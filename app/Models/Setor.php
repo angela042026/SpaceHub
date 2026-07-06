@@ -21,4 +21,8 @@ class Setor extends Model
     {
         return $this->belongsTo(Piso::class);
     }
+    public function secretarias()
+{
+    return $this->hasMany(Secretaria::class);
+}
 }
