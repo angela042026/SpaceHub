@@ -17,12 +17,19 @@ class Setor extends Model
         'ativo',
     ];
 
+    /**
+     * Um setor pertence a um piso.
+     */
     public function piso()
     {
         return $this->belongsTo(Piso::class);
     }
+
+    /**
+     * Um setor possui várias secretárias.
+     */
     public function secretarias()
-{
-    return $this->hasMany(Secretaria::class);
-}
+    {
+        return $this->hasMany(Secretaria::class);
+    }
 }
