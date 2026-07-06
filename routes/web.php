@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LocalidadeController;
 use App\Http\Controllers\PisoController;
 use App\Http\Controllers\SetorController;
+use App\Http\Controllers\SecretariaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -27,10 +28,12 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
+
 });
 
 Route::resource('localidades', LocalidadeController::class);
     Route::resource('pisos', PisoController::class);
     Route::resource('setores', SetorController::class);
+    Route::resource('secretarias', SecretariaController::class);
 
 require __DIR__.'/auth.php';

@@ -21,7 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'pisos',
             'pisos/*',
             'setores',
-            'setores/*'
+            'setores/*',
+            'secretarias',
+            'secretarias/*'
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
