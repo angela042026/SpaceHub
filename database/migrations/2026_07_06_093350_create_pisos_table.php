@@ -12,12 +12,17 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('edificio_id')
-      ->constrained('edificios')
-      ->cascadeOnDelete();
-      
+                  ->constrained('edificios')
+                  ->cascadeOnDelete();
+
             $table->string('nome', 100);
-            $table->integer('numero')->nullable();
+            $table->string('codigo', 10);
+            $table->integer('numero');
+            $table->string('planta')->nullable();
+            $table->text('descricao')->nullable();
             $table->boolean('ativo')->default(true);
+
+            $table->unique(['edificio_id', 'codigo']);
 
             $table->timestamps();
         });
