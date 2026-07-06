@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LocalidadeController;
+use App\Http\Controllers\PisoController;
+use App\Http\Controllers\SetorController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,8 +25,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+
 });
 
 Route::resource('localidades', LocalidadeController::class);
+    Route::resource('pisos', PisoController::class);
+    Route::resource('setores', SetorController::class);
 
 require __DIR__.'/auth.php';
