@@ -84,12 +84,15 @@
 
 ## Backend
 
-- [ ] Autenticação
+- [X] Autenticação
+- [ ] Recuperação de password
+- [ ] Gestão de Utilizadores
 - [ ] CRUD Edifícios
 - [ ] CRUD Pisos
 - [ ] CRUD Setores
 - [ ] CRUD Secretárias
 - [ ] CRUD Reservas
+
 
 ---
 

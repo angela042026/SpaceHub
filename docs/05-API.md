@@ -66,3 +66,41 @@ POST /api/reservas
 DELETE /api/reservas/{id}
 
 POST /api/reservas/checkin
+
+# API
+
+## Autenticação
+
+### Registar utilizador
+
+**POST** `/api/register`
+
+Cria um novo utilizador com o perfil "Utilizador" e devolve um token de autenticação.
+
+---
+
+### Login
+
+**POST** `/api/login`
+
+Autentica um utilizador e devolve um token de acesso.
+
+---
+
+### Logout
+
+**POST** `/api/logout`
+
+Revoga o token utilizado no pedido.
+
+> Requer autenticação com Laravel Sanctum.
+
+---
+
+### Utilizador autenticado
+
+**GET** `/api/me`
+
+Devolve os dados do utilizador autenticado.
+
+> Requer autenticação com Laravel Sanctum.

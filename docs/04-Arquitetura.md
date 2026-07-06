@@ -40,7 +40,8 @@ Base de Dados
 - MySQL
 
 Autenticação
-- Laravel Sanctum (a implementar)
+
+- Laravel Sanctum ✔
 
 Frontend
 - Blade + JavaScript
@@ -82,3 +83,12 @@ Edifícios
 ✔ Check-in QR Code (em desenvolvimento)
 
 ✔ Dashboard com mapa interativo (em desenvolvimento)
+## Autenticação
+
+A autenticação da API é realizada através do Laravel Sanctum.
+
+Após o login, é gerado um Personal Access Token que deve ser enviado em cada pedido protegido utilizando o esquema Bearer Token.
+
+As rotas protegidas utilizam o middleware:
+
+auth:sanctum
