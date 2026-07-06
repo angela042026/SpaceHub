@@ -13,8 +13,8 @@ class Piso extends Model
         'ativo',
     ];
 
-    public function localidade()
-    {
-        return $this->belongsTo(Localidade::class);
-    }
+    public function edificio()
+{
+    return $this->belongsTo(Edificio::class);
+}
 }

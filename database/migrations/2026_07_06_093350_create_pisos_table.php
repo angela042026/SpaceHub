@@ -11,10 +11,10 @@ return new class extends Migration
         Schema::create('pisos', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('localidade_id')
-                  ->constrained('localidades')
-                  ->cascadeOnDelete();
-
+            $table->foreignId('edificio_id')
+      ->constrained('edificios')
+      ->cascadeOnDelete();
+      
             $table->string('nome', 100);
             $table->integer('numero')->nullable();
             $table->boolean('ativo')->default(true);
