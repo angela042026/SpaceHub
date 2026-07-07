@@ -104,3 +104,97 @@ Revoga o token utilizado no pedido.
 Devolve os dados do utilizador autenticado.
 
 > Requer autenticação com Laravel Sanctum.
+
+### Recuperação de password
+
+**POST** `/api/forgot-password`
+
+Envia um link de recuperação de password para o email do utilizador.
+
+**POST** `/api/reset-password`
+
+Permite definir uma nova password usando o token recebido por email.
+
+# Gestão de Utilizadores
+
+> Todas as rotas requerem autenticação com Bearer Token e permissões de Administrador.
+
+---
+
+## Listar utilizadores
+
+**GET** `/api/users`
+
+Lista todos os utilizadores.
+
+### Resposta
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Administrador",
+    "email": "admin@spacehub.pt",
+    "role": "Administrador",
+    "ativo": true,
+    "created_at": "2026-07-07 15:00:00"
+  }
+]
+```
+
+---
+
+## Consultar utilizador
+
+**GET** `/api/users/{id}`
+
+Devolve os dados de um utilizador.
+
+---
+
+## Criar utilizador
+
+**POST** `/api/users`
+
+Cria um novo utilizador.
+
+### Body
+
+```json
+{
+  "name": "Novo Utilizador",
+  "email": "novo@spacehub.pt",
+  "password": "password123",
+  "role_id": 4,
+  "ativo": true
+}
+```
+
+---
+
+## Atualizar utilizador
+
+**PUT** `/api/users/{id}`
+
+Atualiza os dados de um utilizador.
+
+### Body
+
+```json
+{
+  "name": "Novo Nome",
+  "email": "novo.email@spacehub.pt",
+  "role_id": 3,
+  "ativo": true
+}
+```
+
+A password é opcional. Se for enviada, será atualizada.
+
+---
+
+## Ativar / Desativar utilizador
+
+**PATCH** `/api/users/{id}/toggle-ativo`
+
+Alterna o estado do utilizador entre ativo e inativo.

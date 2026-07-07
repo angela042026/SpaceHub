@@ -92,3 +92,15 @@ Após o login, é gerado um Personal Access Token que deve ser enviado em cada p
 As rotas protegidas utilizam o middleware:
 
 auth:sanctum
+
+### Gestão de Utilizadores
+
+A gestão de utilizadores é protegida por autenticação (`auth:sanctum`) e por um middleware personalizado (`role`).
+
+Apenas utilizadores com o papel **Administrador** podem:
+
+- listar utilizadores;
+- consultar utilizadores;
+- criar utilizadores;
+- editar utilizadores;
+- ativar/desativar utilizadores.
