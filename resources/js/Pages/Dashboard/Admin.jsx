@@ -9,8 +9,13 @@ import ReservationCard from '@/Components/Dashboard/ReservationCard';
 import StatisticsPanel from '@/Components/Dashboard/StatisticsPanel';
 import UpcomingReservations from '@/Components/Dashboard/UpcomingReservations';
 
-export default function Admin({ stats, estatisticas }) {
-    const [selectedFloor, setSelectedFloor] = useState('piso0');
+export default function Admin({ stats, estatisticas, pisos }) {
+    console.log('PISOS RECEBIDOS:', pisos);
+
+    const [selectedFloor, setSelectedFloor] = useState(
+    pisos?.[0]?.codigo ?? ''
+);
+
 
     return (
         <>
@@ -38,6 +43,7 @@ export default function Admin({ stats, estatisticas }) {
                             <OfficeMap
                                 selectedFloor={selectedFloor}
                                 setSelectedFloor={setSelectedFloor}
+                                pisos={pisos}
                             />
                         </section>
 

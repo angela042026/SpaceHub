@@ -1,12 +1,8 @@
 function EmptyState({ text }) {
-    return (
-        <p className="text-sm text-slate-400">
-            {text}
-        </p>
-    );
+    return <p className="text-sm text-slate-400">{text}</p>;
 }
 
-function RankingList({ title, items, getKey, renderItem }) {
+function RankingList({ title, items, getKey, renderItem, getTotal }) {
     return (
         <div>
             <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">
@@ -25,13 +21,11 @@ function RankingList({ title, items, getKey, renderItem }) {
                                     {index + 1}
                                 </div>
 
-                                <div>
-                                    {renderItem(item)}
-                                </div>
+                                <div>{renderItem(item)}</div>
                             </div>
 
                             <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
-                                {item.total}
+                                {getTotal ? getTotal(item) : item.total}
                             </span>
                         </div>
                     ))
@@ -63,7 +57,23 @@ export default function StatisticsPanel({ estatisticas }) {
                 </select>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                <p className="text-sm font-semibold text-blue-600">
+                    Piso mais utilizado
+                </p>
+
+                <h3 className="mt-1 text-2xl font-bold text-slate-900">
+                    {estatisticas?.pisoMaisUtilizado?.nome ?? 'Sem dados'}
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-500">
+                    {estatisticas?.pisoMaisUtilizado?.total
+                        ? `${estatisticas.pisoMaisUtilizado.total} reservas registadas`
+                        : 'Ainda não existem reservas suficientes.'}
+                </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                 <RankingList
                     title="Secretárias mais utilizadas"
                     items={estatisticas?.secretariasMaisUtilizadas}
@@ -75,6 +85,23 @@ export default function StatisticsPanel({ estatisticas }) {
                             </p>
                             <p className="text-xs text-slate-500">
                                 {item.total} reservas
+                            </p>
+                        </>
+                    )}
+                />
+
+                <RankingList
+                    title="Secretárias menos utilizadas"
+                    items={estatisticas?.secretariasMenosUtilizadas}
+                    getKey={(item) => item.id}
+                    getTotal={(item) => item.reservas_count}
+                    renderItem={(item) => (
+                        <>
+                            <p className="text-sm font-semibold text-slate-800">
+                                {item.codigo}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                                {item.reservas_count} reservas
                             </p>
                         </>
                     )}
