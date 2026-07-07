@@ -7,6 +7,8 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -72,4 +74,55 @@ public function me(Request $request)
         'user' => $request->user()
     ]);
 }
+
+public function forgotPassword(Request $request)
+{
+    $dados = $request->validate([
+        'email' => ['required', 'email'],
+    ]);
+
+    $status = Password::sendResetLink([
+        'email' => $dados['email'],
+    ]);
+
+    if ($status === Password::RESET_LINK_SENT) {
+        return response()->json([
+            'message' => 'Link de recuperação enviado com sucesso.',
+        ]);
+    }
+
+    return response()->json([
+        'message' => 'Não foi possível enviar o link de recuperação.',
+    ], 400);
+}
+public function resetPassword(Request $request)
+{
+    $dados = $request->validate([
+        'token' => ['required'],
+        'email' => ['required', 'email'],
+        'password' => ['required', 'string', 'min:8', 'confirmed'],
+    ]);
+
+    $status = Password::reset(
+        $dados,
+        function ($user, $password) {
+            $user->forceFill([
+                'password' => Hash::make($password),
+            ])->setRememberToken(Str::random(60));
+
+            $user->save();
+        }
+    );
+
+    if ($status === Password::PASSWORD_RESET) {
+        return response()->json([
+            'message' => 'Password alterada com sucesso.',
+        ]);
+    }
+
+    return response()->json([
+        'message' => 'Não foi possível alterar a password.',
+    ], 400);
+}
+
 }
