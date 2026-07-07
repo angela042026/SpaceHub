@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class EstadoReserva extends Model
 {
+    /**
+     * Campos que podem ser preenchidos em massa.
+     */
     protected $fillable = [
         'nome',
         'codigo',
