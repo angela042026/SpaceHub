@@ -1,74 +1,119 @@
-export default function ReservationCard() {
+import { router, usePage } from '@inertiajs/react';
+import { useState } from 'react';
+
+export default function ReservationCard({ reserva }) {
+    const [processing, setProcessing] = useState(false);
+    const { errors } = usePage().props;
+
+    if (!reserva) {
+        return (
+            <div className="dashboard-card p-6">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                    Reserva de Hoje
+                </h2>
+
+                <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+                    Não existe nenhuma reserva para hoje.
+                </p>
+
+                <button className="btn-primary mt-6 w-full" disabled>
+                    Reservar Secretária
+                </button>
+            </div>
+        );
+    }
+
+    const jaFezCheckIn = reserva.check_in_at !== null;
+    const estadoCodigo = reserva.estado_reserva?.codigo;
+    const podeCancelar = !jaFezCheckIn && !['cancelada', 'expirada'].includes(estadoCodigo);
+
+    function fazerCheckIn() {
+        setProcessing(true);
+        router.post(
+            route('checkin.confirm', reserva.id),
+            {},
+            { preserveScroll: true, onFinish: () => setProcessing(false) },
+        );
+    }
+
+    function cancelarReserva() {
+        setProcessing(true);
+        router.post(
+            route('reservas.cancelar', reserva.id),
+            {},
+            { preserveScroll: true, onFinish: () => setProcessing(false) },
+        );
+    }
+
     return (
-        <div className="rounded-2xl border border-slate-100 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
-                <div>
-                    <h2 className="text-lg font-bold text-slate-900">
-                        A tua reserva de hoje
-                    </h2>
-                    <p className="text-sm text-slate-500">
-                        Informação da reserva ativa.
-                    </p>
-                </div>
+        <div className="dashboard-card">
+            <div className="border-b border-slate-100 p-6 dark:border-slate-800">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                    Reserva de Hoje
+                </h2>
 
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600">
-                    Ativa
-                </span>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Informação da reserva atual.
+                </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
-                <div className="space-y-4 text-sm">
-                    <p>
-                        <span className="text-slate-400">📍 Localidade</span>
-                        <br />
-                        <strong>CESAE Braga</strong>
+            <div className="space-y-5 p-6">
+                <Info
+                    label="Edifício"
+                    value={reserva.secretaria?.setor?.piso?.edificio?.nome}
+                />
+
+                <Info
+                    label="Piso"
+                    value={reserva.secretaria?.setor?.piso?.nome}
+                />
+
+                <Info label="Setor" value={reserva.secretaria?.setor?.nome} />
+
+                <Info label="Secretária" value={reserva.secretaria?.codigo} />
+
+                <Info label="Período" value={reserva.periodo?.nome} />
+
+                <Info label="Estado" value={reserva.estado_reserva?.nome} />
+
+                {errors?.reserva && (
+                    <p className="text-sm font-medium text-red-600 dark:text-red-400">
+                        {errors.reserva}
                     </p>
+                )}
 
-                    <p>
-                        <span className="text-slate-400">▤ Piso</span>
-                        <br />
-                        <strong>2</strong>
-                    </p>
-
-                    <p>
-                        <span className="text-slate-400">🏢 Setor</span>
-                        <br />
-                        <strong>Desenvolvimento</strong>
-                    </p>
-
-                    <p>
-                        <span className="text-slate-400">🪑 Secretária</span>
-                        <br />
-                        <strong>A-18</strong>
-                    </p>
-
-                    <p>
-                        <span className="text-slate-400">📅 Período</span>
-                        <br />
-                        <strong>Manhã (08:30 - 12:30)</strong>
-                    </p>
-                </div>
-
-                <div className="flex flex-col items-center justify-center">
-                    <div className="flex h-36 w-36 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-6xl">
-                        ▦
-                    </div>
-
-                    <div className="mt-4 rounded-xl bg-emerald-50 px-4 py-3 text-center text-xs text-emerald-700">
-                        Faz o check-in até às <strong>08:45</strong>
-                    </div>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 px-6 pb-6 md:grid-cols-2">
-                <button className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700">
-                    ⌗ Fazer check-in
+                <button
+                    type="button"
+                    onClick={fazerCheckIn}
+                    disabled={processing || jaFezCheckIn}
+                    className="btn-accent w-full"
+                >
+                    {jaFezCheckIn ? 'Check-in efetuado ✓' : 'Fazer Check-in'}
                 </button>
 
-                <button className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50">
-                    🗑 Cancelar reserva
+                <button
+                    type="button"
+                    onClick={cancelarReserva}
+                    disabled={processing || !podeCancelar}
+                    className="btn-danger w-full"
+                >
+                    Cancelar Reserva
                 </button>
             </div>
+        </div>
+    );
+}
+
+function Info({ label, value }) {
+    return (
+        <div className="info-row">
+            <span className="text-sm text-slate-500 dark:text-slate-400">
+                {label}
+            </span>
+
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+                {value ?? '-'}
+            </span>
         </div>
     );
 }

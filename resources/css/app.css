@@ -1,3 +1,110 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        /* Marca oficial SpaceHub */
+        --primary: #1e3a5f;
+        --primary-dark: #16314f;
+        --primary-light: #2a4a73;
+        --accent: #14b8a6;
+        --accent-dark: #0f9e90;
+        --accent-light: #5eead4;
+
+        /* Compatibilidade com nomes usados nos componentes (navy/teal) */
+        --color-navy-950: var(--primary-dark);
+        --color-navy-900: var(--primary);
+        --color-navy-800: var(--primary-light);
+
+        --color-teal-400: var(--accent-light);
+        --color-teal-500: var(--accent);
+        --color-teal-600: var(--accent-dark);
+
+        /* Estados do mapa de ocupação / gráficos */
+        --color-status-livre: #14b8a6;
+        --color-status-reservada: #3b82f6;
+        --color-status-ocupada: #dc2626;
+        --color-status-indisponivel: #94a3b8;
+        --color-status-expira: #f59e0b;
+
+        /* Superfícies */
+        --color-surface: #f5f7fa;
+        --color-card: #ffffff;
+        --color-border: #e2e8f0;
+        --color-text-secondary: #475569;
+
+        /* Forma */
+        --radius-card: 1rem;
+        --radius-pill: 9999px;
+        --shadow-card: 0 2px 8px 0 rgb(0 0 0 / 0.05);
+        --shadow-card-hover: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.06);
+    }
+
+    .dark {
+        --color-surface: #0b1220;
+        --color-card: #101a2e;
+        --color-border: #1e293b;
+        --color-text-secondary: #94a3b8;
+    }
+
+    body {
+        @apply bg-surface text-slate-900 dark:text-slate-100;
+        font-family: 'Inter', sans-serif;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Sora', sans-serif;
+    }
+}
+
+@layer components {
+    /* Cartões */
+    .dashboard-card {
+        @apply rounded-card border-none bg-card shadow-card dark:border dark:border-slate-800;
+    }
+
+    .stat-card {
+        @apply dashboard-card p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover;
+    }
+
+    /* Botões (spec: radius 12px, transições .2s) */
+    .btn-primary {
+        @apply rounded-xl bg-navy-900 px-4 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-navy-950 disabled:pointer-events-none disabled:opacity-50;
+    }
+
+    .btn-accent {
+        @apply rounded-xl bg-teal-500 px-4 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-teal-600 disabled:pointer-events-none disabled:opacity-50;
+    }
+
+    .btn-secondary {
+        @apply rounded-xl border border-navy-900 bg-white px-4 py-3 text-sm font-semibold text-navy-900 transition duration-200 hover:bg-surface disabled:pointer-events-none disabled:opacity-50 dark:border-slate-600 dark:bg-transparent dark:text-white dark:hover:bg-slate-800;
+    }
+
+    .btn-danger {
+        @apply rounded-xl border border-red-200 bg-transparent px-4 py-3 text-sm font-semibold text-red-600 transition duration-200 hover:bg-red-50 disabled:pointer-events-none disabled:opacity-50 dark:border-red-900/60 dark:text-red-400 dark:hover:bg-red-950/40;
+    }
+
+    /* Navegação lateral */
+    .sidebar-link {
+        @apply flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-300 transition duration-200 hover:bg-white/10 hover:text-white;
+    }
+
+    .sidebar-link-active {
+        @apply sidebar-link bg-teal-500 text-white hover:bg-teal-500;
+    }
+
+    /* Badges e linhas de info */
+    .badge-status {
+        @apply inline-flex items-center gap-1.5 rounded-pill px-3 py-1 text-xs font-semibold;
+    }
+
+    .info-row {
+        @apply flex items-center justify-between rounded-xl bg-surface px-4 py-3 dark:bg-slate-800/60;
+    }
+
+    /* Inputs (spec: radius 12px, altura 48px, foco turquesa) */
+    .form-input-brand {
+        @apply h-12 w-full rounded-xl border border-slate-200 px-4 text-slate-900 transition focus:border-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-500/15 dark:border-slate-700 dark:bg-slate-800 dark:text-white;
+    }
+}

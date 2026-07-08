@@ -107,18 +107,20 @@ class SpaceHubEstruturaSeeder extends Seeder
         $p2Lounge = $this->criarSetor($piso2, 'P2-LOU', 'Lounge Privado', 'lounge', false, 20);
         $p2Exterior = $this->criarSetor($piso2, 'P2-EXT', 'Coworking Exterior', 'coworking', true, 20);
 
-        $this->criarSecretarias($p0Coworking, 'A', 1, 16);
-        $this->criarSecretarias($p0Reuniao, 'A', 17, 22);
-        $this->criarSecretarias($p0Phone, 'A', 23, 26);
+        // Coordenadas em grelha (% da imagem da planta) — aproximação para dar
+        // vida ao mapa de ocupação; não são posições pixel-perfect das plantas reais.
+        $this->criarSecretarias($p0Coworking, 'A', 1, 16, xInicio: 10, yInicio: 15, colunas: 8);
+        $this->criarSecretarias($p0Reuniao, 'A', 17, 22, xInicio: 10, yInicio: 55, colunas: 6);
+        $this->criarSecretarias($p0Phone, 'A', 23, 26, xInicio: 70, yInicio: 55, colunas: 4);
 
-        $this->criarSecretarias($p1Coworking, 'B', 1, 18);
-        $this->criarSecretarias($p1Reuniao, 'B', 19, 26);
-        $this->criarSecretarias($p1Concentracao, 'B', 27, 34);
-        $this->criarSecretarias($p1Phone, 'B', 35, 38);
+        $this->criarSecretarias($p1Coworking, 'B', 1, 18, xInicio: 10, yInicio: 15, colunas: 9);
+        $this->criarSecretarias($p1Reuniao, 'B', 19, 26, xInicio: 10, yInicio: 55, colunas: 8);
+        $this->criarSecretarias($p1Concentracao, 'B', 27, 34, xInicio: 10, yInicio: 75, colunas: 8);
+        $this->criarSecretarias($p1Phone, 'B', 35, 38, xInicio: 75, yInicio: 75, colunas: 4);
 
-        $this->criarSecretarias($p2Coworking, 'C', 1, 20);
-        $this->criarSecretarias($p2Reuniao, 'C', 21, 26);
-        $this->criarSecretarias($p2Exterior, 'C', 27, 36);
+        $this->criarSecretarias($p2Coworking, 'C', 1, 20, xInicio: 10, yInicio: 15, colunas: 10);
+        $this->criarSecretarias($p2Reuniao, 'C', 21, 26, xInicio: 10, yInicio: 55, colunas: 6);
+        $this->criarSecretarias($p2Exterior, 'C', 27, 36, xInicio: 10, yInicio: 75, colunas: 10);
     }
 
     private function criarSetor(
@@ -149,17 +151,26 @@ class SpaceHubEstruturaSeeder extends Seeder
         Setor $setor,
         string $prefixo,
         int $inicio,
-        int $fim
+        int $fim,
+        float $xInicio = 15,
+        float $yInicio = 20,
+        int $colunas = 6,
+        float $xPasso = 8,
+        float $yPasso = 14
     ): void {
         for ($i = $inicio; $i <= $fim; $i++) {
+            $indice = $i - $inicio;
+            $coluna = $indice % $colunas;
+            $linha = intdiv($indice, $colunas);
+
             Secretaria::updateOrCreate(
                 [
                     'setor_id' => $setor->id,
                     'codigo' => $prefixo . '-' . str_pad($i, 2, '0', STR_PAD_LEFT),
                 ],
                 [
-                    'planta_x' => null,
-                    'planta_y' => null,
+                    'planta_x' => (int) min($xInicio + ($coluna * $xPasso), 95),
+                    'planta_y' => (int) min($yInicio + ($linha * $yPasso), 95),
                     'angulo' => 0,
                     'monitor' => $i % 2 === 0,
                     'dock_usb' => $i % 3 === 0,

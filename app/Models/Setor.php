@@ -12,6 +12,8 @@ class Setor extends Model
         'piso_id',
         'nome',
         'codigo',
+        'planta_x',
+        'planta_y',
         'tipo',
         'reservavel',
         'capacidade',

@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role_id',
+        'ativo',
     ];
 
     /**
@@ -50,4 +52,9 @@ class User extends Authenticatable
 {
     return $this->hasMany(Reserva::class);
 }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
 }
