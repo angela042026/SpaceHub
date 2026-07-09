@@ -32,11 +32,13 @@ protected $casts = [
     'reservavel' => 'boolean',
     'ativo' => 'boolean',
 ];
-    public function setor()
-    {
-        return $this->belongsTo(Setor::class);
-    }
-    public function reservas()
+
+public function setor()
+{
+    return $this->belongsTo(Setor::class);
+}
+
+public function reservas()
 {
     return $this->hasMany(Reserva::class);
 }

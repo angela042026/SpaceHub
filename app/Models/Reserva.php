@@ -17,6 +17,16 @@ class Reserva extends Model
         'observacoes',
     ];
 
+    protected $casts = [
+        'user_id' => 'integer',
+        'secretaria_id' => 'integer',
+        'periodo_id' => 'integer',
+        'estado_reserva_id' => 'integer',
+        'data' => 'date',
+        'check_in_at' => 'datetime',
+        'cancelada_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

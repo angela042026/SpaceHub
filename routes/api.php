@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\EdificioController;
 use App\Http\Controllers\Api\PisoController;
 use App\Http\Controllers\Api\SetorController;
 use App\Http\Controllers\Api\SecretariaController;
+use App\Http\Controllers\Api\ReservaController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -21,7 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware(['auth:sanctum', 'role:Administrador'])->group(function () {
     Route::get('/admin/teste', function () {
         return response()->json([
-            'message' => 'Acesso permitido ao administrador.'
+            'message' => 'Acesso permitido ao administrador.',
         ]);
     });
 
@@ -54,4 +55,8 @@ Route::middleware(['auth:sanctum', 'role:Administrador'])->group(function () {
     Route::post('/secretarias', [SecretariaController::class, 'store']);
     Route::put('/secretarias/{secretaria}', [SecretariaController::class, 'update']);
     Route::patch('/secretarias/{secretaria}/toggle-ativo', [SecretariaController::class, 'toggleAtivo']);
+
+    Route::get('/reservas/disponibilidade', [ReservaController::class, 'disponibilidade']);
+    Route::patch('/reservas/{reserva}/cancelar', [ReservaController::class, 'cancelar']);
+    Route::apiResource('reservas', ReservaController::class)->except(['destroy']);
 });
