@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Setor extends Model
 {
     protected $table = 'setores';
+
     protected $fillable = [
         'piso_id',
         'nome',
@@ -16,6 +17,12 @@ class Setor extends Model
         'capacidade',
         'descricao',
         'ativo',
+    ];
+
+    protected $casts = [
+        'reservavel' => 'boolean',
+        'ativo' => 'boolean',
+        'capacidade' => 'integer',
     ];
 
     /**

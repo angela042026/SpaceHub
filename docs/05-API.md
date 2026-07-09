@@ -198,3 +198,9 @@ A password é opcional. Se for enviada, será atualizada.
 **PATCH** `/api/users/{id}/toggle-ativo`
 
 Alterna o estado do utilizador entre ativo e inativo.
+
+GET    /api/edificios
+GET    /api/edificios/{id}
+POST   /api/edificios
+PUT    /api/edificios/{id}
+PATCH  /api/edificios/{id}/toggle-ativo

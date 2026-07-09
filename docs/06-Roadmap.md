@@ -30,9 +30,9 @@
 
 - [X] Autenticação
 
-- [ ] CRUD Edificios
+- [X] CRUD Edificios
 
-- [ ] CRUD Pisos
+- [X] CRUD Pisos
 
 ...
 
@@ -87,7 +87,7 @@
 - [X] Autenticação
 - [X] Recuperação de password
 - [X] Gestão de Utilizadores
-- [ ] CRUD Edifícios
+- [X] CRUD Edifícios
 - [ ] CRUD Pisos
 - [ ] CRUD Setores
 - [ ] CRUD Secretárias
@@ -103,3 +103,4 @@
 - [ ] Mapa Interativo
 - [ ] Reservas
 - [ ] QR Code
+

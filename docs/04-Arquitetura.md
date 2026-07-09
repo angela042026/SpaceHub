@@ -104,3 +104,28 @@ Apenas utilizadores com o papel **Administrador** podem:
 - criar utilizadores;
 - editar utilizadores;
 - ativar/desativar utilizadores.
+
+## Sprint 5 — Gestão de Espaços
+
+Foi implementado o CRUD completo das entidades:
+
+- Edifícios
+- Pisos
+- Setores
+- Secretárias
+
+Todos seguem o padrão arquitetural definido:
+
+Controllers
+→ Form Requests
+→ Models
+→ Resources
+→ JSON
+
+Foi utilizado:
+
+- Route Model Binding
+- Form Requests
+- Resources
+- Middleware auth:sanctum
+- RoleMiddleware

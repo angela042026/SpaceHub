@@ -140,3 +140,11 @@ php artisan key:generate
 5. Durante o desenvolvimento utilizar:
 
 MAIL_MAILER=log </p>
+
+## Documentação do Projeto
+
+Toda a arquitetura, convenções de código, decisões técnicas e estado atual do projeto encontram-se em:
+
+- `docs/PROJECT_CONTEXT.md`
+
+Este documento deve ser consultado antes de iniciar novas funcionalidades ou continuar o desenvolvimento do projeto.

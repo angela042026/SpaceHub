@@ -27,7 +27,7 @@ return new class extends Migration
                 'estacionamento',
                 'concentracao',
                 'phone_booth',
-                'sanitario',
+                'wc',
                 'tecnico',
                 'outro',
             ])->default('outro');

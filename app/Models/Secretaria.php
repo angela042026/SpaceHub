@@ -21,7 +21,17 @@ class Secretaria extends Model
         'ativo',
         'descricao',
     ];
-
+protected $casts = [
+    'planta_x' => 'integer',
+    'planta_y' => 'integer',
+    'angulo' => 'decimal:2',
+    'monitor' => 'boolean',
+    'dock_usb' => 'boolean',
+    'junto_janela' => 'boolean',
+    'ergonomica' => 'boolean',
+    'reservavel' => 'boolean',
+    'ativo' => 'boolean',
+];
     public function setor()
     {
         return $this->belongsTo(Setor::class);
