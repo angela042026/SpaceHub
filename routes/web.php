@@ -42,8 +42,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/reservas/history', [ReservaController::class, 'history'])->name('reservas.history');
     
     // // Consultar disponibilidade das secretárias
-    // Route::get('/reservas/availability', [ReservaController::class, 'availability'])->name('reservas.availability');
-
+    Route::get('/reservas/availability', [ReservaController::class, 'availability'])->name('reservas.availability');
+  
     // Cancelar uma reserva
     Route::delete('/reservas/{id}', [ReservaController::class, 'destroy'])->name('reservas.destroy');
     });

@@ -1,7 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 export default function Create({ secretarias, periodos }) {
+
+    // Lista de secretárias disponíveis
+    const [secretariasDisponiveis, setSecretariasDisponiveis] = useState(secretarias);
 
     const { data, setData, post, processing, errors } = useForm({
         data: '',
@@ -10,8 +14,45 @@ export default function Create({ secretarias, periodos }) {
         observacoes: '',
     });
 
-    const submit = (e) => {
-        e.preventDefault();
+    // Atualiza automaticamente as secretárias disponíveis  quando a data ou o período são alterados.
+    useEffect(() => {
+        // Apenas consulta a disponibilidade quando ambos os campos estão preenchidos.
+        if (!data.data || !data.periodo_id) {
+            return;
+        }
+
+        fetch(
+            `/reservas/availability?data=${data.data}&periodo_id=${data.periodo_id}`
+        )
+            .then((response) => {
+
+                // Verifica se a resposta é válida
+                if (!response.ok) {
+                    throw new Error('Erro ao consultar disponibilidade.');
+                }
+
+                return response.json();
+
+            })
+            .then((secretarias) => {
+
+                // Atualiza a lista de secretárias disponíveis
+                setSecretariasDisponiveis(secretarias);
+
+                // Limpa a secretária anteriormente selecionada
+                setData('secretaria_id', '');
+
+            })
+            .catch((error) => {
+
+                console.error(error);
+
+            });
+
+    }, [data.data, data.periodo_id]);
+
+    // Submete o formulário
+    const submit = (e) => {e.preventDefault();
         post(route('reservas.store'));
     };
 
@@ -27,12 +68,9 @@ export default function Create({ secretarias, periodos }) {
 
             <div className="py-12">
                 <div className="mx-auto max-w-4xl sm:px-6 lg:px-8">
-
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-
                         <div className="p-6">
-
-                            <h3 className="text-lg font-semibold mb-6">
+                            <h3 className="mb-6 text-lg font-semibold">
                                 Criar Reserva
                             </h3>
 
@@ -40,7 +78,7 @@ export default function Create({ secretarias, periodos }) {
 
                                 {/* Data */}
                                 <div className="mb-4">
-                                    <label className="block font-medium mb-2">
+                                    <label className="mb-2 block font-medium">
                                         Data
                                     </label>
 
@@ -48,7 +86,7 @@ export default function Create({ secretarias, periodos }) {
                                         type="date"
                                         value={data.data}
                                         onChange={(e) => setData('data', e.target.value)}
-                                        className="w-full border rounded p-2"
+                                        className="w-full rounded border p-2"
                                     />
 
                                     {errors.data && (
@@ -60,14 +98,14 @@ export default function Create({ secretarias, periodos }) {
 
                                 {/* Período */}
                                 <div className="mb-4">
-                                    <label className="block font-medium mb-2">
+                                    <label className="mb-2 block font-medium">
                                         Período
                                     </label>
 
                                     <select
                                         value={data.periodo_id}
                                         onChange={(e) => setData('periodo_id', e.target.value)}
-                                        className="w-full border rounded p-2"
+                                        className="w-full rounded border p-2"
                                     >
                                         <option value="">Selecione...</option>
 
@@ -88,20 +126,20 @@ export default function Create({ secretarias, periodos }) {
                                     )}
                                 </div>
 
-                                {/* Espaço */}
+                                {/* Secretária */}
                                 <div className="mb-4">
-                                    <label className="block font-medium mb-2">
-                                        Espaço
+                                    <label className="mb-2 block font-medium">
+                                        Secretária
                                     </label>
 
                                     <select
                                         value={data.secretaria_id}
                                         onChange={(e) => setData('secretaria_id', e.target.value)}
-                                        className="w-full border rounded p-2"
+                                        className="w-full rounded border p-2"
                                     >
                                         <option value="">Selecione...</option>
 
-                                        {secretarias.map((secretaria) => (
+                                        {secretariasDisponiveis.map((secretaria) => (
                                             <option
                                                 key={secretaria.id}
                                                 value={secretaria.id}
@@ -120,7 +158,7 @@ export default function Create({ secretarias, periodos }) {
 
                                 {/* Observações */}
                                 <div className="mb-6">
-                                    <label className="block font-medium mb-2">
+                                    <label className="mb-2 block font-medium">
                                         Observações
                                     </label>
 
@@ -128,7 +166,7 @@ export default function Create({ secretarias, periodos }) {
                                         rows="4"
                                         value={data.observacoes}
                                         onChange={(e) => setData('observacoes', e.target.value)}
-                                        className="w-full border rounded p-2"
+                                        className="w-full rounded border p-2"
                                     />
 
                                     {errors.observacoes && (
