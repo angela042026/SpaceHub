@@ -17,12 +17,16 @@ class Setor extends Model
         'capacidade',
         'descricao',
         'ativo',
+        'planta_x',
+        'planta_y',
     ];
 
     protected $casts = [
         'reservavel' => 'boolean',
         'ativo' => 'boolean',
         'capacidade' => 'integer',
+        'planta_x' => 'integer',
+        'planta_y' => 'integer',
     ];
 
     /**
