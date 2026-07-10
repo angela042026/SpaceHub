@@ -32,8 +32,14 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::resource('localidades', LocalidadeController::class);
-    Route::resource('pisos', PisoController::class);
-    Route::resource('setores', SetorController::class);
-    Route::resource('secretarias', SecretariaController::class);
+Route::resource('pisos', PisoController::class);
+Route::resource('setores', SetorController::class);
+Route::resource('secretarias', SecretariaController::class);
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
+
+
+
+
+// TESTE DE CHAT
+Route::get('/teste-chat', function () {return view('tests.chat'); });
