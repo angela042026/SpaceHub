@@ -12,9 +12,6 @@ class EstadoReserva extends Model
         'descricao',
     ];
 
-    /**
-     * Um estado pode estar associado a várias reservas.
-     */
     public function reservas()
     {
         return $this->hasMany(Reserva::class);

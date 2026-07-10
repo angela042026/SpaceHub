@@ -57,3 +57,94 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+<p align="center">
+  <img src="https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white" />
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
+  <img src="https://img.shields.io/badge/status-em%20desenvolvimento-yellow?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/version-0.1-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" />
+</p>
+
+<p>
+📄 ATA N.º 1 / 2026
+# **Espaços Colaborativos**
+
+## 📌 Sobre o Projeto
+**Space Hub** é uma aplicação desenvolvida para facilitar a gestão de reservas de secretárias em espaços colaborativos.  
+Permite aos utilizadores reservar lugares, efetuar check‑in via QR Code, consultar reservas e gerir disponibilidade de forma simples e intuitiva.
+
+## 🎯 Objetivos
+- Organizar a ocupação de secretárias em ambientes partilhados  
+- Evitar conflitos de utilização  
+- Automatizar processos de check‑in e cancelamento  
+- Melhorar a experiência dos utilizadores
+
+## 🧩 Funcionalidades Principais
+- Registo e autenticação de utilizadores  
+- Reserva de secretárias por dia e período  
+- Check‑in via QR Code  
+- Cancelamento automático após 15 minutos
+
+## Como Executar o Projeto
+
+### 1. Clonar o repositório
+git clone https://github.com/teu-username/space-hub.git
+
+### 2. Instalar dependências (backend)
+dotnet restore
+
+### 3. Executar API
+dotnet run
+
+### 4. Abrir o frontend
+Abrir o ficheiro index.html no navegador.
+
+## Equipa
+- Eduardo
+- Joana
+- Hanna
+- Ângela
+
+Formadoraores: Sara e Rui
+
+## Documentação
+- Ata da Reunião Inicial
+- Requisitos do Projeto
+- Divisão de Tarefas
+
+## Estado do Projeto
+Em desenvolvimento 🚧
+
+ </p>
+
+ <p> ## Configuração
+
+1. Clonar o repositório.
+
+2. Copiar:
+
+.env.example
+
+para:
+
+.env
+
+3. Executar:
+
+php artisan key:generate
+
+4. Configurar a base de dados.
+
+5. Durante o desenvolvimento utilizar:
+
+MAIL_MAILER=log </p>
+
+## Documentação do Projeto
+
+Toda a arquitetura, convenções de código, decisões técnicas e estado atual do projeto encontram-se em:
+
+- `docs/PROJECT_CONTEXT.md`
+
+Este documento deve ser consultado antes de iniciar novas funcionalidades ou continuar o desenvolvimento do projeto.

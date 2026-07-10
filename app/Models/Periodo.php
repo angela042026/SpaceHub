@@ -12,6 +12,12 @@ class Periodo extends Model
         'hora_fim',
         'ativo',
     ];
+
+    protected $casts = [
+    'hora_inicio' => 'datetime:H:i',
+    'hora_fim' => 'datetime:H:i',
+    'ativo' => 'boolean',
+];
     public function reservas()
 {
     return $this->hasMany(Reserva::class);

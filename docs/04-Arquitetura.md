@@ -40,7 +40,8 @@ Base de Dados
 - MySQL
 
 Autenticação
-- Laravel Sanctum (a implementar)
+
+- Laravel Sanctum ✔
 
 Frontend
 - Blade + JavaScript
@@ -82,3 +83,49 @@ Edifícios
 ✔ Check-in QR Code (em desenvolvimento)
 
 ✔ Dashboard com mapa interativo (em desenvolvimento)
+## Autenticação
+
+A autenticação da API é realizada através do Laravel Sanctum.
+
+Após o login, é gerado um Personal Access Token que deve ser enviado em cada pedido protegido utilizando o esquema Bearer Token.
+
+As rotas protegidas utilizam o middleware:
+
+auth:sanctum
+
+### Gestão de Utilizadores
+
+A gestão de utilizadores é protegida por autenticação (`auth:sanctum`) e por um middleware personalizado (`role`).
+
+Apenas utilizadores com o papel **Administrador** podem:
+
+- listar utilizadores;
+- consultar utilizadores;
+- criar utilizadores;
+- editar utilizadores;
+- ativar/desativar utilizadores.
+
+## Sprint 5 — Gestão de Espaços
+
+Foi implementado o CRUD completo das entidades:
+
+- Edifícios
+- Pisos
+- Setores
+- Secretárias
+
+Todos seguem o padrão arquitetural definido:
+
+Controllers
+→ Form Requests
+→ Models
+→ Resources
+→ JSON
+
+Foi utilizado:
+
+- Route Model Binding
+- Form Requests
+- Resources
+- Middleware auth:sanctum
+- RoleMiddleware

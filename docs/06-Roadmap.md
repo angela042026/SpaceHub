@@ -18,21 +18,21 @@
 
 - [x] Edificios
 
-- [ ] Pisos
+- [X] Pisos
 
-- [ ] Setores
+- [X] Setores
 
-- [ ] Secretarias
+- [X] Secretarias
 
 ---
 
 ## Backend
 
-- [ ] Autenticação
+- [X] Autenticação
 
-- [ ] CRUD Edificios
+- [X] CRUD Edificios
 
-- [ ] CRUD Pisos
+- [X] CRUD Pisos
 
 ...
 
@@ -40,7 +40,7 @@
 
 ## API
 
-- [ ] Login
+- [X] Login
 
 - [ ] Reservas
 
@@ -64,7 +64,7 @@
 - [x] Requisitos
 - [x] Casos de Uso
 - [x] Modelo de Dados
-- [ ] Diagrama ER
+- [X] Diagrama ER
 
 ---
 
@@ -84,12 +84,15 @@
 
 ## Backend
 
-- [ ] Autenticação
-- [ ] CRUD Edifícios
+- [X] Autenticação
+- [X] Recuperação de password
+- [X] Gestão de Utilizadores
+- [X] CRUD Edifícios
 - [ ] CRUD Pisos
 - [ ] CRUD Setores
 - [ ] CRUD Secretárias
 - [ ] CRUD Reservas
+
 
 ---
 
@@ -100,3 +103,4 @@
 - [ ] Mapa Interativo
 - [ ] Reservas
 - [ ] QR Code
+
