@@ -204,3 +204,23 @@ GET    /api/edificios/{id}
 POST   /api/edificios
 PUT    /api/edificios/{id}
 PATCH  /api/edificios/{id}/toggle-ativo
+
+## Reservas
+
+GET /api/reservas
+Lista todas as reservas.
+
+GET /api/reservas/{id}
+Obtém uma reserva.
+
+POST /api/reservas
+Cria uma nova reserva.
+
+PUT /api/reservas/{id}
+Atualiza uma reserva.
+
+PATCH /api/reservas/{id}/cancelar
+Cancela uma reserva.
+
+GET /api/reservas/disponibilidade
+Lista as secretárias disponíveis para uma data e período.

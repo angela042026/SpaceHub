@@ -7,13 +7,54 @@ export default {
         './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
+        './resources/js/**/*.js',
         './resources/js/**/*.jsx',
     ],
+
+    darkMode: 'class',
 
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                display: ['Sora', ...defaultTheme.fontFamily.sans],
+            },
+
+            colors: {
+                navy: {
+                    800: 'var(--color-navy-800)',
+                    900: 'var(--color-navy-900)',
+                    950: 'var(--color-navy-950)',
+                },
+
+                teal: {
+                    400: 'var(--color-teal-400)',
+                    500: 'var(--color-teal-500)',
+                    600: 'var(--color-teal-600)',
+                },
+
+                surface: 'var(--color-surface)',
+                card: 'var(--color-card)',
+                border: 'var(--color-border)',
+                'text-secondary': 'var(--color-text-secondary)',
+
+                status: {
+                    livre: 'var(--color-status-livre)',
+                    reservada: 'var(--color-status-reservada)',
+                    ocupada: 'var(--color-status-ocupada)',
+                    indisponivel: 'var(--color-status-indisponivel)',
+                    expira: 'var(--color-status-expira)',
+                },
+            },
+
+            borderRadius: {
+                card: 'var(--radius-card)',
+                pill: 'var(--radius-pill)',
+            },
+
+            boxShadow: {
+                card: 'var(--shadow-card)',
+                'card-hover': 'var(--shadow-card-hover)',
             },
         },
     },
