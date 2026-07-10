@@ -95,6 +95,14 @@
 
 
 ---
+### Reservas
+
+- [x] CRUD Reservas
+- [x] Validação com Form Requests
+- [x] Resource
+- [x] Disponibilidade
+- [x] Cancelamento
+- [x] Testes Postman
 
 ## Frontend
 
@@ -103,4 +111,6 @@
 - [ ] Mapa Interativo
 - [ ] Reservas
 - [ ] QR Code
+
+## Sprint 6
 

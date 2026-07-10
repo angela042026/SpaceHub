@@ -384,3 +384,37 @@ Não implementar funcionalidades que contrariem decisões já tomadas (por exemp
 O projeto encontra-se numa fase sólida, com autenticação, autorização e gestão de utilizadores concluídas.
 
 O próximo objetivo é refatorar e concluir os CRUDs de Gestão de Espaços (Edifícios, Pisos, Setores e Secretárias) para que sigam exatamente o mesmo padrão arquitetural adotado no módulo de Utilizadores
+
+# Estado Atual do Projeto
+
+## Sprint 1
+✅ Concluída
+
+## Sprint 2
+✅ Concluída
+
+## Sprint 3
+✅ Concluída
+
+## Sprint 4
+✅ Concluída
+
+## Sprint 5
+✅ Concluída
+
+## Sprint 6
+✅ Concluída
+
+Inclui:
+
+- CRUD Reservas
+- Disponibilidade
+- Cancelamento
+- Testes Postman
+
+## Próxima Sprint
+
+- Dashboard
+- QR Code
+- Estatísticas
+- Mapa Interativo

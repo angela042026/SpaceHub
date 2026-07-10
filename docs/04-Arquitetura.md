@@ -129,3 +129,33 @@ Foi utilizado:
 - Resources
 - Middleware auth:sanctum
 - RoleMiddleware
+
+## Gestão de Reservas
+
+O módulo de Reservas segue a arquitetura definida para a API:
+
+Routes
+↓
+Controllers (Api)
+↓
+Form Requests
+↓
+Models
+↓
+Resources
+↓
+JSON
+
+Componentes implementados:
+
+- ReservaController
+- StoreReservaRequest
+- UpdateReservaRequest
+- DisponibilidadeReservaRequest
+- ReservaResource
+
+Utiliza:
+- Route Model Binding
+- Relações Eloquent
+- Laravel Sanctum
+- RoleMiddleware
