@@ -7,15 +7,18 @@ export default function DashboardLayout({ children, header = true }) {
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-surface">
+        <div className="min-h-screen bg-[#F7FAFC]">
             <Sidebar open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
             <main className="min-h-screen lg:pl-72">
-                <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-7">
+                <div className="mx-auto max-w-[1660px] px-5 py-6 sm:px-7 lg:px-9">
                     {header && (
                         <DashboardHeader onOpenNav={() => setMobileNavOpen(true)} />
                     )}
-                    {children}
+
+                    <div className="space-y-6">
+                        {children}
+                    </div>
                 </div>
             </main>
         </div>
