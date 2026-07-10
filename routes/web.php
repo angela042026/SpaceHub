@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\ReservaController;
+use App\Http\Controllers\FaqController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -40,12 +41,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/reservas', [ReservaController::class, 'store'])->name('reservas.store');
     // Consultar histórico de reservas
     Route::get('/reservas/history', [ReservaController::class, 'history'])->name('reservas.history');
-    
-    // // Consultar disponibilidade das secretárias
+        // // Consultar disponibilidade das secretárias
     Route::get('/reservas/availability', [ReservaController::class, 'availability'])->name('reservas.availability');
-  
-    // Cancelar uma reserva
+      // Cancelar uma reserva
     Route::delete('/reservas/{id}', [ReservaController::class, 'destroy'])->name('reservas.destroy');
     });
+
+
+    // ==========================
+    // Gestão FAQs
+    // ==========================
+    Route::get('/ajuda', [FaqController::class, 'index']) ->name('faqs.index');
+
+
 
 require __DIR__.'/auth.php';
