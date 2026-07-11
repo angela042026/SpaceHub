@@ -1,226 +1,152 @@
-POST /login
-
-POST /register
-
-GET /edificios
-
-POST /reservas
-
-DELETE /reservas/{id}
-
-POST /checkin
 # API
 
 ## Autenticação
-
-POST /api/login
-
-POST /api/register
-
-POST /api/logout
-
----
-
-## Edifícios
-
-GET /api/edificios
-
-POST /api/edificios
-
-PUT /api/edificios/{id}
-
-DELETE /api/edificios/{id}
-
----
-
-## Pisos
-
-GET /api/pisos
-
-...
-
----
-
-## Setores
-
-GET /api/setores
-
-...
-
----
-
-## Secretárias
-
-GET /api/secretarias
-
-...
-
----
-
-## Reservas
-
-GET /api/reservas
-
-POST /api/reservas
-
-DELETE /api/reservas/{id}
-
-POST /api/reservas/checkin
-
-# API
-
-## Autenticação
-
-### Registar utilizador
 
 **POST** `/api/register`
 
-Cria um novo utilizador com o perfil "Utilizador" e devolve um token de autenticação.
+Regista um novo utilizador.
 
 ---
-
-### Login
 
 **POST** `/api/login`
 
-Autentica um utilizador e devolve um token de acesso.
+Autentica um utilizador.
 
 ---
-
-### Logout
 
 **POST** `/api/logout`
 
-Revoga o token utilizado no pedido.
+Termina a sessão.
 
 > Requer autenticação com Laravel Sanctum.
 
 ---
-
-### Utilizador autenticado
 
 **GET** `/api/me`
 
-Devolve os dados do utilizador autenticado.
+Devolve o utilizador autenticado.
 
 > Requer autenticação com Laravel Sanctum.
 
-### Recuperação de password
+---
 
 **POST** `/api/forgot-password`
 
-Envia um link de recuperação de password para o email do utilizador.
+Envia um email de recuperação de password.
+
+---
 
 **POST** `/api/reset-password`
 
-Permite definir uma nova password usando o token recebido por email.
+Redefine a password.
+
+---
 
 # Gestão de Utilizadores
 
-> Todas as rotas requerem autenticação com Bearer Token e permissões de Administrador.
+> Todas as rotas requerem autenticação (`auth:sanctum`) e permissões de Administrador.
+
+| Método | Endpoint |
+|--------|----------|
+| GET | `/api/users` |
+| GET | `/api/users/{id}` |
+| POST | `/api/users` |
+| PUT | `/api/users/{id}` |
+| PATCH | `/api/users/{id}/toggle-ativo` |
 
 ---
 
-## Listar utilizadores
+# Edifícios
 
-**GET** `/api/users`
-
-Lista todos os utilizadores.
-
-### Resposta
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Administrador",
-    "email": "admin@spacehub.pt",
-    "role": "Administrador",
-    "ativo": true,
-    "created_at": "2026-07-07 15:00:00"
-  }
-]
-```
+| Método | Endpoint |
+|--------|----------|
+| GET | `/api/edificios` |
+| GET | `/api/edificios/{id}` |
+| POST | `/api/edificios` |
+| PUT | `/api/edificios/{id}` |
+| PATCH | `/api/edificios/{id}/toggle-ativo` |
 
 ---
 
-## Consultar utilizador
+# Pisos
 
-**GET** `/api/users/{id}`
-
-Devolve os dados de um utilizador.
-
----
-
-## Criar utilizador
-
-**POST** `/api/users`
-
-Cria um novo utilizador.
-
-### Body
-
-```json
-{
-  "name": "Novo Utilizador",
-  "email": "novo@spacehub.pt",
-  "password": "password123",
-  "role_id": 4,
-  "ativo": true
-}
-```
+| Método | Endpoint |
+|--------|----------|
+| GET | `/api/pisos` |
+| GET | `/api/pisos/{id}` |
+| POST | `/api/pisos` |
+| PUT | `/api/pisos/{id}` |
+| PATCH | `/api/pisos/{id}/toggle-ativo` |
 
 ---
 
-## Atualizar utilizador
+# Setores
 
-**PUT** `/api/users/{id}`
-
-Atualiza os dados de um utilizador.
-
-### Body
-
-```json
-{
-  "name": "Novo Nome",
-  "email": "novo.email@spacehub.pt",
-  "role_id": 3,
-  "ativo": true
-}
-```
-
-A password é opcional. Se for enviada, será atualizada.
+| Método | Endpoint |
+|--------|----------|
+| GET | `/api/setores` |
+| GET | `/api/setores/{id}` |
+| POST | `/api/setores` |
+| PUT | `/api/setores/{id}` |
+| PATCH | `/api/setores/{id}/toggle-ativo` |
 
 ---
 
-## Ativar / Desativar utilizador
+# Secretárias
 
-**PATCH** `/api/users/{id}/toggle-ativo`
+| Método | Endpoint |
+|--------|----------|
+| GET | `/api/secretarias` |
+| GET | `/api/secretarias/{id}` |
+| POST | `/api/secretarias` |
+| PUT | `/api/secretarias/{id}` |
+| PATCH | `/api/secretarias/{id}/toggle-ativo` |
 
-Alterna o estado do utilizador entre ativo e inativo.
+---
 
-GET    /api/edificios
-GET    /api/edificios/{id}
-POST   /api/edificios
-PUT    /api/edificios/{id}
-PATCH  /api/edificios/{id}/toggle-ativo
+# Reservas
 
-## Reservas
+| Método | Endpoint |
+|--------|----------|
+| GET | `/api/reservas` |
+| GET | `/api/reservas/{id}` |
+| POST | `/api/reservas` |
+| PUT | `/api/reservas/{id}` |
+| PATCH | `/api/reservas/{id}/cancelar` |
+| GET | `/api/reservas/disponibilidade` |
 
-GET /api/reservas
-Lista todas as reservas.
+---
 
-GET /api/reservas/{id}
-Obtém uma reserva.
+# Dashboard (Web)
 
-POST /api/reservas
-Cria uma nova reserva.
+| Método | Endpoint |
+|--------|----------|
+| GET | `/dashboard` |
 
-PUT /api/reservas/{id}
-Atualiza uma reserva.
+---
 
-PATCH /api/reservas/{id}/cancelar
-Cancela uma reserva.
+# Check-in (Web)
 
-GET /api/reservas/disponibilidade
-Lista as secretárias disponíveis para uma data e período.
+| Método | Endpoint |
+|--------|----------|
+| GET | `/checkin/camera` |
+| GET | `/checkin/scan/{qrToken}` |
+| POST | `/checkin/confirm/{reserva}` |
+
+---
+
+# QR Code
+
+| Método | Endpoint |
+|--------|----------|
+| GET | `/secretarias/qrcodes` |
+| GET | `/secretarias/{secretaria}/qrcode` |
+
+---
+
+# Mapa Interativo
+
+| Método | Endpoint |
+|--------|----------|
+| GET | `/setores/mapa` |
+| PATCH | `/setores/{setor}/posicao` |

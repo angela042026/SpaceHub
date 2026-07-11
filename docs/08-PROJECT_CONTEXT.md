@@ -1,31 +1,39 @@
 📘 Documento Mestre do Projeto – SpaceHub
 
-Versão: 1.0
-Estado: Em desenvolvimento
-Framework: Laravel 12 + Sanctum + Bootstrap (frontend previsto)
+Versão: 1.1  
+Estado: Em desenvolvimento  
+Framework: Laravel 12 + Sanctum + Inertia.js + React + Tailwind CSS
 
-1. Objetivo do Projeto
+---
+
+# 1. Objetivo do Projeto
 
 O SpaceHub é uma aplicação web para gestão de espaços de trabalho e reservas de secretárias.
 
-O sistema permitirá:
+O sistema permite:
 
-gerir edifícios;
-gerir pisos;
-gerir setores;
-gerir secretárias;
-gerir reservas;
-gerir utilizadores;
-controlar acessos por papéis (roles).
-2. Arquitetura
+- gerir edifícios;
+- gerir pisos;
+- gerir setores;
+- gerir secretárias;
+- gerir reservas;
+- gerir utilizadores;
+- controlar acessos por papéis (roles);
+- gerir Check-in através de QR Code;
+- visualizar estatísticas e dashboards;
+- visualizar um mapa interativo dos espaços.
+
+---
+
+# 2. Arquitetura
 
 O projeto segue uma arquitetura REST baseada em Laravel.
 
-Backend
+## Backend
 
 Laravel 12
 
-Estrutura utilizada:
+### API
 
 Controllers
 ↓
@@ -37,25 +45,56 @@ Resources
 ↓
 JSON
 
+Todos os novos CRUD seguem este padrão.
+
 Nunca colocar validação diretamente nos Controllers.
 
-Autenticação
+### Aplicação Web
+
+Routes
+↓
+Controllers
+↓
+Models
+↓
+Inertia
+↓
+React
+
+Os Controllers Web encontram-se em:
+
+App\Http\Controllers
+
+Os Controllers da API encontram-se em:
+
+App\Http\Controllers\Api
+
+---
+
+## Autenticação
 
 Laravel Sanctum.
 
 Endpoints implementados:
 
-Register
-Login
-Logout
-Me
-Forgot Password
-Reset Password
+- Register
+- Login
+- Logout
+- Me
+- Forgot Password
+- Reset Password
 
 Todos os endpoints privados utilizam:
 
 auth:sanctum
-Autorização
+
+As páginas Web privadas utilizam:
+
+auth
+
+---
+
+## Autorização
 
 Existe um middleware personalizado:
 
@@ -71,11 +110,16 @@ role
 
 Utilização:
 
+```php
 Route::middleware([
     'auth:sanctum',
     'role:Administrador'
 ]);
-3. Base de Dados
+```
+
+---
+
+# 3. Base de Dados
 
 As entidades principais são:
 
@@ -93,11 +137,14 @@ Piso
 │
 Edificio
 
-Existe Diagrama ER.
+Existe:
 
-Existe Dicionário de Dados.
+- Diagrama ER
+- Dicionário de Dados
 
-4. Relações Eloquent
+---
+
+# 4. Relações Eloquent
 
 Exemplo:
 
@@ -114,6 +161,7 @@ hasMany(Secretaria)
 
 Secretaria
 belongsTo(Setor)
+hasMany(Reserva)
 
 Reserva
 belongsTo(User)
@@ -130,30 +178,39 @@ Sempre utilizar relações Eloquent.
 
 Evitar queries manuais.
 
-5. Convenções adotadas
-Controllers
+---
+
+# 5. Convenções adotadas
+
+## Controllers
 
 Todos os novos CRUD utilizam:
 
-Api/
-
-Exemplo:
-
 App\Http\Controllers\Api
-Form Requests
+
+Os Controllers Web ficam em:
+
+App\Http\Controllers
+
+---
+
+## Form Requests
 
 Toda a validação deve estar em:
 
 StoreXXXXXRequest
+
 UpdateXXXXXRequest
 
-Nunca usar:
+Nunca utilizar:
 
+```php
 $request->validate(...)
+```
 
-dentro do controller.
+---
 
-Resources
+## Resources
 
 Todos os endpoints devolvem:
 
@@ -165,39 +222,52 @@ XXXXXResource::collection(...)
 
 Nunca devolver diretamente o Model.
 
-Route Model Binding
+---
+
+## Route Model Binding
 
 Utilizar sempre:
 
+```php
 public function show(User $user)
+```
 
 em vez de:
 
+```php
 User::find($id)
-Passwords
+```
+
+---
+
+## Passwords
 
 Sempre:
 
+```php
 Hash::make(...)
+```
 
 Nunca guardar passwords em texto simples.
 
-Roles
+---
+
+## Roles
 
 Os Roles são fixos.
 
 Existem:
 
-Administrador
-Gestor
-Colaborador
-Utilizador
+- Administrador
+- Gestor
+- Colaborador
+- Utilizador
 
 Não existe CRUD de Roles.
 
-O sistema de Roles já está considerado concluído.
+---
 
-Utilizadores
+## Utilizadores
 
 Nunca eliminar utilizadores.
 
@@ -209,33 +279,41 @@ para ativar/desativar.
 
 Não implementar destroy().
 
-6. Funcionalidades Implementadas
-Sprint 1
+---
 
-✔ Base de Dados
+# 6. Funcionalidades Implementadas
 
-Migrations
-Models
-Relações
-Seeders
-Documentação
-Sprint 2
+## Sprint 1
 
-✔ Autenticação
+✅ Base de Dados
 
-Register
-Login
-Logout
-Me
+- Migrations
+- Models
+- Relações
+- Seeders
+- Documentação
+
+---
+
+## Sprint 2
+
+✅ Autenticação
+
+- Register
+- Login
+- Logout
+- Me
 
 Laravel Sanctum.
 
-Sprint 3
+---
 
-✔ Recuperação de Password
+## Sprint 3
 
-Forgot Password
-Reset Password
+✅ Recuperação de Password
+
+- Forgot Password
+- Reset Password
 
 Configuração:
 
@@ -244,111 +322,186 @@ MAIL_MAILER=log
 Emails escritos em:
 
 storage/logs/laravel.log
-Sprint 4
 
-✔ Gestão de Utilizadores
+---
+
+## Sprint 4
+
+✅ Gestão de Utilizadores
 
 Implementado:
 
-UserController
-UserResource
-StoreUserRequest
-UpdateUserRequest
-RoleMiddleware
+- UserController
+- UserResource
+- StoreUserRequest
+- UpdateUserRequest
+- RoleMiddleware
 
 CRUD:
 
-index
-show
-store
-update
-toggleAtivo
+- index
+- show
+- store
+- update
+- toggleAtivo
 
-Sem destroy.
+Sem destroy().
 
 Existe UserSeeder.
 
-7. Funcionalidades Pendentes
+---
 
-Sprint seguinte:
+## Sprint 5
 
-Gestão de Espaços
-CRUD Edifícios
-CRUD Pisos
-CRUD Setores
-CRUD Secretárias
+✅ Gestão de Espaços
 
-Seguir exatamente o padrão usado em User.
+Implementado:
 
-Depois:
+- CRUD Edifícios
+- CRUD Pisos
+- CRUD Setores
+- CRUD Secretárias
 
-Reservas.
+Todos seguem o padrão:
 
-Depois:
+Controllers
+↓
+Form Requests
+↓
+Models
+↓
+Resources
+↓
+JSON
 
-Dashboard.
+---
 
-Depois:
+## Sprint 6
 
-Mapa Interativo.
+✅ Reservas
 
-8. Padrão obrigatório para novos CRUD
+Implementado:
+
+- CRUD Reservas
+- Disponibilidade
+- Cancelamento
+- Testes Postman
+
+---
+
+## Sprint 7
+
+✅ Dashboard
+
+✅ Estatísticas
+
+✅ QR Code
+
+✅ Check-in
+
+✅ Mapa Interativo
+
+Implementado:
+
+- DashboardController
+- CheckInController
+- SecretariaQrCodeController
+- SetorMapaController
+
+Tecnologias:
+
+- Inertia.js
+- React
+- Tailwind CSS
+- Recharts
+- Simple QR Code
+- html5-qrcode
+
+---
+
+# 7. Próximas Tarefas
+
+- Validação funcional do Dashboard
+- Validação funcional do QR Code
+- Validação funcional do Check-in
+- Testes Feature
+- Melhorias de interface
+- Otimização do Dashboard
+
+---
+
+# 8. Padrão obrigatório para novos CRUD
 
 Cada entidade deve possuir:
 
-Model
+- Model
+- Controller
+- Resource
+- StoreRequest
+- UpdateRequest
+- Rotas
+- Testes Postman
+- Documentação
 
-Controller
+---
 
-Resource
-
-StoreRequest
-
-UpdateRequest
-
-Rotas
-
-Testes Postman
-
-Documentação
-9. Testes
+# 9. Testes
 
 Todos os endpoints devem ser testados no Postman.
 
 Checklist:
 
-GET lista
-GET por ID
-POST
-PUT
-PATCH toggle ativo
-validação 422
-autorização 403
-10. Seeders
+- GET lista
+- GET por ID
+- POST
+- PUT
+- PATCH toggle ativo
+- validação 422
+- autorização 403
+
+Antes de cada integração executar:
+
+```bash
+php artisan optimize:clear
+composer dump-autoload
+npm run build
+php artisan test
+php artisan route:list
+```
+
+---
+
+# 10. Seeders
 
 Existem:
 
-RoleSeeder
-PeriodoSeeder
-EstadoReservaSeeder
-UserSeeder
+- RoleSeeder
+- PeriodoSeeder
+- EstadoReservaSeeder
+- UserSeeder
+- SpaceHubEstruturaSeeder
 
 O projeto deve funcionar após:
 
+```bash
 php artisan migrate:fresh --seed
-11. Documentação
+```
+
+---
+
+# 11. Documentação
 
 Sempre atualizar:
 
-docs/04-Arquitetura.md
-
-docs/05-API.md
-
-docs/06-Roadmap.md
+- docs/04-Arquitetura.md
+- docs/05-API.md
+- docs/06-Roadmap.md
 
 antes do commit.
 
-12. Git
+---
+
+# 12. Git
 
 Fluxo utilizado:
 
@@ -358,51 +511,74 @@ Depois:
 
 commit
 
+↓
+
 push
 
-merge
+↓
 
-na main.
+Pull Request
 
-Não apagar branches antes de validação.
+↓
 
-13. Regras de Continuidade (Muito Importante)
+Create a merge commit
 
-Ao continuar este projeto numa nova conversa, seguir obrigatoriamente estas regras:
+↓
 
-Não alterar a arquitetura existente.
-Não renomear ficheiros, classes, métodos ou rotas sem autorização.
-Não fazer refactors automáticos.
-Manter compatibilidade com todo o código existente.
-Antes de propor alterações estruturais, explicar o impacto e esperar aprovação.
-Quando houver dúvida, perguntar em vez de assumir.
-Manter o padrão já definido (Controllers → Form Requests → Models → Resources → JSON).
-Usar sempre Route Model Binding, Form Requests e Resources nos novos CRUDs.
-Não implementar funcionalidades que contrariem decisões já tomadas (por exemplo, apagar utilizadores em vez de desativá-los).
-14. Estado Atual do Projeto
+main
 
-O projeto encontra-se numa fase sólida, com autenticação, autorização e gestão de utilizadores concluídas.
+Não apagar branches antes da validação.
 
-O próximo objetivo é refatorar e concluir os CRUDs de Gestão de Espaços (Edifícios, Pisos, Setores e Secretárias) para que sigam exatamente o mesmo padrão arquitetural adotado no módulo de Utilizadores
+Evitar **Squash and merge** quando for necessário preservar a autoria dos colaboradores.
 
-# Estado Atual do Projeto
+---
+
+# 13. Regras de Continuidade
+
+Ao continuar este projeto numa nova conversa:
+
+- Não alterar a arquitetura existente.
+- Não renomear ficheiros, classes, métodos ou rotas sem autorização.
+- Não fazer refactors automáticos.
+- Manter compatibilidade com todo o código existente.
+- Antes de propor alterações estruturais, explicar o impacto.
+- Quando houver dúvida, perguntar.
+- Manter o padrão Controllers → Form Requests → Models → Resources → JSON.
+- Utilizar sempre Route Model Binding.
+- Utilizar sempre Form Requests.
+- Utilizar sempre Resources.
+- Não implementar funcionalidades que contrariem decisões já tomadas.
+
+---
+
+# 14. Estado Atual do Projeto
 
 ## Sprint 1
+
 ✅ Concluída
 
 ## Sprint 2
+
 ✅ Concluída
 
 ## Sprint 3
+
 ✅ Concluída
 
 ## Sprint 4
+
 ✅ Concluída
 
 ## Sprint 5
+
 ✅ Concluída
 
+Inclui:
+
+- CRUD Gestão de Espaços
+
 ## Sprint 6
+
 ✅ Concluída
 
 Inclui:
@@ -412,9 +588,21 @@ Inclui:
 - Cancelamento
 - Testes Postman
 
-## Próxima Sprint
+## Sprint 7
+
+✅ Integrada
+
+Inclui:
 
 - Dashboard
-- QR Code
 - Estatísticas
+- QR Code
+- Check-in
 - Mapa Interativo
+
+## Próximas tarefas
+
+- Validação funcional do QR Code
+- Validação funcional do Check-in
+- Testes Feature
+- Melhorias de interface
