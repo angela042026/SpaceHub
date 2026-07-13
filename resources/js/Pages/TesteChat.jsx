@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 export default function TesteChat() {
     const [status, setStatus] = useState('A ligar ao Laravel Echo...');
@@ -6,14 +6,25 @@ export default function TesteChat() {
     const [mensagens, setMensagens] = useState([]);
     const [inputMensagem, setInputMensagem] = useState('');
 
+    // ESTADOS PARA OS BOTÕES DINÂMICOS
+    const [mostrarBotoes, setMostrarBotoes] = useState(false);
+    const [triggerPendente, setTriggerPendente] = useState(null);
+
+    const mensagensEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        mensagensEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [mensagens]);
+
     useEffect(() => {
         if (window.Echo) {
             setStatus('✅ Ligado ao Reverb (Modo Sandbox)!');
             setStatusColor('green');
-
             const canal = window.Echo.channel('chat');
-
-            // Continua a ouvir se vier algo do backend
             canal.listen('MensagemTeste', (dados) => {
                 setMensagens((prev) => [...prev, { user: dados.user, texto: dados.texto }]);
             });
@@ -21,39 +32,127 @@ export default function TesteChat() {
             setStatus('❌ Erro: Laravel Echo não configurado.');
             setStatusColor('red');
         }
-
         return () => {
             if (window.Echo) window.Echo.leaveChannel('chat');
         };
     }, []);
 
-    // Simulação no Frontend (Ignora o bloqueio do servidor PHP)
     const enviarParaOBackend = (e) => {
         e.preventDefault();
         if (!inputMensagem.trim()) return;
 
         const pergunta = inputMensagem;
-
-        // 1. Adiciona a tua mensagem instantaneamente no ecrã
         setMensagens((prev) => [...prev, { user: 'Tu', texto: pergunta }]);
         setInputMensagem('');
+        setMostrarBotoes(false);
 
-        // 2. Simula a resposta do Bot diretamente no React após 800ms
         setTimeout(() => {
-            let respostaBot = "Desculpa, ainda sou um robô em treino no SpaceHub. Podes perguntar por 'olá', 'preço' ou 'espaço'!";
-            const termo = pergunta.toLowerCase().trim();
+            const frase = pergunta.toLowerCase().trim();
 
-            if (termo === 'olá' || termo === 'oi') {
-                respostaBot = "Olá! Bem-vindo ao suporte do SpaceHub. Como posso ajudar-te hoje? 👋";
-            } else if (termo === 'preço' || termo === 'preços' || termo === 'valor') {
-                respostaBot = "Os nossos planos de Coworking começam em 49€/mês! 💼";
-            } else if (termo === 'espaço' || termo === 'local') {
-                respostaBot = "Temos salas de reunião modernas, internet ultra-rápida e café grátis à discrição! ☕";
+            const temasDisponiveis = [
+                {
+                    id: 'saudacao',
+                    nome: 'Saudações',
+                    triggers: ['olá', 'oi', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'ajuda', 'suporte', 'chat'],
+                    resposta: "Olá! 👋\nBem-vindo ao suporte do SpaceHub. Como posso ajudar hoje?"
+                },
+                {
+                    id: 'precos',
+                    nome: 'Preços',
+                    triggers: ['preço', 'preços', 'valor', 'valores', 'plano', 'planos', 'custo', 'custos'],
+                    resposta: "Os nossos planos de Coworking começam em 49€/mês! 💼"
+                },
+                {
+                    id: 'espaco',
+                    nome: 'Espaço',
+                    triggers: ['espaço', 'local', 'sala', 'salas', 'internet', 'wifi', 'café', 'bar', 'comida', 'bebidas', 'catering', 'cafe'],
+                    resposta: "Temos salas de reunião modernas, internet ultra-rápida e café grátis à descrição, disponível no lobby! ☕"
+                }
+            ];
+
+            let temasEncontrados = [];
+
+            // Mapeia todas as ocorrências guardando a posição real do texto (ordem correta)
+            temasDisponiveis.forEach(tema => {
+                tema.triggers.forEach(trigger => {
+                    const posicao = frase.indexOf(trigger);
+                    if (posicao !== -1) {
+                        temasEncontrados.push({
+                            ...tema,
+                            triggerExata: trigger,
+                            posicaoNaFrase: posicao
+                        });
+                    }
+                });
+            });
+
+            if (temasEncontrados.length === 0) {
+                setMensagens((prev) => [...prev, {
+                    user: 'Bot SpaceHub 🤖',
+                    texto: "Desculpe, ainda sou um robô em treino no SpaceHub. Pode perguntar por assuntos como 'preço' ou 'espaço'!"
+                }]);
+                return;
             }
 
-            // Injeta a resposta do bot diretamente no estado do chat
-            setMensagens((prev) => [...prev, { user: 'Bot SpaceHub 🤖', texto: respostaBot }]);
+            // CORREÇÃO 1: Ordena as respostas de acordo com o que o utilizador escreveu primeiro
+            temasEncontrados.sort((a, b) => a.posicaoNaFrase - b.posicaoNaFrase);
+
+            // Filtra duplicados do mesmo tema (ex: "sala" e "espaço" na mesma frase)
+            const temasUnicos = [];
+            const idsVistos = new Set();
+            temasEncontrados.forEach(t => {
+                if (!idsVistos.has(t.id)) {
+                    idsVistos.add(t.id);
+                    temasUnicos.push(t);
+                }
+            });
+
+            const primeiroTema = temasUnicos[0];
+            let respostaFinal = primeiroTema.resposta;
+
+            // Se houver uma segunda trigger detetada na frase
+            if (temasUnicos.length > 1) {
+                const segundoTema = temasUnicos[1];
+                respostaFinal += `\n\n💡 Notei que também mencionou "${segundoTema.triggerExata}". Deseja obter mais informação sobre este assunto?`;
+
+                setTriggerPendente(segundoTema);
+                setMostrarBotoes(true);
+            } else {
+                setTriggerPendente(null);
+            }
+
+            setMensagens((prev) => [...prev, { user: 'Bot SpaceHub 🤖', texto: respostaFinal }]);
         }, 800);
+    };
+
+    // AÇÃO DOS BOTÕES DE DECISÃO
+    const lidarComEscolha = (querSaberMais) => {
+        // Guardamos o ponteiro localmente para o setTimeout conseguir ler sem conflito de render
+        const proximoTema = triggerPendente;
+
+        setMostrarBotoes(false);
+        setTriggerPendente(null); // Limpa o estado imediatamente para libertar o próximo ciclo
+
+        if (querSaberMais && proximoTema) {
+            setMensagens((prev) => [...prev, { user: 'Tu', texto: "Sim, quero saber mais." }]);
+
+            // CORREÇÃO 2: Injeta a resposta em falta no chat e fecha o ciclo
+            setTimeout(() => {
+                setMensagens((prev) => [...prev, {
+                    user: 'Bot SpaceHub 🤖',
+                    texto: `${proximoTema.resposta}\n\nPrecisa de ajuda com algum outro assunto?`
+                }]);
+            }, 800);
+        } else {
+            setMensagens((prev) => [...prev, { user: 'Tu', texto: "Já tenho a informação que procurava." }]);
+
+            setTimeout(() => {
+                setMensagens((prev) => [...prev, {
+                    user: 'Bot SpaceHub 🤖',
+                    texto: "Excelente! Se precisar de mais ajuda, eu continuo deste lado. Bom trabalho no SpaceHub! 🚀"
+                }]);
+            }, 800);
+        }
     };
 
     return (
@@ -61,8 +160,7 @@ export default function TesteChat() {
             <h2>SpaceHub Chat Bot 🤖 (Sandbox)</h2>
             <div style={{ color: statusColor, fontWeight: 'bold', marginBottom: '15px' }}>{status}</div>
 
-            {/* Janela de Chat */}
-            <div style={{ border: '1px solid #ccc', borderRadius: '8px', height: '350px', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
+            <div style={{ border: '1px solid #ccc', borderRadius: '8px', height: '400px', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
                 <div style={{ flex: 1, padding: '15px', overflowY: 'auto' }}>
                     {mensagens.map((msg, index) => (
                         <div key={index} style={{ marginBottom: '12px', textAlign: msg.user === 'Tu' ? 'right' : 'left' }}>
@@ -73,15 +171,36 @@ export default function TesteChat() {
                                 borderRadius: '12px',
                                 background: msg.user === 'Tu' ? '#007bff' : '#e9ecef',
                                 color: msg.user === 'Tu' ? '#fff' : '#000',
-                                marginTop: '2px'
+                                marginTop: '2px',
+                                maxWidth: '80%',
+                                whitespace: 'pre-line',
+                                textAlign: 'left'
                             }}>
                                 {msg.texto}
                             </span>
                         </div>
                     ))}
+
+                    {mostrarBotoes && (
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'flex-start' }}>
+                            <button
+                                onClick={() => lidarComEscolha(false)}
+                                style={{ background: '#6c757d', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '15px', fontSize: '12px', cursor: 'pointer' }}
+                            >
+                                Já tenho a informação que procurava
+                            </button>
+                            <button
+                                onClick={() => lidarComEscolha(true)}
+                                style={{ background: '#007bff', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '15px', fontSize: '12px', cursor: 'pointer' }}
+                            >
+                                Sim, quero saber mais
+                            </button>
+                        </div>
+                    )}
+
+                    <div ref={mensagensEndRef} />
                 </div>
 
-                {/* Formulário de Envio */}
                 <form onSubmit={enviarParaOBackend} style={{ display: 'flex', borderTop: '1px solid #ccc', padding: '10px', background: '#fff', borderRadius: '0 0 8px 8px' }}>
                     <input
                         type="text"

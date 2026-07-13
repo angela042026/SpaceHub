@@ -10,22 +10,23 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 
 class EnviarMensagem implements ShouldBroadcastNow
-
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $user;
     public $texto;
+    public $opcoes; // Preservamos o teu ficheiro e injetamos as opções aqui!
 
-    public function __construct($user, $texto)
+    public function __construct($user, $texto, $opcoes = [])
     {
         $this->user = $user;
         $this->texto = $texto;
+        $this->opcoes = $opcoes;
     }
 
     public function broadcastOn(): array
     {
-        // Define o canal público chamado 'chat'
+        // Mantém o teu canal público original chamado 'chat'
         return [
             new Channel('chat'),
         ];
@@ -33,7 +34,7 @@ class EnviarMensagem implements ShouldBroadcastNow
 
     public function broadcastAs(): string
     {
-        // Define o nome exato do evento que o Echo vai ouvir
+        // Mantém o nome exato que o teu Echo já está a ouvir no React
         return 'MensagemTeste';
     }
 }
