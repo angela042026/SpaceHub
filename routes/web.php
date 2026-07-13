@@ -1,5 +1,7 @@
 <?php
 
+use App\Events\EnviarMensagem;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
@@ -29,11 +31,14 @@ Route::middleware('auth')->group(function () {
     // ==========================
     // Perfil do Utilizador
     // ==========================
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
 
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
 
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
 
     // ==========================
     // Check-in
@@ -68,7 +73,6 @@ Route::middleware('auth')->group(function () {
     // ==========================
     // Sistema de Reservas
     // ==========================
-
     Route::get('/reservas', [ReservaController::class, 'index'])
         ->name('reservas.index');
 
@@ -87,16 +91,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/reservas/{id}', [ReservaController::class, 'destroy'])
         ->name('reservas.destroy');
 
-
     // ==========================
     // Help Center
     // ==========================
-    Route::get('/ajuda', [FaqController::class, 'index'])->name('faqs.index');
+    Route::get('/ajuda', [FaqController::class, 'index'])
+        ->name('faqs.index');
 
     // ==========================
     // Suporte
     // ==========================
-
     Route::get('/suporte', [PedidoSuporteController::class, 'create'])
         ->name('support.create');
 
@@ -111,7 +114,30 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'update'])
         ->name('support.update');
-
 });
 
 require __DIR__.'/auth.php';
+
+/*
+|--------------------------------------------------------------------------
+| Rotas do Sistema de Chat e WebSockets
+|--------------------------------------------------------------------------
+*/
+
+// Rota de teste para disparo manual de eventos
+Route::get('/disparar-evento', function () {
+    broadcast(new EnviarMensagem(
+        'Sistema SpaceHub',
+        'WebSockets nativos a funcionar! 🚀'
+    ));
+
+    return 'Evento nativo enviado com sucesso!';
+});
+
+// Processamento do Chat Bot
+Route::post('/simular-chat', [ChatController::class, 'simularResposta']);
+
+// Página de testes do Chat
+Route::get('/teste-chat', function () {
+    return Inertia::render('TesteChat');
+});
