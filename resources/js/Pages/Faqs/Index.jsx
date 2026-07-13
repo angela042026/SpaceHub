@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function Index({ faqs }) {
@@ -84,13 +84,13 @@ export default function Index({ faqs }) {
                             <div className="mt-12 rounded-xl border border-teal-200 bg-teal-50 p-8 text-center">
                                 <h3 className="mb-3 text-2xl font-semibold text-gray-800">
                                     Ainda precisa de ajuda?
-                                </h3>                                 
-                                <p className="mb-8 text-gray-600">                                
+                                </h3>
+                                <p className="mb-8 text-gray-600">
                                     A nossa equipa está disponível para o ajudar.
                                 </p>
-                                <button className="rounded-lg px-6 py-2 font-semibold text-white transition hover:opacity-90" style={{ backgroundColor: '#14B8A6' }}>
+                                <Link href={route('support.create')} className="inline-block rounded-lg px-6 py-3 font-semibold text-white transition hover:opacity-90" style={{ backgroundColor: '#14B8A6' }} >
                                     Contactar Suporte
-                                </button>
+                                </Link>
                             </div>
 
                         </div>
