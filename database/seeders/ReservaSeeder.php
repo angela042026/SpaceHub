@@ -7,36 +7,26 @@ use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Carbon\Carbon;
 
-class EstadoReservaSeeder extends Seeder
+class ReservaSeeder extends Seeder
 {
     public function run(): void
     {
-        $utilizador = User::where('email', 'utilizador@spacehub.pt')->first();
+        $user = User::where('email', 'utilizador@spacehub.pt')->first();
         $admin = User::where('email', 'admin@spacehub.pt')->first();
 
         $manha = Periodo::where('nome', 'Manhã')->first();
         $tarde = Periodo::where('nome', 'Tarde')->first();
 
-        $confirmada = EstadoReserva::where('codigo', 'confirmada')->first();
         $pendente = EstadoReserva::where('codigo', 'pendente')->first();
+        $confirmada = EstadoReserva::where('codigo', 'confirmada')->first();
         $cancelada = EstadoReserva::where('codigo', 'cancelada')->first();
-        $expirada = EstadoReserva::where('codigo', 'expirada')->first();
 
         $secretarias = Secretaria::take(6)->get();
 
-        if (
-            !$utilizador ||
-            !$admin ||
-            !$manha ||
-            !$tarde ||
-            !$confirmada ||
-            !$pendente ||
-            !$cancelada ||
-            !$expirada
-        ) {
+        if (!$user || !$admin || !$manha || !$tarde || !$pendente || !$confirmada || $secretarias->count() < 3) {
             return;
         }
 
@@ -47,9 +37,9 @@ class EstadoReservaSeeder extends Seeder
                 'periodo_id' => $manha->id,
             ],
             [
-                'user_id' => $utilizador->id,
+                'user_id' => $user->id,
                 'estado_reserva_id' => $confirmada->id,
-                'check_in_at' => now()->subMinutes(20),
+                'check_in_at' => now(),
             ]
         );
 
@@ -57,7 +47,7 @@ class EstadoReservaSeeder extends Seeder
             [
                 'secretaria_id' => $secretarias[1]->id,
                 'data' => Carbon::today(),
-                'periodo_id' => $manha->id,
+                'periodo_id' => $tarde->id,
             ],
             [
                 'user_id' => $admin->id,
@@ -68,15 +58,14 @@ class EstadoReservaSeeder extends Seeder
         Reserva::updateOrCreate(
             [
                 'secretaria_id' => $secretarias[2]->id,
-                'data' => Carbon::today(),
-                'periodo_id' => $tarde->id,
+                'data' => Carbon::tomorrow(),
+                'periodo_id' => $manha->id,
             ],
             [
-                'user_id' => $utilizador->id,
-                'estado_reserva_id' => $cancelada->id,
+                'user_id' => $user->id,
+                'estado_reserva_id' => $pendente->id,
             ]
         );
-
         Reserva::updateOrCreate(
             [
                 'secretaria_id' => $secretarias[3]->id,
@@ -84,20 +73,8 @@ class EstadoReservaSeeder extends Seeder
                 'periodo_id' => $tarde->id,
             ],
             [
-                'user_id' => $admin->id,
-                'estado_reserva_id' => $expirada->id,
-            ]
-        );
-
-        Reserva::updateOrCreate(
-            [
-                'secretaria_id' => $secretarias[4]->id,
-                'data' => Carbon::tomorrow(),
-                'periodo_id' => $manha->id,
-            ],
-            [
-                'user_id' => $utilizador->id,
-                'estado_reserva_id' => $pendente->id,
+                'user_id' => $user->id,
+                'estado_reserva_id' => $cancelada->id,
             ]
         );
     }

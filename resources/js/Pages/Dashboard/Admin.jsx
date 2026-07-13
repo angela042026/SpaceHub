@@ -8,6 +8,15 @@ import ReservationCard from '@/Components/Dashboard/ReservationCard';
 import StatisticsPanel from '@/Components/Dashboard/StatisticsPanel';
 import UpcomingReservations from '@/Components/Dashboard/UpcomingReservations';
 
+import {
+    CalendarDays,
+    CheckCircle2,
+    Armchair,
+    PieChart,
+    TimerOff,
+    XCircle,
+} from 'lucide-react';
+
 export default function Admin({
     stats,
     estatisticas,
@@ -20,51 +29,50 @@ export default function Admin({
 
     return (
         <>
-            <Head title="Dashboard SpaceHub" />
+            <Head title="Dashboard" />
 
             <DashboardLayout>
-                <section className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
+                <section className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
                     <StatCard
                         title="Reservas Hoje"
                         value={stats.reservasHoje.value}
                         changePercent={stats.reservasHoje.changePercent}
-                        icon="📅"
-                        color="blue"
+                        icon={CalendarDays}
                     />
+
                     <StatCard
                         title="Check-ins realizados"
                         value={stats.checkinsHoje.value}
                         changePercent={stats.checkinsHoje.changePercent}
-                        icon="✅"
-                        color="green"
+                        icon={CheckCircle2}
                     />
+
                     <StatCard
                         title="Secretárias Livres"
                         value={stats.mesasLivres.value}
                         changePercent={stats.mesasLivres.changePercent}
-                        icon="🪑"
-                        color="orange"
+                        icon={Armchair}
                     />
+
                     <StatCard
                         title="Taxa de Ocupação"
                         value={`${stats.taxaOcupacao.value}%`}
                         changePercent={stats.taxaOcupacao.changePercent}
-                        icon="◔"
-                        color="purple"
+                        icon={PieChart}
                     />
+
                     <StatCard
                         title="Reservas Expiradas"
                         value={stats.reservasExpiradasHoje.value}
                         changePercent={stats.reservasExpiradasHoje.changePercent}
-                        icon="⏱️"
-                        color="red"
+                        icon={TimerOff}
                     />
+
                     <StatCard
                         title="Cancelamentos"
                         value={stats.cancelamentosHoje.value}
                         changePercent={stats.cancelamentosHoje.changePercent}
-                        icon="×"
-                        color="slate"
+                        icon={XCircle}
                     />
                 </section>
 
