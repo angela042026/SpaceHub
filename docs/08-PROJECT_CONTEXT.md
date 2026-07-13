@@ -606,3 +606,250 @@ Inclui:
 - Validação funcional do Check-in
 - Testes Feature
 - Melhorias de interface
+
+Sprint 7
+
+✅ Dashboard
+
+✅ Estatísticas
+
+✅ QR Code
+
+✅ Check-in
+
+✅ Mapa Interativo
+
+✅ Help Center
+
+✅ Sistema de Pedidos de Suporte
+
+Implementado:
+
+DashboardController
+CheckInController
+SecretariaQrCodeController
+SetorMapaController
+FaqController
+PedidoSuporteController
+
+Tecnologias:
+
+Inertia.js
+React
+Tailwind CSS
+Recharts
+Simple QR Code
+html5-qrcode
+7. Próximas Tarefas
+Validação funcional do Dashboard
+Validação funcional do QR Code
+Validação funcional do Check-in
+Validação funcional do Help Center
+Validação funcional do Sistema de Pedidos de Suporte
+Testes Feature
+Melhorias de interface
+Otimização do Dashboard
+10. Seeders
+
+Existem:
+
+RoleSeeder
+PeriodoSeeder
+EstadoReservaSeeder
+UserSeeder
+SpaceHubEstruturaSeeder
+ReservaSeeder
+FaqSeeder
+
+O projeto deve funcionar após:
+
+php artisan migrate:fresh --seed
+12. Git
+
+Fluxo utilizado:
+
+Cada funcionalidade é desenvolvida numa branch.
+
+Depois:
+
+commit
+
+↓
+
+push
+
+↓
+
+Pull Request
+
+↓
+
+Create a merge commit
+
+↓
+
+main
+
+Este fluxo permite:
+
+preservar a autoria dos colaboradores;
+manter o histórico completo dos commits;
+manter a referência aos Pull Requests;
+facilitar a revisão de código.
+
+Não apagar branches antes da validação.
+
+Evitar Squash and merge quando for necessário preservar a autoria dos colaboradores.
+
+14. Estado Atual do Projeto
+Sprint 1
+
+✅ Concluída
+
+Sprint 2
+
+✅ Concluída
+
+Sprint 3
+
+✅ Concluída
+
+Sprint 4
+
+✅ Concluída
+
+Sprint 5
+
+✅ Concluída
+
+Inclui:
+
+CRUD Gestão de Espaços
+Sprint 6
+
+✅ Concluída
+
+Inclui:
+
+CRUD Reservas
+Disponibilidade
+Cancelamento
+Testes Postman
+Sprint 7
+
+✅ Integrada
+
+Inclui:
+
+Dashboard
+Estatísticas
+QR Code
+Check-in
+Mapa Interativo
+Melhorias da Interface do Dashboard
+Help Center
+FAQs
+Sistema de Pedidos de Suporte
+
+Validação Técnica:
+
+php artisan optimize:clear
+composer dump-autoload
+npm run build
+php artisan test
+php artisan route:list
+
+Todos os testes executados com sucesso após as integrações.
+
+Integrações realizadas
+Pull Request #1
+
+Dashboard, Estatísticas, QR Code, Check-in e Mapa Interativo.
+
+Pull Request #2
+
+Histórico e funcionalidades do módulo de Reservas.
+
+Pull Request #3
+
+Help Center e Sistema de Pedidos de Suporte.
+
+Todas as integrações foram realizadas preservando a autoria dos colaboradores através de Create a merge commit.
+
+Próximas tarefas
+Validação funcional do Dashboard
+Validação funcional do QR Code
+Validação funcional do Check-in
+Validação funcional do Help Center
+Testes Feature
+Melhorias de interface
+Otimização geral do Dashboard
+Continuação do desenvolvimento das funcionalidades previstas no Roadmap
+# Integração Julho 2026
+
+## Branch integrada
+
+feature/update-eduardo
+
+## Funcionalidades
+
+- Laravel Reverb
+- Laravel Echo
+- Broadcasting
+- Sistema de Chat
+- ChatController
+- Evento EnviarMensagem
+- Página React TesteChat
+- Configuração de WebSockets
+
+## Validação Técnica
+
+Executado:
+
+php artisan optimize:clear
+
+composer dump-autoload
+
+npm install
+
+npm run build
+
+php artisan test
+
+php artisan route:list
+
+Resultado:
+
+- Build concluído.
+- 25 testes passaram.
+- 61 assertions.
+- Rotas registadas corretamente.
+- Integração funcional.
+
+## Processo de Integração
+
+A integração foi realizada através da branch:
+
+integration/update-eduardo
+
+seguindo o fluxo:
+
+feature/update-eduardo
+        ↓
+merge
+        ↓
+integration/update-eduardo
+        ↓
+Pull Request
+        ↓
+Create a merge commit
+        ↓
+main
+
+A autoria dos commits da branch feature/update-eduardo foi preservada.
+
+Não foi efetuado rebase.
+
+Não foi utilizado Squash and merge.
+
+Não foi alterado o histórico da branch do colaborador.

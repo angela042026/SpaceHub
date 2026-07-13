@@ -121,3 +121,52 @@
 - [ ] Melhorias de interface
 - [ ] Otimização do Dashboard
 - [ ] Deploy
+
+# Sprint 8 (Em Integração)
+
+## Chat em Tempo Real
+
+Integração da branch:
+
+feature/update-eduardo
+
+Funcionalidades adicionadas:
+
+- Sistema de Chat em Tempo Real;
+- Laravel Reverb;
+- Laravel Echo;
+- Broadcasting;
+- Evento EnviarMensagem;
+- ChatController;
+- Página React TesteChat;
+- Configuração de WebSockets;
+- Rotas de teste do Chat.
+
+Tecnologias:
+
+- Laravel Reverb
+- Laravel Echo
+- Pusher JS
+- Broadcasting
+- React
+
+Validação técnica:
+
+- php artisan optimize:clear
+- composer dump-autoload
+- npm install
+- npm run build
+- php artisan test
+- php artisan route:list
+
+Resultado:
+
+- Build concluído com sucesso;
+- 25 testes executados com sucesso;
+- 61 assertions;
+- Rotas do Chat registadas;
+- Integração preparada para Pull Request.
+
+Estado:
+
+Em validação funcional.

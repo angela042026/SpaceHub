@@ -443,3 +443,34 @@ npm.cmd run build
 php artisan test
 
 php artisan route:list
+## WebSockets
+
+O projeto passa a suportar comunicação em tempo real através de Laravel Reverb.
+
+Arquitetura:
+
+React
+↓
+Laravel Echo
+↓
+Broadcasting
+↓
+Laravel Reverb
+↓
+Eventos Laravel
+
+Evento implementado:
+
+EnviarMensagem
+
+Controlador:
+
+ChatController
+
+Configuração:
+
+config/broadcasting.php
+
+config/reverb.php
+
+routes/channels.php

@@ -150,3 +150,22 @@ Redefine a password.
 |--------|----------|
 | GET | `/setores/mapa` |
 | PATCH | `/setores/{setor}/posicao` |
+## Chat
+
+Rotas implementadas
+
+GET /teste-chat
+
+Página React de testes do Chat.
+
+POST /simular-chat
+
+Processa mensagens do Chat através do ChatController.
+
+GET /disparar-evento
+
+Dispara manualmente o evento EnviarMensagem para testes de Broadcasting.
+
+Observações
+
+Estas rotas destinam-se atualmente ao ambiente de desenvolvimento e validação funcional.
