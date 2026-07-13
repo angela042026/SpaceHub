@@ -29,14 +29,11 @@ Route::middleware('auth')->group(function () {
     // ==========================
     // Perfil do Utilizador
     // ==========================
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
 
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // ==========================
     // Check-in
@@ -71,6 +68,7 @@ Route::middleware('auth')->group(function () {
     // ==========================
     // Sistema de Reservas
     // ==========================
+
     Route::get('/reservas', [ReservaController::class, 'index'])
         ->name('reservas.index');
 
@@ -89,15 +87,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/reservas/{id}', [ReservaController::class, 'destroy'])
         ->name('reservas.destroy');
 
+
     // ==========================
     // Help Center
     // ==========================
-    Route::get('/ajuda', [FaqController::class, 'index'])
-        ->name('faqs.index');
+    Route::get('/ajuda', [FaqController::class, 'index'])->name('faqs.index');
 
     // ==========================
     // Suporte
     // ==========================
+
     Route::get('/suporte', [PedidoSuporteController::class, 'create'])
         ->name('support.create');
 
@@ -112,6 +111,7 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'update'])
         ->name('support.update');
+
 });
 
 require __DIR__.'/auth.php';
