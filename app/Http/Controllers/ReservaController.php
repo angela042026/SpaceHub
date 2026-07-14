@@ -4,79 +4,71 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ReservaController extends Controller
 {
-    /**
-     * Listar as reservas do utilizador.
-     */
-    
-    public function index()
+    public function index(): Response
     {
         return Inertia::render('Reservas/Index');
     }
 
-    /**
-     * Mostrar o formulário de nova reserva.
-     */
-    public function create()
+
+    public function create(): Response
     {
-        //
+        return Inertia::render('Reservas/Create');
     }
 
-    /**
-     * Guardar uma nova reserva.
-     */
+
+    // A criação é efetuada através de API.
     public function store(Request $request)
     {
         //
     }
 
-    /**
-     * Mostrar os detalhes de uma reserva.
-     */
+    //Não utilizado nesta fase.
+    //O módulo não possui uma página de detalhe da reserva.
     public function show(string $id)
     {
         //
     }
 
-    /**
-     * Mostrar o formulário de edição.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
-     * Atualizar uma reserva.
+     * Mostrar o formulário de edição.
+     * Futuramente será utilizado Route Model Binding.
      */
+    public function edit(string $id): Response
+    {
+        return Inertia::render('Reservas/Edit', [
+            'id' => $id,
+        ]);
+    }
+
+
+    // A atualização é efetuada através da API.
+     
     public function update(Request $request, string $id)
     {
         //
     }
 
-    /**
-     * Cancelar uma reserva.
-     */
+
+    // Não existe eliminação física de reservas.
+    //O cancelamento é efetuado através da API.
     public function destroy(string $id)
     {
         //
     }
 
-    /**
-     * Histórico de reservas.
-     */
-    public function history()
+    public function history(): Response
     {
-        //
+        return Inertia::render('Reservas/History');
     }
 
-    /**
-     * Consultar disponibilidade das secretárias.
-     */
-    public function availability()
+
+    public function availability(): Response
     {
-        //
+        return Inertia::render('Reservas/Availability');
     }
 }
