@@ -11,4 +11,4 @@ Artisan::command('inspire', function () {
 // Liberta secretárias cujas reservas pendentes não tiveram check-in a tempo.
 // Nota operacional: requer o scheduler do Laravel a correr no servidor
 // (`* * * * * php artisan schedule:run` no crontab).
-Schedule::command('reservas:cancelar-expiradas')->everyFiveMinutes();
+Schedule::command('reservas:cancelar-expiradas')->everyMinute();
