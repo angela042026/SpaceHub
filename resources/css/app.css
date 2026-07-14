@@ -28,6 +28,7 @@
 
         --color-surface: #f5f7fa;
         --color-card: #ffffff;
+        --color-card-to: #f8fafc;
         --color-border: #e2e8f0;
         --color-text-secondary: #475569;
 
@@ -40,10 +41,15 @@
     }
 
     .dark {
-        --color-surface: #0b1220;
-        --color-card: #101a2e;
-        --color-border: #1e293b;
-        --color-text-secondary: #94a3b8;
+        --color-surface: #080d17;
+        --color-card: #18213b;
+        --color-card-to: #111a30;
+        --color-border: #2a3752;
+        --color-text-secondary: #9aa8c0;
+
+        --shadow-card: 0 2px 8px rgb(0 0 0 / 0.35);
+        --shadow-card-hover: 0 10px 25px -5px rgb(0 0 0 / 0.45),
+            0 8px 10px -6px rgb(0 0 0 / 0.3);
     }
 
     body {
@@ -63,7 +69,8 @@
 
 @layer components {
     .dashboard-card {
-        @apply rounded-card border-none bg-card shadow-card dark:border dark:border-slate-800;
+        @apply rounded-card border-none shadow-card dark:border dark:border-slate-800;
+        background-image: linear-gradient(160deg, var(--color-card) 0%, var(--color-card-to) 100%);
     }
 
     .stat-card {

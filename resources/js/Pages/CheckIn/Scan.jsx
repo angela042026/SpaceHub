@@ -38,7 +38,7 @@ const STATUS_INFO = {
 
 export default function Scan({ secretaria, reserva, status }) {
     const [processing, setProcessing] = useState(false);
-    const { errors, flash } = usePage().props;
+    const { errors } = usePage().props;
     const info = STATUS_INFO[status] ?? STATUS_INFO.sem_reserva;
 
     function confirmar() {
@@ -86,12 +86,6 @@ export default function Scan({ secretaria, reserva, status }) {
                         {errors?.reserva && (
                             <p className="mt-3 text-sm font-medium text-red-600">
                                 {errors.reserva}
-                            </p>
-                        )}
-
-                        {flash?.success && (
-                            <p className="mt-3 text-sm font-medium text-emerald-600">
-                                {flash.success}
                             </p>
                         )}
 

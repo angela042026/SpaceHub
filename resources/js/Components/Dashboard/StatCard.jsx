@@ -38,22 +38,28 @@ export default function StatCard({
     }
 
     return (
-        <div className="group min-h-[145px] rounded-3xl border border-slate-200/70 bg-white px-6 py-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-teal-400/30 hover:shadow-2xl dark:border-slate-800 dark:bg-card">
+        <div
+            className="group min-h-[145px] rounded-3xl border border-slate-200/70 px-6 py-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-teal-400/30 hover:shadow-2xl dark:border-slate-800"
+            style={{
+                backgroundImage:
+                    'linear-gradient(160deg, var(--color-card) 0%, var(--color-card-to) 100%)',
+            }}
+        >
             <div className="flex h-full flex-col justify-between">
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                        <p className="text-xs font-bold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-400">
                             {title}
                         </p>
 
-                        <h3 className="mt-2 text-4xl font-extrabold leading-none tracking-tight text-slate-900 dark:text-white">
+                        <h3 className="mt-2 text-[42px] font-extrabold leading-none tracking-tight text-slate-900 dark:text-white">
                             {value}
                         </h3>
                     </div>
 
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500 transition-all duration-300 group-hover:scale-105 group-hover:bg-teal-500 group-hover:text-white group-hover:shadow-lg">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500 transition-all duration-300 group-hover:scale-105 group-hover:bg-teal-500 group-hover:text-white group-hover:shadow-lg">
                         <Icon
-                            size={24}
+                            size={28}
                             strokeWidth={2}
                         />
                     </div>

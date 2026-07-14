@@ -21,11 +21,13 @@ export default function Admin({
     stats,
     estatisticas,
     pisos,
+    edificios,
     reservaHojeUtilizador,
     proximasReservas,
     periodo,
 }) {
     const [selectedFloor, setSelectedFloor] = useState(pisos?.[0]?.codigo ?? '');
+    const [selectedEdificio, setSelectedEdificio] = useState(edificios?.[0]?.id ?? '');
 
     return (
         <>
@@ -82,6 +84,9 @@ export default function Admin({
                     <OfficeMap
                         selectedFloor={selectedFloor}
                         setSelectedFloor={setSelectedFloor}
+                        selectedEdificio={selectedEdificio}
+                        setSelectedEdificio={setSelectedEdificio}
+                        edificios={edificios}
                         pisos={pisos}
                     />
                 </section>

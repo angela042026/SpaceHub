@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use Carbon\Carbon;
@@ -48,7 +49,7 @@ class CancelarReservasExpiradas extends Command
                 }
 
                 $data = $reserva->data->format('Y-m-d');
-                $limite = Carbon::parse("{$data} {$reserva->periodo->hora_inicio}")->addMinutes(30);
+                $limite = Carbon::parse("{$data} {$reserva->periodo->hora_inicio->format('H:i')}")->addMinutes(30);
 
                 return now()->greaterThan($limite);
             });
@@ -61,6 +62,8 @@ class CancelarReservasExpiradas extends Command
 
         Reserva::whereIn('id', $candidatas->pluck('id'))
             ->update(['estado_reserva_id' => $estadoExpirada->id]);
+
+        broadcast(new MapaAtualizado());
 
         $this->info("{$candidatas->count()} reserva(s) marcada(s) como expirada(s).");
 

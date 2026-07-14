@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Models\Secretaria;
@@ -97,6 +98,8 @@ class CheckInController extends Controller
             'estado_reserva_id' => optional($estadoConfirmada)->id ?? $reserva->estado_reserva_id,
         ]);
 
+        broadcast(new MapaAtualizado());
+
         return back()->with('success', 'Check-in confirmado com sucesso.');
     }
 
@@ -116,8 +119,8 @@ class CheckInController extends Controller
 
         $data = $reserva->data->format('Y-m-d');
 
-        $abreJanela = Carbon::parse("{$data} {$reserva->periodo->hora_inicio}")->subMinutes(30);
-        $fechaJanela = Carbon::parse("{$data} {$reserva->periodo->hora_fim}");
+        $abreJanela = Carbon::parse("{$data} {$reserva->periodo->hora_inicio->format('H:i')}")->subMinutes(30);
+        $fechaJanela = Carbon::parse("{$data} {$reserva->periodo->hora_fim->format('H:i')}");
 
         if (! now()->between($abreJanela, $fechaJanela)) {
             return 'fora_da_janela';
