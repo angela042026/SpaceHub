@@ -1,4 +1,7 @@
 import { router } from '@inertiajs/react';
+import { useState } from 'react';
+
+import { LoadingOverlay } from '@/Components/Loading';
 
 import {
     Armchair,
@@ -7,6 +10,7 @@ import {
     CalendarDays,
     ChevronDown,
     Crown,
+    MapPinned,
     Medal,
     TrendingDown,
     TrendingUp,
@@ -344,6 +348,8 @@ export default function StatisticsPanel({
     estatisticas,
     periodo = 'geral',
 }) {
+    const [carregando, setCarregando] = useState(false);
+
     function mudarPeriodo(event) {
         router.get(
             route('dashboard'),
@@ -354,6 +360,8 @@ export default function StatisticsPanel({
                 preserveState: true,
                 preserveScroll: true,
                 only: ['estatisticas', 'periodo'],
+                onStart: () => setCarregando(true),
+                onFinish: () => setCarregando(false),
             },
         );
     }
@@ -388,8 +396,16 @@ export default function StatisticsPanel({
     const totalPiso =
         Number(pisoMaisUtilizado?.total ?? 0);
 
+    const setorMaisUtilizado =
+        estatisticas?.setorMaisUtilizado;
+
+    const totalSetor =
+        Number(setorMaisUtilizado?.total ?? 0);
+
     return (
-        <section className="dashboard-card overflow-hidden">
+        <section className="dashboard-card relative overflow-hidden">
+            <LoadingOverlay show={carregando} label="A atualizar estatísticas..." />
+
             {/* Cabeçalho */}
             <div className="flex flex-col gap-5 border-b border-slate-100 px-6 py-5 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-center gap-4">
@@ -443,46 +459,92 @@ export default function StatisticsPanel({
             </div>
 
             <div className="space-y-6 p-6">
-                {/* Piso em destaque */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-900 via-navy-900 to-navy-800 p-6 text-white shadow-xl">
-                    <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-teal-500/15 blur-2xl" />
+                {/* Piso e setor em destaque */}
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy-900 via-navy-900 to-navy-800 p-6 text-white shadow-xl">
+                        <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-teal-500/15 blur-2xl" />
 
-                    <div className="absolute -bottom-20 left-1/3 h-44 w-44 rounded-full bg-cyan-400/10 blur-3xl" />
+                        <div className="absolute -bottom-20 left-1/3 h-44 w-44 rounded-full bg-cyan-400/10 blur-3xl" />
 
-                    <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                        <div className="flex items-start gap-4">
-                            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-teal-300 ring-1 ring-white/10 backdrop-blur-sm">
-                                <Trophy size={27} strokeWidth={1.8} />
+                        <div className="relative z-10 flex flex-col gap-5">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-teal-300 ring-1 ring-white/10 backdrop-blur-sm">
+                                    <Trophy size={27} strokeWidth={1.8} />
+                                </div>
+
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">
+                                        Piso em destaque
+                                    </p>
+
+                                    <h3 className="mt-2 text-3xl font-extrabold tracking-tight">
+                                        {pisoMaisUtilizado?.nome ?? 'Sem dados'}
+                                    </h3>
+
+                                    <p className="mt-2 text-sm text-slate-300">
+                                        Piso com maior número de reservas no período selecionado.
+                                    </p>
+                                </div>
                             </div>
 
-                            <div>
-                                <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">
-                                    Piso em destaque
-                                </p>
+                            <div className="flex min-w-[190px] items-center gap-4 rounded-2xl bg-white/10 px-5 py-4 ring-1 ring-white/10 backdrop-blur-md">
+                                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-500 text-white shadow-lg shadow-teal-500/20">
+                                    <TrendingUp size={21} strokeWidth={2} />
+                                </div>
 
-                                <h3 className="mt-2 text-3xl font-extrabold tracking-tight">
-                                    {pisoMaisUtilizado?.nome ?? 'Sem dados'}
-                                </h3>
+                                <div>
+                                    <p className="text-xs text-slate-300">
+                                        Total de reservas
+                                    </p>
 
-                                <p className="mt-2 text-sm text-slate-300">
-                                    Piso com maior número de reservas no período selecionado.
-                                </p>
+                                    <p className="mt-0.5 text-2xl font-extrabold">
+                                        {totalPiso}
+                                    </p>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div className="flex min-w-[190px] items-center gap-4 rounded-2xl bg-white/10 px-5 py-4 ring-1 ring-white/10 backdrop-blur-md">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-500 text-white shadow-lg shadow-teal-500/20">
-                                <TrendingUp size={21} strokeWidth={2} />
+                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 p-6 text-white shadow-xl">
+                        <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-teal-500/15 blur-2xl" />
+
+                        <div className="absolute -bottom-20 left-1/3 h-44 w-44 rounded-full bg-cyan-400/10 blur-3xl" />
+
+                        <div className="relative z-10 flex flex-col gap-5">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-teal-300 ring-1 ring-white/10 backdrop-blur-sm">
+                                    <MapPinned size={27} strokeWidth={1.8} />
+                                </div>
+
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">
+                                        Setor em destaque
+                                    </p>
+
+                                    <h3 className="mt-2 text-3xl font-extrabold tracking-tight">
+                                        {setorMaisUtilizado?.nome ?? 'Sem dados'}
+                                    </h3>
+
+                                    <p className="mt-2 text-sm text-slate-300">
+                                        Setor com maior número de reservas no período selecionado.
+                                    </p>
+                                </div>
                             </div>
 
-                            <div>
-                                <p className="text-xs text-slate-300">
-                                    Total de reservas
-                                </p>
+                            <div className="flex min-w-[190px] items-center gap-4 rounded-2xl bg-white/10 px-5 py-4 ring-1 ring-white/10 backdrop-blur-md">
+                                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-500 text-white shadow-lg shadow-teal-500/20">
+                                    <TrendingUp size={21} strokeWidth={2} />
+                                </div>
 
-                                <p className="mt-0.5 text-2xl font-extrabold">
-                                    {totalPiso}
-                                </p>
+                                <div>
+                                    <p className="text-xs text-slate-300">
+                                        Total de reservas
+                                    </p>
+
+                                    <p className="mt-0.5 text-2xl font-extrabold">
+                                        {totalSetor}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -2,12 +2,14 @@ import { useState } from 'react';
 
 import Sidebar from '@/Components/Dashboard/Sidebar';
 import DashboardHeader from '@/Components/Dashboard/DashboardHeader';
+import Footer from '@/Components/Footer';
+import Toast from '@/Components/Toast';
 
 export default function DashboardLayout({ children, header = true }) {
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
     return (
-        <div className="min-h-screen bg-[#F7FAFC]">
+        <div className="min-h-screen bg-surface">
             <Sidebar open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
             <main className="min-h-screen lg:pl-72">
@@ -19,8 +21,12 @@ export default function DashboardLayout({ children, header = true }) {
                     <div className="space-y-6">
                         {children}
                     </div>
+
+                    <Footer />
                 </div>
             </main>
+
+            <Toast />
         </div>
     );
 }

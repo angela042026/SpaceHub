@@ -125,11 +125,22 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                         <SidebarItem
                             icon={Map}
                             label="Mapa do Escritório"
+                            href={route('mapa.index')}
+                            active={route().current('mapa.index')}
+                            onNavigate={onClose}
                         />
 
                         <SidebarItem
                             icon={History}
                             label="Histórico"
+                        />
+
+                        <SidebarItem
+                            icon={Settings}
+                            label="Definições"
+                            href={route('profile.edit')}
+                            active={route().current('profile.edit')}
+                            onNavigate={onClose}
                         />
                     </nav>
 
@@ -184,11 +195,6 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                                 <SidebarItem
                                     icon={FileText}
                                     label="Relatórios"
-                                />
-
-                                <SidebarItem
-                                    icon={Settings}
-                                    label="Definições"
                                 />
                             </nav>
                         </>

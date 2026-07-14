@@ -169,7 +169,7 @@ export default function MapaEditor({ pisos }) {
                                 .map((setor) => (
                                     <div
                                         key={setor.id}
-                                        className={`pointer-events-none absolute flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[11px] font-bold text-white shadow-lg ring-4 transition ${
+                                        className={`pointer-events-none absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[9px] font-bold text-white shadow-lg ring-2 transition ${
                                             setorAtivo?.id === setor.id
                                                 ? 'scale-125 bg-teal-500 ring-teal-200'
                                                 : guardadoId === setor.id

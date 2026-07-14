@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\MapaAtualizado;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DisponibilidadeReservaRequest;
 use App\Http\Requests\StoreReservaRequest;
@@ -63,6 +64,8 @@ class ReservaController extends Controller
 
         $this->carregarRelacoes($reserva);
 
+        broadcast(new MapaAtualizado());
+
         return new ReservaResource($reserva);
     }
 
@@ -90,6 +93,8 @@ class ReservaController extends Controller
 
         $this->carregarRelacoes($reserva);
 
+        broadcast(new MapaAtualizado());
+
         return new ReservaResource($reserva);
     }
 
@@ -109,6 +114,8 @@ class ReservaController extends Controller
         ]);
 
         $this->carregarRelacoes($reserva);
+
+        broadcast(new MapaAtualizado());
 
         return new ReservaResource($reserva);
     }

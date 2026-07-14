@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
+
+import { LoadingBadge } from '@/Components/Loading';
 
 import {
     Armchair,
@@ -46,20 +49,54 @@ export default function OfficeMap({
     pisos,
     selectedFloor,
     setSelectedFloor,
+    edificios,
+    selectedEdificio,
+    setSelectedEdificio,
+    expandido = false,
 }) {
     const [selectedSector, setSelectedSector] = useState(null);
+    const larguraClass = expandido ? 'w-full' : 'mx-auto w-full max-w-5xl';
+    const [atualizando, setAtualizando] = useState(false);
+
+    const pisosDoEdificio = (pisos ?? []).filter(
+        (piso) => !selectedEdificio || piso.edificio_id === selectedEdificio,
+    );
 
     const pisoAtual =
-        pisos?.find((piso) => piso.codigo === selectedFloor) ??
-        pisos?.[0];
+        pisosDoEdificio.find((piso) => piso.codigo === selectedFloor) ??
+        pisosDoEdificio[0];
 
     useEffect(() => {
         setSelectedSector(null);
     }, [selectedFloor]);
 
+    useEffect(() => {
+        if (pisoAtual && pisoAtual.codigo !== selectedFloor) {
+            setSelectedFloor?.(pisoAtual.codigo);
+        }
+    }, [selectedEdificio, pisoAtual]);
+
+    useEffect(() => {
+        if (!window.Echo) {
+            return;
+        }
+
+        const canal = window.Echo.channel('office-map');
+
+        canal.listen('MapaAtualizado', () => {
+            setAtualizando(true);
+            router.reload({
+                only: ['pisos'],
+                onFinish: () => setAtualizando(false),
+            });
+        });
+
+        return () => window.Echo.leaveChannel('office-map');
+    }, []);
+
     if (!pisoAtual) {
         return (
-            <section className="dashboard-card mx-auto w-full max-w-5xl p-5">
+            <section className={`dashboard-card p-5 ${larguraClass}`}>
                 <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500">
                         <MapPinned size={21} strokeWidth={1.9} />
@@ -105,7 +142,7 @@ export default function OfficeMap({
     }
 
     return (
-        <section className="dashboard-card mx-auto w-full max-w-5xl overflow-hidden">
+        <section className={`dashboard-card overflow-hidden ${larguraClass}`}>
             {/* Cabeçalho compacto */}
             <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
@@ -114,14 +151,18 @@ export default function OfficeMap({
                     </div>
 
                     <div>
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                            Mapa do Escritório
-                        </h2>
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                                Mapa do Escritório
+                            </h2>
+
+                            <LoadingBadge show={atualizando} label="A atualizar" />
+                        </div>
 
                         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-500 dark:text-slate-400">
                             <span className="flex items-center gap-1">
                                 <Building2 size={13} strokeWidth={1.9} />
-                                SpaceHub
+                                {pisoAtual.edificio_nome ?? 'SpaceHub'}
                             </span>
 
                             <span className="text-slate-300 dark:text-slate-700">
@@ -136,37 +177,80 @@ export default function OfficeMap({
                     </div>
                 </div>
 
-                <div className="relative w-full sm:w-[200px]">
-                    <Layers3
-                        size={16}
-                        strokeWidth={1.9}
-                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-teal-500"
-                    />
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                    {edificios?.length > 0 && (
+                        <div className="relative w-full sm:w-[200px]">
+                            <Building2
+                                size={16}
+                                strokeWidth={1.9}
+                                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-teal-500"
+                            />
 
-                    <select
-                        value={selectedFloor}
-                        onChange={(event) =>
-                            setSelectedFloor(event.target.value)
-                        }
-                        aria-label="Selecionar piso"
-                        className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-                    >
-                        {pisos?.map((piso) => (
-                            <option
-                                key={piso.id}
-                                value={piso.codigo}
+                            <select
+                                value={selectedEdificio}
+                                onChange={(event) =>
+                                    setSelectedEdificio?.(Number(event.target.value))
+                                }
+                                aria-label="Selecionar edifício"
+                                className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                             >
-                                {piso.nome}
-                            </option>
-                        ))}
-                    </select>
+                                {edificios.map((edificio) => (
+                                    <option key={edificio.id} value={edificio.id}>
+                                        {edificio.nome}
+                                    </option>
+                                ))}
+                            </select>
 
-                    <ChevronDown
-                        size={16}
-                        strokeWidth={1.9}
-                        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
+                            <ChevronDown
+                                size={16}
+                                strokeWidth={1.9}
+                                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                            />
+                        </div>
+                    )}
+
+                    <div className="relative w-full sm:w-[200px]">
+                        <Layers3
+                            size={16}
+                            strokeWidth={1.9}
+                            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-teal-500"
+                        />
+
+                        <select
+                            value={selectedFloor}
+                            onChange={(event) =>
+                                setSelectedFloor(event.target.value)
+                            }
+                            aria-label="Selecionar piso"
+                            className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                        >
+                            {pisosDoEdificio.map((piso) => (
+                                <option
+                                    key={piso.id}
+                                    value={piso.codigo}
+                                >
+                                    {piso.nome}
+                                </option>
+                            ))}
+                        </select>
+
+                        <ChevronDown
+                            size={16}
+                            strokeWidth={1.9}
+                            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        />
+                    </div>
                 </div>
+            </div>
+
+            {/* Legenda fixa */}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 border-b border-slate-100 px-4 py-2.5 text-xs dark:border-slate-800">
+                {Object.entries(ESTADOS).map(([status, estado]) => (
+                    <span key={status} className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                        <span className={`h-2.5 w-2.5 rounded-full ${estado.marker}`} />
+                        {estado.label}
+                    </span>
+                ))}
             </div>
 
             {/* Resumo compacto */}

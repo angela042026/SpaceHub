@@ -5,6 +5,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
+use App\Http\Controllers\MapaController;
 use App\Http\Controllers\PedidoSuporteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservaController;
@@ -60,6 +61,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/secretarias/{secretaria}/qrcode', [SecretariaQrCodeController::class, 'show'])
         ->name('secretarias.qrcode');
+
+    // ==========================
+    // Mapa do Escritório
+    // ==========================
+    Route::get('/mapa', [MapaController::class, 'index'])
+        ->name('mapa.index');
 
     // ==========================
     // Mapa dos Setores
