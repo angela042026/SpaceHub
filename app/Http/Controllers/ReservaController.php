@@ -81,7 +81,7 @@ class ReservaController extends Controller
         // apresentar apenas as secretárias disponíveis
         if ($request->filled('data') && $request->filled('periodo_id')) {
 
-            $secretariasReservadas = Reserva::where('data', $request->data)
+            $secretariasReservadas = Reserva::whereDate('data', $request->data)
                 ->where('periodo_id', $request->periodo_id)
                 ->whereNull('cancelada_at')
                 ->pluck('secretaria_id');
@@ -118,7 +118,7 @@ class ReservaController extends Controller
 
         // Verifica se a secretária já está reservada
         $reservaExistente = Reserva::where('secretaria_id', $request->secretaria_id)
-            ->where('data', $request->data)
+            ->whereDate('data', $request->data)
             ->where('periodo_id', $request->periodo_id)
             ->whereNull('cancelada_at')
             ->exists();
@@ -134,7 +134,7 @@ class ReservaController extends Controller
         // Verifica se o utilizador já possui uma reserva
         // para a mesma data e período
         $reservaUtilizador = Reserva::where('user_id', Auth::id())
-            ->where('data', $request->data)
+            ->whereDate('data', $request->data)
             ->where('periodo_id', $request->periodo_id)
             ->whereNull('cancelada_at')
             ->exists();
@@ -197,37 +197,177 @@ class ReservaController extends Controller
     }
 
     /**
-     * Histórico de reservas.
+     * Mostrar o formulário de edição de uma reserva.
      */
-    public function history()
+    public function edit(Reserva $reserva)
     {
-        //
+        if ($reserva->user_id !== Auth::id()) {
+            abort(403, 'Esta reserva não te pertence.');
+        }
+
+        if ($reserva->cancelada_at !== null) {
+            return redirect()
+                ->route('reservas.index')
+                ->with('error', 'Não é possível alterar uma reserva cancelada.');
+        }
+
+        $periodos = Periodo::where('ativo', true)
+            ->orderBy('hora_inicio')
+            ->get();
+
+        $secretarias = Secretaria::where('reservavel', true)
+            ->where('ativo', true)
+            ->orderBy('codigo')
+            ->get();
+
+        return Inertia::render('Reservas/Edit', [
+            'reserva' => $reserva->only(['id', 'data', 'periodo_id', 'secretaria_id', 'observacoes']),
+            'periodos' => $periodos,
+            'secretarias' => $secretarias,
+        ]);
+    }
+
+    /**
+     * Atualizar uma reserva existente.
+     */
+    public function update(Request $request, Reserva $reserva)
+    {
+        if ($reserva->user_id !== Auth::id()) {
+            abort(403, 'Esta reserva não te pertence.');
+        }
+
+        if ($reserva->cancelada_at !== null) {
+            return redirect()
+                ->route('reservas.index')
+                ->with('error', 'Não é possível alterar uma reserva cancelada.');
+        }
+
+        $request->validate([
+            'data' => ['required', 'date'],
+            'periodo_id' => ['required', 'exists:periodos,id'],
+            'secretaria_id' => ['required', 'exists:secretarias,id'],
+            'observacoes' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        // Verifica se outra reserva já ocupa a secretária na data e período
+        $reservaExistente = Reserva::where('secretaria_id', $request->secretaria_id)
+            ->whereDate('data', $request->data)
+            ->where('periodo_id', $request->periodo_id)
+            ->whereNull('cancelada_at')
+            ->where('id', '!=', $reserva->id)
+            ->exists();
+
+        if ($reservaExistente) {
+            return back()
+                ->withErrors([
+                    'secretaria_id' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
+                ])
+                ->withInput();
+        }
+
+        // Verifica se o utilizador já tem outra reserva na mesma data e período
+        $reservaUtilizador = Reserva::where('user_id', Auth::id())
+            ->whereDate('data', $request->data)
+            ->where('periodo_id', $request->periodo_id)
+            ->whereNull('cancelada_at')
+            ->where('id', '!=', $reserva->id)
+            ->exists();
+
+        if ($reservaUtilizador) {
+            return back()
+                ->withErrors([
+                    'data' => 'Já possui uma reserva para esta data e período.',
+                ])
+                ->withInput();
+        }
+
+        $reserva->update([
+            'data' => $request->data,
+            'periodo_id' => $request->periodo_id,
+            'secretaria_id' => $request->secretaria_id,
+            'observacoes' => $request->observacoes,
+        ]);
+
+        return redirect()
+            ->route('reservas.index')
+            ->with('success', 'Reserva atualizada com sucesso.');
+    }
+
+    /**
+     * Histórico de reservas passadas do utilizador autenticado, paginado.
+     */
+    public function history(Request $request)
+    {
+        $reservas = Reserva::where('user_id', Auth::id())
+            ->whereDate('data', '<', now()->toDateString())
+            ->with([
+                'secretaria.setor',
+                'periodo',
+                'estadoReserva',
+            ])
+            ->orderBy('data', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return Inertia::render('Reservas/History', [
+            'reservas' => $reservas,
+        ]);
     }
 
     /**
      * Consultar disponibilidade das secretárias.
+     *
+     * Usado tanto pela consulta em direto do formulário de criação (JSON)
+     * como pela página dedicada de consulta de disponibilidade (Inertia).
      */
     public function availability(Request $request)
     {
-        // Validar os dados recebidos
-        $request->validate([
-            'data' => ['required', 'date'],
-            'periodo_id' => ['required', 'exists:periodos,id'],
-        ]);
+        if ($request->wantsJson()) {
+            $request->validate([
+                'data' => ['required', 'date'],
+                'periodo_id' => ['required', 'exists:periodos,id'],
+            ]);
 
-        // Obtém as secretárias já reservadas
-        $secretariasReservadas = Reserva::where('data', $request->data)
-            ->where('periodo_id', $request->periodo_id)
+            return response()->json($this->secretariasDisponiveis($request->data, $request->periodo_id));
+        }
+
+        $periodos = Periodo::where('ativo', true)
+            ->orderBy('hora_inicio')
+            ->get();
+
+        $secretariasDisponiveis = null;
+
+        if ($request->filled('data') && $request->filled('periodo_id')) {
+            $request->validate([
+                'data' => ['required', 'date'],
+                'periodo_id' => ['required', 'exists:periodos,id'],
+            ]);
+
+            $secretariasDisponiveis = $this->secretariasDisponiveis($request->data, $request->periodo_id)
+                ->load('setor.piso.edificio');
+        }
+
+        return Inertia::render('Reservas/Availability', [
+            'periodos' => $periodos,
+            'secretariasDisponiveis' => $secretariasDisponiveis,
+            'filters' => $request->only(['data', 'periodo_id']),
+        ]);
+    }
+
+    /**
+     * Secretárias reserváveis e ativas sem reserva ativa numa data/período.
+     */
+    private function secretariasDisponiveis(string $data, int|string $periodoId)
+    {
+        $secretariasReservadas = Reserva::whereDate('data', $data)
+            ->where('periodo_id', $periodoId)
             ->whereNull('cancelada_at')
             ->pluck('secretaria_id');
 
-        // Obtém apenas as secretárias disponíveis
-        $secretarias = Secretaria::where('reservavel', true)
+        return Secretaria::where('reservavel', true)
             ->where('ativo', true)
             ->whereNotIn('id', $secretariasReservadas)
             ->orderBy('codigo')
             ->get();
-
-        return response()->json($secretarias);
     }
 }

@@ -253,12 +253,21 @@ export default function Index({ reservas, setores, filters }) {
 
                                                     {reserva.estadoReserva.codigo === 'pendente' ? (
 
-                                                        <button
-                                                            onClick={() => cancelarReserva(reserva.id)}
-                                                            className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
-                                                        >
-                                                            Cancelar
-                                                        </button>
+                                                        <div className="flex gap-2">
+                                                            <Link
+                                                                href={route('reservas.edit', reserva.id)}
+                                                                className="rounded bg-gray-600 px-3 py-1 text-sm text-white hover:bg-gray-700"
+                                                            >
+                                                                Editar
+                                                            </Link>
+
+                                                            <button
+                                                                onClick={() => cancelarReserva(reserva.id)}
+                                                                className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
+                                                            >
+                                                                Cancelar
+                                                            </button>
+                                                        </div>
 
                                                     ) : (
 

@@ -124,7 +124,7 @@ class ReservaController extends Controller
     {
         $dados = $request->validated();
 
-        $secretariasReservadas = Reserva::where('data', $dados['data'])
+        $secretariasReservadas = Reserva::whereDate('data', $dados['data'])
             ->where('periodo_id', $dados['periodo_id'])
             ->whereNull('cancelada_at')
             ->pluck('secretaria_id');
@@ -155,7 +155,7 @@ class ReservaController extends Controller
         ?int $ignorarReservaId = null
     ): bool {
         $query = Reserva::where('secretaria_id', $secretariaId)
-            ->where('data', $data)
+            ->whereDate('data', $data)
             ->where('periodo_id', $periodoId)
             ->whereNull('cancelada_at');
 
@@ -173,7 +173,7 @@ class ReservaController extends Controller
         ?int $ignorarReservaId = null
     ): bool {
         $query = Reserva::where('user_id', $userId)
-            ->where('data', $data)
+            ->whereDate('data', $data)
             ->where('periodo_id', $periodoId)
             ->whereNull('cancelada_at');
 

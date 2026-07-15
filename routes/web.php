@@ -95,13 +95,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/reservas/disponibilidade', [ReservaController::class, 'availability'])
         ->name('reservas.availability');
 
-    // Route::delete('/reservas/{id}', [ReservaController::class, 'destroy'])
-    //     ->name('reservas.destroy');
-    // Não existe eliminação física de reservas.
-    // O cancelamento é efetuado através da API através do método cancelar().
-
-    Route::get('/reservas/{reserva}', [ReservaController::class, 'show'])
-        ->name('reservas.show');
+    // Cancelamento da reserva (soft: marca como cancelada, não elimina o registo).
+    Route::delete('/reservas/{id}', [ReservaController::class, 'destroy'])
+        ->name('reservas.destroy');
 
     Route::get('/reservas/{reserva}/editar', [ReservaController::class, 'edit'])
         ->name('reservas.edit');

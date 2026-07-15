@@ -58,5 +58,5 @@ Route::middleware(['auth:sanctum', 'role:Administrador'])->group(function () {
 
     Route::get('/reservas/disponibilidade', [ReservaController::class, 'disponibilidade']);
     Route::patch('/reservas/{reserva}/cancelar', [ReservaController::class, 'cancelar']);
-    Route::apiResource('reservas', ReservaController::class)->except(['destroy']);
+    Route::apiResource('reservas', ReservaController::class)->except(['destroy'])->names('api.reservas');
 });
