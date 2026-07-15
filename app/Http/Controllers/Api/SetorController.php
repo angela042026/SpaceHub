@@ -7,52 +7,63 @@ use App\Http\Requests\StoreSetorRequest;
 use App\Http\Requests\UpdateSetorRequest;
 use App\Http\Resources\SetorResource;
 use App\Models\Setor;
+use Illuminate\Support\Facades\Gate;
 
 class SetorController extends Controller
 {
     public function index()
-    {
-        $setores = Setor::with('piso')
-            ->orderBy('nome')
-            ->get();
+{
+    Gate::authorize('viewAny', Setor::class);
 
-        return SetorResource::collection($setores);
-    }
+    $setores = Setor::with('piso')
+        ->orderBy('nome')
+        ->get();
 
-    public function show(Setor $setor)
-    {
-        $setor->load('piso');
+    return SetorResource::collection($setores);
+}
 
-        return new SetorResource($setor);
-    }
+public function show(Setor $setor)
+{
+    Gate::authorize('view', $setor);
 
-    public function store(StoreSetorRequest $request)
-    {
-        $setor = Setor::create($request->validated());
+    $setor->load('piso');
 
-        $setor->load('piso');
+    return new SetorResource($setor);
+}
 
-        return (new SetorResource($setor))
-            ->response()
-            ->setStatusCode(201);
-    }
+public function store(StoreSetorRequest $request)
+{
+    Gate::authorize('create', Setor::class);
 
-    public function update(UpdateSetorRequest $request, Setor $setor)
-    {
-        $setor->update($request->validated());
+    $setor = Setor::create($request->validated());
 
-        $setor->load('piso');
+    $setor->load('piso');
 
-        return new SetorResource($setor);
-    }
+    return (new SetorResource($setor))
+        ->response()
+        ->setStatusCode(201);
+}
 
-    public function toggleAtivo(Setor $setor)
-    {
-        $setor->ativo = !$setor->ativo;
-        $setor->save();
+public function update(UpdateSetorRequest $request, Setor $setor)
+{
+    Gate::authorize('update', $setor);
 
-        $setor->load('piso');
+    $setor->update($request->validated());
 
-        return new SetorResource($setor);
-    }
+    $setor->load('piso');
+
+    return new SetorResource($setor);
+}
+
+public function toggleAtivo(Setor $setor)
+{
+    Gate::authorize('toggleAtivo', $setor);
+
+    $setor->ativo = ! $setor->ativo;
+    $setor->save();
+
+    $setor->load('piso');
+
+    return new SetorResource($setor);
+}
 }

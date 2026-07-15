@@ -12,49 +12,92 @@ use App\Http\Resources\SecretariaResource;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Models\Secretaria;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 
 class ReservaController extends Controller
 {
-    public function index()
+    /**
+     * Lista reservas.
+     *
+     * O Administrador consulta todas.
+     * Os restantes utilizadores consultam apenas as próprias.
+     */
+    public function index(Request $request): AnonymousResourceCollection
     {
-        $reservas = Reserva::with([
+        Gate::authorize('viewAny', Reserva::class);
+
+        $query = Reserva::with([
             'user',
             'secretaria.setor.piso.edificio',
             'periodo',
             'estadoReserva',
-        ])->latest()->get();
+        ]);
+
+        if (! $this->isAdministrador($request)) {
+            $query->where('user_id', $request->user()->id);
+        }
+
+        $reservas = $query
+            ->latest()
+            ->get();
 
         return ReservaResource::collection($reservas);
     }
 
-    public function show(Reserva $reserva)
+    /**
+     * Apresenta uma reserva.
+     */
+    public function show(Reserva $reserva): ReservaResource
     {
+        Gate::authorize('view', $reserva);
+
         $this->carregarRelacoes($reserva);
 
         return new ReservaResource($reserva);
     }
 
-    public function store(StoreReservaRequest $request)
+    /**
+     * Cria uma reserva para o utilizador autenticado.
+     */
+    public function store(StoreReservaRequest $request): ReservaResource|JsonResponse
     {
-        $dados = $request->validated();
+        Gate::authorize('create', Reserva::class);
 
-        if ($this->secretariaJaReservada($dados['secretaria_id'], $dados['data'], $dados['periodo_id'])) {
+        $dados = $request->validated();
+        $userId = $request->user()->id;
+
+        if (
+            $this->secretariaJaReservada(
+                $dados['secretaria_id'],
+                $dados['data'],
+                $dados['periodo_id']
+            )
+        ) {
             return response()->json([
                 'message' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
             ], 422);
         }
 
-        if ($this->utilizadorJaTemReserva(Auth::id(), $dados['data'], $dados['periodo_id'])) {
+        if (
+            $this->utilizadorJaTemReserva(
+                $userId,
+                $dados['data'],
+                $dados['periodo_id']
+            )
+        ) {
             return response()->json([
                 'message' => 'Já possui uma reserva para esta data e período.',
             ], 422);
         }
 
-        $estadoPendente = EstadoReserva::where('codigo', 'pendente')->firstOrFail();
+        $estadoPendente = EstadoReserva::where('codigo', 'pendente')
+            ->firstOrFail();
 
         $reserva = Reserva::create([
-            'user_id' => Auth::id(),
+            'user_id' => $userId,
             'secretaria_id' => $dados['secretaria_id'],
             'periodo_id' => $dados['periodo_id'],
             'estado_reserva_id' => $estadoPendente->id,
@@ -69,21 +112,47 @@ class ReservaController extends Controller
         return new ReservaResource($reserva);
     }
 
-    public function update(UpdateReservaRequest $request, Reserva $reserva)
-    {
+    /**
+     * Atualiza uma reserva.
+     */
+    public function update(
+        UpdateReservaRequest $request,
+        Reserva $reserva
+    ): ReservaResource|JsonResponse {
+        Gate::authorize('update', $reserva);
+
         $dados = $request->validated();
 
-        $secretariaId = $dados['secretaria_id'] ?? $reserva->secretaria_id;
-        $data = $dados['data'] ?? $reserva->data->format('Y-m-d');
-        $periodoId = $dados['periodo_id'] ?? $reserva->periodo_id;
+        $secretariaId = $dados['secretaria_id']
+            ?? $reserva->secretaria_id;
 
-        if ($this->secretariaJaReservada($secretariaId, $data, $periodoId, $reserva->id)) {
+        $data = $dados['data']
+            ?? $reserva->data->format('Y-m-d');
+
+        $periodoId = $dados['periodo_id']
+            ?? $reserva->periodo_id;
+
+        if (
+            $this->secretariaJaReservada(
+                $secretariaId,
+                $data,
+                $periodoId,
+                $reserva->id
+            )
+        ) {
             return response()->json([
                 'message' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
             ], 422);
         }
 
-        if ($this->utilizadorJaTemReserva($reserva->user_id, $data, $periodoId, $reserva->id)) {
+        if (
+            $this->utilizadorJaTemReserva(
+                $reserva->user_id,
+                $data,
+                $periodoId,
+                $reserva->id
+            )
+        ) {
             return response()->json([
                 'message' => 'Este utilizador já possui uma reserva para esta data e período.',
             ], 422);
@@ -98,15 +167,21 @@ class ReservaController extends Controller
         return new ReservaResource($reserva);
     }
 
-    public function cancelar(Reserva $reserva)
+    /**
+     * Cancela uma reserva.
+     */
+    public function cancelar(Reserva $reserva): ReservaResource|JsonResponse
     {
+        Gate::authorize('cancelar', $reserva);
+
         if ($reserva->cancelada_at !== null) {
             return response()->json([
                 'message' => 'Esta reserva já se encontra cancelada.',
             ], 422);
         }
 
-        $estadoCancelada = EstadoReserva::where('codigo', 'cancelada')->firstOrFail();
+        $estadoCancelada = EstadoReserva::where('codigo', 'cancelada')
+            ->firstOrFail();
 
         $reserva->update([
             'estado_reserva_id' => $estadoCancelada->id,
@@ -120,8 +195,14 @@ class ReservaController extends Controller
         return new ReservaResource($reserva);
     }
 
-    public function disponibilidade(DisponibilidadeReservaRequest $request)
-    {
+    /**
+     * Lista secretárias disponíveis.
+     */
+    public function disponibilidade(
+        DisponibilidadeReservaRequest $request
+    ): AnonymousResourceCollection {
+        Gate::authorize('viewAny', Reserva::class);
+
         $dados = $request->validated();
 
         $secretariasReservadas = Reserva::where('data', $dados['data'])
@@ -182,5 +263,10 @@ class ReservaController extends Controller
         }
 
         return $query->exists();
+    }
+
+    private function isAdministrador(Request $request): bool
+    {
+        return $request->user()->role?->nome === 'Administrador';
     }
 }

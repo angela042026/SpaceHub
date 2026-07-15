@@ -6,16 +6,13 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class RoleMiddleware
+class EnsureUserIsActive
 {
     /**
      * Handle an incoming request.
      */
-    public function handle(
-        Request $request,
-        Closure $next,
-        string ...$roles
-    ): Response {
+    public function handle(Request $request, Closure $next): Response
+    {
         $user = $request->user();
 
         if (! $user) {
@@ -26,16 +23,7 @@ class RoleMiddleware
 
         if (! $user->ativo) {
             return response()->json([
-                'message' => 'Utilizador inativo.',
-            ], 403);
-        }
-
-        if (
-            ! $user->role ||
-            ! in_array($user->role->nome, $roles, true)
-        ) {
-            return response()->json([
-                'message' => 'Não tem permissão para aceder a este recurso.',
+                'message' => 'A conta encontra-se desativada.',
             ], 403);
         }
 

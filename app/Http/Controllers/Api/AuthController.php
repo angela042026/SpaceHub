@@ -37,7 +37,7 @@ class AuthController extends Controller
             'token' => $token,
         ], 201);
     }
-    public function login(Request $request)
+   public function login(Request $request)
 {
     $dados = $request->validate([
         'email' => ['required', 'email'],
@@ -46,10 +46,16 @@ class AuthController extends Controller
 
     $user = User::where('email', $dados['email'])->first();
 
-    if (!$user || !Hash::check($dados['password'], $user->password)) {
+    if (! $user || ! Hash::check($dados['password'], $user->password)) {
         return response()->json([
             'message' => 'Credenciais inválidas.',
         ], 401);
+    }
+
+    if (! $user->ativo) {
+        return response()->json([
+            'message' => 'A conta encontra-se desativada.',
+        ], 403);
     }
 
     $token = $user->createToken('api-token')->plainTextToken;

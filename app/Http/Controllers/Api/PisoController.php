@@ -7,52 +7,64 @@ use App\Http\Requests\StorePisoRequest;
 use App\Http\Requests\UpdatePisoRequest;
 use App\Http\Resources\PisoResource;
 use App\Models\Piso;
+use Illuminate\Support\Facades\Gate;
 
 class PisoController extends Controller
 {
+  
     public function index()
-    {
-        $pisos = Piso::with('edificio')
-            ->orderBy('numero')
-            ->get();
+{
+    Gate::authorize('viewAny', Piso::class);
 
-        return PisoResource::collection($pisos);
-    }
+    $pisos = Piso::with('edificio')
+        ->orderBy('numero')
+        ->get();
 
-    public function show(Piso $piso)
-    {
-        $piso->load('edificio');
+    return PisoResource::collection($pisos);
+}
 
-        return new PisoResource($piso);
-    }
+public function show(Piso $piso)
+{
+    Gate::authorize('view', $piso);
 
-    public function store(StorePisoRequest $request)
-    {
-        $piso = Piso::create($request->validated());
+    $piso->load('edificio');
 
-        $piso->load('edificio');
+    return new PisoResource($piso);
+}
 
-        return (new PisoResource($piso))
-            ->response()
-            ->setStatusCode(201);
-    }
+public function store(StorePisoRequest $request)
+{
+    Gate::authorize('create', Piso::class);
 
-    public function update(UpdatePisoRequest $request, Piso $piso)
-    {
-        $piso->update($request->validated());
+    $piso = Piso::create($request->validated());
 
-        $piso->load('edificio');
+    $piso->load('edificio');
 
-        return new PisoResource($piso);
-    }
+    return (new PisoResource($piso))
+        ->response()
+        ->setStatusCode(201);
+}
 
-    public function toggleAtivo(Piso $piso)
-    {
-        $piso->ativo = !$piso->ativo;
-        $piso->save();
+public function update(UpdatePisoRequest $request, Piso $piso)
+{
+    Gate::authorize('update', $piso);
 
-        $piso->load('edificio');
+    $piso->update($request->validated());
 
-        return new PisoResource($piso);
-    }
+    $piso->load('edificio');
+
+    return new PisoResource($piso);
+}
+
+public function toggleAtivo(Piso $piso)
+{
+    Gate::authorize('toggleAtivo', $piso);
+
+    $piso->ativo = ! $piso->ativo;
+    $piso->save();
+
+    $piso->load('edificio');
+
+    return new PisoResource($piso);
+}
 }

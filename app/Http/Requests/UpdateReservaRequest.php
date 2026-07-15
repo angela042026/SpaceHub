@@ -23,12 +23,14 @@ class UpdateReservaRequest extends FormRequest
             'periodo_id' => [
                 'sometimes',
                 'required',
+                'integer',
                 'exists:periodos,id',
             ],
 
             'secretaria_id' => [
                 'sometimes',
                 'required',
+                'integer',
                 'exists:secretarias,id',
             ],
 

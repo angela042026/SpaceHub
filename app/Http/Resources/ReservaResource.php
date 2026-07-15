@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,5 +22,12 @@ class ReservaResource extends JsonResource
             'observacoes' => $this->observacoes,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
         ];
+    }
+
+    public function toResponse($request): JsonResponse
+    {
+        return response()->json([
+            'data' => $this->resolve($request),
+        ]);
     }
 }

@@ -3,9 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 
 class Reserva extends Model
+
+ 
 {
+    
     protected $fillable = [
         'user_id',
         'secretaria_id',
@@ -27,22 +32,22 @@ class Reserva extends Model
         'cancelada_at' => 'datetime',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function secretaria()
+    public function secretaria(): BelongsTo
     {
         return $this->belongsTo(Secretaria::class);
     }
 
-    public function periodo()
+    public function periodo(): BelongsTo
     {
         return $this->belongsTo(Periodo::class);
     }
 
-    public function estadoReserva()
+    public function estadoReserva(): BelongsTo
     {
         return $this->belongsTo(EstadoReserva::class);
     }

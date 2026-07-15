@@ -7,41 +7,56 @@ use App\Http\Requests\StoreEdificioRequest;
 use App\Http\Requests\UpdateEdificioRequest;
 use App\Http\Resources\EdificioResource;
 use App\Models\Edificio;
+use Illuminate\Support\Facades\Gate;
 
 class EdificioController extends Controller
 {
+   
     public function index()
-    {
-        $edificios = Edificio::orderBy('nome')->get();
+{
+    Gate::authorize('viewAny', Edificio::class);
 
-        return EdificioResource::collection($edificios);
-    }
+    $edificios = Edificio::orderBy('nome')->get();
 
-    public function show(Edificio $edificio)
-    {
-        return new EdificioResource($edificio);
-    }
+    return EdificioResource::collection($edificios);
+}
 
-    public function store(StoreEdificioRequest $request)
-    {
-        $edificio = Edificio::create($request->validated());
+public function show(Edificio $edificio)
+{
+    Gate::authorize('view', $edificio);
 
-        return new EdificioResource($edificio);
-    }
+    return new EdificioResource($edificio);
+}
 
-    public function update(UpdateEdificioRequest $request, Edificio $edificio)
-    {
-        $edificio->fill($request->validated());
-        $edificio->save();
+public function store(StoreEdificioRequest $request)
+{
+    Gate::authorize('create', Edificio::class);
 
-        return new EdificioResource($edificio);
-    }
+    $edificio = Edificio::create($request->validated());
 
-    public function toggleAtivo(Edificio $edificio)
-    {
-        $edificio->ativo = !$edificio->ativo;
-        $edificio->save();
+    return (new EdificioResource($edificio))
+        ->response()
+        ->setStatusCode(201);
+}
 
-        return new EdificioResource($edificio);
-    }
+public function update(
+    UpdateEdificioRequest $request,
+    Edificio $edificio
+) {
+    Gate::authorize('update', $edificio);
+
+    $edificio->update($request->validated());
+
+    return new EdificioResource($edificio);
+}
+
+public function toggleAtivo(Edificio $edificio)
+{
+    Gate::authorize('toggleAtivo', $edificio);
+
+    $edificio->ativo = ! $edificio->ativo;
+    $edificio->save();
+
+    return new EdificioResource($edificio);
+}
 }
