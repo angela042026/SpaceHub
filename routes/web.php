@@ -145,6 +145,6 @@ Route::get('/disparar-evento', function () {
 Route::post('/simular-chat', [ChatController::class, 'simularResposta']);
 
 // Página de testes do Chat
-Route::get('/teste-chat', function () {
-    return Inertia::render('TesteChat');
+Route::get('/chat', function () {
+    return Inertia::render('ChatBot');
 });

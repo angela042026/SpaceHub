@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 
-export default function TesteChat() {
-    const [status, setStatus] = useState('A ligar ao Laravel Echo...');
-    const [statusColor, setStatusColor] = useState('orange');
+export default function ChatBot() {
     const [mensagens, setMensagens] = useState([]);
     const [inputMensagem, setInputMensagem] = useState('');
 
@@ -20,16 +18,12 @@ export default function TesteChat() {
     }, [mensagens]);
 
     useEffect(() => {
+        // O Echo continua a ouvir em background silenciosamente, sem mostrar avisos técnicos no ecrã
         if (window.Echo) {
-            setStatus('✅ Ligado ao Reverb (Modo Sandbox)!');
-            setStatusColor('green');
             const canal = window.Echo.channel('chat');
             canal.listen('MensagemTeste', (dados) => {
                 setMensagens((prev) => [...prev, { user: dados.user, texto: dados.texto }]);
             });
-        } else {
-            setStatus('❌ Erro: Laravel Echo não configurado.');
-            setStatusColor('red');
         }
         return () => {
             if (window.Echo) window.Echo.leaveChannel('chat');
@@ -150,10 +144,9 @@ export default function TesteChat() {
 
     return (
         <div style={{ padding: '30px', fontFamily: 'sans-serif', maxWidth: '500px', margin: '0 auto' }}>
-            <h2>SpaceHub Chat Bot 🤖 (Sandbox)</h2>
-            <div style={{ color: statusColor, fontWeight: 'bold', marginBottom: '15px' }}>{status}</div>
+            <h2 style={{ color: '#333', marginBottom: '20px' }}>Assistente Virtual SpaceHub 🤖</h2>
 
-            <div style={{ border: '1px solid #ccc', borderRadius: '8px', height: '400px', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
+            <div style={{ border: '1px solid #ccc', borderRadius: '8px', height: '400px', display: 'flex', flexDirection: 'column', background: '#f9f9f9', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
                 <div style={{ flex: 1, padding: '15px', overflowY: 'auto' }}>
                     {mensagens.map((msg, index) => (
                         <div key={index} style={{ marginBottom: '12px', textAlign: msg.user === 'Utilizador' ? 'right' : 'left' }}>
