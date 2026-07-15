@@ -7,101 +7,108 @@ use App\Events\EnviarMensagem;
 
 class ChatController extends Controller
 {
-    /**
-     * Processa a mensagem do utilizador e gera uma resposta via WebSocket.
-     */
     public function simularResposta(Request $request)
     {
-        // Captura a mensagem que vem do useForm do React
-        $pergunta = $request->input('mensagem', '');
+        $pergunta = (string) $request->input('mensagem', '');
 
-        // Obtém o array com ['texto' => ..., 'opcoes' => ...]
+        if (trim($pergunta) === '') {
+            return back();
+        }
+
         $dadosResposta = $this->processarMensagem($pergunta);
 
-        // Dispara o WebSocket enviando os campos certos para o construtor do EnviarMensagem
         broadcast(new EnviarMensagem('Bot SpaceHub 🤖', $dadosResposta['texto'], $dadosResposta['opcoes']));
 
-        // Retorna um redirecionamento válido para o Inertia
         return back();
     }
 
-    /**
-     * Dicionário com substituição direta de acentos (Public para evitar restrições de proxy)
-     */
     public function processarMensagem(string $pergunta): array
     {
-        // Converte para minúsculas garantindo suporte a UTF-8
         $perguntaLimpa = mb_strtolower(trim($pergunta), 'UTF-8');
 
-        // Substituição manual direta e rápida dos acentos mais comuns em português
         $procurar   = ['á', 'à', 'ã', 'â', 'é', 'ê', 'í', 'ó', 'ô', 'õ', 'ú', 'ç'];
         $substituir = ['a', 'a', 'a', 'a', 'e', 'e', 'i', 'o', 'o', 'o', 'u', 'c'];
         $perguntaLimpa = str_replace($procurar, $substituir, $perguntaLimpa);
 
-        // Dicionário com chaves SEM acentos
         $dicionario = [
             'saudacao' => [
-                'chaves' => ['ola', 'oi', 'ajuda', 'bom dia', 'boa tarde'],
+                'chaves' => ['ola', 'oi', 'ajuda', 'bom dia', 'boa tarde', 'boa noite'],
                 'nome' => 'Saudação',
-                'resposta' => "Olá! Bem-vindo ao SpaceHub. Procuras um lugar para trabalhar ou queres gerir salas? 🚀"
+                'resposta' => "Olá! Bem-vindo ao SpaceHub. Como posso ajudar? 🚀"
             ],
             'precos' => [
-                'chaves' => ['preco', 'valores', 'plano', 'planos', 'pagar', 'valor'],
+                'chaves' => ['preco', 'precos', 'valores', 'plano', 'planos', 'pagar', 'valor', 'custo', 'custos'],
                 'nome' => 'Preços e Planos',
-                'resposta' => "Os nossos planos de Coworking começam em 49€/mês para secretarias partilhadas! 💼"
+                'resposta' => "Os nossos planos de Coworking começam em 49€/mês para secretárias partilhadas! 💼"
             ],
             'espaco' => [
-                'chaves' => ['espaco', 'local', 'morada', 'onde', 'instalacoes', 'comunidade'],
+                'chaves' => ['espaco', 'local', 'morada', 'onde', 'instalacoes', 'comunidade', 'cafe', 'internet', 'wifi'],
                 'nome' => 'O Nosso Espaço',
-                'resposta' => "Temos salas de reunião modernas, internet ultra-rápida e café grátis à discrição! ☕"
+                'resposta' => "Temos salas de reunião modernas, internet ultra-rápida e café grátis à descrição! ☕"
             ],
             'reservas' => [
-                'chaves' => ['reserva', 'reservar', 'sala', 'salas', 'secretaria', 'secretarias'],
+                'chaves' => ['reserva', 'reservar'],
                 'nome' => 'Reservas',
-                'resposta' => "Para reservar uma sala de reunião ou secretaria, basta acederes ao módulo correspondente no teu menu! 🗓️"
+                'resposta' => "Para reservar uma sala de reunião ou secretária, basta aceder ao módulo correspondente no seu menu! 🗓️"
             ]
         ];
 
-        // Detetar quais os temas presentes na frase limpa
         $temasDetetados = [];
+
         foreach ($dicionario as $idTema => $dados) {
             foreach ($dados['chaves'] as $chave) {
-                if (str_contains($perguntaLimpa, $chave)) {
-                    $temasDetetados[] = $idTema;
+                $padrao = '/\b' . preg_quote($chave, '/') . '\b/iu';
+
+                if (preg_match($padrao, $perguntaLimpa, $matches, PREG_OFFSET_CAPTURE)) {
+                    $posicao = $matches[0][1];
+                    $temasDetetados[] = [
+                        'id' => $idTema,
+                        'posicao' => $posicao,
+                        'triggerExata' => $chave
+                    ];
                     break;
                 }
             }
         }
 
-        // Construir a resposta com base nos temas encontrados
         if (empty($temasDetetados)) {
             return [
-                'texto' => "Desculpa, ainda sou um robô em treino no SpaceHub. Podes perguntar por 'olá', 'preço', 'espaço' ou 'reserva'!",
+                'texto' => "Desculpe, ainda sou um robô em treino no SpaceHub. A minha formação só me permite responder a perguntas sobre preços, espaços ou reservas.",
                 'opcoes' => []
             ];
         }
 
-        $primeiroTema = $temasDetetados[0];
-        $textoPrincipal = $dicionario[$primeiroTema]['resposta'];
+        usort($temasDetetados, function ($a, $b) {
+            return $a['posicao'] <=> $b['posicao'];
+        });
+
+        $primeiroTemaDados = $temasDetetados[0];
+        $idPrimeiroTema = $primeiroTemaDados['id'];
+
+        $textoPrincipal = $dicionario[$idPrimeiroTema]['resposta'];
         $opcoesSecundarias = [];
 
         if (count($temasDetetados) > 1) {
-            $outrosTemas = array_slice($temasDetetados, 1);
+            $outrosTemasDados = array_slice($temasDetetados, 1);
             $nomesOutrosTemas = [];
 
-            foreach ($outrosTemas as $temaSecundario) {
-                $nomesOutrosTemas[] = $dicionario[$temaSecundario]['nome'];
+            foreach ($outrosTemasDados as $temaSecundarioDados) {
+                $idSecundario = $temaSecundarioDados['id'];
+                $nomesOutrosTemas[] = $dicionario[$idSecundario]['nome'];
+
                 $opcoesSecundarias[] = [
-                    'label' => "Saber mais sobre " . $dicionario[$temaSecundario]['nome'],
-                    'id_tema' => $temaSecundario,
-                    'mensagem_simulada' => $dicionario[$temaSecundario]['chaves'][0]
+                    'label' => "Saber mais sobre " . $dicionario[$idSecundario]['nome'],
+                    'id_tema' => $idSecundario,
+                    'mensagem_simulada' => $temaSecundarioDados['triggerExata']
                 ];
             }
 
             $listaNomes = implode(' e ', $nomesOutrosTemas);
-            $textoPrincipal .= "\n\n💡 Notei que também mencionaste assuntos relacionados com: {$listaNomes}. O que desejas fazer?";
+
+            $triggerSecundariaExata = $outrosTemasDados[0]['triggerExata'];
+            $textoPrincipal .= "\n\n💡 Notei que também mencionou \"{$triggerSecundariaExata}\". Deseja obter mais informação sobre este assunto?";
         } else {
-            $textoPrincipal .= "\n\nTens mais alguma questão sobre " . $dicionario[$primeiroTema]['nome'] . "?";
+            $textoPrincipal .= "\n\nTem mais alguma questão sobre " . $dicionario[$idPrimeiroTema]['nome'] . "?";
         }
 
         return [

@@ -6,7 +6,6 @@ export default function TesteChat() {
     const [mensagens, setMensagens] = useState([]);
     const [inputMensagem, setInputMensagem] = useState('');
 
-    // ESTADOS PARA OS BOTÕES DINÂMICOS
     const [mostrarBotoes, setMostrarBotoes] = useState(false);
     const [triggerPendente, setTriggerPendente] = useState(null);
 
@@ -42,77 +41,74 @@ export default function TesteChat() {
         if (!inputMensagem.trim()) return;
 
         const pergunta = inputMensagem;
-        setMensagens((prev) => [...prev, { user: 'Tu', texto: pergunta }]);
+        setMensagens((prev) => [...prev, { user: 'Utilizador', texto: pergunta }]);
         setInputMensagem('');
         setMostrarBotoes(false);
 
         setTimeout(() => {
-            const frase = pergunta.toLowerCase().trim();
+            let frase = pergunta.toLowerCase().trim();
+            const procurar   = ['á', 'à', 'ã', 'â', 'é', 'ê', 'í', 'ó', 'ô', 'õ', 'ú', 'ç'];
+            const substituir = ['a', 'a', 'a', 'a', 'e', 'e', 'i', 'o', 'o', 'o', 'u', 'c'];
+            procurar.forEach((letra, i) => {
+                frase = frase.replaceAll(letra, substituir[i]);
+            });
 
-            const temasDisponiveis = [
+            const temas = [
                 {
                     id: 'saudacao',
                     nome: 'Saudações',
-                    triggers: ['olá', 'oi', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'ajuda', 'suporte', 'chat'],
+                    triggers: ['ola', 'oi', 'ajuda', 'bom dia', 'boa tarde', 'boa noite'],
                     resposta: "Olá! 👋\nBem-vindo ao suporte do SpaceHub. Como posso ajudar hoje?"
                 },
                 {
                     id: 'precos',
                     nome: 'Preços',
-                    triggers: ['preço', 'preços', 'valor', 'valores', 'plano', 'planos', 'custo', 'custos'],
+                    triggers: ['preco', 'precos', 'valores', 'plano', 'planos', 'pagar', 'valor', 'custo', 'custos'],
                     resposta: "Os nossos planos de Coworking começam em 49€/mês! 💼"
                 },
                 {
                     id: 'espaco',
                     nome: 'Espaço',
-                    triggers: ['espaço', 'local', 'sala', 'salas', 'internet', 'wifi', 'café', 'bar', 'comida', 'bebidas', 'catering', 'cafe'],
+                    triggers: ['espaco', 'local', 'morada', 'onde', 'instalacoes', 'comunidade', 'cafe', 'internet', 'wifi'],
                     resposta: "Temos salas de reunião modernas, internet ultra-rápida e café grátis à descrição, disponível no lobby! ☕"
+                },
+                {
+                    id: 'reservas',
+                    nome: 'Reservas',
+                    triggers: ['reserva', 'reservar', 'reservas', 'sala', 'salas', 'secretaria', 'secretarias'],
+                    resposta: "Para reservar uma sala de reunião ou secretária, basta aceder ao módulo correspondente no seu menu! 🗓️"
                 }
             ];
 
             let temasEncontrados = [];
 
-            // Mapeia todas as ocorrências guardando a posição real do texto (ordem correta)
-            temasDisponiveis.forEach(tema => {
-                tema.triggers.forEach(trigger => {
-                    const posicao = frase.indexOf(trigger);
-                    if (posicao !== -1) {
-                        temasEncontrados.push({
-                            ...tema,
-                            triggerExata: trigger,
-                            posicaoNaFrase: posicao
-                        });
-                    }
+            temas.forEach(tema => {
+                const triggerUsada = tema.triggers.find(t => {
+                    const regex = new RegExp(`\\b${t}\\b`, 'i');
+                    return regex.test(frase);
                 });
+
+                if (triggerUsada) {
+                    const posicao = frase.indexOf(triggerUsada);
+                    temasEncontrados.push({ ...tema, triggerExata: triggerUsada, posicaoNaFrase: posicao });
+                }
             });
 
             if (temasEncontrados.length === 0) {
                 setMensagens((prev) => [...prev, {
                     user: 'Bot SpaceHub 🤖',
-                    texto: "Desculpe, ainda sou um robô em treino no SpaceHub. Pode perguntar por assuntos como 'preço' ou 'espaço'!"
+                    texto: "Desculpe, ainda sou um robô em treino no SpaceHub. Pode perguntar por assuntos como 'preço', 'espaço' ou 'reserva'!"
                 }]);
                 return;
             }
 
-            // CORREÇÃO 1: Ordena as respostas de acordo com o que o utilizador escreveu primeiro
             temasEncontrados.sort((a, b) => a.posicaoNaFrase - b.posicaoNaFrase);
 
-            // Filtra duplicados do mesmo tema (ex: "sala" e "espaço" na mesma frase)
-            const temasUnicos = [];
-            const idsVistos = new Set();
-            temasEncontrados.forEach(t => {
-                if (!idsVistos.has(t.id)) {
-                    idsVistos.add(t.id);
-                    temasUnicos.push(t);
-                }
-            });
-
-            const primeiroTema = temasUnicos[0];
+            const primeiroTema = temasEncontrados[0];
             let respostaFinal = primeiroTema.resposta;
 
-            // Se houver uma segunda trigger detetada na frase
-            if (temasUnicos.length > 1) {
-                const segundoTema = temasUnicos[1];
+            if (temasEncontrados.length > 1) {
+                const segundoTema = temasEncontrados[1];
                 respostaFinal += `\n\n💡 Notei que também mencionou "${segundoTema.triggerExata}". Deseja obter mais informação sobre este assunto?`;
 
                 setTriggerPendente(segundoTema);
@@ -125,26 +121,23 @@ export default function TesteChat() {
         }, 800);
     };
 
-    // AÇÃO DOS BOTÕES DE DECISÃO
     const lidarComEscolha = (querSaberMais) => {
-        // Guardamos o ponteiro localmente para o setTimeout conseguir ler sem conflito de render
         const proximoTema = triggerPendente;
 
         setMostrarBotoes(false);
-        setTriggerPendente(null); // Limpa o estado imediatamente para libertar o próximo ciclo
+        setTriggerPendente(null);
 
         if (querSaberMais && proximoTema) {
-            setMensagens((prev) => [...prev, { user: 'Tu', texto: "Sim, quero saber mais." }]);
+            setMensagens((prev) => [...prev, { user: 'Utilizador', texto: "Sim, quero saber mais." }]);
 
-            // CORREÇÃO 2: Injeta a resposta em falta no chat e fecha o ciclo
             setTimeout(() => {
                 setMensagens((prev) => [...prev, {
                     user: 'Bot SpaceHub 🤖',
-                    texto: `${proximoTema.resposta}\n\nPrecisa de ajuda com algum outro assunto?`
+                    texto: `${proximoTema.resposta}`
                 }]);
             }, 800);
         } else {
-            setMensagens((prev) => [...prev, { user: 'Tu', texto: "Já tenho a informação que procurava." }]);
+            setMensagens((prev) => [...prev, { user: 'Utilizador', texto: "Já tenho a informação que procurava." }]);
 
             setTimeout(() => {
                 setMensagens((prev) => [...prev, {
@@ -163,17 +156,17 @@ export default function TesteChat() {
             <div style={{ border: '1px solid #ccc', borderRadius: '8px', height: '400px', display: 'flex', flexDirection: 'column', background: '#f9f9f9' }}>
                 <div style={{ flex: 1, padding: '15px', overflowY: 'auto' }}>
                     {mensagens.map((msg, index) => (
-                        <div key={index} style={{ marginBottom: '12px', textAlign: msg.user === 'Tu' ? 'right' : 'left' }}>
+                        <div key={index} style={{ marginBottom: '12px', textAlign: msg.user === 'Utilizador' ? 'right' : 'left' }}>
                             <span style={{ fontSize: '11px', color: '#666', display: 'block' }}>{msg.user}</span>
                             <span style={{
                                 display: 'inline-block',
                                 padding: '8px 12px',
                                 borderRadius: '12px',
-                                background: msg.user === 'Tu' ? '#007bff' : '#e9ecef',
-                                color: msg.user === 'Tu' ? '#fff' : '#000',
+                                background: msg.user === 'Utilizador' ? '#007bff' : '#e9ecef',
+                                color: msg.user === 'Utilizador' ? '#fff' : '#000',
                                 marginTop: '2px',
                                 maxWidth: '80%',
-                                whitespace: 'pre-line',
+                                whiteSpace: 'pre-line',
                                 textAlign: 'left'
                             }}>
                                 {msg.texto}
@@ -206,7 +199,7 @@ export default function TesteChat() {
                         type="text"
                         value={inputMensagem}
                         onChange={(e) => setInputMensagem(e.target.value)}
-                        placeholder="Pergunta-me algo (ex: olá, preço, espaço)..."
+                        placeholder="Pergunte-me algo (ex: olá, preço, espaço)..."
                         style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc', marginRight: '8px' }}
                     />
                     <button type="submit" style={{ padding: '8px 15px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}> Enviar </button>
