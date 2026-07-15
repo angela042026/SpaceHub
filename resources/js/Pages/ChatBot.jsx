@@ -1,9 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { usePage } from '@inertiajs/react';
 
 export default function ChatBot() {
+    // 1. Ir buscar os dados de autenticação do Inertia
+    const { auth } = usePage().props;
+    const nomeDoUtilizador = auth?.user ? auth.user.name : 'Utilizador';
+
     const [mensagens, setMensagens] = useState([]);
     const [inputMensagem, setInputMensagem] = useState('');
-
     const [mostrarBotoes, setMostrarBotoes] = useState(false);
     const [triggerPendente, setTriggerPendente] = useState(null);
 
@@ -18,7 +22,6 @@ export default function ChatBot() {
     }, [mensagens]);
 
     useEffect(() => {
-        // O Echo continua a ouvir em background silenciosamente, sem mostrar avisos técnicos no ecrã
         if (window.Echo) {
             const canal = window.Echo.channel('chat');
             canal.listen('MensagemTeste', (dados) => {
@@ -35,7 +38,9 @@ export default function ChatBot() {
         if (!inputMensagem.trim()) return;
 
         const pergunta = inputMensagem;
-        setMensagens((prev) => [...prev, { user: 'Utilizador', texto: pergunta }]);
+
+        // Adiciona apenas uma vez com o nome dinâmico correto
+        setMensagens((prev) => [...prev, { user: nomeDoUtilizador, texto: pergunta }]);
         setInputMensagem('');
         setMostrarBotoes(false);
 
@@ -91,7 +96,7 @@ export default function ChatBot() {
             if (temasEncontrados.length === 0) {
                 setMensagens((prev) => [...prev, {
                     user: 'Bot SpaceHub 🤖',
-                    texto: "Desculpe, ainda sou um robô em treino no SpaceHub. Pode perguntar por assuntos como 'preço', 'espaço' ou 'reserva'!"
+                    texto: "Desculpa, ainda sou um robô em treino no SpaceHub. Podes perguntar por assuntos como 'preço', 'espaço' ou 'reserva'!"
                 }]);
                 return;
             }
@@ -103,7 +108,7 @@ export default function ChatBot() {
 
             if (temasEncontrados.length > 1) {
                 const segundoTema = temasEncontrados[1];
-                respostaFinal += `\n\n💡 Notei que também mencionou "${segundoTema.triggerExata}". Deseja obter mais informação sobre este assunto?`;
+                respostaFinal += `\n\n💡 Notei que também mencionaste "${segundoTema.triggerExata}". Desejas obter mais informação sobre este assunto?`;
 
                 setTriggerPendente(segundoTema);
                 setMostrarBotoes(true);
@@ -122,7 +127,7 @@ export default function ChatBot() {
         setTriggerPendente(null);
 
         if (querSaberMais && proximoTema) {
-            setMensagens((prev) => [...prev, { user: 'Utilizador', texto: "Sim, quero saber mais." }]);
+            setMensagens((prev) => [...prev, { user: nomeDoUtilizador, texto: "Sim, quero saber mais." }]);
 
             setTimeout(() => {
                 setMensagens((prev) => [...prev, {
@@ -131,12 +136,12 @@ export default function ChatBot() {
                 }]);
             }, 800);
         } else {
-            setMensagens((prev) => [...prev, { user: 'Utilizador', texto: "Já tenho a informação que procurava." }]);
+            setMensagens((prev) => [...prev, { user: nomeDoUtilizador, texto: "Já tenho a informação que procurava." }]);
 
             setTimeout(() => {
                 setMensagens((prev) => [...prev, {
                     user: 'Bot SpaceHub 🤖',
-                    texto: "Excelente! Se precisar de mais ajuda, eu continuo deste lado. Bom trabalho no SpaceHub! 🚀"
+                    texto: "Excelente! Se precisares de mais ajuda, eu continuo deste lado. Bom trabalho no SpaceHub! 🚀"
                 }]);
             }, 800);
         }
@@ -149,29 +154,34 @@ export default function ChatBot() {
             <div style={{ border: '1px solid #ccc', borderRadius: '8px', height: '400px', display: 'flex', flexDirection: 'column', background: '#f9f9f9', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
                 <div style={{
                     flex: 1, padding: '15px', overflowY: 'auto',
-                    backgroundImage: "linear-gradient(rgba(249, 249, 249, 0.92), rgba(249, 249, 249, 0.92)), url('images/logo/spacehub-logo.png')",
+                    backgroundImage: "linear-gradient(rgba(249, 249, 249, 0.92), rgba(249, 249, 249, 0.92)), url('/images/logo/spacehub-logo.png')",
                     backgroundSize: 'contain',
                     backgroundPosition: 'center',
                     backgroundRepeat: 'no-repeat'
                 }}>
-                    {mensagens.map((msg, index) => (
-                        <div key={index} style={{ marginBottom: '12px', textAlign: msg.user === 'Utilizador' ? 'right' : 'left' }}>
-                            <span style={{ fontSize: '11px', color: '#666', display: 'block' }}>{msg.user}</span>
-                            <span style={{
-                                display: 'inline-block',
-                                padding: '8px 12px',
-                                borderRadius: '12px',
-                                background: msg.user === 'Utilizador' ? '#007bff' : '#e9ecef',
-                                color: msg.user === 'Utilizador' ? '#fff' : '#000',
-                                marginTop: '2px',
-                                maxWidth: '80%',
-                                whiteSpace: 'pre-line',
-                                textAlign: 'left',
-                            }}>
-                                {msg.texto}
-                            </span>
-                        </div>
-                    ))}
+                    {mensagens.map((msg, index) => {
+                        // Alinha à direita qualquer mensagem que não venha do bot
+                        const ehMinhaMensagem = msg.user !== 'Bot SpaceHub 🤖';
+
+                        return (
+                            <div key={index} style={{ marginBottom: '12px', textAlign: ehMinhaMensagem ? 'right' : 'left' }}>
+                                <span style={{ fontSize: '11px', color: '#666', display: 'block' }}>{msg.user}</span>
+                                <span style={{
+                                    display: 'inline-block',
+                                    padding: '8px 12px',
+                                    borderRadius: '12px',
+                                    background: ehMinhaMensagem ? '#007bff' : '#e9ecef',
+                                    color: ehMinhaMensagem ? '#fff' : '#000',
+                                    marginTop: '2px',
+                                    maxWidth: '80%',
+                                    whiteSpace: 'pre-line',
+                                    textAlign: 'left',
+                                }}>
+                                    {msg.texto}
+                                </span>
+                            </div>
+                        );
+                    })}
 
                     {mostrarBotoes && (
                         <div style={{ display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'flex-start' }}>
@@ -198,7 +208,7 @@ export default function ChatBot() {
                         type="text"
                         value={inputMensagem}
                         onChange={(e) => setInputMensagem(e.target.value)}
-                        placeholder="Pergunte-me algo (ex: olá, preço, espaço)..."
+                        placeholder="Pergunta-me algo (ex: olá, preço, espaço)..."
                         style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc', marginRight: '8px' }}
                     />
                     <button type="submit" style={{ padding: '8px 15px', background: '#28a745', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}> Enviar </button>
