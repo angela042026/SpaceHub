@@ -41,7 +41,7 @@ export default function ChatBot() {
 
         setTimeout(() => {
             let frase = pergunta.toLowerCase().trim();
-            const procurar   = ['á', 'à', 'ã', 'â', 'é', 'ê', 'í', 'ó', 'ô', 'õ', 'ú', 'ç'];
+            const procurar = ['á', 'à', 'ã', 'â', 'é', 'ê', 'í', 'ó', 'ô', 'õ', 'ú', 'ç'];
             const substituir = ['a', 'a', 'a', 'a', 'e', 'e', 'i', 'o', 'o', 'o', 'u', 'c'];
             procurar.forEach((letra, i) => {
                 frase = frase.replaceAll(letra, substituir[i]);
@@ -147,7 +147,13 @@ export default function ChatBot() {
             <h2 style={{ color: '#333', marginBottom: '20px' }}>Assistente Virtual SpaceHub 🤖</h2>
 
             <div style={{ border: '1px solid #ccc', borderRadius: '8px', height: '400px', display: 'flex', flexDirection: 'column', background: '#f9f9f9', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                <div style={{ flex: 1, padding: '15px', overflowY: 'auto' }}>
+                <div style={{
+                    flex: 1, padding: '15px', overflowY: 'auto',
+                    backgroundImage: "linear-gradient(rgba(249, 249, 249, 0.92), rgba(249, 249, 249, 0.92)), url('images/logo/spacehub-logo.png')",
+                    backgroundSize: 'contain',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat'
+                }}>
                     {mensagens.map((msg, index) => (
                         <div key={index} style={{ marginBottom: '12px', textAlign: msg.user === 'Utilizador' ? 'right' : 'left' }}>
                             <span style={{ fontSize: '11px', color: '#666', display: 'block' }}>{msg.user}</span>
@@ -160,7 +166,7 @@ export default function ChatBot() {
                                 marginTop: '2px',
                                 maxWidth: '80%',
                                 whiteSpace: 'pre-line',
-                                textAlign: 'left'
+                                textAlign: 'left',
                             }}>
                                 {msg.texto}
                             </span>
