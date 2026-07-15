@@ -5,12 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-
 class Reserva extends Model
-
- 
 {
-    
     protected $fillable = [
         'user_id',
         'secretaria_id',
@@ -22,15 +18,18 @@ class Reserva extends Model
         'observacoes',
     ];
 
-    protected $casts = [
-        'user_id' => 'integer',
-        'secretaria_id' => 'integer',
-        'periodo_id' => 'integer',
-        'estado_reserva_id' => 'integer',
-        'data' => 'date',
-        'check_in_at' => 'datetime',
-        'cancelada_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'user_id' => 'integer',
+            'secretaria_id' => 'integer',
+            'periodo_id' => 'integer',
+            'estado_reserva_id' => 'integer',
+            'data' => 'date',
+            'check_in_at' => 'datetime',
+            'cancelada_at' => 'datetime',
+        ];
+    }
 
     public function user(): BelongsTo
     {

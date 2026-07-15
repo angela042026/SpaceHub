@@ -36,6 +36,7 @@ class StoreReservaRequest extends FormRequest
                 'string',
                 'max:500',
             ],
+
         ];
     }
 }

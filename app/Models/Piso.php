@@ -3,33 +3,37 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Piso extends Model
 {
-   protected $fillable = [
-    'edificio_id',
-    'nome',
-    'codigo',
-    'numero',
-    'planta',
-    'descricao',
-    'ativo',
+    protected $fillable = [
+        'edificio_id',
+        'nome',
+        'codigo',
+        'numero',
+        'planta',
+        'descricao',
+        'ativo',
     ];
 
-    /**
-     * Um piso pertence a um edifício.
-     */
-    public function edificio()
+    protected function casts(): array
+    {
+        return [
+            'edificio_id' => 'integer',
+            'numero' => 'integer',
+            'ativo' => 'boolean',
+        ];
+    }
+
+    public function edificio(): BelongsTo
     {
         return $this->belongsTo(Edificio::class);
     }
 
-    /**
-     * Um piso possui vários setores.
-     */
-  
-    public function setores()
-{
-    return $this->hasMany(Setor::class);
-}
+    public function setores(): HasMany
+    {
+        return $this->hasMany(Setor::class);
+    }
 }

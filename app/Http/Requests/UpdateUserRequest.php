@@ -16,15 +16,26 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
+
             'email' => [
                 'sometimes',
                 'required',
                 'email',
-                Rule::unique('users', 'email')->ignore($this->route('user')),
+                Rule::unique('users', 'email')
+                    ->ignore($this->route('user')),
             ],
-            'password' => ['nullable', 'string', 'min:8'],
-            'role_id' => ['sometimes', 'required', 'exists:roles,id'],
-            'ativo' => ['boolean'],
+
+            'password' => [
+                'nullable',
+                'string',
+                'min:8',
+            ],
+
+            'role_id' => [
+                'sometimes',
+                'required',
+                'exists:roles,id',
+            ],
         ];
     }
 }
