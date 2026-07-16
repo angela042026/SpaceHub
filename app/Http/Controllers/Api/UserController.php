@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
@@ -14,15 +15,94 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     /**
-     * Lista todos os utilizadores.
+     * Lista os utilizadores com pesquisa, filtros,
+     * ordenação e paginação.
      */
-    public function index(): AnonymousResourceCollection
+    public function index(Request $request): AnonymousResourceCollection
     {
         Gate::authorize('viewAny', User::class);
 
-        $users = User::with('role')
-            ->orderBy('name')
-            ->get();
+        $query = User::query()->with('role');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pesquisa
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('search')) {
+            $search = trim((string) $request->input('search'));
+
+            $query->where(function ($query) use ($search): void {
+                $query
+                    ->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Filtros
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('role_id')) {
+            $query->where(
+                'role_id',
+                $request->integer('role_id')
+            );
+        }
+
+        if ($request->has('ativo')) {
+            $query->where(
+                'ativo',
+                $request->boolean('ativo')
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ordenação segura
+        |--------------------------------------------------------------------------
+        */
+
+        $allowedSortFields = [
+            'id',
+            'name',
+            'email',
+            'role_id',
+            'ativo',
+            'created_at',
+            'updated_at',
+        ];
+
+        $sortBy = (string) $request->input('sort_by', 'name');
+
+        if (! in_array($sortBy, $allowedSortFields, true)) {
+            $sortBy = 'name';
+        }
+
+        $sortDirection = strtolower(
+            (string) $request->input('sort_direction', 'asc')
+        );
+
+        if (! in_array($sortDirection, ['asc', 'desc'], true)) {
+            $sortDirection = 'asc';
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Paginação
+        |--------------------------------------------------------------------------
+        */
+
+        $perPage = $request->integer('per_page', 15);
+        $perPage = max(1, min($perPage, 100));
+
+        $users = $query
+            ->orderBy($sortBy, $sortDirection)
+            ->paginate($perPage)
+            ->withQueryString();
 
         return UserResource::collection($users);
     }
@@ -53,7 +133,7 @@ class UserController extends Controller
             'email' => $dados['email'],
             'password' => Hash::make($dados['password']),
             'role_id' => $dados['role_id'],
-            'ativo' => $dados['ativo'] ?? true,
+            'ativo' => true,
         ]);
 
         $user->load('role');
@@ -76,7 +156,6 @@ class UserController extends Controller
             'name' => $dados['name'] ?? $user->name,
             'email' => $dados['email'] ?? $user->email,
             'role_id' => $dados['role_id'] ?? $user->role_id,
-            'ativo' => $dados['ativo'] ?? $user->ativo,
         ]);
 
         if (! empty($dados['password'])) {

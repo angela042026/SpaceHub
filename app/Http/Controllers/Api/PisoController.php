@@ -7,64 +7,176 @@ use App\Http\Requests\StorePisoRequest;
 use App\Http\Requests\UpdatePisoRequest;
 use App\Http\Resources\PisoResource;
 use App\Models\Piso;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 
 class PisoController extends Controller
 {
-  
-    public function index()
-{
-    Gate::authorize('viewAny', Piso::class);
+    /**
+     * Lista pisos com pesquisa, filtros,
+     * ordenação e paginação.
+     */
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        Gate::authorize('viewAny', Piso::class);
 
-    $pisos = Piso::with('edificio')
-        ->orderBy('numero')
-        ->get();
+        $query = Piso::query()->with('edificio');
 
-    return PisoResource::collection($pisos);
-}
+        /*
+        |--------------------------------------------------------------------------
+        | Pesquisa
+        |--------------------------------------------------------------------------
+        */
 
-public function show(Piso $piso)
-{
-    Gate::authorize('view', $piso);
+        if ($request->filled('search')) {
+            $search = trim((string) $request->input('search'));
 
-    $piso->load('edificio');
+            $query->where(function ($query) use ($search): void {
+                $query
+                    ->where('nome', 'like', "%{$search}%")
+                    ->orWhere('codigo', 'like', "%{$search}%")
+                    ->orWhereHas('edificio', function ($query) use ($search): void {
+                        $query->where('nome', 'like', "%{$search}%");
+                    });
+            });
+        }
 
-    return new PisoResource($piso);
-}
+        /*
+        |--------------------------------------------------------------------------
+        | Filtros
+        |--------------------------------------------------------------------------
+        */
 
-public function store(StorePisoRequest $request)
-{
-    Gate::authorize('create', Piso::class);
+        if ($request->filled('edificio_id')) {
+            $query->where(
+                'edificio_id',
+                $request->integer('edificio_id')
+            );
+        }
 
-    $piso = Piso::create($request->validated());
+        if ($request->has('ativo')) {
+            $query->where(
+                'ativo',
+                $request->boolean('ativo')
+            );
+        }
 
-    $piso->load('edificio');
+        if ($request->filled('numero')) {
+            $query->where(
+                'numero',
+                $request->integer('numero')
+            );
+        }
 
-    return (new PisoResource($piso))
-        ->response()
-        ->setStatusCode(201);
-}
+        /*
+        |--------------------------------------------------------------------------
+        | Ordenação segura
+        |--------------------------------------------------------------------------
+        */
 
-public function update(UpdatePisoRequest $request, Piso $piso)
-{
-    Gate::authorize('update', $piso);
+        $allowedSortFields = [
+            'id',
+            'edificio_id',
+            'nome',
+            'codigo',
+            'numero',
+            'ativo',
+            'created_at',
+            'updated_at',
+        ];
 
-    $piso->update($request->validated());
+        $sortBy = (string) $request->input('sort_by', 'numero');
 
-    $piso->load('edificio');
+        if (! in_array($sortBy, $allowedSortFields, true)) {
+            $sortBy = 'numero';
+        }
 
-    return new PisoResource($piso);
-}
+        $sortDirection = strtolower(
+            (string) $request->input('sort_direction', 'asc')
+        );
 
-public function toggleAtivo(Piso $piso)
-{
-    Gate::authorize('toggleAtivo', $piso);
+        if (! in_array($sortDirection, ['asc', 'desc'], true)) {
+            $sortDirection = 'asc';
+        }
 
-    $piso->ativo = ! $piso->ativo;
-    $piso->save();
+        /*
+        |--------------------------------------------------------------------------
+        | Paginação
+        |--------------------------------------------------------------------------
+        */
 
-    $piso->load('edificio');
+        $perPage = $request->integer('per_page', 15);
+        $perPage = max(1, min($perPage, 100));
 
-    return new PisoResource($piso);
-}
+        $pisos = $query
+            ->orderBy($sortBy, $sortDirection)
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return PisoResource::collection($pisos);
+    }
+
+    /**
+     * Apresenta um piso.
+     */
+    public function show(Piso $piso): PisoResource
+    {
+        Gate::authorize('view', $piso);
+
+        $piso->load('edificio');
+
+        return new PisoResource($piso);
+    }
+
+    /**
+     * Cria um piso.
+     */
+    public function store(StorePisoRequest $request)
+    {
+        Gate::authorize('create', Piso::class);
+
+        $piso = Piso::create(
+            $request->validated()
+        );
+
+        $piso->load('edificio');
+
+        return (new PisoResource($piso))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    /**
+     * Atualiza um piso.
+     */
+    public function update(
+        UpdatePisoRequest $request,
+        Piso $piso
+    ): PisoResource {
+        Gate::authorize('update', $piso);
+
+        $piso->update(
+            $request->validated()
+        );
+
+        $piso->load('edificio');
+
+        return new PisoResource($piso);
+    }
+
+    /**
+     * Ativa ou desativa um piso.
+     */
+    public function toggleAtivo(Piso $piso): PisoResource
+    {
+        Gate::authorize('toggleAtivo', $piso);
+
+        $piso->ativo = ! $piso->ativo;
+        $piso->save();
+
+        $piso->load('edificio');
+
+        return new PisoResource($piso);
+    }
 }

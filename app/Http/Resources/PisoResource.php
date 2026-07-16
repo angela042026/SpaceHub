@@ -20,6 +20,7 @@ class PisoResource extends JsonResource
             'descricao' => $this->descricao,
             'ativo' => (bool) $this->ativo,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];
     }
 }

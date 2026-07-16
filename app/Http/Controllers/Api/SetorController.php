@@ -7,63 +7,197 @@ use App\Http\Requests\StoreSetorRequest;
 use App\Http\Requests\UpdateSetorRequest;
 use App\Http\Resources\SetorResource;
 use App\Models\Setor;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 
 class SetorController extends Controller
 {
-    public function index()
-{
-    Gate::authorize('viewAny', Setor::class);
+    /**
+     * Lista setores com pesquisa, filtros,
+     * ordenação e paginação.
+     */
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        Gate::authorize('viewAny', Setor::class);
 
-    $setores = Setor::with('piso')
-        ->orderBy('nome')
-        ->get();
+        $query = Setor::query()
+            ->with('piso.edificio');
 
-    return SetorResource::collection($setores);
-}
+        /*
+        |--------------------------------------------------------------------------
+        | Pesquisa
+        |--------------------------------------------------------------------------
+        */
 
-public function show(Setor $setor)
-{
-    Gate::authorize('view', $setor);
+        if ($request->filled('search')) {
+            $search = trim((string) $request->input('search'));
 
-    $setor->load('piso');
+            $query->where(function ($query) use ($search): void {
+                $query
+                    ->where('nome', 'like', "%{$search}%")
+                    ->orWhere('codigo', 'like', "%{$search}%")
+                    ->orWhere('tipo', 'like', "%{$search}%")
+                    ->orWhereHas('piso', function ($query) use ($search): void {
+                        $query
+                            ->where('nome', 'like', "%{$search}%")
+                            ->orWhere('codigo', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas(
+                        'piso.edificio',
+                        function ($query) use ($search): void {
+                            $query
+                                ->where('nome', 'like', "%{$search}%")
+                                ->orWhere('codigo', 'like', "%{$search}%");
+                        }
+                    );
+            });
+        }
 
-    return new SetorResource($setor);
-}
+        /*
+        |--------------------------------------------------------------------------
+        | Filtros
+        |--------------------------------------------------------------------------
+        */
 
-public function store(StoreSetorRequest $request)
-{
-    Gate::authorize('create', Setor::class);
+        if ($request->filled('piso_id')) {
+            $query->where(
+                'piso_id',
+                $request->integer('piso_id')
+            );
+        }
 
-    $setor = Setor::create($request->validated());
+        if ($request->filled('tipo')) {
+            $query->where(
+                'tipo',
+                (string) $request->input('tipo')
+            );
+        }
 
-    $setor->load('piso');
+        if ($request->has('reservavel')) {
+            $query->where(
+                'reservavel',
+                $request->boolean('reservavel')
+            );
+        }
 
-    return (new SetorResource($setor))
-        ->response()
-        ->setStatusCode(201);
-}
+        if ($request->has('ativo')) {
+            $query->where(
+                'ativo',
+                $request->boolean('ativo')
+            );
+        }
 
-public function update(UpdateSetorRequest $request, Setor $setor)
-{
-    Gate::authorize('update', $setor);
+        /*
+        |--------------------------------------------------------------------------
+        | Ordenação segura
+        |--------------------------------------------------------------------------
+        */
 
-    $setor->update($request->validated());
+        $allowedSortFields = [
+            'id',
+            'piso_id',
+            'nome',
+            'codigo',
+            'tipo',
+            'reservavel',
+            'capacidade',
+            'ativo',
+            'created_at',
+            'updated_at',
+        ];
 
-    $setor->load('piso');
+        $sortBy = (string) $request->input('sort_by', 'nome');
 
-    return new SetorResource($setor);
-}
+        if (! in_array($sortBy, $allowedSortFields, true)) {
+            $sortBy = 'nome';
+        }
 
-public function toggleAtivo(Setor $setor)
-{
-    Gate::authorize('toggleAtivo', $setor);
+        $sortDirection = strtolower(
+            (string) $request->input('sort_direction', 'asc')
+        );
 
-    $setor->ativo = ! $setor->ativo;
-    $setor->save();
+        if (! in_array($sortDirection, ['asc', 'desc'], true)) {
+            $sortDirection = 'asc';
+        }
 
-    $setor->load('piso');
+        /*
+        |--------------------------------------------------------------------------
+        | Paginação
+        |--------------------------------------------------------------------------
+        */
 
-    return new SetorResource($setor);
-}
+        $perPage = $request->integer('per_page', 15);
+        $perPage = max(1, min($perPage, 100));
+
+        $setores = $query
+            ->orderBy($sortBy, $sortDirection)
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return SetorResource::collection($setores);
+    }
+
+    /**
+     * Apresenta um setor.
+     */
+    public function show(Setor $setor): SetorResource
+    {
+        Gate::authorize('view', $setor);
+
+        $setor->load('piso.edificio');
+
+        return new SetorResource($setor);
+    }
+
+    /**
+     * Cria um setor.
+     */
+    public function store(StoreSetorRequest $request)
+    {
+        Gate::authorize('create', Setor::class);
+
+        $setor = Setor::create(
+            $request->validated()
+        );
+
+        $setor->load('piso.edificio');
+
+        return (new SetorResource($setor))
+            ->response()
+            ->setStatusCode(201);
+    }
+
+    /**
+     * Atualiza um setor.
+     */
+    public function update(
+        UpdateSetorRequest $request,
+        Setor $setor
+    ): SetorResource {
+        Gate::authorize('update', $setor);
+
+        $setor->update(
+            $request->validated()
+        );
+
+        $setor->load('piso.edificio');
+
+        return new SetorResource($setor);
+    }
+
+    /**
+     * Ativa ou desativa um setor.
+     */
+    public function toggleAtivo(Setor $setor): SetorResource
+    {
+        Gate::authorize('toggleAtivo', $setor);
+
+        $setor->ativo = ! $setor->ativo;
+        $setor->save();
+
+        $setor->load('piso.edificio');
+
+        return new SetorResource($setor);
+    }
 }
