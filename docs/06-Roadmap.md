@@ -1,172 +1,185 @@
-# Roadmap
+# 6. Evolução do Projeto e Trabalho Futuro
 
-## Documentação
+# 6.1 Introdução
 
-- [x] Requisitos
-- [x] Casos de Uso
-- [x] Modelo de Dados
-- [x] Diagrama ER
-- [x] Dicionário de Dados
-- [x] Arquitetura
-- [x] API
-- [x] Roadmap
+O desenvolvimento do SpaceHub foi realizado de forma incremental, permitindo validar continuamente as funcionalidades implementadas e adaptar a solução às necessidades identificadas durante o projeto.
+
+Ao longo do desenvolvimento foram introduzidas melhorias na arquitetura, segurança, organização do código e experiência do utilizador, culminando numa aplicação estável e suportada por testes automatizados.
 
 ---
 
-## Base de Dados
+# 6.2 Evolução do Projeto
 
-- [x] Roles
-- [x] Users
-- [x] Edifícios
-- [x] Pisos
-- [x] Setores
-- [x] Secretárias
-- [x] Períodos
-- [x] Estado das Reservas
-- [x] Reservas
+O desenvolvimento iniciou-se com a implementação da estrutura base da aplicação, incluindo autenticação, gestão de utilizadores e definição das principais entidades da base de dados.
 
----
+Numa fase posterior foram desenvolvidos os módulos de gestão dos espaços físicos, organizando-os segundo a seguinte hierarquia:
 
-## Backend
+- Edifícios;
+- Pisos;
+- Setores;
+- Secretárias.
 
-- [x] Autenticação
-- [x] Recuperação de Password
-- [x] Gestão de Utilizadores
-- [x] CRUD Edifícios
-- [x] CRUD Pisos
-- [x] CRUD Setores
-- [x] CRUD Secretárias
-- [x] CRUD Reservas
+Posteriormente foi implementado o sistema de reservas, permitindo aos utilizadores reservar postos de trabalho para datas e períodos específicos.
 
----
+Após estabilização das funcionalidades principais foram introduzidos diversos melhoramentos, nomeadamente:
 
-## API
-
-- [x] Login
-- [x] Registo
-- [x] Logout
-- [x] Recuperação de Password
-- [x] Gestão de Utilizadores
-- [x] Gestão de Espaços
-- [x] Reservas
-- [x] Disponibilidade
-- [x] Cancelamento de Reservas
+- autenticação através de Laravel Sanctum;
+- autorização baseada em Policies;
+- pesquisa;
+- filtros;
+- ordenação;
+- paginação;
+- upload de fotografias;
+- upload das plantas dos pisos;
+- dashboard estatístico;
+- QR Codes;
+- editor gráfico do mapa;
+- atualização do mapa em tempo real;
+- testes automatizados.
 
 ---
 
-## Frontend
+# 6.3 Melhorias Introduzidas
 
-- [x] Login
-- [x] Dashboard
-- [x] Estatísticas
-- [x] Mapa Interativo
-- [x] QR Code
-- [x] Check-in
+Durante o desenvolvimento foram efetuadas várias refatorações com o objetivo de melhorar a qualidade do código.
 
----
+Entre as principais melhorias destacam-se:
 
-## Sprint 1
+- utilização sistemática de Form Requests;
+- utilização de API Resources;
+- centralização das regras de autorização através de Policies;
+- separação clara entre validação e lógica de negócio;
+- organização consistente dos Controllers;
+- utilização do sistema Storage para uploads;
+- melhoria das consultas através de eager loading.
 
-- [x] Base de Dados
-
----
-
-## Sprint 2
-
-- [x] Autenticação
+Estas alterações permitiram tornar o código mais organizado, reutilizável e fácil de manter.
 
 ---
 
-## Sprint 3
+# 6.4 Funcionalidades Implementadas
 
-- [x] Recuperação de Password
+No final do desenvolvimento encontram-se implementadas as seguintes funcionalidades:
 
----
-
-## Sprint 4
-
-- [x] Gestão de Utilizadores
-
----
-
-## Sprint 5
-
-- [x] Gestão de Espaços
-
----
-
-## Sprint 6
-
-- [x] CRUD Reservas
-- [x] Disponibilidade
-- [x] Cancelamento
-- [x] Testes Postman
+- autenticação;
+- recuperação de password;
+- gestão de utilizadores;
+- gestão de papéis;
+- gestão de edifícios;
+- gestão de pisos;
+- upload da planta dos pisos;
+- gestão de setores;
+- editor gráfico dos mapas;
+- gestão de secretárias;
+- geração de QR Code;
+- reservas;
+- consulta de disponibilidade;
+- dashboard;
+- estatísticas;
+- uploads;
+- testes automatizados.
 
 ---
 
-## Sprint 7
+# 6.5 Trabalho Futuro
 
-- [x] Dashboard
-- [x] Estatísticas
-- [x] QR Code
-- [x] Check-in
-- [x] Mapa Interativo
+Embora o sistema se encontre funcional, existem diversas funcionalidades que poderão ser adicionadas em versões futuras.
+
+Entre elas destacam-se:
+
+## Notificações
+
+Envio automático de notificações por email relativamente a:
+
+- confirmação da reserva;
+- cancelamento;
+- lembretes de check-in.
 
 ---
 
-## Próximas Melhorias
+## Integração com Calendário
 
-- [ ] Testes funcionais do Check-in
-- [ ] Validação completa do QR Code
-- [ ] Melhorias de interface
-- [ ] Otimização do Dashboard
-- [ ] Deploy
+Integração com:
 
-# Sprint 8 (Em Integração)
+- Microsoft Outlook;
+- Google Calendar.
 
-## Chat em Tempo Real
+---
 
-Integração da branch:
+## Aplicação Mobile
 
-feature/update-eduardo
+Desenvolvimento de aplicações móveis para Android e iOS.
 
-Funcionalidades adicionadas:
+---
 
-- Sistema de Chat em Tempo Real;
-- Laravel Reverb;
-- Laravel Echo;
-- Broadcasting;
-- Evento EnviarMensagem;
-- ChatController;
-- Página React TesteChat;
-- Configuração de WebSockets;
-- Rotas de teste do Chat.
+## Estatísticas Avançadas
 
-Tecnologias:
+Implementação de novos indicadores, como:
 
-- Laravel Reverb
-- Laravel Echo
-- Pusher JS
-- Broadcasting
-- React
+- ocupação média por edifício;
+- utilização por utilizador;
+- mapas de calor;
+- evolução mensal.
 
-Validação técnica:
+---
 
-- php artisan optimize:clear
-- composer dump-autoload
-- npm install
-- npm run build
-- php artisan test
-- php artisan route:list
+## Gestão de Equipamentos
 
-Resultado:
+Possibilidade de associar equipamentos às secretárias, como:
 
-- Build concluído com sucesso;
-- 25 testes executados com sucesso;
-- 61 assertions;
-- Rotas do Chat registadas;
-- Integração preparada para Pull Request.
+- monitores;
+- docks;
+- cadeiras;
+- equipamentos multimédia.
 
-Estado:
+---
 
-Em validação funcional.
+## Auditoria
+
+Registo detalhado das operações realizadas pelos utilizadores, incluindo:
+
+- criação;
+- atualização;
+- cancelamento;
+- check-in.
+
+---
+
+## Notificações em Tempo Real
+
+Melhoria da comunicação em tempo real através de eventos WebSocket para todas as áreas administrativas.
+
+---
+
+## Inteligência Artificial
+
+Numa evolução futura poderá ser incorporado um módulo baseado em Inteligência Artificial para auxiliar a gestão dos espaços.
+
+Entre as possíveis funcionalidades incluem-se:
+
+- previsão da ocupação;
+- sugestão automática da melhor secretária;
+- otimização da distribuição dos utilizadores;
+- deteção de padrões de utilização.
+
+# 6.6 Escalabilidade
+
+A arquitetura adotada permite expandir facilmente o sistema.
+
+Entre as possíveis evoluções destacam-se:
+
+- múltiplos edifícios;
+- múltiplas organizações;
+- autenticação SSO;
+- integração com Microsoft Entra ID;
+- integração com Active Directory;
+- APIs públicas;
+- relatórios exportáveis.
+
+---
+
+# 6.7 Considerações Finais
+
+A arquitetura desenvolvida durante este projeto permite que o SpaceHub evolua de forma sustentada, mantendo uma organização consistente do código e reduzindo o impacto da introdução de novas funcionalidades.
+
+A utilização das boas práticas disponibilizadas pelo Laravel, aliada à separação de responsabilidades e à cobertura por testes automatizados, constitui uma base sólida para futuras evoluções da aplicação.

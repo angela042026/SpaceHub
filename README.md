@@ -1,150 +1,331 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# 🏢 SpaceHub
 
-## About Laravel
+### Sistema de Gestão e Reserva de Espaços Colaborativos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Aplicação desenvolvida em **Laravel 12**, **React** e **Inertia.js** para gestão de edifícios, espaços colaborativos e reservas de secretárias.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+![Laravel](https://img.shields.io/badge/Laravel-12-red?logo=laravel)
+![PHP](https://img.shields.io/badge/PHP-8-blue?logo=php)
+![React](https://img.shields.io/badge/React-19-61dafb?logo=react)
+![Inertia.js](https://img.shields.io/badge/Inertia.js-SPA-purple)
+![MySQL](https://img.shields.io/badge/MySQL-Database-blue?logo=mysql)
+![Sanctum](https://img.shields.io/badge/Auth-Sanctum-success)
+![PHPUnit](https://img.shields.io/badge/Tests-111%20Passed-brightgreen)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+</div>
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+# 📖 Sobre o Projeto
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+O **SpaceHub** é uma aplicação web destinada à gestão de espaços colaborativos e à reserva de secretárias.
 
-## Laravel Sponsors
+O sistema permite organizar edifícios, pisos, setores e secretárias, possibilitando aos utilizadores reservar postos de trabalho de forma simples e segura.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Além da gestão dos espaços, a aplicação disponibiliza mecanismos de autenticação, autorização, dashboards estatísticos, check-in através de QR Code e atualização em tempo real do mapa de ocupação.
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# ✨ Funcionalidades
 
-## Contributing
+## Gestão
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- Gestão de utilizadores
+- Gestão de papéis
+- Gestão de edifícios
+- Gestão de pisos
+- Gestão de setores
+- Gestão de secretárias
 
-## Code of Conduct
+## Reservas
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Reserva de secretárias
+- Consulta de disponibilidade
+- Cancelamento de reservas
+- Estados das reservas
+- Validação de conflitos
 
-## Security Vulnerabilities
+## Check-in
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+- QR Code
+- Validação da reserva
+- Confirmação automática
 
-## License
+## Dashboard
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Estatísticas
+- Taxa de ocupação
+- Reservas por período
+- Reservas por estado
+- Reservas por edifício
 
+## Administração
 
-<p align="center">
-  <img src="https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white" />
-  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" />
-  <img src="https://img.shields.io/badge/status-em%20desenvolvimento-yellow?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/version-0.1-blue?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" />
-</p>
+- Pesquisa
+- Filtros
+- Ordenação
+- Paginação
+- Upload de fotografias
+- Upload das plantas dos pisos
 
-<p>
-📄 ATA N.º 1 / 2026
-# **Espaços Colaborativos**
+## Suporte
 
-## 📌 Sobre o Projeto
-**Space Hub** é uma aplicação desenvolvida para facilitar a gestão de reservas de secretárias em espaços colaborativos.  
-Permite aos utilizadores reservar lugares, efetuar check‑in via QR Code, consultar reservas e gerir disponibilidade de forma simples e intuitiva.
+- FAQs
+- Help Center
+- Pedidos de Suporte
 
-## 🎯 Objetivos
-- Organizar a ocupação de secretárias em ambientes partilhados  
-- Evitar conflitos de utilização  
-- Automatizar processos de check‑in e cancelamento  
-- Melhorar a experiência dos utilizadores
+---
 
-## 🧩 Funcionalidades Principais
-- Registo e autenticação de utilizadores  
-- Reserva de secretárias por dia e período  
-- Check‑in via QR Code  
-- Cancelamento automático após 15 minutos
+# 🏗 Arquitetura
 
-## Como Executar o Projeto
+O projeto segue o padrão **MVC** disponibilizado pelo Laravel.
 
-### 1. Clonar o repositório
-git clone https://github.com/teu-username/space-hub.git
+```text
+React
+      │
+      ▼
+Inertia.js
+      │
+      ▼
+Controllers
+      │
+      ▼
+Form Requests
+      │
+      ▼
+Policies
+      │
+      ▼
+Models (Eloquent)
+      │
+      ▼
+MySQL
+```
 
-### 2. Instalar dependências (backend)
-dotnet restore
+A API utiliza:
 
-### 3. Executar API
-dotnet run
+- Laravel Sanctum
+- API Resources
+- Policies
+- Form Requests
+- Route Model Binding
 
-### 4. Abrir o frontend
-Abrir o ficheiro index.html no navegador.
+---
 
-## Equipa
-- Eduardo
-- Joana
-- Hanna
-- Ângela
+# 🛠 Tecnologias
 
-Formadoraores: Sara e Rui
+| Tecnologia | Utilização |
+|------------|------------|
+| Laravel 12 | Backend |
+| PHP 8 | Linguagem |
+| React | Frontend |
+| Inertia.js | SPA |
+| Tailwind CSS | Interface |
+| MySQL | Base de Dados |
+| Laravel Sanctum | Autenticação |
+| Laravel Reverb | WebSockets |
+| Laravel Echo | Broadcast |
+| PHPUnit | Testes |
+| Vite | Build Frontend |
 
-## Documentação
-- Ata da Reunião Inicial
-- Requisitos do Projeto
-- Divisão de Tarefas
+---
 
-## Estado do Projeto
-Em desenvolvimento 🚧
+# 📂 Estrutura do Projeto
 
- </p>
+```text
+app/
+database/
+docs/
+public/
+resources/
+routes/
+storage/
+tests/
+```
 
- <p> ## Configuração
+---
 
-1. Clonar o repositório.
+# 🚀 Instalação
 
-2. Copiar:
+## Clonar o projeto
 
+```bash
+git clone https://github.com/angela042026/SpaceHub.git
+
+cd SpaceHub
+```
+
+---
+
+## Instalar dependências PHP
+
+```bash
+composer install
+```
+
+---
+
+## Instalar dependências JavaScript
+
+```bash
+npm install
+```
+
+---
+
+## Configurar ambiente
+
+Copiar:
+
+```text
 .env.example
+```
 
 para:
 
+```text
 .env
+```
 
-3. Executar:
+Gerar a chave da aplicação:
 
+```bash
 php artisan key:generate
+```
 
-4. Configurar a base de dados.
+---
 
-5. Durante o desenvolvimento utilizar:
+## Configurar a Base de Dados
 
-MAIL_MAILER=log </p>
+Editar o ficheiro `.env` e configurar:
 
-## Documentação do Projeto
+```text
+DB_DATABASE=
+DB_USERNAME=
+DB_PASSWORD=
+```
 
-Toda a arquitetura, convenções de código, decisões técnicas e estado atual do projeto encontram-se em:
+Executar:
 
-- `docs/PROJECT_CONTEXT.md`
+```bash
+php artisan migrate --seed
+```
 
-Este documento deve ser consultado antes de iniciar novas funcionalidades ou continuar o desenvolvimento do projeto.
+---
+
+## Storage
+
+Criar o link simbólico:
+
+```bash
+php artisan storage:link
+```
+
+---
+
+## Compilar Frontend
+
+```bash
+npm run build
+```
+
+Durante o desenvolvimento:
+
+```bash
+npm run dev
+```
+
+---
+
+## Executar
+
+```bash
+php artisan serve
+```
+
+A aplicação ficará disponível em:
+
+```text
+http://127.0.0.1:8000
+```
+
+---
+
+# 🧪 Testes
+
+Executar todos os testes:
+
+```bash
+php artisan test
+```
+
+Estado atual:
+
+✅ **111 testes automatizados aprovados**
+
+Os testes cobrem:
+
+- autenticação;
+- autorização;
+- uploads;
+- reservas;
+- dashboard;
+- QR Code;
+- check-in;
+- mapa;
+- pesquisas;
+- filtros;
+- paginação.
+
+---
+
+# 📚 Documentação
+
+Toda a documentação técnica encontra-se na pasta `docs`.
+
+| Documento | Descrição |
+|-----------|-----------|
+| 01-Requisitos | Requisitos funcionais, não funcionais e regras de negócio |
+| 02-CasosDeUso | Casos de uso do sistema |
+| 03-ModeloBaseDados | Modelo relacional da base de dados |
+| 04-Arquitetura | Arquitetura técnica da aplicação |
+| 05-API | Documentação da API REST |
+| 06-Roadmap | Evolução do projeto e trabalho futuro |
+| 07-DicionarioDados | Dicionário de dados |
+| 08-PROJECT_CONTEXT | Documento mestre do projeto |
+
+---
+
+# 👥 Equipa
+
+Projeto desenvolvido por:
+
+- Ângela
+- Eduardo
+- Joana
+- Hanna
+
+Formadores:
+
+- Sara
+- Rui
+
+---
+
+# 📄 Licença
+
+Este projeto foi desenvolvido no âmbito académico e destina-se a fins educativos.
+
+---
+
+<div align="center">
+
+**SpaceHub**
+
+Sistema de Gestão e Reserva de Espaços Colaborativos
+
+Laravel • React • Inertia • MySQL
+
+</div>

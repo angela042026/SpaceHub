@@ -11,7 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class UserController extends Controller
 {
@@ -104,20 +106,39 @@ class UserController extends Controller
         Gate::authorize('create', User::class);
 
         $dados = $request->validated();
+        $fotografiaGuardada = null;
 
         if ($request->hasFile('fotografia')) {
-            $dados['fotografia'] = $request
+            $fotografiaGuardada = $request
                 ->file('fotografia')
                 ->store('utilizadores/fotografias', 'public');
+
+            $dados['fotografia'] = $fotografiaGuardada;
         }
 
-        $user = User::create([
-            'name' => $dados['name'],
-            'email' => $dados['email'],
-            'password' => Hash::make($dados['password']),
-            'role_id' => $dados['role_id'],
-            'ativo' => true,
-            'fotografia' => $dados['fotografia'] ?? null,
+        try {
+            $user = User::create([
+                'name' => $dados['name'],
+                'email' => $dados['email'],
+                'password' => Hash::make($dados['password']),
+                'role_id' => $dados['role_id'],
+                'ativo' => true,
+                'fotografia' => $dados['fotografia'] ?? null,
+            ]);
+        } catch (Throwable $exception) {
+            if ($fotografiaGuardada !== null) {
+                Storage::disk('public')->delete($fotografiaGuardada);
+            }
+
+            throw $exception;
+        }
+
+        Log::info('Utilizador criado.', [
+            'ator_id' => $request->user()->id,
+            'utilizador_id' => $user->id,
+            'role_id' => $user->role_id,
+            'ativo' => $user->ativo,
+            'tem_fotografia' => $user->fotografia !== null,
         ]);
 
         $user->load('role');
@@ -136,6 +157,7 @@ class UserController extends Controller
 
         $dados = $request->validated();
 
+        $roleAnterior = $user->role_id;
         $fotografiaAntiga = $user->fotografia;
         $novaFotografia = null;
 
@@ -158,9 +180,11 @@ class UserController extends Controller
             $user->password = Hash::make($dados['password']);
         }
 
+        $camposAlterados = array_keys($user->getDirty());
+
         try {
             $user->save();
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             if ($novaFotografia !== null) {
                 Storage::disk('public')->delete($novaFotografia);
             }
@@ -176,6 +200,31 @@ class UserController extends Controller
             Storage::disk('public')->delete($fotografiaAntiga);
         }
 
+        if ($camposAlterados !== []) {
+            Log::info('Utilizador atualizado.', [
+                'ator_id' => $request->user()->id,
+                'utilizador_id' => $user->id,
+                'campos_alterados' => $camposAlterados,
+            ]);
+        }
+
+        if ($roleAnterior !== $user->role_id) {
+            Log::notice('Papel do utilizador alterado.', [
+                'ator_id' => $request->user()->id,
+                'utilizador_id' => $user->id,
+                'role_anterior_id' => $roleAnterior,
+                'role_nova_id' => $user->role_id,
+            ]);
+        }
+
+        if ($novaFotografia !== null) {
+            Log::info('Fotografia do utilizador alterada.', [
+                'ator_id' => $request->user()->id,
+                'utilizador_id' => $user->id,
+                'tinha_fotografia_anterior' => $fotografiaAntiga !== null,
+            ]);
+        }
+
         $user->load('role');
 
         return new UserResource($user);
@@ -188,8 +237,17 @@ class UserController extends Controller
     {
         Gate::authorize('toggleAtivo', $user);
 
+        $estadoAnterior = (bool) $user->ativo;
+
         $user->ativo = ! $user->ativo;
         $user->save();
+
+        Log::notice('Estado do utilizador alterado.', [
+            'ator_id' => request()->user()->id,
+            'utilizador_id' => $user->id,
+            'ativo_anterior' => $estadoAnterior,
+            'ativo_atual' => (bool) $user->ativo,
+        ]);
 
         $user->load('role');
 

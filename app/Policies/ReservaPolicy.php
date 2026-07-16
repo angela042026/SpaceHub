@@ -8,6 +8,18 @@ use App\Models\User;
 class ReservaPolicy
 {
     /**
+     * Bloqueia qualquer operação de utilizadores inativos.
+     */
+    public function before(User $user, string $ability): bool|null
+    {
+        if (! $user->ativo) {
+            return false;
+        }
+
+        return null;
+    }
+
+    /**
      * Todos os utilizadores autenticados podem listar reservas.
      *
      * O controller garante que apenas o Administrador recebe todas.
