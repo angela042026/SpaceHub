@@ -121,6 +121,9 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'update'])
         ->name('support.update');
+
+    Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
+        ->name('chat.enviar');
 });
 
 require __DIR__.'/auth.php';

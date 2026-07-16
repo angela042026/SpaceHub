@@ -7,10 +7,8 @@ use App\Events\EnviarMensagem;
 
 class ChatController extends Controller
 {
-    public function simularResposta(Request $request)
+    private function gerarRespostaDoBot(string $pergunta)
     {
-        $pergunta = (string) $request->input('mensagem', '');
-
         if (trim($pergunta) === '') {
             return back();
         }
@@ -22,11 +20,26 @@ class ChatController extends Controller
         return back();
     }
 
+    public function enviarMensagem(Request $request)
+    {
+        $request->validate([
+            'mensagem' => 'required|string|max:1000',
+        ]);
+
+        $utilizador = Auth::user();
+
+        $nomeDoUtilizador = $utilizador ? $utilizador->name : 'Convidado';
+
+        broadcast(new EnviarMensagem($nomeDoUtilizador, $request->mensagem, []))->toOthers();
+
+        return $this->gerarRespostaDoBot($request->mensagem);
+    }
+
     public function processarMensagem(string $pergunta): array
     {
         $perguntaLimpa = mb_strtolower(trim($pergunta), 'UTF-8');
 
-        $procurar   = ['á', 'à', 'ã', 'â', 'é', 'ê', 'í', 'ó', 'ô', 'õ', 'ú', 'ç'];
+        $procurar = ['á', 'à', 'ã', 'â', 'é', 'ê', 'í', 'ó', 'ô', 'õ', 'ú', 'ç'];
         $substituir = ['a', 'a', 'a', 'a', 'e', 'e', 'i', 'o', 'o', 'o', 'u', 'c'];
         $perguntaLimpa = str_replace($procurar, $substituir, $perguntaLimpa);
 
