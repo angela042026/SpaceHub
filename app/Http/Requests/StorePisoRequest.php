@@ -46,8 +46,10 @@ class StorePisoRequest extends FormRequest
 
             'planta' => [
                 'nullable',
-                'string',
-                'max:255',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
             ],
 
             'descricao' => [

@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -24,12 +25,6 @@ class UserController extends Controller
 
         $query = User::query()->with('role');
 
-        /*
-        |--------------------------------------------------------------------------
-        | Pesquisa
-        |--------------------------------------------------------------------------
-        */
-
         if ($request->filled('search')) {
             $search = trim((string) $request->input('search'));
 
@@ -39,12 +34,6 @@ class UserController extends Controller
                     ->orWhere('email', 'like', "%{$search}%");
             });
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Filtros
-        |--------------------------------------------------------------------------
-        */
 
         if ($request->filled('role_id')) {
             $query->where(
@@ -59,12 +48,6 @@ class UserController extends Controller
                 $request->boolean('ativo')
             );
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Ordenação segura
-        |--------------------------------------------------------------------------
-        */
 
         $allowedSortFields = [
             'id',
@@ -89,12 +72,6 @@ class UserController extends Controller
         if (! in_array($sortDirection, ['asc', 'desc'], true)) {
             $sortDirection = 'asc';
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Paginação
-        |--------------------------------------------------------------------------
-        */
 
         $perPage = $request->integer('per_page', 15);
         $perPage = max(1, min($perPage, 100));
@@ -128,12 +105,19 @@ class UserController extends Controller
 
         $dados = $request->validated();
 
+        if ($request->hasFile('fotografia')) {
+            $dados['fotografia'] = $request
+                ->file('fotografia')
+                ->store('utilizadores/fotografias', 'public');
+        }
+
         $user = User::create([
             'name' => $dados['name'],
             'email' => $dados['email'],
             'password' => Hash::make($dados['password']),
             'role_id' => $dados['role_id'],
             'ativo' => true,
+            'fotografia' => $dados['fotografia'] ?? null,
         ]);
 
         $user->load('role');
@@ -152,17 +136,46 @@ class UserController extends Controller
 
         $dados = $request->validated();
 
+        $fotografiaAntiga = $user->fotografia;
+        $novaFotografia = null;
+
+        if ($request->hasFile('fotografia')) {
+            $novaFotografia = $request
+                ->file('fotografia')
+                ->store('utilizadores/fotografias', 'public');
+
+            $dados['fotografia'] = $novaFotografia;
+        }
+
         $user->fill([
             'name' => $dados['name'] ?? $user->name,
             'email' => $dados['email'] ?? $user->email,
             'role_id' => $dados['role_id'] ?? $user->role_id,
+            'fotografia' => $dados['fotografia'] ?? $user->fotografia,
         ]);
 
         if (! empty($dados['password'])) {
             $user->password = Hash::make($dados['password']);
         }
 
-        $user->save();
+        try {
+            $user->save();
+        } catch (\Throwable $exception) {
+            if ($novaFotografia !== null) {
+                Storage::disk('public')->delete($novaFotografia);
+            }
+
+            throw $exception;
+        }
+
+        if (
+            $novaFotografia !== null
+            && $fotografiaAntiga !== null
+            && $fotografiaAntiga !== $novaFotografia
+        ) {
+            Storage::disk('public')->delete($fotografiaAntiga);
+        }
+
         $user->load('role');
 
         return new UserResource($user);

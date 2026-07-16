@@ -36,6 +36,18 @@ class StoreUserRequest extends FormRequest
                 'required',
                 'exists:roles,id',
             ],
+
+            'ativo' => [
+                'boolean',
+            ],
+
+            'fotografia' => [
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
         ];
     }
 }

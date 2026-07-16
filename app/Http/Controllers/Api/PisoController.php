@@ -10,6 +10,8 @@ use App\Models\Piso;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class PisoController extends Controller
 {
@@ -36,9 +38,16 @@ class PisoController extends Controller
                 $query
                     ->where('nome', 'like', "%{$search}%")
                     ->orWhere('codigo', 'like', "%{$search}%")
-                    ->orWhereHas('edificio', function ($query) use ($search): void {
-                        $query->where('nome', 'like', "%{$search}%");
-                    });
+                    ->orWhereHas(
+                        'edificio',
+                        function ($query) use ($search): void {
+                            $query->where(
+                                'nome',
+                                'like',
+                                "%{$search}%"
+                            );
+                        }
+                    );
             });
         }
 
@@ -136,9 +145,26 @@ class PisoController extends Controller
     {
         Gate::authorize('create', Piso::class);
 
-        $piso = Piso::create(
-            $request->validated()
-        );
+        $dados = $request->validated();
+        $plantaGuardada = null;
+
+        if ($request->hasFile('planta')) {
+            $plantaGuardada = $request
+                ->file('planta')
+                ->store('pisos/plantas', 'public');
+
+            $dados['planta'] = $plantaGuardada;
+        }
+
+        try {
+            $piso = Piso::create($dados);
+        } catch (Throwable $exception) {
+            if ($plantaGuardada !== null) {
+                Storage::disk('public')->delete($plantaGuardada);
+            }
+
+            throw $exception;
+        }
 
         $piso->load('edificio');
 
@@ -156,9 +182,44 @@ class PisoController extends Controller
     ): PisoResource {
         Gate::authorize('update', $piso);
 
-        $piso->update(
-            $request->validated()
-        );
+        $dados = $request->validated();
+
+        $plantaAntiga = $piso->planta;
+        $novaPlanta = null;
+
+        /*
+         * Permite distinguir:
+         * - campo planta não enviado: mantém a planta atual;
+         * - nova planta enviada: substitui a anterior;
+         * - planta enviada como null: remove a planta atual.
+         */
+        $campoPlantaEnviado = array_key_exists('planta', $dados);
+
+        if ($request->hasFile('planta')) {
+            $novaPlanta = $request
+                ->file('planta')
+                ->store('pisos/plantas', 'public');
+
+            $dados['planta'] = $novaPlanta;
+        }
+
+        try {
+            $piso->update($dados);
+        } catch (Throwable $exception) {
+            if ($novaPlanta !== null) {
+                Storage::disk('public')->delete($novaPlanta);
+            }
+
+            throw $exception;
+        }
+
+        $deveApagarPlantaAntiga = $plantaAntiga !== null
+            && $campoPlantaEnviado
+            && $plantaAntiga !== $piso->planta;
+
+        if ($deveApagarPlantaAntiga) {
+            Storage::disk('public')->delete($plantaAntiga);
+        }
 
         $piso->load('edificio');
 

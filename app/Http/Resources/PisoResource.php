@@ -16,9 +16,16 @@ class PisoResource extends JsonResource
             'nome' => $this->nome,
             'codigo' => $this->codigo,
             'numero' => $this->numero,
+
             'planta' => $this->planta,
+
+            'planta_url' => $this->planta
+                ? asset('storage/' . $this->planta)
+                : null,
+
             'descricao' => $this->descricao,
             'ativo' => (bool) $this->ativo,
+
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];

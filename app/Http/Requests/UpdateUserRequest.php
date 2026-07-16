@@ -15,7 +15,12 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'name' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:255',
+            ],
 
             'email' => [
                 'sometimes',
@@ -26,6 +31,7 @@ class UpdateUserRequest extends FormRequest
             ],
 
             'password' => [
+                'sometimes',
                 'nullable',
                 'string',
                 'min:8',
@@ -35,6 +41,15 @@ class UpdateUserRequest extends FormRequest
                 'sometimes',
                 'required',
                 'exists:roles,id',
+            ],
+
+            'fotografia' => [
+                'sometimes',
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
             ],
         ];
     }
