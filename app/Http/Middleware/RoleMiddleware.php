@@ -11,21 +11,31 @@ class RoleMiddleware
     /**
      * Handle an incoming request.
      */
-    public function handle(Request $request, Closure $next, string $role): Response
-    {
+    public function handle(
+        Request $request,
+        Closure $next,
+        string ...$roles
+    ): Response {
         $user = $request->user();
 
-        // Verifica se existe utilizador autenticado
-        if (!$user) {
+        if (! $user) {
             return response()->json([
-                'message' => 'Utilizador não autenticado.'
+                'message' => 'Utilizador não autenticado.',
             ], 401);
         }
 
-        // Verifica se o utilizador tem o papel pretendido
-        if (!$user->role || $user->role->nome !== $role) {
+        if (! $user->ativo) {
             return response()->json([
-                'message' => 'Não tem permissão para aceder a este recurso.'
+                'message' => 'Utilizador inativo.',
+            ], 403);
+        }
+
+        if (
+            ! $user->role ||
+            ! in_array($user->role->nome, $roles, true)
+        ) {
+            return response()->json([
+                'message' => 'Não tem permissão para aceder a este recurso.',
             ], 403);
         }
 

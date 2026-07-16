@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+
 class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
@@ -15,6 +16,13 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'role' => $this->role?->nome,
             'ativo' => (bool) $this->ativo,
+
+            'fotografia' => $this->fotografia,
+
+            'fotografia_url' => $this->fotografia
+    ? asset('storage/' . $this->fotografia)
+    : null,
+
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
         ];
     }

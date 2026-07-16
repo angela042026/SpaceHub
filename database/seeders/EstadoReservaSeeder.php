@@ -3,102 +3,36 @@
 namespace Database\Seeders;
 
 use App\Models\EstadoReserva;
-use App\Models\Periodo;
-use App\Models\Reserva;
-use App\Models\Secretaria;
-use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class EstadoReservaSeeder extends Seeder
 {
     public function run(): void
     {
-        $utilizador = User::where('email', 'utilizador@spacehub.pt')->first();
-        $admin = User::where('email', 'admin@spacehub.pt')->first();
+        $estados = [
+            [
+                'codigo' => 'pendente',
+                'nome' => 'Pendente',
+            ],
+            [
+                'codigo' => 'confirmada',
+                'nome' => 'Confirmada',
+            ],
+            [
+                'codigo' => 'cancelada',
+                'nome' => 'Cancelada',
+            ],
+            [
+                'codigo' => 'expirada',
+                'nome' => 'Expirada',
+            ],
+        ];
 
-        $manha = Periodo::where('nome', 'Manhã')->first();
-        $tarde = Periodo::where('nome', 'Tarde')->first();
-
-        $confirmada = EstadoReserva::where('codigo', 'confirmada')->first();
-        $pendente = EstadoReserva::where('codigo', 'pendente')->first();
-        $cancelada = EstadoReserva::where('codigo', 'cancelada')->first();
-        $expirada = EstadoReserva::where('codigo', 'expirada')->first();
-
-        $secretarias = Secretaria::take(6)->get();
-
-        if (
-            !$utilizador ||
-            !$admin ||
-            !$manha ||
-            !$tarde ||
-            !$confirmada ||
-            !$pendente ||
-            !$cancelada ||
-            !$expirada
-        ) {
-            return;
+        foreach ($estados as $estado) {
+            EstadoReserva::updateOrCreate(
+                ['codigo' => $estado['codigo']],
+                $estado
+            );
         }
-
-        Reserva::updateOrCreate(
-            [
-                'secretaria_id' => $secretarias[0]->id,
-                'data' => Carbon::today(),
-                'periodo_id' => $manha->id,
-            ],
-            [
-                'user_id' => $utilizador->id,
-                'estado_reserva_id' => $confirmada->id,
-                'check_in_at' => now()->subMinutes(20),
-            ]
-        );
-
-        Reserva::updateOrCreate(
-            [
-                'secretaria_id' => $secretarias[1]->id,
-                'data' => Carbon::today(),
-                'periodo_id' => $manha->id,
-            ],
-            [
-                'user_id' => $admin->id,
-                'estado_reserva_id' => $pendente->id,
-            ]
-        );
-
-        Reserva::updateOrCreate(
-            [
-                'secretaria_id' => $secretarias[2]->id,
-                'data' => Carbon::today(),
-                'periodo_id' => $tarde->id,
-            ],
-            [
-                'user_id' => $utilizador->id,
-                'estado_reserva_id' => $cancelada->id,
-            ]
-        );
-
-        Reserva::updateOrCreate(
-            [
-                'secretaria_id' => $secretarias[3]->id,
-                'data' => Carbon::today(),
-                'periodo_id' => $tarde->id,
-            ],
-            [
-                'user_id' => $admin->id,
-                'estado_reserva_id' => $expirada->id,
-            ]
-        );
-
-        Reserva::updateOrCreate(
-            [
-                'secretaria_id' => $secretarias[4]->id,
-                'data' => Carbon::tomorrow(),
-                'periodo_id' => $manha->id,
-            ],
-            [
-                'user_id' => $utilizador->id,
-                'estado_reserva_id' => $pendente->id,
-            ]
-        );
     }
 }

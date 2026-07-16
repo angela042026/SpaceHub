@@ -17,21 +17,55 @@ class UpdatePisoRequest extends FormRequest
         $piso = $this->route('piso');
 
         return [
-            'edificio_id' => ['sometimes', 'required', 'exists:edificios,id'],
-            'nome' => ['sometimes', 'required', 'string', 'max:100'],
+            'edificio_id' => [
+                'sometimes',
+                'required',
+                'integer',
+                'exists:edificios,id',
+            ],
+
+            'nome' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:100',
+            ],
+
             'codigo' => [
                 'sometimes',
                 'required',
                 'string',
                 'max:10',
-                Rule::unique('pisos')->where(fn ($query) =>
-                    $query->where('edificio_id', $this->edificio_id ?? $piso->edificio_id)
-                )->ignore($piso),
+                Rule::unique('pisos')
+                    ->where(
+                        fn ($query) => $query->where(
+                            'edificio_id',
+                            $this->integer('edificio_id')
+                                ?: $piso->edificio_id
+                        )
+                    )
+                    ->ignore($piso),
             ],
-            'numero' => ['sometimes', 'required', 'integer'],
-            'planta' => ['nullable', 'string'],
-            'descricao' => ['nullable', 'string'],
-            'ativo' => ['boolean'],
+
+            'numero' => [
+                'sometimes',
+                'required',
+                'integer',
+            ],
+
+            'planta' => [
+                'sometimes',
+                'nullable',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
+            ],
+
+            'descricao' => [
+                'nullable',
+                'string',
+            ],
         ];
     }
 }

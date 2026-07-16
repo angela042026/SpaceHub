@@ -21,11 +21,13 @@ class StoreReservaRequest extends FormRequest
 
             'periodo_id' => [
                 'required',
+                'integer',
                 'exists:periodos,id',
             ],
 
             'secretaria_id' => [
                 'required',
+                'integer',
                 'exists:secretarias,id',
             ],
 
@@ -34,6 +36,7 @@ class StoreReservaRequest extends FormRequest
                 'string',
                 'max:500',
             ],
+
         ];
     }
 }

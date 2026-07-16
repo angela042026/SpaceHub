@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Setor extends Model
 {
@@ -21,26 +23,24 @@ class Setor extends Model
         'planta_y',
     ];
 
-    protected $casts = [
-        'reservavel' => 'boolean',
-        'ativo' => 'boolean',
-        'capacidade' => 'integer',
-        'planta_x' => 'integer',
-        'planta_y' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'piso_id' => 'integer',
+            'reservavel' => 'boolean',
+            'ativo' => 'boolean',
+            'capacidade' => 'integer',
+            'planta_x' => 'integer',
+            'planta_y' => 'integer',
+        ];
+    }
 
-    /**
-     * Um setor pertence a um piso.
-     */
-    public function piso()
+    public function piso(): BelongsTo
     {
         return $this->belongsTo(Piso::class);
     }
 
-    /**
-     * Um setor possui várias secretárias.
-     */
-    public function secretarias()
+    public function secretarias(): HasMany
     {
         return $this->hasMany(Secretaria::class);
     }

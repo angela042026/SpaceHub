@@ -14,23 +14,75 @@ class StoreEdificioRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nome' => 'required|string|max:100',
-            'codigo' => 'required|string|max:20|unique:edificios,codigo',
+            'nome' => [
+                'required',
+                'string',
+                'max:100',
+            ],
 
-            'morada' => 'required|string|max:255',
-            'codigo_postal' => 'nullable|string|max:20',
-            'cidade' => 'required|string|max:100',
-            'pais' => 'nullable|string|max:100',
+            'codigo' => [
+                'required',
+                'string',
+                'max:20',
+                'unique:edificios,codigo',
+            ],
 
-            'telefone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'imagem' => 'nullable|string|max:255',
+            'morada' => [
+                'required',
+                'string',
+                'max:255',
+            ],
 
-            'hora_abertura' => 'nullable|date_format:H:i',
-            'hora_fecho' => 'nullable|date_format:H:i',
+            'codigo_postal' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
 
-            'ativo' => 'boolean',
-            'descricao' => 'nullable|string',
+            'cidade' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+
+            'pais' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'telefone' => [
+                'nullable',
+                'string',
+                'max:20',
+            ],
+
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+            ],
+
+            'imagem' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'hora_abertura' => [
+                'nullable',
+                'date_format:H:i',
+            ],
+
+            'hora_fecho' => [
+                'nullable',
+                'date_format:H:i',
+            ],
+
+            'descricao' => [
+                'nullable',
+                'string',
+            ],
         ];
     }
 }

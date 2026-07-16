@@ -7,74 +7,116 @@ use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class ReservaSeeder extends Seeder
 {
     public function run(): void
     {
-        $user = User::where('email', 'utilizador@spacehub.pt')->first();
+        $utilizador = User::where('email', 'utilizador@spacehub.pt')->first();
         $admin = User::where('email', 'admin@spacehub.pt')->first();
 
         $manha = Periodo::where('nome', 'Manhã')->first();
         $tarde = Periodo::where('nome', 'Tarde')->first();
 
-        $pendente = EstadoReserva::where('codigo', 'pendente')->first();
         $confirmada = EstadoReserva::where('codigo', 'confirmada')->first();
+        $pendente = EstadoReserva::where('codigo', 'pendente')->first();
         $cancelada = EstadoReserva::where('codigo', 'cancelada')->first();
+        $expirada = EstadoReserva::where('codigo', 'expirada')->first();
 
-        $secretarias = Secretaria::take(6)->get();
+        $secretarias = Secretaria::query()
+            ->orderBy('id')
+            ->take(5)
+            ->get();
 
-        if (!$user || !$admin || !$manha || !$tarde || !$pendente || !$confirmada || $secretarias->count() < 3) {
-            return;
+        if (!$utilizador || !$admin) {
+            throw new RuntimeException(
+                'ReservaSeeder: os utilizadores obrigatórios não foram encontrados.'
+            );
+        }
+
+        if (!$manha || !$tarde) {
+            throw new RuntimeException(
+                'ReservaSeeder: os períodos obrigatórios não foram encontrados.'
+            );
+        }
+
+        if (!$confirmada || !$pendente || !$cancelada || !$expirada) {
+            throw new RuntimeException(
+                'ReservaSeeder: os estados de reserva obrigatórios não foram encontrados.'
+            );
+        }
+
+        if ($secretarias->count() < 5) {
+            throw new RuntimeException(
+                'ReservaSeeder: são necessárias pelo menos cinco secretárias.'
+            );
         }
 
         Reserva::updateOrCreate(
             [
                 'secretaria_id' => $secretarias[0]->id,
-                'data' => Carbon::today(),
+                'data' => Carbon::today()->toDateString(),
                 'periodo_id' => $manha->id,
             ],
             [
-                'user_id' => $user->id,
+                'user_id' => $utilizador->id,
                 'estado_reserva_id' => $confirmada->id,
-                'check_in_at' => now(),
+                'check_in_at' => now()->subMinutes(20),
             ]
         );
 
         Reserva::updateOrCreate(
             [
                 'secretaria_id' => $secretarias[1]->id,
-                'data' => Carbon::today(),
-                'periodo_id' => $tarde->id,
+                'data' => Carbon::today()->toDateString(),
+                'periodo_id' => $manha->id,
             ],
             [
                 'user_id' => $admin->id,
                 'estado_reserva_id' => $pendente->id,
+                'check_in_at' => null,
             ]
         );
 
         Reserva::updateOrCreate(
             [
                 'secretaria_id' => $secretarias[2]->id,
-                'data' => Carbon::tomorrow(),
-                'periodo_id' => $manha->id,
-            ],
-            [
-                'user_id' => $user->id,
-                'estado_reserva_id' => $pendente->id,
-            ]
-        );
-        Reserva::updateOrCreate(
-            [
-                'secretaria_id' => $secretarias[3]->id,
-                'data' => Carbon::today(),
+                'data' => Carbon::today()->toDateString(),
                 'periodo_id' => $tarde->id,
             ],
             [
-                'user_id' => $user->id,
+                'user_id' => $utilizador->id,
                 'estado_reserva_id' => $cancelada->id,
+                'check_in_at' => null,
+            ]
+        );
+
+        Reserva::updateOrCreate(
+            [
+                'secretaria_id' => $secretarias[3]->id,
+                'data' => Carbon::today()->toDateString(),
+                'periodo_id' => $tarde->id,
+            ],
+            [
+                'user_id' => $admin->id,
+                'estado_reserva_id' => $expirada->id,
+                'check_in_at' => null,
+            ]
+        );
+
+        Reserva::updateOrCreate(
+            [
+                'secretaria_id' => $secretarias[4]->id,
+                'data' => Carbon::tomorrow()->toDateString(),
+                'periodo_id' => $manha->id,
+            ],
+            [
+                'user_id' => $utilizador->id,
+                'estado_reserva_id' => $pendente->id,
+                'check_in_at' => null,
             ]
         );
     }
