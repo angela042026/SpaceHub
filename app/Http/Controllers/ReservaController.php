@@ -10,7 +10,7 @@ class ReservaController extends Controller
     /**
      * Listar as reservas do utilizador.
      */
-    
+
     public function index()
     {
         return Inertia::render('Reservas/Index');
