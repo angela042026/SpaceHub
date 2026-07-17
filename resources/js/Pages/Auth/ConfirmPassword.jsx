@@ -1,55 +1,141 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import AuthActions from '@/Components/Auth/AuthActions';
+import AuthCard from '@/Components/Auth/AuthCard';
+import AuthLayout from '@/Components/Auth/AuthLayout';
+import PasswordField from '@/Components/Auth/PasswordField';
+import { Head, Link, useForm } from '@inertiajs/react';
+import {
+    ArrowLeft,
+    ShieldCheck,
+} from 'lucide-react';
 
 export default function ConfirmPassword() {
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const {
+        data,
+        setData,
+        post,
+        processing,
+        errors,
+        reset,
+    } = useForm({
         password: '',
     });
 
-    const submit = (e) => {
-        e.preventDefault();
+    const submit = (event) => {
+        event.preventDefault();
 
         post(route('password.confirm'), {
+            preserveScroll: true,
             onFinish: () => reset('password'),
         });
     };
 
     return (
-        <GuestLayout>
-            <Head title="Confirm Password" />
+        <>
+            <Head title="Confirmar senha" />
 
-            <div className="mb-4 text-sm text-gray-600">
-                This is a secure area of the application. Please confirm your
-                password before continuing.
-            </div>
+            <AuthLayout
+                title="Confirme a sua"
+                highlightedTitle="senha"
+                subtitle="Por segurança, confirme a sua senha antes de continuar."
+                heroTitle="Área protegida."
+                heroPrefix="Acesso"
+                heroHighlightedTitle="seguro."
+                heroDescription="Esta verificação ajuda a proteger os seus dados e as ações sensíveis da sua conta."
+            >
+                <form
+                    onSubmit={submit}
+                    noValidate
+                >
+                    <AuthCard>
+                        <div
+                            className="
+                                mb-5 flex items-start gap-3
+                                rounded-xl
+                                border border-slate-200
+                                bg-slate-50
+                                px-4 py-3
+                                text-sm leading-6
+                                text-slate-600
+                                dark:border-white/10
+                                dark:bg-white/5
+                                dark:text-slate-300
+                            "
+                        >
+                            <ShieldCheck
+                                size={20}
+                                aria-hidden="true"
+                                className="
+                                    mt-0.5 shrink-0
+                                    text-[#14B8A6]
+                                    dark:text-[#5EEAD4]
+                                "
+                            />
 
-            <form onSubmit={submit}>
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                            <p>
+                                Esta é uma área segura da aplicação.
+                                Confirme a sua senha para continuar.
+                            </p>
+                        </div>
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
+                        <PasswordField
+                            id="password"
+                            label="Senha"
+                            name="password"
+                            value={data.password}
+                            placeholder="Introduza a sua senha"
+                            autoComplete="current-password"
+                            error={errors.password}
+                            onChange={(event) =>
+                                setData(
+                                    'password',
+                                    event.target.value,
+                                )
+                            }
+                        />
 
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
+                        <AuthActions
+                            processing={processing}
+                            submitText="Confirmar"
+                            processingText="A confirmar..."
+                            submitIcon={ShieldCheck}
+                            showSecondary={false}
+                        />
+                    </AuthCard>
+                </form>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Confirm
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
+                <p
+                    className="
+                        mt-6 text-center
+                        text-sm text-slate-600
+                        dark:text-slate-300
+                    "
+                >
+                    Não pretende continuar?{' '}
+
+                    <Link
+                        href={route('dashboard')}
+                        className="
+                            inline-flex items-center gap-1
+                            font-semibold
+                            text-[#0F9E90]
+                            underline-offset-4
+                            transition
+                            hover:underline
+                            focus:outline-none
+                            focus:ring-2
+                            focus:ring-[#14B8A6]/30
+                            dark:text-[#5EEAD4]
+                        "
+                    >
+                        <ArrowLeft
+                            size={15}
+                            aria-hidden="true"
+                        />
+
+                        Voltar ao dashboard
+                    </Link>
+                </p>
+            </AuthLayout>
+        </>
     );
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\EnviarMensagem;
+use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
@@ -22,6 +23,20 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Autenticação com Google
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('guest')->group(function () {
+    Route::get('/auth/google', [GoogleAuthController::class, 'redirect'])
+        ->name('google.redirect');
+
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])
+        ->name('google.callback');
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
@@ -139,7 +154,6 @@ require __DIR__.'/auth.php';
 |--------------------------------------------------------------------------
 */
 
-// Rota de teste para disparo manual de eventos
 Route::get('/disparar-evento', function () {
     broadcast(new EnviarMensagem(
         'Sistema SpaceHub',
@@ -149,10 +163,8 @@ Route::get('/disparar-evento', function () {
     return 'Evento nativo enviado com sucesso!';
 });
 
-// Processamento do Chat Bot
 Route::post('/simular-chat', [ChatController::class, 'simularResposta']);
 
-// Página de testes do Chat
 Route::get('/teste-chat', function () {
     return Inertia::render('TesteChat');
 });
