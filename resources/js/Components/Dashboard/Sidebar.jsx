@@ -17,6 +17,7 @@ import {
     LogOut,
     X,
     FileText,
+    Search,
 } from 'lucide-react';
 
 function SidebarItem({
@@ -107,11 +108,25 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                         <SidebarItem
                             icon={CalendarPlus}
                             label="Reservar Espaço"
+                            href={route('reservas.create')}
+                            active={route().current('reservas.create')}
+                            onNavigate={onClose}
                         />
 
                         <SidebarItem
                             icon={CalendarDays}
                             label="Minhas Reservas"
+                            href={route('reservas.index')}
+                            active={route().current('reservas.index')}
+                            onNavigate={onClose}
+                        />
+
+                        <SidebarItem
+                            icon={Search}
+                            label="Disponibilidade"
+                            href={route('reservas.availability')}
+                            active={route().current('reservas.availability')}
+                            onNavigate={onClose}
                         />
 
                         <SidebarItem
@@ -133,6 +148,9 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                         <SidebarItem
                             icon={History}
                             label="Histórico"
+                            href={route('reservas.history')}
+                            active={route().current('reservas.history')}
+                            onNavigate={onClose}
                         />
 
                         <SidebarItem

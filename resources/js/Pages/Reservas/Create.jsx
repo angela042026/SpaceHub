@@ -23,7 +23,9 @@ export default function Create({ secretarias, periodos }) {
             return;
         }
 
-        fetch(`/reservas/availability?data=${data.data}&periodo_id=${data.periodo_id}`)
+        fetch(route('reservas.availability', { data: data.data, periodo_id: data.periodo_id }), {
+            headers: { Accept: 'application/json' },
+        })
             .then((response) => {
 
                 // Verifica se a resposta é válida
@@ -146,7 +148,7 @@ export default function Create({ secretarias, periodos }) {
                                             Selecione...
                                         </option>
 
-                                        {secretarias.map((secretaria) => (
+                                        {secretariasDisponiveis.map((secretaria) => (
                                             <option
                                                 key={secretaria.id}
                                                 value={secretaria.id}
@@ -155,6 +157,12 @@ export default function Create({ secretarias, periodos }) {
                                             </option>
                                         ))}
                                     </select>
+
+                                    {secretariasDisponiveis.length === 0 && (
+                                        <p className="mt-1 text-sm text-gray-500">
+                                            Não há secretárias disponíveis para a data e período selecionados.
+                                        </p>
+                                    )}
 
                                     {errors.secretaria_id && (
                                         <p className="mt-1 text-sm text-red-600">
