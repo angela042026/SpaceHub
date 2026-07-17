@@ -4,6 +4,7 @@ import Sidebar from '@/Components/Dashboard/Sidebar';
 import DashboardHeader from '@/Components/Dashboard/DashboardHeader';
 import Footer from '@/Components/Footer';
 import Toast from '@/Components/Toast';
+import ChatWidget from '@/Components/Chat/ChatWidget';
 
 export default function DashboardLayout({ children, header = true }) {
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -27,6 +28,8 @@ export default function DashboardLayout({ children, header = true }) {
             </main>
 
             <Toast />
+
+            <ChatWidget />
         </div>
     );
 }

@@ -134,20 +134,16 @@ require __DIR__.'/auth.php';
 |--------------------------------------------------------------------------
 */
 
-// Rota de teste para disparo manual de eventos
+// Envio de mensagens seguro (lê o utilizador da sessão e aciona o Bot)
+Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
+    ->name('chat.enviar')
+    ->middleware('auth'); // Garante que só utilizadores autenticados usam o chat real
+
+// Rota de teste rápida (opcional - podes apagar se já não precisares de testar a ligação)
 Route::get('/disparar-evento', function () {
     broadcast(new EnviarMensagem(
         'Sistema SpaceHub',
         'WebSockets nativos a funcionar! 🚀'
     ));
-
     return 'Evento nativo enviado com sucesso!';
-});
-
-// Processamento do Chat Bot
-Route::post('/simular-chat', [ChatController::class, 'simularResposta']);
-
-// Página de testes do Chat
-Route::get('/chat', function () {
-    return Inertia::render('ChatBot');
 });
