@@ -168,13 +168,11 @@ class ReservaController extends Controller
     /**
      * Cancelar uma reserva.
      */
-    public function destroy(string $id)
+    public function cancelar(Reserva $reserva)
     {
-        // Obtém a reserva do utilizador autenticado
-        $reserva = Reserva::where('id', $id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
-
+        if ($reserva->user_id !== Auth::id()) {
+            abort(403, 'Esta reserva não te pertence.');
+        }
         // Verifica se a reserva já foi cancelada
         if ($reserva->cancelada_at !== null) {
             return redirect()
