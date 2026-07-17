@@ -22,13 +22,22 @@ export default function useTheme() {
     const [theme, setTheme] = useState(getPreferredTheme);
 
     useEffect(() => {
-        document.documentElement.classList.toggle('dark', theme === 'dark');
+        document.documentElement.classList.toggle(
+            'dark',
+            theme === 'dark',
+        );
+
         window.localStorage.setItem(STORAGE_KEY, theme);
     }, [theme]);
 
     const toggleTheme = useCallback(() => {
-        setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
+        setTheme((current) =>
+            current === 'dark' ? 'light' : 'dark',
+        );
     }, []);
 
-    return { theme, toggleTheme };
+    return {
+        theme,
+        toggleTheme,
+    };
 }
