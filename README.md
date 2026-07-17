@@ -328,4 +328,8 @@ Sistema de Gestão e Reserva de Espaços Colaborativos
 
 Laravel • React • Inertia • MySQL
 
+## Integração final
+
+A consolidação da segurança, documentação e revisão do backend foi concluída na versão v1.0.0.
+
 </div>
