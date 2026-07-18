@@ -22,9 +22,13 @@ class EnsureUserIsActive
         }
 
         if (! $user->ativo) {
-            return response()->json([
-                'message' => 'A conta encontra-se desativada.',
-            ], 403);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'A conta encontra-se desativada.',
+                ], 403);
+            }
+
+            abort(403, 'A conta encontra-se desativada.');
         }
 
         return $next($request);

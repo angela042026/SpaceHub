@@ -1,3 +1,5 @@
+import { Link } from '@inertiajs/react';
+
 export default function AuthFooter() {
     return (
         <footer
@@ -16,21 +18,21 @@ export default function AuthFooter() {
 
                 <span className="hidden h-5 w-px bg-slate-300 dark:bg-white/15 sm:block" />
 
-                <button
-                    type="button"
+                <Link
+                    href={route('legal.privacy')}
                     className="transition hover:text-[#0F9E90] dark:hover:text-[#5EEAD4]"
                 >
                     Política de Privacidade
-                </button>
+                </Link>
 
                 <span className="hidden h-5 w-px bg-slate-300 dark:bg-white/15 sm:block" />
 
-                <button
-                    type="button"
+                <Link
+                    href={route('legal.terms')}
                     className="transition hover:text-[#0F9E90] dark:hover:text-[#5EEAD4]"
                 >
                     Termos de Utilização
-                </button>
+                </Link>
             </div>
         </footer>
     );
