@@ -24,17 +24,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'active' => EnsureUserIsActive::class,
         ]);
-
-        $middleware->validateCsrfTokens(except: [
-            'localidades',
-            'localidades/*',
-            'pisos',
-            'pisos/*',
-            'setores',
-            'setores/*',
-            'secretarias',
-            'secretarias/*',
-        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

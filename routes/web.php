@@ -25,6 +25,17 @@ Route::get('/', function () {
     ]);
 });
 
+// ==========================
+// Páginas legais (públicas)
+// ==========================
+Route::get('/termos-utilizacao', function () {
+    return Inertia::render('Legal/Terms');
+})->name('legal.terms');
+
+Route::get('/politica-privacidade', function () {
+    return Inertia::render('Legal/Privacy');
+})->name('legal.privacy');
+
 /*
 |--------------------------------------------------------------------------
 | Autenticação com Google
@@ -40,10 +51,10 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'active'])
     ->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'active'])->group(function () {
     // ==========================
     // Perfil do Utilizador
     // ==========================

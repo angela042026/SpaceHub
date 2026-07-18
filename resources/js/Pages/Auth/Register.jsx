@@ -167,7 +167,9 @@ function TermsAgreement({
                 <span>
                     Aceito os{' '}
                     <Link
-                        href="/termos-utilizacao"
+                        href={route('legal.terms')}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="
                             font-semibold
                             text-[#0F9E90]
@@ -181,7 +183,9 @@ function TermsAgreement({
                     </Link>
                     <span> e a </span>
                     <Link
-                        href="/politica-privacidade"
+                        href={route('legal.privacy')}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="
                             font-semibold
                             text-[#0F9E90]
@@ -207,9 +211,6 @@ function TermsAgreement({
 }
 
 export default function Register() {
-    const [acceptedTerms, setAcceptedTerms] =
-        useState(false);
-
     const [attemptedSubmit, setAttemptedSubmit] =
         useState(false);
 
@@ -225,6 +226,7 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
+        terms: false,
     });
 
     const hasConfirmation =
@@ -247,7 +249,7 @@ export default function Register() {
     const handleTermsChange = (event) => {
         const checked = event.target.checked;
 
-        setAcceptedTerms(checked);
+        setData('terms', checked);
 
         if (checked) {
             setAttemptedSubmit(false);
@@ -258,7 +260,7 @@ export default function Register() {
         event.preventDefault();
         setAttemptedSubmit(true);
 
-        if (!acceptedTerms) {
+        if (!data.terms) {
             return;
         }
 
@@ -285,139 +287,138 @@ export default function Register() {
                 heroHighlightedTitle="inteligente."
                 heroDescription="Tudo o que precisa para gerir reservas, espaços e check-ins num único lugar."
             >
-                <div className="lg:-mx-7 xl:-mx-9">
-                    <form
-                        onSubmit={submit}
-                        noValidate
-                    >
-                        <AuthCard>
-                            <AuthField
-                                id="name"
-                                label="Nome completo"
-                                name="name"
-                                icon={User}
-                                value={data.name}
-                                placeholder="Ex.: Hanna Sampaio"
-                                autoComplete="name"
-                                autoFocus
-                                error={errors.name}
-                                onChange={(event) =>
-                                    setData(
-                                        'name',
-                                        event.target.value,
-                                    )
-                                }
+                <form
+                    onSubmit={submit}
+                    noValidate
+                >
+                    <AuthCard>
+                        <AuthField
+                            id="name"
+                            label="Nome completo"
+                            name="name"
+                            icon={User}
+                            value={data.name}
+                            placeholder="Ex.: Hanna Sampaio"
+                            autoComplete="name"
+                            autoFocus
+                            error={errors.name}
+                            onChange={(event) =>
+                                setData(
+                                    'name',
+                                    event.target.value,
+                                )
+                            }
+                        />
+
+                        <AuthField
+                            id="email"
+                            label="E-mail"
+                            name="email"
+                            type="email"
+                            icon={Mail}
+                            value={data.email}
+                            placeholder="Ex.: hanna@empresa.pt"
+                            autoComplete="username"
+                            error={errors.email}
+                            className="mt-5"
+                            onChange={(event) =>
+                                setData(
+                                    'email',
+                                    event.target.value,
+                                )
+                            }
+                        />
+
+                        <PasswordField
+                            id="password"
+                            label="Senha"
+                            name="password"
+                            value={data.password}
+                            placeholder="Crie uma senha segura"
+                            error={errors.password}
+                            className="mt-5"
+                            onChange={(event) =>
+                                setData(
+                                    'password',
+                                    event.target.value,
+                                )
+                            }
+                        >
+                            <PasswordStrength
+                                password={data.password}
                             />
+                        </PasswordField>
 
-                            <AuthField
-                                id="email"
-                                label="E-mail"
-                                name="email"
-                                type="email"
-                                icon={Mail}
-                                value={data.email}
-                                placeholder="Ex.: hanna@empresa.pt"
-                                autoComplete="username"
-                                error={errors.email}
-                                className="mt-5"
-                                onChange={(event) =>
-                                    setData(
-                                        'email',
-                                        event.target.value,
-                                    )
-                                }
-                            />
-
-                            <PasswordField
-                                id="password"
-                                label="Senha"
-                                name="password"
-                                value={data.password}
-                                placeholder="Crie uma senha segura"
-                                error={errors.password}
-                                className="mt-5"
-                                onChange={(event) =>
-                                    setData(
-                                        'password',
-                                        event.target.value,
-                                    )
-                                }
-                            >
-                                <PasswordStrength
-                                    password={data.password}
-                                />
-                            </PasswordField>
-
-                            <PasswordField
-                                id="password_confirmation"
-                                label="Confirmar senha"
-                                name="password_confirmation"
-                                value={
+                        <PasswordField
+                            id="password_confirmation"
+                            label="Confirmar senha"
+                            name="password_confirmation"
+                            value={
+                                data.password_confirmation
+                            }
+                            placeholder="Repita a sua senha"
+                            validationState={
+                                confirmationState
+                            }
+                            error={
+                                errors.password_confirmation
+                            }
+                            className="mt-5"
+                            onChange={(event) =>
+                                setData(
+                                    'password_confirmation',
+                                    event.target.value,
+                                )
+                            }
+                        >
+                            <PasswordMatchMessage
+                                confirmation={
                                     data.password_confirmation
                                 }
-                                placeholder="Repita a sua senha"
-                                validationState={
-                                    confirmationState
-                                }
-                                error={
-                                    errors.password_confirmation
-                                }
-                                className="mt-5"
-                                onChange={(event) =>
-                                    setData(
-                                        'password_confirmation',
-                                        event.target.value,
-                                    )
-                                }
-                            >
-                                <PasswordMatchMessage
-                                    confirmation={
-                                        data.password_confirmation
-                                    }
-                                    matches={passwordsMatch}
-                                />
-                            </PasswordField>
-
-                            <TermsAgreement
-                                accepted={acceptedTerms}
-                                onChange={handleTermsChange}
-                                showError={
-                                    attemptedSubmit &&
-                                    !acceptedTerms
-                                }
+                                matches={passwordsMatch}
                             />
-                            <AuthActions
-                                processing={processing}
-                                disabled={!acceptedTerms}
-                                submitText="Criar conta"
-                                processingText="A criar conta..."
-                                submitIcon={UserPlus}
-                                googleText="Registar com Google"
-                                onGoogleClick={() => {
-                                    window.location.href = route('google.redirect');
-                                }}
-                            />
-                        </AuthCard>
-                    </form>
+                        </PasswordField>
 
-                    <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-300">
-                        Já possui uma conta?{' '}
+                        <TermsAgreement
+                            accepted={data.terms}
+                            onChange={handleTermsChange}
+                            showError={
+                                (attemptedSubmit &&
+                                    !data.terms) ||
+                                Boolean(errors.terms)
+                            }
+                        />
+                        <AuthActions
+                            processing={processing}
+                            disabled={!data.terms}
+                            submitText="Criar conta"
+                            processingText="A criar conta..."
+                            submitIcon={UserPlus}
+                            googleText="Registar com Google"
+                            onGoogleClick={() => {
+                                window.location.href = route('google.redirect');
+                            }}
+                        />
+                    </AuthCard>
+                </form>
 
-                        <Link
-                            href={route('login')}
-                            className="
-                                font-semibold
-                                text-[#0F9E90]
-                                underline-offset-4
-                                transition
-                                hover:underline
-                                dark:text-[#5EEAD4]
-                            "
-                        >
-                            Iniciar sessão
-                        </Link>
-                    </p>
-                </div>
+                <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-300">
+                    Já possui uma conta?{' '}
+
+                    <Link
+                        href={route('login')}
+                        className="
+                            font-semibold
+                            text-[#0F9E90]
+                            underline-offset-4
+                            transition
+                            hover:underline
+                            dark:text-[#5EEAD4]
+                        "
+                    >
+                        Iniciar sessão
+                    </Link>
+                </p>
             </AuthLayout>
         </>
     );
