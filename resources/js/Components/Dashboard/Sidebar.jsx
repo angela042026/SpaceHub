@@ -71,7 +71,7 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
             )}
 
             <aside
-                className={`fixed left-0 top-0 z-40 flex h-screen w-72 flex-col bg-navy-950 px-5 py-7 text-white shadow-2xl transition-transform duration-300 lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed left-0 top-0 z-40 flex h-screen w-72 flex-col bg-navy-950 px-5 py-7 text-white shadow-2xl transition-transform duration-300 print:hidden lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="mb-6 border-b border-white/5 pb-6">
@@ -171,19 +171,43 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                             </p>
 
                             <nav className="space-y-2">
-                                <SidebarItem icon={Users} label="Utilizadores" />
+                                <SidebarItem
+                                    icon={Users}
+                                    label="Utilizadores"
+                                    href={route('admin.users.index')}
+                                    active={route().current('admin.users.*')}
+                                    onNavigate={onClose}
+                                />
 
-                                <SidebarItem icon={Building2} label="Localidades" />
+                                <SidebarItem
+                                    icon={Building2}
+                                    label="Edifícios"
+                                    href={route('admin.edificios.index')}
+                                    active={route().current('admin.edificios.*')}
+                                    onNavigate={onClose}
+                                />
 
-                                <SidebarItem icon={Layers} label="Pisos" />
+                                <SidebarItem
+                                    icon={Layers}
+                                    label="Pisos"
+                                    href={route('admin.pisos.index')}
+                                    active={route().current('admin.pisos.*')}
+                                    onNavigate={onClose}
+                                />
 
-                                <SidebarItem icon={MapPinned} label="Setores" />
+                                <SidebarItem
+                                    icon={MapPinned}
+                                    label="Setores"
+                                    href={route('admin.setores.index')}
+                                    active={route().current('admin.setores.*')}
+                                    onNavigate={onClose}
+                                />
 
                                 <SidebarItem
                                     icon={Armchair}
                                     label="Secretárias"
-                                    href={route('secretarias.qrcodes')}
-                                    active={route().current('secretarias.qrcodes')}
+                                    href={route('admin.secretarias.index')}
+                                    active={route().current('admin.secretarias.*')}
                                     onNavigate={onClose}
                                 />
 
@@ -195,6 +219,9 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                                 <SidebarItem
                                     icon={QrCode}
                                     label="QR Codes"
+                                    href={route('secretarias.qrcodes')}
+                                    active={route().current('secretarias.qrcodes')}
+                                    onNavigate={onClose}
                                 />
 
                                 <SidebarItem
@@ -208,11 +235,17 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                                 <SidebarItem
                                     icon={BarChart3}
                                     label="Estatísticas"
+                                    href={route('admin.statistics.index')}
+                                    active={route().current('admin.statistics.*')}
+                                    onNavigate={onClose}
                                 />
 
                                 <SidebarItem
                                     icon={FileText}
                                     label="Relatórios"
+                                    href={route('admin.reports.index')}
+                                    active={route().current('admin.reports.*')}
+                                    onNavigate={onClose}
                                 />
                             </nav>
                         </>

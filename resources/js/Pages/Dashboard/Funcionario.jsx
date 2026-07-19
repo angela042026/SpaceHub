@@ -3,11 +3,17 @@ import { useState } from 'react';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import OfficeMap from '@/Components/Dashboard/OfficeMap';
+import RecentActivity from '@/Components/Dashboard/RecentActivity';
 import StatCard from '@/Components/Dashboard/StatCard';
 
 import { Armchair, CheckCircle2, Users } from 'lucide-react';
 
-export default function Funcionario({ stats, pisos, edificios }) {
+export default function Funcionario({
+    stats,
+    atividadeRecente,
+    pisos,
+    edificios,
+}) {
     const [selectedFloor, setSelectedFloor] = useState(pisos?.[0]?.codigo ?? '');
     const [selectedEdificio, setSelectedEdificio] = useState(edificios?.[0]?.id ?? '');
 
@@ -50,6 +56,10 @@ export default function Funcionario({ stats, pisos, edificios }) {
                         edificios={edificios}
                         pisos={pisos}
                     />
+                </section>
+
+                <section className="mt-6">
+                    <RecentActivity eventos={atividadeRecente} />
                 </section>
             </DashboardLayout>
         </>

@@ -12,17 +12,21 @@ export default function DashboardLayout({ children, header = true }) {
         <div className="min-h-screen bg-surface">
             <Sidebar open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
-            <main className="min-h-screen lg:pl-72">
-                <div className="mx-auto max-w-[1660px] px-5 py-6 sm:px-7 lg:px-9">
+            <main className="min-h-screen print:pl-0 lg:pl-72">
+                <div className="mx-auto max-w-[1660px] px-5 py-6 sm:px-7 lg:px-9 print:px-0 print:py-0">
                     {header && (
-                        <DashboardHeader onOpenNav={() => setMobileNavOpen(true)} />
+                        <div className="print:hidden">
+                            <DashboardHeader onOpenNav={() => setMobileNavOpen(true)} />
+                        </div>
                     )}
 
                     <div className="space-y-6">
                         {children}
                     </div>
 
-                    <Footer />
+                    <div className="print:hidden">
+                        <Footer />
+                    </div>
                 </div>
             </main>
 
