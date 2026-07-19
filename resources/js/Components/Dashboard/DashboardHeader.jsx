@@ -5,6 +5,7 @@ import {
     Bell,
     CalendarCheck2,
     CheckCircle2,
+    Clock,
     Clock3,
     Menu,
     Moon,
@@ -292,6 +293,27 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
             </div>
 
             <div className="relative flex flex-wrap items-center gap-3">
+                <div className="hidden h-12 items-center gap-3 rounded-xl border border-slate-200 bg-card px-4 shadow-card dark:border-slate-700 sm:flex">
+                    <Clock size={18} strokeWidth={1.9} className="text-teal-500" />
+
+                    <div className="leading-tight">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white">
+                            {agora.toLocaleTimeString('pt-PT', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                            })}
+                        </p>
+
+                        <p className="text-[11px] capitalize text-slate-400">
+                            {agora.toLocaleDateString('pt-PT', {
+                                weekday: 'short',
+                                day: '2-digit',
+                                month: 'short',
+                            })}
+                        </p>
+                    </div>
+                </div>
+
                 <button
                     type="button"
                     onClick={toggleTheme}

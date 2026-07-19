@@ -5,7 +5,8 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import StatCard from '@/Components/Dashboard/StatCard';
 import OfficeMap from '@/Components/Dashboard/OfficeMap';
 import ReservationCard from '@/Components/Dashboard/ReservationCard';
-import StatisticsPanel from '@/Components/Dashboard/StatisticsPanel';
+import RecentActivity from '@/Components/Dashboard/RecentActivity';
+import StatisticsSummary from '@/Components/Dashboard/StatisticsSummary';
 import UpcomingReservations from '@/Components/Dashboard/UpcomingReservations';
 
 import {
@@ -20,11 +21,11 @@ import {
 export default function Admin({
     stats,
     estatisticas,
+    atividadeRecente,
     pisos,
     edificios,
     reservaHojeUtilizador,
     proximasReservas,
-    periodo,
 }) {
     const [selectedFloor, setSelectedFloor] = useState(pisos?.[0]?.codigo ?? '');
     const [selectedEdificio, setSelectedEdificio] = useState(edificios?.[0]?.id ?? '');
@@ -94,7 +95,11 @@ export default function Admin({
                 <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[430px_1fr]">
                     <UpcomingReservations reservas={proximasReservas} />
 
-                    <StatisticsPanel estatisticas={estatisticas} periodo={periodo} />
+                    <StatisticsSummary estatisticas={estatisticas} />
+                </section>
+
+                <section className="mt-6 grid grid-cols-1 gap-6">
+                    <RecentActivity eventos={atividadeRecente} />
                 </section>
             </DashboardLayout>
         </>
