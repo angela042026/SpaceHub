@@ -6,10 +6,11 @@ use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Models\Periodo;
 use App\Models\EstadoReserva;
-use App\Models\Setor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Models\Setor;
+use App\Models\Piso;
 
 class ReservaController extends Controller
 {
@@ -19,7 +20,9 @@ class ReservaController extends Controller
     public function index(Request $request)
     {
         $query = Reserva::where('user_id', Auth::id())
+            ->whereNotNull('secretaria_id')
             ->with([
+                'secretaria',
                 'secretaria.setor',
                 'periodo',
                 'estadoReserva',
@@ -63,45 +66,48 @@ class ReservaController extends Controller
         ]);
     }
 
+
+
     /**
      * Mostrar o formulário de nova reserva.
      */
     public function create(Request $request)
     {
-        // Obtém os períodos ativos
+        // Períodos ativos
         $periodos = Periodo::where('ativo', true)
             ->orderBy('hora_inicio')
             ->get();
 
-        // Obtém as secretárias reserváveis e ativas
-        $secretarias = Secretaria::where('reservavel', true)
-            ->where('ativo', true);
+        // Pisos ativos
+        $pisos = Piso::where('ativo', true)
+            ->orderBy('numero')
+            ->get();
 
-        // Se já foi escolhida uma data e um período,
-        // apresentar apenas as secretárias disponíveis
-        if ($request->filled('data') && $request->filled('periodo_id')) {
-
-            $secretariasReservadas = Reserva::whereDate('data', $request->data)
-                ->where('periodo_id', $request->periodo_id)
-                ->whereNull('cancelada_at')
-                ->pluck('secretaria_id');
-
-            $secretarias->whereNotIn('id', $secretariasReservadas);
-        }
+        // Tipos de espaço (setores)
+        $setores = Setor::where('reservavel', true)
+            ->with('piso')
+            ->orderBy('piso_id')
+            ->orderBy('nome')
+            ->get();
 
         return Inertia::render('Reservas/Create', [
-            'secretarias' => $secretarias
-                ->orderBy('codigo')
-                ->get(),
-
             'periodos' => $periodos,
+            'pisos' => $pisos,
+            'setores' => $setores,
 
             'filters' => $request->only([
                 'data',
                 'periodo_id',
+                'piso_id',
+                'setor_id',
             ]),
         ]);
     }
+
+
+
+
+
 
     /**
      * Guardar uma nova reserva.
@@ -194,6 +200,8 @@ class ReservaController extends Controller
             ->with('success', 'Reserva cancelada com sucesso.');
     }
 
+
+
     /**
      * Mostrar o formulário de edição de uma reserva.
      */
@@ -213,17 +221,32 @@ class ReservaController extends Controller
             ->orderBy('hora_inicio')
             ->get();
 
+        $pisos = Piso::where('ativo', true)
+            ->orderBy('numero')
+            ->get();
+
+        $setores = Setor::where('reservavel', true)
+            ->with('piso')
+            ->orderBy('piso_id')
+            ->orderBy('nome')
+            ->get();
+
         $secretarias = Secretaria::where('reservavel', true)
             ->where('ativo', true)
+            ->with('setor.piso')
             ->orderBy('codigo')
             ->get();
 
         return Inertia::render('Reservas/Edit', [
-            'reserva' => $reserva->only(['id', 'data', 'periodo_id', 'secretaria_id', 'observacoes']),
+            'reserva' => $reserva->load('secretaria.setor.piso'),
             'periodos' => $periodos,
+            'pisos' => $pisos,
+            'setores' => $setores,
             'secretarias' => $secretarias,
         ]);
     }
+
+
 
     /**
      * Atualizar uma reserva existente.
@@ -313,7 +336,7 @@ class ReservaController extends Controller
     }
 
     /**
-     * Consultar disponibilidade das secretárias.
+     * Consultar disponibilidade dos lugares.
      *
      * Usado tanto pela consulta em direto do formulário de criação (JSON)
      * como pela página dedicada de consulta de disponibilidade (Inertia).
@@ -321,12 +344,20 @@ class ReservaController extends Controller
     public function availability(Request $request)
     {
         if ($request->wantsJson()) {
+
             $request->validate([
                 'data' => ['required', 'date'],
                 'periodo_id' => ['required', 'exists:periodos,id'],
+                'setor_id' => ['required', 'exists:setores,id'],
             ]);
 
-            return response()->json($this->secretariasDisponiveis($request->data, $request->periodo_id));
+            return response()->json(
+                $this->secretariasDisponiveis(
+                    $request->data,
+                    $request->periodo_id,
+                    $request->setor_id
+                )
+            );
         }
 
         $periodos = Periodo::where('ativo', true)
@@ -335,28 +366,47 @@ class ReservaController extends Controller
 
         $secretariasDisponiveis = null;
 
-        if ($request->filled('data') && $request->filled('periodo_id')) {
+        if (
+            $request->filled('data') &&
+            $request->filled('periodo_id') &&
+            $request->filled('setor_id')
+        ) {
+
             $request->validate([
                 'data' => ['required', 'date'],
                 'periodo_id' => ['required', 'exists:periodos,id'],
+                'setor_id' => ['required', 'exists:setores,id'],
             ]);
 
-            $secretariasDisponiveis = $this->secretariasDisponiveis($request->data, $request->periodo_id)
-                ->load('setor.piso.edificio');
+            $secretariasDisponiveis = $this->secretariasDisponiveis(
+                $request->data,
+                $request->periodo_id,
+                $request->setor_id
+            )->load('setor.piso.edificio');
         }
 
         return Inertia::render('Reservas/Availability', [
             'periodos' => $periodos,
             'secretariasDisponiveis' => $secretariasDisponiveis,
-            'filters' => $request->only(['data', 'periodo_id']),
+            'filters' => $request->only([
+                'data',
+                'periodo_id',
+                'setor_id',
+            ]),
         ]);
     }
 
+
+
+
     /**
-     * Secretárias reserváveis e ativas sem reserva ativa numa data/período.
+     * Lugares reserváveis e ativos sem reserva ativa numa data/período.
      */
-    private function secretariasDisponiveis(string $data, int|string $periodoId)
-    {
+    private function secretariasDisponiveis(
+        string $data,
+        int|string $periodoId,
+        int|string $setorId
+    ) {
         $secretariasReservadas = Reserva::whereDate('data', $data)
             ->where('periodo_id', $periodoId)
             ->whereNull('cancelada_at')
@@ -364,6 +414,7 @@ class ReservaController extends Controller
 
         return Secretaria::where('reservavel', true)
             ->where('ativo', true)
+            ->where('setor_id', $setorId)
             ->whereNotIn('id', $secretariasReservadas)
             ->orderBy('codigo')
             ->get();
