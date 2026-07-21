@@ -133,7 +133,7 @@ export default function Create({ secretarias, periodos }) {
                                     )}
                                 </div>
 
-                                {/* Espaço */}
+                                {/* Lugar */}
                                 <div className="mb-4">
                                     <label className="mb-2 block font-medium">
                                         Espaço
@@ -153,7 +153,7 @@ export default function Create({ secretarias, periodos }) {
                                                 key={secretaria.id}
                                                 value={secretaria.id}
                                             >
-                                                {secretaria.codigo}
+                                                {secretaria.codigo} — {secretaria.descricao}
                                             </option>
                                         ))}
                                     </select>

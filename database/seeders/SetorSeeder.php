@@ -21,162 +21,208 @@ class SetorSeeder extends Seeder
         // Lista de setores
         $setores = [
 
-            // ==========================
-            // Piso 0
-            // ==========================
-            [
-                'piso_id' => $piso0->id,
-                'codigo' => 'OSC',
-                'nome' => 'Open Space Central',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 34,
-            ],
-            [
-                'piso_id' => $piso0->id,
-                'codigo' => 'OSN',
-                'nome' => 'Open Space Norte',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 14,
-            ],
-            [
-                'piso_id' => $piso0->id,
-                'codigo' => 'PB',
-                'nome' => 'Phone Booths',
-                'tipo' => 'phone_booth',
-                'reservavel' => true,
-                'capacidade' => 10,
-            ],
-            [
-                'piso_id' => $piso0->id,
-                'codigo' => 'REC',
-                'nome' => 'Receção',
-                'tipo' => 'rececao',
-                'reservavel' => false,
-                'capacidade' => null,
-            ],
-            [
-                'piso_id' => $piso0->id,
-                'codigo' => 'LOU',
-                'nome' => 'Lounge',
-                'tipo' => 'lounge',
-                'reservavel' => false,
-                'capacidade' => null,
-            ],
-            [
-                'piso_id' => $piso0->id,
-                'codigo' => 'COP',
-                'nome' => 'Copa',
-                'tipo' => 'cafetaria',
-                'reservavel' => false,
-                'capacidade' => null,
-            ],
-            [
-                'piso_id' => $piso0->id,
-                'codigo' => 'WC',
-                'nome' => 'Instalações Sanitárias',
-                'tipo' => 'sanitario',
-                'reservavel' => false,
-                'capacidade' => null,
-            ],
+    // =====================================================
+    // PISO 0
+    // =====================================================
 
-            // ==========================
-            // Piso 1
-            // ==========================
-            [
-                'piso_id' => $piso1->id,
-                'codigo' => 'E01',
-                'nome' => 'Escritório 1',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 4,
-            ],
-            [
-                'piso_id' => $piso1->id,
-                'codigo' => 'E02',
-                'nome' => 'Escritório 2',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 4,
-            ],
-            [
-                'piso_id' => $piso1->id,
-                'codigo' => 'E03',
-                'nome' => 'Escritório 3',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 4,
-            ],
-            [
-                'piso_id' => $piso1->id,
-                'codigo' => 'E04',
-                'nome' => 'Escritório 4',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 4,
-            ],
-            [
-                'piso_id' => $piso1->id,
-                'codigo' => 'E05',
-                'nome' => 'Escritório 5',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 4,
-            ],
-            [
-                'piso_id' => $piso1->id,
-                'codigo' => 'E06',
-                'nome' => 'Escritório 6',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 4,
-            ],
+    [
+        'piso_id' => $piso0->id,
+        'codigo' => 'OSC',
+        'nome' => 'Open Space Central',
+        'tipo' => 'open_space',
+        'reservavel' => true,
+        'capacidade' => 34,
+    ],
 
-            // ==========================
-            // Piso 2
-            // ==========================
-            [
-                'piso_id' => $piso2->id,
-                'codigo' => 'EP1',
-                'nome' => 'Escritório Premium 1',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 6,
-            ],
-            [
-                'piso_id' => $piso2->id,
-                'codigo' => 'EP2',
-                'nome' => 'Escritório Premium 2',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 6,
-            ],
-            [
-                'piso_id' => $piso2->id,
-                'codigo' => 'EP3',
-                'nome' => 'Escritório Premium 3',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 6,
-            ],
-            [
-                'piso_id' => $piso2->id,
-                'codigo' => 'EP4',
-                'nome' => 'Escritório Premium 4',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 6,
-            ],
-            [
-                'piso_id' => $piso2->id,
-                'codigo' => 'EP5',
-                'nome' => 'Escritório Premium 5',
-                'tipo' => 'coworking',
-                'reservavel' => true,
-                'capacidade' => 6,
-            ],
-        ];
+    [
+        'piso_id' => $piso0->id,
+        'codigo' => 'OSN',
+        'nome' => 'Open Space Norte',
+        'tipo' => 'open_space',
+        'reservavel' => true,
+        'capacidade' => 14,
+    ],
+
+    [
+        'piso_id' => $piso0->id,
+        'codigo' => 'PB',
+        'nome' => 'Phone Booth',
+        'tipo' => 'phone_booth',
+        'reservavel' => true,
+        'capacidade' => 10,
+    ],
+
+    [
+        'piso_id' => $piso0->id,
+        'codigo' => 'REC',
+        'nome' => 'Receção',
+        'tipo' => 'rececao',
+        'reservavel' => false,
+        'capacidade' => 1,
+    ],
+
+    [
+        'piso_id' => $piso0->id,
+        'codigo' => 'LOU',
+        'nome' => 'Lounge',
+        'tipo' => 'lounge',
+        'reservavel' => false,
+        'capacidade' => 1,
+    ],
+
+    [
+        'piso_id' => $piso0->id,
+        'codigo' => 'COP',
+        'nome' => 'Copa',
+        'tipo' => 'copa',
+        'reservavel' => false,
+        'capacidade' => 1,
+    ],
+
+    [
+        'piso_id' => $piso0->id,
+        'codigo' => 'WC',
+        'nome' => 'Instalações Sanitárias',
+        'tipo' => 'wc',
+        'reservavel' => false,
+        'capacidade' => 2,
+    ],
+
+    // =====================================================
+    // PISO 1
+    // =====================================================
+
+    [
+        'piso_id' => $piso1->id,
+        'codigo' => 'E',
+        'nome' => 'Escritório',
+        'tipo' => 'escritorio',
+        'reservavel' => true,
+        'capacidade' => 5,
+    ],
+
+    [
+        'piso_id' => $piso1->id,
+        'codigo' => 'SRG',
+        'nome' => 'Sala de Reuniões Grande',
+        'tipo' => 'sala_reunioes',
+        'reservavel' => true,
+        'capacidade' => 2,
+    ],
+
+    [
+        'piso_id' => $piso1->id,
+        'codigo' => 'SRM',
+        'nome' => 'Sala de Reuniões Média',
+        'tipo' => 'sala_reunioes',
+        'reservavel' => true,
+        'capacidade' => 1,
+    ],
+
+    [
+        'piso_id' => $piso1->id,
+        'codigo' => 'SRR',
+        'nome' => 'Sala de Reuniões Redonda',
+        'tipo' => 'sala_reunioes',
+        'reservavel' => true,
+        'capacidade' => 1,
+    ],
+
+    [
+        'piso_id' => $piso1->id,
+        'codigo' => 'PB',
+        'nome' => 'Phone Booth',
+        'tipo' => 'phone_booth',
+        'reservavel' => true,
+        'capacidade' => 5,
+    ],
+
+    [
+        'piso_id' => $piso1->id,
+        'codigo' => 'COP',
+        'nome' => 'Copa',
+        'tipo' => 'copa',
+        'reservavel' => false,
+        'capacidade' => 1,
+    ],
+
+    [
+        'piso_id' => $piso1->id,
+        'codigo' => 'SE',
+        'nome' => 'Sala de Espera',
+        'tipo' => 'sala_espera',
+        'reservavel' => false,
+        'capacidade' => 1,
+    ],
+
+    // =====================================================
+    // PISO 2
+    // =====================================================
+
+    [
+        'piso_id' => $piso2->id,
+        'codigo' => 'EE',
+        'nome' => 'Escritório Executivo',
+        'tipo' => 'escritorio_executivo',
+        'reservavel' => true,
+        'capacidade' => 7,
+    ],
+
+    [
+        'piso_id' => $piso2->id,
+        'codigo' => 'SRE',
+        'nome' => 'Sala de Reuniões Executiva',
+        'tipo' => 'sala_reunioes',
+        'reservavel' => true,
+        'capacidade' => 1,
+    ],
+
+    [
+        'piso_id' => $piso2->id,
+        'codigo' => 'SCR',
+        'nome' => 'Sala Criativa',
+        'tipo' => 'sala_criativa',
+        'reservavel' => true,
+        'capacidade' => 1,
+    ],
+
+    [
+        'piso_id' => $piso2->id,
+        'codigo' => 'PB',
+        'nome' => 'Phone Booth',
+        'tipo' => 'phone_booth',
+        'reservavel' => true,
+        'capacidade' => 2,
+    ],
+
+    [
+        'piso_id' => $piso2->id,
+        'codigo' => 'SE',
+        'nome' => 'Sala de Espera',
+        'tipo' => 'sala_espera',
+        'reservavel' => false,
+        'capacidade' => 1,
+    ],
+
+    [
+        'piso_id' => $piso2->id,
+        'codigo' => 'COP',
+        'nome' => 'Copa',
+        'tipo' => 'copa',
+        'reservavel' => false,
+        'capacidade' => 2,
+    ],
+
+    [
+        'piso_id' => $piso2->id,
+        'codigo' => 'WC',
+        'nome' => 'Instalações Sanitárias',
+        'tipo' => 'wc',
+        'reservavel' => false,
+        'capacidade' => 4,
+    ],
+
+    ];
 
         // Guarda os setores na base de dados
         foreach ($setores as $setor) {
