@@ -162,6 +162,9 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::patch('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'update'])
         ->name('support.update');
+
+    Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
+        ->name('chat.enviar');
 });
 
 // ==========================
@@ -291,17 +294,7 @@ require __DIR__.'/auth.php';
 |--------------------------------------------------------------------------
 */
 
-Route::get('/disparar-evento', function () {
-    broadcast(new EnviarMensagem(
-        'Sistema SpaceHub',
-        'WebSockets nativos a funcionar! 🚀'
-    ));
-
-    return 'Evento nativo enviado com sucesso!';
-});
-
-Route::post('/simular-chat', [ChatController::class, 'simularResposta']);
-
-Route::get('/teste-chat', function () {
-    return Inertia::render('TesteChat');
-});
+// Envio de mensagens seguro (lê o utilizador da sessão e aciona o Bot)
+Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
+    ->name('chat.enviar')
+    ->middleware('auth'); // Garante que só utilizadores autenticados usam o chat real
