@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Edificio extends Model
 {
@@ -22,7 +23,14 @@ class Edificio extends Model
         'descricao',
     ];
 
-    public function pisos()
+    protected function casts(): array
+    {
+        return [
+            'ativo' => 'boolean',
+        ];
+    }
+
+    public function pisos(): HasMany
     {
         return $this->hasMany(Piso::class);
     }

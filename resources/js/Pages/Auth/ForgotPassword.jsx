@@ -1,55 +1,149 @@
-import InputError from '@/Components/InputError';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import AuthActions from '@/Components/Auth/AuthActions';
+import AuthCard from '@/Components/Auth/AuthCard';
+import AuthField from '@/Components/Auth/AuthField';
+import AuthLayout from '@/Components/Auth/AuthLayout';
+import { Head, Link, useForm } from '@inertiajs/react';
+import {
+    ArrowLeft,
+    Mail,
+    Send,
+} from 'lucide-react';
 
 export default function ForgotPassword({ status }) {
-    const { data, setData, post, processing, errors } = useForm({
+    const {
+        data,
+        setData,
+        post,
+        processing,
+        errors,
+    } = useForm({
         email: '',
     });
 
-    const submit = (e) => {
-        e.preventDefault();
+    const submit = (event) => {
+        event.preventDefault();
 
-        post(route('password.email'));
+        post(route('password.email'), {
+            preserveScroll: true,
+        });
     };
 
     return (
-        <GuestLayout>
-            <Head title="Forgot Password" />
+        <>
+            <Head title="Recuperar senha" />
 
-            <div className="mb-4 text-sm text-gray-600">
-                Forgot your password? No problem. Just let us know your email
-                address and we will email you a password reset link that will
-                allow you to choose a new one.
-            </div>
+            <AuthLayout
+                title="Recupere a sua"
+                highlightedTitle="senha"
+                subtitle="Introduza o seu e-mail e enviaremos um link para definir uma nova senha."
+                heroTitle="Recupere o acesso."
+                heroPrefix="De forma"
+                heroHighlightedTitle="segura."
+                heroDescription="Enviaremos um link de recuperação para o endereço associado à sua conta."
+            >
+                {status && (
+                    <output
+                        className="
+                            mb-5 block rounded-xl
+                            border border-emerald-200
+                            bg-emerald-50
+                            px-4 py-3
+                            text-sm font-medium
+                            text-emerald-700
+                            dark:border-emerald-400/20
+                            dark:bg-emerald-400/10
+                            dark:text-emerald-300
+                        "
+                    >
+                        {status}
+                    </output>
+                )}
 
-            {status && (
-                <div className="mb-4 text-sm font-medium text-green-600">
-                    {status}
-                </div>
-            )}
+                <form
+                    onSubmit={submit}
+                    noValidate
+                >
+                    <AuthCard>
+                        <div
+                            className="
+                                mb-5 rounded-xl
+                                border border-slate-200
+                                bg-slate-50
+                                px-4 py-3
+                                text-sm leading-6
+                                text-slate-600
+                                dark:border-white/10
+                                dark:bg-white/5
+                                dark:text-slate-300
+                            "
+                        >
+                            Esqueceu a sua senha? Não há problema.
+                            Indique o seu e-mail e enviaremos um link
+                            para criar uma nova.
+                        </div>
 
-            <form onSubmit={submit}>
-                <TextInput
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={data.email}
-                    className="mt-1 block w-full"
-                    isFocused={true}
-                    onChange={(e) => setData('email', e.target.value)}
-                />
+                        <AuthField
+                            id="email"
+                            label="E-mail"
+                            name="email"
+                            type="email"
+                            icon={Mail}
+                            value={data.email}
+                            placeholder="exemplo@spacehub.pt"
+                            autoComplete="username"
+                            autoFocus
+                            error={errors.email}
+                            onChange={(event) =>
+                                setData(
+                                    'email',
+                                    event.target.value,
+                                )
+                            }
+                        />
 
-                <InputError message={errors.email} className="mt-2" />
+                        <AuthActions
+                            processing={processing}
+                            submitText="Enviar link de recuperação"
+                            processingText="A enviar..."
+                            submitIcon={Send}
+                            showSecondary={false}
+                        />
+                    </AuthCard>
+                </form>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Email Password Reset Link
-                    </PrimaryButton>
-                </div>
-            </form>
-        </GuestLayout>
+                <p
+                    className="
+                        mt-6 text-center
+                        text-sm text-slate-600
+                        dark:text-slate-300
+                    "
+                >
+                    Lembrou-se da senha?{' '}
+
+                    <Link
+                        href={route('login')}
+                        className="
+                            inline-flex items-center gap-1
+                            font-semibold
+                            text-[#0F9E90]
+                            underline-offset-4
+                            transition
+                            hover:underline
+                            focus:outline-none
+                            focus:ring-2
+                            focus:ring-[#14B8A6]/30
+                            dark:text-[#5EEAD4]
+                        "
+                    >
+                        <ArrowLeft
+                            size={15}
+                            aria-hidden="true"
+                        />
+
+                        Voltar ao login
+                    </Link>
+                </p>
+            </AuthLayout>
+        </>
     );
 }

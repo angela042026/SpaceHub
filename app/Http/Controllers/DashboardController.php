@@ -6,9 +6,9 @@ use App\Http\Requests\DashboardRequest;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Models\Secretaria;
+use App\Services\EstatisticasService;
 use App\Services\MapaOcupacaoService;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,14 +19,9 @@ class DashboardController extends Controller
         'confirmada',
     ];
 
-    private const ESTADOS_VALIDOS_ESTATISTICAS = [
-        'pendente',
-        'confirmada',
-        'concluida',
-    ];
-
     public function __construct(
-        private readonly MapaOcupacaoService $mapaOcupacaoService
+        private readonly MapaOcupacaoService $mapaOcupacaoService,
+        private readonly EstatisticasService $estatisticasService,
     ) {
     }
 
@@ -36,15 +31,10 @@ class DashboardController extends Controller
         $ontem = $hoje->copy()->subDay();
 
         $periodo = $request->validated('periodo', 'geral');
-        $dataInicio = $this->obterDataInicio($periodo);
+        $dataInicio = $this->estatisticasService->obterDataInicio($periodo);
 
         $idsEstadosAtivos = EstadoReserva::query()
             ->whereIn('codigo', self::ESTADOS_ATIVOS)
-            ->pluck('id')
-            ->all();
-
-        $idsEstadosValidosEstatisticas = EstadoReserva::query()
-            ->whereIn('codigo', self::ESTADOS_VALIDOS_ESTATISTICAS)
             ->pluck('id')
             ->all();
 
@@ -89,165 +79,17 @@ class DashboardController extends Controller
             ];
         }
 
+        $idsEstadosValidosEstatisticas = EstadoReserva::query()
+            ->whereIn('codigo', ['pendente', 'confirmada', 'concluida'])
+            ->pluck('id')
+            ->all();
+
         $totalReservas = Reserva::query()
-            ->whereIn(
-                'estado_reserva_id',
-                $idsEstadosValidosEstatisticas
-            )
+            ->whereIn('estado_reserva_id', $idsEstadosValidosEstatisticas)
             ->count();
 
-        $secretariasMaisUtilizadas = Reserva::query()
-            ->selectRaw('secretaria_id, COUNT(*) as total')
-            ->with('secretaria')
-            ->whereIn(
-                'estado_reserva_id',
-                $idsEstadosValidosEstatisticas
-            )
-            ->when(
-                $dataInicio,
-                fn (Builder $query) => $query->whereDate(
-                    'data',
-                    '>=',
-                    $dataInicio
-                )
-            )
-            ->groupBy('secretaria_id')
-            ->orderByDesc('total')
-            ->take(5)
-            ->get();
-
-        $secretariasMenosUtilizadas = Secretaria::query()
-            ->withCount([
-                'reservas' => function (Builder $query) use (
-                    $dataInicio,
-                    $idsEstadosValidosEstatisticas
-                ): void {
-                    $query
-                        ->whereIn(
-                            'estado_reserva_id',
-                            $idsEstadosValidosEstatisticas
-                        )
-                        ->when(
-                            $dataInicio,
-                            fn (Builder $reservaQuery) => $reservaQuery
-                                ->whereDate('data', '>=', $dataInicio)
-                        );
-                },
-            ])
-            ->where('ativo', true)
-            ->where('reservavel', true)
-            ->orderBy('reservas_count')
-            ->take(5)
-            ->get();
-
-        $pisosPorUtilizacao = Reserva::query()
-            ->selectRaw(
-                'pisos.id, pisos.nome, COUNT(reservas.id) as total'
-            )
-            ->join(
-                'secretarias',
-                'reservas.secretaria_id',
-                '=',
-                'secretarias.id'
-            )
-            ->join(
-                'setores',
-                'secretarias.setor_id',
-                '=',
-                'setores.id'
-            )
-            ->join(
-                'pisos',
-                'setores.piso_id',
-                '=',
-                'pisos.id'
-            )
-            ->whereIn(
-                'reservas.estado_reserva_id',
-                $idsEstadosValidosEstatisticas
-            )
-            ->when(
-                $dataInicio,
-                fn (Builder $query) => $query->whereDate(
-                    'reservas.data',
-                    '>=',
-                    $dataInicio
-                )
-            )
-            ->groupBy('pisos.id', 'pisos.nome')
-            ->orderByDesc('total')
-            ->get();
-
-        $setoresPorUtilizacao = Reserva::query()
-            ->selectRaw(
-                'setores.id, setores.nome, COUNT(reservas.id) as total'
-            )
-            ->join(
-                'secretarias',
-                'reservas.secretaria_id',
-                '=',
-                'secretarias.id'
-            )
-            ->join(
-                'setores',
-                'secretarias.setor_id',
-                '=',
-                'setores.id'
-            )
-            ->whereIn(
-                'reservas.estado_reserva_id',
-                $idsEstadosValidosEstatisticas
-            )
-            ->when(
-                $dataInicio,
-                fn (Builder $query) => $query->whereDate(
-                    'reservas.data',
-                    '>=',
-                    $dataInicio
-                )
-            )
-            ->groupBy('setores.id', 'setores.nome')
-            ->orderByDesc('total')
-            ->get();
-
-        $utilizadoresComMaisReservas = Reserva::query()
-            ->selectRaw('user_id, COUNT(*) as total')
-            ->with('user')
-            ->whereIn(
-                'estado_reserva_id',
-                $idsEstadosValidosEstatisticas
-            )
-            ->when(
-                $dataInicio,
-                fn (Builder $query) => $query->whereDate(
-                    'data',
-                    '>=',
-                    $dataInicio
-                )
-            )
-            ->groupBy('user_id')
-            ->orderByDesc('total')
-            ->take(5)
-            ->get();
-
-        $diasComMaiorOcupacao = Reserva::query()
-            ->selectRaw('data, COUNT(*) as total')
-            ->whereIn(
-                'estado_reserva_id',
-                $idsEstadosValidosEstatisticas
-            )
-            ->when(
-                $dataInicio,
-                fn (Builder $query) => $query->whereDate(
-                    'data',
-                    '>=',
-                    $dataInicio
-                )
-            )
-            ->groupBy('data')
-            ->orderByDesc('total')
-            ->take(5)
-            ->get();
+        $estatisticas = $this->estatisticasService->obterEstatisticas($dataInicio);
+        $atividadeRecente = $this->obterAtividadeRecente();
 
         ['pisos' => $pisos, 'edificios' => $edificios] = $this->mapaOcupacaoService->obterDados();
 
@@ -296,31 +138,8 @@ class DashboardController extends Controller
                 'totalSecretarias' => $totalSecretarias,
             ],
 
-            'estatisticas' => [
-                'secretariasMaisUtilizadas' =>
-                    $secretariasMaisUtilizadas,
-
-                'secretariasMenosUtilizadas' =>
-                    $secretariasMenosUtilizadas,
-
-                'pisosPorUtilizacao' =>
-                    $pisosPorUtilizacao,
-
-                'pisoMaisUtilizado' =>
-                    $pisosPorUtilizacao->first(),
-
-                'setoresPorUtilizacao' =>
-                    $setoresPorUtilizacao,
-
-                'setorMaisUtilizado' =>
-                    $setoresPorUtilizacao->first(),
-
-                'utilizadoresComMaisReservas' =>
-                    $utilizadoresComMaisReservas,
-
-                'diasComMaiorOcupacao' =>
-                    $diasComMaiorOcupacao,
-            ],
+            'estatisticas' => $estatisticas,
+            'atividadeRecente' => $atividadeRecente,
         ];
 
         $role = $request->user()->role?->nome;
@@ -337,15 +156,6 @@ class DashboardController extends Controller
         }
 
         return Inertia::render('Dashboard/Utilizador', $dados);
-    }
-
-    private function obterDataInicio(string $periodo): ?Carbon
-    {
-        return match ($periodo) {
-            'semana' => Carbon::today()->startOfWeek(),
-            'mes' => Carbon::today()->startOfMonth(),
-            default => null,
-        };
     }
 
     private function metricasDoDia(
@@ -416,6 +226,62 @@ class DashboardController extends Controller
             'mesasLivres' => $mesasLivres,
             'taxaOcupacao' => $taxaOcupacao,
         ];
+    }
+
+    private function obterAtividadeRecente(): array
+    {
+        $criadas = Reserva::query()
+            ->with(['user', 'secretaria'])
+            ->latest('created_at')
+            ->take(8)
+            ->get()
+            ->map(fn (Reserva $reserva) => [
+                'id' => "criada-{$reserva->id}",
+                'tipo' => 'criada',
+                'utilizador' => $reserva->user?->name,
+                'secretaria' => $reserva->secretaria?->codigo,
+                'timestamp' => $reserva->created_at,
+            ]);
+
+        $checkins = Reserva::query()
+            ->with(['user', 'secretaria'])
+            ->whereNotNull('check_in_at')
+            ->latest('check_in_at')
+            ->take(8)
+            ->get()
+            ->map(fn (Reserva $reserva) => [
+                'id' => "checkin-{$reserva->id}",
+                'tipo' => 'checkin',
+                'utilizador' => $reserva->user?->name,
+                'secretaria' => $reserva->secretaria?->codigo,
+                'timestamp' => $reserva->check_in_at,
+            ]);
+
+        $canceladas = Reserva::query()
+            ->with(['user', 'secretaria'])
+            ->whereNotNull('cancelada_at')
+            ->latest('cancelada_at')
+            ->take(8)
+            ->get()
+            ->map(fn (Reserva $reserva) => [
+                'id' => "cancelada-{$reserva->id}",
+                'tipo' => 'cancelada',
+                'utilizador' => $reserva->user?->name,
+                'secretaria' => $reserva->secretaria?->codigo,
+                'timestamp' => $reserva->cancelada_at,
+            ]);
+
+        return $criadas
+            ->concat($checkins)
+            ->concat($canceladas)
+            ->sortByDesc('timestamp')
+            ->take(8)
+            ->values()
+            ->map(fn (array $evento) => [
+                ...$evento,
+                'timestamp' => $evento['timestamp']->toIso8601String(),
+            ])
+            ->all();
     }
 
     private function percentChange(

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EstadoReserva extends Model
 {
@@ -12,8 +13,9 @@ class EstadoReserva extends Model
         'descricao',
     ];
 
-    public function reservas()
-    {
-        return $this->hasMany(Reserva::class);
-    }
+   
+    public function reservas(): HasMany
+{
+    return $this->hasMany(Reserva::class);
+}
 }

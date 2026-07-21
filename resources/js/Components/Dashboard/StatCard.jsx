@@ -39,7 +39,23 @@ export default function StatCard({
 
     return (
         <div
-            className="group min-h-[145px] rounded-3xl border border-slate-200/70 px-6 py-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-teal-400/30 hover:shadow-2xl dark:border-slate-800"
+            className="
+                group
+                min-h-[145px]
+                rounded-3xl
+                border
+                border-slate-200/70
+                dark:border-[#3b5f7d]
+                px-6
+                py-5
+                shadow-sm
+                transition-all
+                duration-300
+                hover:-translate-y-1
+                hover:border-teal-400/30
+                dark:hover:border-teal-400/60
+                hover:shadow-2xl
+            "
             style={{
                 backgroundImage:
                     'linear-gradient(160deg, var(--color-card) 0%, var(--color-card-to) 100%)',
@@ -66,7 +82,7 @@ export default function StatCard({
                 </div>
 
                 <div>
-                    <div className="mb-3 h-px w-full bg-slate-100 dark:bg-slate-800" />
+                    <div className="mb-3 h-px w-full bg-slate-100 dark:bg-[#365b79]" />
 
                     <div className="flex items-center gap-2">
                         {isPositive && (

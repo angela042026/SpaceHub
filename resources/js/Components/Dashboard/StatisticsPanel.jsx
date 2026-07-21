@@ -347,12 +347,13 @@ function RankingSection({
 export default function StatisticsPanel({
     estatisticas,
     periodo = 'geral',
+    periodoRoute = 'dashboard',
 }) {
     const [carregando, setCarregando] = useState(false);
 
     function mudarPeriodo(event) {
         router.get(
-            route('dashboard'),
+            route(periodoRoute),
             {
                 periodo: event.target.value,
             },
@@ -424,7 +425,7 @@ export default function StatisticsPanel({
                     </div>
                 </div>
 
-                <div className="relative w-full sm:w-[210px]">
+                <div className="relative w-full print:hidden sm:w-[210px]">
                     <CalendarDays
                         size={17}
                         strokeWidth={1.9}

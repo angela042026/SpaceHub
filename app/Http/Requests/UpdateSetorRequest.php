@@ -17,34 +17,71 @@ class UpdateSetorRequest extends FormRequest
         $setor = $this->route('setor');
 
         return [
-            'piso_id' => ['sometimes', 'required', 'exists:pisos,id'],
-            'nome' => ['sometimes', 'required', 'string', 'max:100'],
+            'piso_id' => [
+                'sometimes',
+                'required',
+                'integer',
+                'exists:pisos,id',
+            ],
+
+            'nome' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:100',
+            ],
+
             'codigo' => [
                 'sometimes',
                 'required',
                 'string',
                 'max:20',
-                Rule::unique('setores')->where(fn ($query) =>
-                    $query->where('piso_id', $this->piso_id ?? $setor->piso_id)
-                )->ignore($setor),
+                Rule::unique('setores')
+                    ->where(
+                        fn ($query) => $query->where(
+                            'piso_id',
+                            $this->integer('piso_id')
+                                ?: $setor->piso_id
+                        )
+                    )
+                    ->ignore($setor),
             ],
-            'tipo' => ['nullable', Rule::in([
-                'coworking',
-                'reuniao',
-                'rececao',
-                'cafetaria',
-                'lounge',
-                'estacionamento',
-                'concentracao',
-                'phone_booth',
-                'wc',
-                'tecnico',
-                'outro',
-            ])],
-            'reservavel' => ['boolean'],
-            'capacidade' => ['nullable', 'integer', 'min:0'],
-            'descricao' => ['nullable', 'string'],
-            'ativo' => ['boolean'],
+
+            'tipo' => [
+                'sometimes',
+                'nullable',
+                Rule::in([
+                    'coworking',
+                    'reuniao',
+                    'rececao',
+                    'cafetaria',
+                    'lounge',
+                    'estacionamento',
+                    'concentracao',
+                    'phone_booth',
+                    'wc',
+                    'tecnico',
+                    'outro',
+                ]),
+            ],
+
+            'reservavel' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            'capacidade' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                'min:0',
+            ],
+
+            'descricao' => [
+                'sometimes',
+                'nullable',
+                'string',
+            ],
         ];
     }
 }

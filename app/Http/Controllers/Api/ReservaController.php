@@ -12,49 +12,102 @@ use App\Http\Resources\SecretariaResource;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Models\Secretaria;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Gate;
 
 class ReservaController extends Controller
 {
-    public function index()
+    /**
+     * Lista reservas.
+     *
+     * O Administrador consulta todas.
+     * Os restantes utilizadores consultam apenas as próprias.
+     */
+    public function index(Request $request): AnonymousResourceCollection
     {
-        $reservas = Reserva::with([
+        Gate::authorize('viewAny', Reserva::class);
+
+        $query = Reserva::with([
             'user',
             'secretaria.setor.piso.edificio',
             'periodo',
             'estadoReserva',
-        ])->latest()->get();
+        ]);
+
+        if (! $this->isAdministrador($request)) {
+            $query->where('user_id', $request->user()->id);
+        }
+
+        $reservas = $query
+            ->latest('data')
+            ->latest('id')
+            ->get();
 
         return ReservaResource::collection($reservas);
     }
 
-    public function show(Reserva $reserva)
+    /**
+     * Apresenta uma reserva.
+     */
+    public function show(Reserva $reserva): ReservaResource
     {
+        Gate::authorize('view', $reserva);
+
         $this->carregarRelacoes($reserva);
 
         return new ReservaResource($reserva);
     }
 
-    public function store(StoreReservaRequest $request)
-    {
-        $dados = $request->validated();
+    /**
+     * Cria uma reserva para o utilizador autenticado.
+     */
+    public function store(
+        StoreReservaRequest $request
+    ): ReservaResource|JsonResponse {
+        Gate::authorize('create', Reserva::class);
 
-        if ($this->secretariaJaReservada($dados['secretaria_id'], $dados['data'], $dados['periodo_id'])) {
+        $dados = $request->validated();
+        $userId = $request->user()->id;
+
+        $secretaria = Secretaria::query()
+            ->findOrFail($dados['secretaria_id']);
+
+        if (! $secretaria->ativo || ! $secretaria->reservavel) {
+            return response()->json([
+                'message' => 'A secretária selecionada não está disponível para reservas.',
+            ], 422);
+        }
+
+        if (
+            $this->secretariaJaReservada(
+                $dados['secretaria_id'],
+                $dados['data'],
+                $dados['periodo_id']
+            )
+        ) {
             return response()->json([
                 'message' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
             ], 422);
         }
 
-        if ($this->utilizadorJaTemReserva(Auth::id(), $dados['data'], $dados['periodo_id'])) {
+        if (
+            $this->utilizadorJaTemReserva(
+                $userId,
+                $dados['data'],
+                $dados['periodo_id']
+            )
+        ) {
             return response()->json([
                 'message' => 'Já possui uma reserva para esta data e período.',
             ], 422);
         }
 
-        $estadoPendente = EstadoReserva::where('codigo', 'pendente')->firstOrFail();
+        $estadoPendente = $this->obterEstado('pendente');
 
         $reserva = Reserva::create([
-            'user_id' => Auth::id(),
+            'user_id' => $userId,
             'secretaria_id' => $dados['secretaria_id'],
             'periodo_id' => $dados['periodo_id'],
             'estado_reserva_id' => $estadoPendente->id,
@@ -69,21 +122,76 @@ class ReservaController extends Controller
         return new ReservaResource($reserva);
     }
 
-    public function update(UpdateReservaRequest $request, Reserva $reserva)
-    {
+    /**
+     * Atualiza uma reserva.
+     */
+    public function update(
+        UpdateReservaRequest $request,
+        Reserva $reserva
+    ): ReservaResource|JsonResponse {
+        Gate::authorize('update', $reserva);
+
+        $reserva->loadMissing('estadoReserva');
+
+        if ($reserva->check_in_at !== null) {
+            return response()->json([
+                'message' => 'Não é possível alterar uma reserva que já realizou check-in.',
+            ], 422);
+        }
+
+        if (
+            in_array(
+                $reserva->estadoReserva?->codigo,
+                ['cancelada', 'expirada'],
+                true
+            )
+        ) {
+            return response()->json([
+                'message' => 'O estado atual da reserva não permite alterações.',
+            ], 422);
+        }
+
         $dados = $request->validated();
 
-        $secretariaId = $dados['secretaria_id'] ?? $reserva->secretaria_id;
-        $data = $dados['data'] ?? $reserva->data->format('Y-m-d');
-        $periodoId = $dados['periodo_id'] ?? $reserva->periodo_id;
+        $secretariaId = $dados['secretaria_id']
+            ?? $reserva->secretaria_id;
 
-        if ($this->secretariaJaReservada($secretariaId, $data, $periodoId, $reserva->id)) {
+        $data = $dados['data']
+            ?? $reserva->data->format('Y-m-d');
+
+        $periodoId = $dados['periodo_id']
+            ?? $reserva->periodo_id;
+
+        $secretaria = Secretaria::query()
+            ->findOrFail($secretariaId);
+
+        if (! $secretaria->ativo || ! $secretaria->reservavel) {
+            return response()->json([
+                'message' => 'A secretária selecionada não está disponível para reservas.',
+            ], 422);
+        }
+
+        if (
+            $this->secretariaJaReservada(
+                $secretariaId,
+                $data,
+                $periodoId,
+                $reserva->id
+            )
+        ) {
             return response()->json([
                 'message' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
             ], 422);
         }
 
-        if ($this->utilizadorJaTemReserva($reserva->user_id, $data, $periodoId, $reserva->id)) {
+        if (
+            $this->utilizadorJaTemReserva(
+                $reserva->user_id,
+                $data,
+                $periodoId,
+                $reserva->id
+            )
+        ) {
             return response()->json([
                 'message' => 'Este utilizador já possui uma reserva para esta data e período.',
             ], 422);
@@ -98,15 +206,59 @@ class ReservaController extends Controller
         return new ReservaResource($reserva);
     }
 
-    public function cancelar(Reserva $reserva)
-    {
-        if ($reserva->cancelada_at !== null) {
+    /**
+     * Cancela uma reserva.
+     */
+    public function cancelar(
+        Request $request,
+        Reserva $reserva
+    ): ReservaResource|JsonResponse {
+        Gate::authorize('cancelar', $reserva);
+
+        $reserva->loadMissing('estadoReserva');
+
+        if (
+            $reserva->cancelada_at !== null
+            || $reserva->estadoReserva?->codigo === 'cancelada'
+        ) {
             return response()->json([
                 'message' => 'Esta reserva já se encontra cancelada.',
             ], 422);
         }
 
-        $estadoCancelada = EstadoReserva::where('codigo', 'cancelada')->firstOrFail();
+        if ($reserva->check_in_at !== null) {
+            return response()->json([
+                'message' => 'Não é possível cancelar uma reserva que já realizou check-in.',
+            ], 422);
+        }
+
+        if (
+            in_array(
+                $reserva->estadoReserva?->codigo,
+                ['confirmada', 'expirada'],
+                true
+            )
+        ) {
+            return response()->json([
+                'message' => 'O estado atual da reserva não permite o cancelamento.',
+            ], 422);
+        }
+
+        /*
+         * O utilizador comum só pode cancelar reservas futuras.
+         * O Administrador pode cancelar uma reserva ativa, desde que
+         * ainda não tenha check-in e o estado permita o cancelamento.
+         */
+        if (
+            ! $this->isAdministrador($request)
+            && ! $reserva->data->isFuture()
+        ) {
+            return response()->json([
+                'message' => 'Apenas reservas futuras podem ser canceladas.',
+            ], 422);
+        }
+
+        $estadoCancelada = $this->obterEstado('cancelada');
 
         $reserva->update([
             'estado_reserva_id' => $estadoCancelada->id,
@@ -120,16 +272,30 @@ class ReservaController extends Controller
         return new ReservaResource($reserva);
     }
 
-    public function disponibilidade(DisponibilidadeReservaRequest $request)
-    {
+    /**
+     * Lista secretárias disponíveis.
+     */
+    public function disponibilidade(
+        DisponibilidadeReservaRequest $request
+    ): AnonymousResourceCollection {
+        Gate::authorize('viewAny', Reserva::class);
+
         $dados = $request->validated();
 
-        $secretariasReservadas = Reserva::where('data', $dados['data'])
+        $secretariasReservadas = Reserva::query()
+            ->where('data', $dados['data'])
             ->where('periodo_id', $dados['periodo_id'])
             ->whereNull('cancelada_at')
+            ->whereHas('estadoReserva', function ($query): void {
+                $query->whereNotIn('codigo', [
+                    'cancelada',
+                    'expirada',
+                ]);
+            })
             ->pluck('secretaria_id');
 
-        $secretarias = Secretaria::where('reservavel', true)
+        $secretarias = Secretaria::query()
+            ->where('reservavel', true)
             ->where('ativo', true)
             ->whereNotIn('id', $secretariasReservadas)
             ->orderBy('codigo')
@@ -154,13 +320,20 @@ class ReservaController extends Controller
         int $periodoId,
         ?int $ignorarReservaId = null
     ): bool {
-        $query = Reserva::where('secretaria_id', $secretariaId)
+        $query = Reserva::query()
+            ->where('secretaria_id', $secretariaId)
             ->where('data', $data)
             ->where('periodo_id', $periodoId)
-            ->whereNull('cancelada_at');
+            ->whereNull('cancelada_at')
+            ->whereHas('estadoReserva', function ($query): void {
+                $query->whereNotIn('codigo', [
+                    'cancelada',
+                    'expirada',
+                ]);
+            });
 
         if ($ignorarReservaId !== null) {
-            $query->where('id', '!=', $ignorarReservaId);
+            $query->whereKeyNot($ignorarReservaId);
         }
 
         return $query->exists();
@@ -172,15 +345,34 @@ class ReservaController extends Controller
         int $periodoId,
         ?int $ignorarReservaId = null
     ): bool {
-        $query = Reserva::where('user_id', $userId)
+        $query = Reserva::query()
+            ->where('user_id', $userId)
             ->where('data', $data)
             ->where('periodo_id', $periodoId)
-            ->whereNull('cancelada_at');
+            ->whereNull('cancelada_at')
+            ->whereHas('estadoReserva', function ($query): void {
+                $query->whereNotIn('codigo', [
+                    'cancelada',
+                    'expirada',
+                ]);
+            });
 
         if ($ignorarReservaId !== null) {
-            $query->where('id', '!=', $ignorarReservaId);
+            $query->whereKeyNot($ignorarReservaId);
         }
 
         return $query->exists();
+    }
+
+    private function obterEstado(string $codigo): EstadoReserva
+    {
+        return EstadoReserva::query()
+            ->where('codigo', $codigo)
+            ->firstOrFail();
+    }
+
+    private function isAdministrador(Request $request): bool
+    {
+        return $request->user()->role?->nome === 'Administrador';
     }
 }

@@ -1,14 +1,34 @@
-📘 Documento Mestre do Projeto – SpaceHub
+# Documento Mestre do Projeto — SpaceHub
 
-Versão: 1.1  
-Estado: Em desenvolvimento  
-Framework: Laravel 12 + Sanctum + Inertia.js + React + Tailwind CSS
+**Versão:** 2.0  
+**Estado:** Revisão final e preparação da entrega  
+**Framework:** Laravel 12 + Sanctum + Inertia.js + React + Tailwind CSS  
+**Base de dados:** MySQL  
+**Testes automatizados:** 111 testes aprovados  
+**Rotas da API:** 38 rotas registadas  
 
 ---
 
-# 1. Objetivo do Projeto
+# 1. Finalidade deste Documento
 
-O SpaceHub é uma aplicação web para gestão de espaços de trabalho e reservas de secretárias.
+Este documento funciona como resumo técnico e contexto permanente do projeto SpaceHub.
+
+Deve ser utilizado para:
+
+- contextualizar novas conversas sobre o projeto;
+- preservar as decisões técnicas já tomadas;
+- evitar alterações incompatíveis com a arquitetura existente;
+- acompanhar o estado atual do desenvolvimento;
+- registar funcionalidades, integrações e convenções;
+- orientar os passos finais até à entrega.
+
+Este documento não substitui a documentação funcional e técnica existente na pasta `docs`.
+
+---
+
+# 2. Objetivo do Projeto
+
+O SpaceHub é uma aplicação web para gestão de espaços de trabalho colaborativos e reserva de secretárias.
 
 O sistema permite:
 
@@ -16,643 +36,901 @@ O sistema permite:
 - gerir pisos;
 - gerir setores;
 - gerir secretárias;
-- gerir reservas;
 - gerir utilizadores;
-- controlar acessos por papéis (roles);
-- gerir Check-in através de QR Code;
-- visualizar estatísticas e dashboards;
-- visualizar um mapa interativo dos espaços.
+- controlar acessos através de papéis;
+- consultar secretárias livres e ocupadas;
+- efetuar reservas por data e período;
+- cancelar reservas elegíveis;
+- realizar check-in através de QR Code;
+- consultar estatísticas e dashboards;
+- visualizar mapas interativos dos espaços;
+- reportar problemas e pedidos de suporte;
+- consultar FAQs e conteúdos de ajuda;
+- carregar fotografias de utilizadores;
+- carregar plantas dos pisos.
 
 ---
 
-# 2. Arquitetura
+# 3. Decisões Funcionais Principais
 
-O projeto segue uma arquitetura REST baseada em Laravel.
+## 3.1 Edifício substitui Localidade
 
-## Backend
+A entidade inicialmente designada por `Localidade` foi substituída por `Edificio`.
 
-Laravel 12
+A hierarquia final dos espaços é:
 
-### API
+```text
+Edifício
+    ↓
+Piso
+    ↓
+Setor
+    ↓
+Secretária
+```
 
-Controllers
-↓
-Form Requests
-↓
-Models (Eloquent)
-↓
-Resources
-↓
-JSON
+Não deve ser criado um novo módulo de Localidades.
 
-Todos os novos CRUD seguem este padrão.
+Qualquer migration antiga de localidades deve ser considerada código legado e não deve ser utilizada na versão final.
 
-Nunca colocar validação diretamente nos Controllers.
+---
 
-### Aplicação Web
+## 3.2 Eliminação lógica
 
-Routes
-↓
-Controllers
-↓
-Models
-↓
-Inertia
-↓
-React
+As principais entidades não são eliminadas fisicamente.
 
-Os Controllers Web encontram-se em:
+É utilizado o campo:
 
-App\Http\Controllers
+```text
+ativo
+```
+
+para ativar ou desativar:
+
+- utilizadores;
+- edifícios;
+- pisos;
+- setores;
+- secretárias.
+
+Não devem ser adicionados métodos `destroy()` sem uma decisão explícita de alteração desta regra.
+
+---
+
+## 3.3 Papéis fixos
+
+Os papéis existentes são:
+
+- Administrador;
+- Gestor;
+- Colaborador;
+- Utilizador.
+
+Os papéis são criados através de seeders.
+
+Não existe CRUD de papéis.
+
+---
+
+## 3.4 Estados das reservas
+
+Os estados implementados são:
+
+- `pendente`;
+- `confirmada`;
+- `cancelada`;
+- `expirada`.
+
+O estado `concluida` não está implementado.
+
+Não deve ser adicionado sem definir previamente:
+
+- quando ocorre a transição;
+- qual o processo responsável;
+- impacto no dashboard;
+- impacto nas estatísticas;
+- testes necessários.
+
+---
+
+# 4. Arquitetura Geral
+
+O SpaceHub utiliza Laravel no backend e React com Inertia.js no frontend.
+
+## 4.1 Backend
+
+O backend utiliza:
+
+- Laravel 12;
+- PHP 8;
+- Eloquent ORM;
+- Laravel Sanctum;
+- Form Requests;
+- API Resources;
+- Policies;
+- Gates;
+- Middleware;
+- Events;
+- Broadcasting;
+- Storage;
+- PHPUnit.
+
+---
+
+## 4.2 Frontend
+
+O frontend utiliza:
+
+- React;
+- Inertia.js;
+- Tailwind CSS;
+- Vite;
+- Recharts;
+- Simple QR Code;
+- html5-qrcode;
+- Laravel Echo;
+- Laravel Reverb.
+
+---
+
+## 4.3 Base de dados
+
+A base de dados utilizada é MySQL.
+
+As principais entidades são:
+
+```text
+Role
+User
+Edificio
+Piso
+Setor
+Secretaria
+Periodo
+EstadoReserva
+Reserva
+Faq
+PedidoSuporte
+```
+
+Existem ainda tabelas técnicas do Laravel, nomeadamente:
+
+- sessions;
+- password_reset_tokens;
+- personal_access_tokens;
+- cache;
+- jobs.
+
+---
+
+# 5. Organização do Backend
+
+## 5.1 API
 
 Os Controllers da API encontram-se em:
 
-App\Http\Controllers\Api
+```text
+app/Http/Controllers/Api
+```
 
----
+O padrão preferencial dos CRUD é:
 
-## Autenticação
-
-Laravel Sanctum.
-
-Endpoints implementados:
-
-- Register
-- Login
-- Logout
-- Me
-- Forgot Password
-- Reset Password
-
-Todos os endpoints privados utilizam:
-
-auth:sanctum
-
-As páginas Web privadas utilizam:
-
-auth
-
----
-
-## Autorização
-
-Existe um middleware personalizado:
-
-RoleMiddleware
-
-Registado em:
-
-bootstrap/app.php
-
-Alias:
-
-role
-
-Utilização:
-
-```php
-Route::middleware([
-    'auth:sanctum',
-    'role:Administrador'
-]);
+```text
+Route
+    ↓
+Controller
+    ↓
+Form Request
+    ↓
+Policy / Gate
+    ↓
+Model
+    ↓
+Resource
+    ↓
+JSON
 ```
 
 ---
 
-# 3. Base de Dados
+## 5.2 Aplicação Web
 
-As entidades principais são:
+Os Controllers das páginas web encontram-se em:
 
-Role
-│
-User
-│
-Reserva
-│
-Secretaria
-│
-Setor
-│
-Piso
-│
-Edificio
+```text
+app/Http/Controllers
+```
 
-Existe:
+O fluxo principal é:
 
-- Diagrama ER
-- Dicionário de Dados
-
----
-
-# 4. Relações Eloquent
-
-Exemplo:
-
-Edificio
-hasMany(Piso)
-
-Piso
-belongsTo(Edificio)
-hasMany(Setor)
-
-Setor
-belongsTo(Piso)
-hasMany(Secretaria)
-
-Secretaria
-belongsTo(Setor)
-hasMany(Reserva)
-
-Reserva
-belongsTo(User)
-belongsTo(Secretaria)
-
-User
-belongsTo(Role)
-hasMany(Reserva)
-
-Role
-hasMany(User)
-
-Sempre utilizar relações Eloquent.
-
-Evitar queries manuais.
+```text
+Route Web
+    ↓
+Controller
+    ↓
+Model ou Service
+    ↓
+Inertia
+    ↓
+React
+```
 
 ---
 
-# 5. Convenções adotadas
+## 5.3 Models
 
-## Controllers
+Os Models representam as entidades persistentes e utilizam relações Eloquent.
 
-Todos os novos CRUD utilizam:
+Exemplos:
 
-App\Http\Controllers\Api
+```php
+public function edificio(): BelongsTo
+{
+    return $this->belongsTo(Edificio::class);
+}
+```
 
-Os Controllers Web ficam em:
+```php
+public function pisos(): HasMany
+{
+    return $this->hasMany(Piso::class);
+}
+```
 
-App\Http\Controllers
+Devem ser preferidas relações Eloquent em vez de queries manuais repetidas.
 
 ---
 
-## Form Requests
+## 5.4 Form Requests
 
-Toda a validação deve estar em:
+A validação dos CRUD deve ser realizada em:
 
+```text
 StoreXXXXXRequest
-
 UpdateXXXXXRequest
+```
 
-Nunca utilizar:
+Exemplos:
+
+```text
+StoreUserRequest
+UpdateUserRequest
+StoreEdificioRequest
+UpdateEdificioRequest
+StorePisoRequest
+UpdatePisoRequest
+StoreSetorRequest
+UpdateSetorRequest
+StoreSecretariaRequest
+UpdateSecretariaRequest
+StoreReservaRequest
+UpdateReservaRequest
+```
+
+Nos endpoints de autenticação, o `AuthController` utiliza validação direta por se tratar de operações específicas e não de CRUD administrativo.
+
+---
+
+## 5.5 Resources
+
+Os endpoints da API devem devolver Resources.
+
+Exemplos:
+
+```text
+UserResource
+EdificioResource
+PisoResource
+SetorResource
+SecretariaResource
+ReservaResource
+```
+
+Deve ser evitada a exposição direta de Models em respostas JSON.
+
+---
+
+## 5.6 Route Model Binding
+
+Deve ser utilizado Route Model Binding.
+
+Correto:
 
 ```php
-$request->validate(...)
+public function show(User $user): UserResource
+```
+
+Evitar:
+
+```php
+public function show(int $id)
+{
+    $user = User::findOrFail($id);
+}
 ```
 
 ---
 
-## Resources
+## 5.7 Passwords
 
-Todos os endpoints devolvem:
+As passwords devem ser sempre protegidas por hashing.
 
-XXXXXResource
-
-ou
-
-XXXXXResource::collection(...)
-
-Nunca devolver diretamente o Model.
-
----
-
-## Route Model Binding
-
-Utilizar sempre:
+Utilizar:
 
 ```php
-public function show(User $user)
+Hash::make($password)
 ```
 
-em vez de:
+O Model `User` também utiliza o cast:
 
 ```php
-User::find($id)
-```
-
----
-
-## Passwords
-
-Sempre:
-
-```php
-Hash::make(...)
+'password' => 'hashed'
 ```
 
 Nunca guardar passwords em texto simples.
 
 ---
 
-## Roles
+# 6. Autenticação
 
-Os Roles são fixos.
+A API utiliza Laravel Sanctum.
 
-Existem:
+Endpoints implementados:
 
-- Administrador
-- Gestor
-- Colaborador
-- Utilizador
+- registo;
+- login;
+- logout;
+- consulta do utilizador autenticado;
+- pedido de recuperação de password;
+- redefinição de password.
 
-Não existe CRUD de Roles.
+Rotas principais:
 
----
+```text
+POST /api/register
+POST /api/login
+POST /api/logout
+GET  /api/me
+POST /api/forgot-password
+POST /api/reset-password
+```
 
-## Utilizadores
+As rotas privadas da API utilizam:
 
-Nunca eliminar utilizadores.
+```text
+auth:sanctum
+```
 
-Utilizar:
+As páginas privadas da aplicação web utilizam:
 
-ativo
+```text
+auth
+```
 
-para ativar/desativar.
+Utilizadores inativos:
 
-Não implementar destroy().
+- não podem iniciar sessão;
+- são bloqueados nas Policies;
+- não podem executar operações protegidas.
 
----
-
-# 6. Funcionalidades Implementadas
-
-## Sprint 1
-
-✅ Base de Dados
-
-- Migrations
-- Models
-- Relações
-- Seeders
-- Documentação
-
----
-
-## Sprint 2
-
-✅ Autenticação
-
-- Register
-- Login
-- Logout
-- Me
-
-Laravel Sanctum.
+Após uma redefinição de password, os tokens Sanctum antigos são revogados.
 
 ---
 
-## Sprint 3
+# 7. Autorização
 
-✅ Recuperação de Password
+A autorização é realizada através de:
 
-- Forgot Password
-- Reset Password
+- Policies;
+- Gates;
+- Middleware de papéis.
 
-Configuração:
+Existe um middleware personalizado:
 
-MAIL_MAILER=log
+```text
+RoleMiddleware
+```
 
-Emails escritos em:
+Alias registado:
 
-storage/logs/laravel.log
+```text
+role
+```
 
----
+Exemplo de utilização:
 
-## Sprint 4
+```php
+Route::middleware([
+    'auth:sanctum',
+    'role:Administrador',
+]);
+```
 
-✅ Gestão de Utilizadores
+Nos Controllers da API é utilizado:
 
-Implementado:
+```php
+Gate::authorize(...)
+```
 
-- UserController
-- UserResource
-- StoreUserRequest
-- UpdateUserRequest
-- RoleMiddleware
+Policies principais:
 
-CRUD:
+```text
+UserPolicy
+EdificioPolicy
+PisoPolicy
+SetorPolicy
+SecretariaPolicy
+ReservaPolicy
+```
 
-- index
-- show
-- store
-- update
-- toggleAtivo
-
-Sem destroy().
-
-Existe UserSeeder.
-
----
-
-## Sprint 5
-
-✅ Gestão de Espaços
-
-Implementado:
-
-- CRUD Edifícios
-- CRUD Pisos
-- CRUD Setores
-- CRUD Secretárias
-
-Todos seguem o padrão:
-
-Controllers
-↓
-Form Requests
-↓
-Models
-↓
-Resources
-↓
-JSON
+A `ReservaPolicy` bloqueia globalmente utilizadores inativos através do método `before()`.
 
 ---
 
-## Sprint 6
+# 8. Gestão de Espaços
 
-✅ Reservas
+A gestão dos espaços segue a hierarquia:
 
-Implementado:
+```text
+Edifício
+    ↓
+Piso
+    ↓
+Setor
+    ↓
+Secretária
+```
 
-- CRUD Reservas
-- Disponibilidade
-- Cancelamento
-- Testes Postman
+## 8.1 Edifícios
 
----
+Funcionalidades:
 
-## Sprint 7
-
-✅ Dashboard
-
-✅ Estatísticas
-
-✅ QR Code
-
-✅ Check-in
-
-✅ Mapa Interativo
-
-Implementado:
-
-- DashboardController
-- CheckInController
-- SecretariaQrCodeController
-- SetorMapaController
-
-Tecnologias:
-
-- Inertia.js
-- React
-- Tailwind CSS
-- Recharts
-- Simple QR Code
-- html5-qrcode
+- listar;
+- consultar;
+- criar;
+- atualizar;
+- pesquisar;
+- filtrar;
+- ordenar;
+- paginar;
+- ativar ou desativar.
 
 ---
 
-# 7. Próximas Tarefas
+## 8.2 Pisos
 
-- Validação funcional do Dashboard
-- Validação funcional do QR Code
-- Validação funcional do Check-in
-- Testes Feature
-- Melhorias de interface
-- Otimização do Dashboard
+Funcionalidades:
 
----
+- listar;
+- consultar;
+- criar;
+- atualizar;
+- pesquisar;
+- filtrar;
+- ordenar;
+- paginar;
+- ativar ou desativar;
+- carregar uma planta;
+- substituir a planta existente.
 
-# 8. Padrão obrigatório para novos CRUD
+As plantas são armazenadas em:
 
-Cada entidade deve possuir:
-
-- Model
-- Controller
-- Resource
-- StoreRequest
-- UpdateRequest
-- Rotas
-- Testes Postman
-- Documentação
+```text
+storage/app/public/pisos/plantas
+```
 
 ---
 
-# 9. Testes
+## 8.3 Setores
 
-Todos os endpoints devem ser testados no Postman.
+Funcionalidades:
 
-Checklist:
+- listar;
+- consultar;
+- criar;
+- atualizar;
+- pesquisar;
+- filtrar;
+- ordenar;
+- paginar;
+- ativar ou desativar;
+- configurar tipo;
+- configurar capacidade;
+- configurar reservabilidade;
+- posicionar no editor de mapa.
 
-- GET lista
-- GET por ID
-- POST
-- PUT
-- PATCH toggle ativo
-- validação 422
-- autorização 403
+---
 
-Antes de cada integração executar:
+## 8.4 Secretárias
+
+Funcionalidades:
+
+- listar;
+- consultar;
+- criar;
+- atualizar;
+- filtrar;
+- ordenar;
+- paginar;
+- ativar ou desativar;
+- configurar características;
+- configurar posição;
+- gerar QR Code único.
+
+Características disponíveis:
+
+- monitor;
+- dock USB;
+- junto à janela;
+- ergonómica;
+- reservável;
+- ativa.
+
+---
+
+# 9. Gestão de Utilizadores
+
+Funcionalidades:
+
+- listar utilizadores;
+- consultar utilizador;
+- criar utilizador;
+- atualizar utilizador;
+- pesquisar;
+- filtrar;
+- ordenar;
+- paginar;
+- alterar papel;
+- ativar ou desativar;
+- carregar fotografia;
+- substituir fotografia.
+
+As fotografias são armazenadas em:
+
+```text
+storage/app/public/utilizadores/fotografias
+```
+
+Formatos permitidos:
+
+- JPG;
+- JPEG;
+- PNG;
+- WebP.
+
+Tamanho máximo:
+
+```text
+2 MB
+```
+
+Um Administrador não pode desativar a própria conta.
+
+---
+
+# 10. Reservas
+
+O módulo de reservas suporta:
+
+- criação de reservas;
+- consulta de reservas;
+- atualização;
+- cancelamento;
+- consulta de disponibilidade;
+- validação de duplicações;
+- validação de regras de negócio;
+- atualização do mapa.
+
+## 10.1 Regras principais
+
+Uma secretária apenas pode possuir uma reserva ativa para a mesma data e período.
+
+Um utilizador apenas pode possuir uma reserva para a mesma data e período.
+
+Apenas secretárias:
+
+- ativas;
+- reserváveis;
+- disponíveis
+
+podem receber reservas.
+
+Não podem ser atualizadas reservas:
+
+- canceladas;
+- expiradas;
+- com check-in efetuado.
+
+Não podem ser canceladas reservas:
+
+- já canceladas;
+- confirmadas;
+- expiradas;
+- com check-in.
+
+O utilizador comum apenas pode cancelar reservas próprias, futuras e elegíveis.
+
+---
+
+## 10.2 Períodos
+
+Os períodos implementados são:
+
+- Manhã;
+- Tarde.
+
+---
+
+## 10.3 Disponibilidade
+
+A disponibilidade considera:
+
+- data;
+- período;
+- estado da secretária;
+- atributo reservável;
+- reservas ativas existentes.
+
+---
+
+# 11. QR Code e Check-in
+
+Cada secretária possui um `qr_token` único.
+
+O QR Code permite iniciar o processo de check-in.
+
+Durante o check-in são validados:
+
+- utilizador autenticado;
+- propriedade da reserva;
+- data;
+- período;
+- secretária;
+- QR Code;
+- estado da reserva;
+- inexistência de cancelamento.
+
+Após check-in:
+
+- é preenchido `check_in_at`;
+- a reserva passa ao estado `confirmada`;
+- o mapa é atualizado.
+
+Tecnologias utilizadas:
+
+- Simple QR Code;
+- html5-qrcode.
+
+---
+
+# 12. Dashboard, Estatísticas e Mapa
+
+Funcionalidades implementadas:
+
+- dashboard;
+- estatísticas;
+- taxa de ocupação;
+- reservas por período;
+- reservas por estado;
+- reservas por edifício;
+- mapa interativo;
+- editor gráfico dos setores;
+- atualização do mapa em tempo real.
+
+O evento utilizado para atualização do mapa é:
+
+```text
+MapaAtualizado
+```
+
+Tecnologias utilizadas:
+
+- React;
+- Inertia.js;
+- Recharts;
+- Broadcasting;
+- Laravel Echo;
+- Laravel Reverb.
+
+---
+
+# 13. Help Center e Suporte
+
+Funcionalidades implementadas:
+
+- Help Center;
+- FAQs;
+- pedidos de suporte;
+- consulta de conteúdos de ajuda;
+- reporte de problemas e avarias.
+
+Controllers principais:
+
+```text
+FaqController
+PedidoSuporteController
+```
+
+Seeders associados:
+
+```text
+FaqSeeder
+```
+
+---
+
+# 14. Sistema de Chat e WebSockets
+
+Foi integrada uma funcionalidade experimental de comunicação em tempo real.
+
+Componentes integrados:
+
+- Laravel Reverb;
+- Laravel Echo;
+- Broadcasting;
+- ChatController;
+- evento `EnviarMensagem`;
+- página React `TesteChat`;
+- configuração de WebSockets.
+
+Esta integração teve origem na branch:
+
+```text
+feature/update-eduardo
+```
+
+Fluxo de integração utilizado:
+
+```text
+feature/update-eduardo
+        ↓
+integration/update-eduardo
+        ↓
+Pull Request
+        ↓
+Create a merge commit
+        ↓
+main
+```
+
+A autoria dos commits foi preservada.
+
+Não foi utilizado:
+
+- rebase;
+- Squash and merge;
+- alteração do histórico da branch do colaborador.
+
+---
+
+# 15. Testes
+
+O projeto utiliza PHPUnit para testes automatizados.
+
+Situação atual:
+
+```text
+111 testes aprovados
+```
+
+Os testes cobrem:
+
+- autenticação;
+- recuperação de password;
+- autorização;
+- Policies;
+- utilizadores inativos;
+- gestão de utilizadores;
+- gestão de edifícios;
+- gestão de pisos;
+- gestão de setores;
+- gestão de secretárias;
+- reservas;
+- disponibilidade;
+- cancelamento;
+- check-in;
+- QR Code;
+- dashboard;
+- estatísticas;
+- mapa;
+- Help Center;
+- uploads;
+- pesquisa;
+- filtros;
+- ordenação;
+- paginação;
+- performance de queries.
+
+Comando principal:
+
+```bash
+php artisan test
+```
+
+Antes de uma integração ou entrega executar:
 
 ```bash
 php artisan optimize:clear
 composer dump-autoload
-npm run build
+npm.cmd run build
 php artisan test
 php artisan route:list
 ```
 
----
-
-# 10. Seeders
-
-Existem:
-
-- RoleSeeder
-- PeriodoSeeder
-- EstadoReservaSeeder
-- UserSeeder
-- SpaceHubEstruturaSeeder
-
-O projeto deve funcionar após:
+No Windows PowerShell deve ser utilizado:
 
 ```bash
-php artisan migrate:fresh --seed
+npm.cmd run build
 ```
 
----
-
-# 11. Documentação
-
-Sempre atualizar:
-
-- docs/04-Arquitetura.md
-- docs/05-API.md
-- docs/06-Roadmap.md
-
-antes do commit.
+caso a execução de `npm.ps1` esteja bloqueada pela política do sistema.
 
 ---
 
-# 12. Git
+# 16. Rotas da API
 
-Fluxo utilizado:
+À data da revisão existem:
 
-Cada funcionalidade é desenvolvida numa branch.
+```text
+38 rotas de API
+```
 
-Depois:
+Grupos principais:
 
-commit
+- autenticação;
+- utilizadores;
+- edifícios;
+- pisos;
+- setores;
+- secretárias;
+- reservas;
+- disponibilidade;
+- ações de ativação e desativação;
+- cancelamento.
 
-↓
+As atualizações normais utilizam `PUT`.
 
-push
+Exemplos:
 
-↓
+```text
+PUT /api/users/{user}
+PUT /api/edificios/{edificio}
+PUT /api/pisos/{piso}
+PUT /api/setores/{setor}
+PUT /api/secretarias/{secretaria}
+PUT /api/reservas/{reserva}
+```
 
-Pull Request
+As operações especiais utilizam `PATCH`.
 
-↓
+Exemplos:
 
-Create a merge commit
+```text
+PATCH /api/users/{user}/toggle-ativo
+PATCH /api/edificios/{edificio}/toggle-ativo
+PATCH /api/pisos/{piso}/toggle-ativo
+PATCH /api/setores/{setor}/toggle-ativo
+PATCH /api/secretarias/{secretaria}/toggle-ativo
+PATCH /api/reservas/{reserva}/cancelar
+```
 
-↓
+Existe atualmente uma rota técnica:
 
-main
+```text
+GET /api/admin/teste
+```
 
-Não apagar branches antes da validação.
+Esta rota deve ser revista antes da entrega final e removida caso já não seja necessária.
 
-Evitar **Squash and merge** quando for necessário preservar a autoria dos colaboradores.
+As funcionalidades de dashboard, mapa, QR Code e check-in utilizam rotas web específicas e não pertencem necessariamente ao grupo `/api`.
 
 ---
 
-# 13. Regras de Continuidade
+# 17. Seeders
 
-Ao continuar este projeto numa nova conversa:
+Seeders principais:
 
-- Não alterar a arquitetura existente.
-- Não renomear ficheiros, classes, métodos ou rotas sem autorização.
-- Não fazer refactors automáticos.
-- Manter compatibilidade com todo o código existente.
-- Antes de propor alterações estruturais, explicar o impacto.
-- Quando houver dúvida, perguntar.
-- Manter o padrão Controllers → Form Requests → Models → Resources → JSON.
-- Utilizar sempre Route Model Binding.
-- Utilizar sempre Form Requests.
-- Utilizar sempre Resources.
-- Não implementar funcionalidades que contrariem decisões já tomadas.
-
----
-
-# 14. Estado Atual do Projeto
-
-## Sprint 1
-
-✅ Concluída
-
-## Sprint 2
-
-✅ Concluída
-
-## Sprint 3
-
-✅ Concluída
-
-## Sprint 4
-
-✅ Concluída
-
-## Sprint 5
-
-✅ Concluída
-
-Inclui:
-
-- CRUD Gestão de Espaços
-
-## Sprint 6
-
-✅ Concluída
-
-Inclui:
-
-- CRUD Reservas
-- Disponibilidade
-- Cancelamento
-- Testes Postman
-
-## Sprint 7
-
-✅ Integrada
-
-Inclui:
-
-- Dashboard
-- Estatísticas
-- QR Code
-- Check-in
-- Mapa Interativo
-
-## Próximas tarefas
-
-- Validação funcional do QR Code
-- Validação funcional do Check-in
-- Testes Feature
-- Melhorias de interface
-
-Sprint 7
-
-✅ Dashboard
-
-✅ Estatísticas
-
-✅ QR Code
-
-✅ Check-in
-
-✅ Mapa Interativo
-
-✅ Help Center
-
-✅ Sistema de Pedidos de Suporte
-
-Implementado:
-
-DashboardController
-CheckInController
-SecretariaQrCodeController
-SetorMapaController
-FaqController
-PedidoSuporteController
-
-Tecnologias:
-
-Inertia.js
-React
-Tailwind CSS
-Recharts
-Simple QR Code
-html5-qrcode
-7. Próximas Tarefas
-Validação funcional do Dashboard
-Validação funcional do QR Code
-Validação funcional do Check-in
-Validação funcional do Help Center
-Validação funcional do Sistema de Pedidos de Suporte
-Testes Feature
-Melhorias de interface
-Otimização do Dashboard
-10. Seeders
-
-Existem:
-
+```text
 RoleSeeder
 PeriodoSeeder
 EstadoReservaSeeder
@@ -660,196 +938,435 @@ UserSeeder
 SpaceHubEstruturaSeeder
 ReservaSeeder
 FaqSeeder
+```
 
 O projeto deve funcionar após:
 
+```bash
 php artisan migrate:fresh --seed
-12. Git
+```
 
-Fluxo utilizado:
+Estados criados pelo `EstadoReservaSeeder`:
 
-Cada funcionalidade é desenvolvida numa branch.
+```text
+pendente
+confirmada
+cancelada
+expirada
+```
 
-Depois:
+---
 
-commit
+# 18. Uploads
 
-↓
+Uploads implementados:
 
-push
+## Fotografia dos utilizadores
 
-↓
+Diretório:
 
+```text
+storage/app/public/utilizadores/fotografias
+```
+
+## Planta dos pisos
+
+Diretório:
+
+```text
+storage/app/public/pisos/plantas
+```
+
+O link público é criado através de:
+
+```bash
+php artisan storage:link
+```
+
+Os ficheiros antigos são removidos quando ocorre substituição bem-sucedida.
+
+Se a gravação na base de dados falhar, o novo ficheiro é eliminado para evitar ficheiros órfãos.
+
+---
+
+# 19. Documentação Técnica
+
+A pasta `docs` contém:
+
+```text
+01-Requisitos.md
+02-CasosDeUso.md
+03-ModeloBaseDados.md
+04-Arquitetura.md
+05-API.md
+06-EvolucaoProjeto.md
+07-DicionarioDados.md
+08-DocumentoMestre.md
+```
+
+Finalidade dos documentos:
+
+| Documento | Finalidade |
+|-----------|------------|
+| 01 — Requisitos | Requisitos funcionais, não funcionais e regras de negócio |
+| 02 — Casos de Uso | Interações entre atores e sistema |
+| 03 — Modelo da Base de Dados | Entidades, relações e decisões de modelação |
+| 04 — Arquitetura | Estrutura técnica da aplicação |
+| 05 — API | Endpoints, autenticação e respostas |
+| 06 — Evolução do Projeto | Desenvolvimento e trabalho futuro |
+| 07 — Dicionário de Dados | Tabelas e campos da base de dados |
+| 08 — Documento Mestre | Contexto permanente e decisões consolidadas |
+
+A documentação deve ser atualizada sempre que existirem alterações estruturais relevantes.
+
+---
+
+# 20. Git e Integração
+
+O fluxo utilizado é:
+
+```text
+Branch de funcionalidade
+        ↓
+Commit
+        ↓
+Push
+        ↓
 Pull Request
-
-↓
-
+        ↓
 Create a merge commit
-
-↓
-
+        ↓
 main
+```
 
 Este fluxo permite:
 
-preservar a autoria dos colaboradores;
-manter o histórico completo dos commits;
-manter a referência aos Pull Requests;
-facilitar a revisão de código.
+- preservar autoria;
+- manter o histórico completo;
+- associar alterações a Pull Requests;
+- facilitar revisão;
+- evitar perda de commits.
 
 Não apagar branches antes da validação.
 
-Evitar Squash and merge quando for necessário preservar a autoria dos colaboradores.
+Evitar `Squash and merge` quando for necessário preservar a autoria individual.
 
-14. Estado Atual do Projeto
-Sprint 1
+---
 
-✅ Concluída
+# 21. Integrações Realizadas
 
-Sprint 2
+## Pull Request 1
 
-✅ Concluída
+Funcionalidades:
 
-Sprint 3
+- Dashboard;
+- Estatísticas;
+- QR Code;
+- Check-in;
+- Mapa Interativo.
 
-✅ Concluída
+---
 
-Sprint 4
+## Pull Request 2
 
-✅ Concluída
+Funcionalidades:
 
-Sprint 5
+- histórico de reservas;
+- funcionalidades adicionais do módulo de reservas.
 
-✅ Concluída
+---
 
-Inclui:
+## Pull Request 3
 
-CRUD Gestão de Espaços
-Sprint 6
+Funcionalidades:
 
-✅ Concluída
+- Help Center;
+- FAQs;
+- sistema de pedidos de suporte.
 
-Inclui:
+---
 
-CRUD Reservas
-Disponibilidade
-Cancelamento
-Testes Postman
-Sprint 7
+## Integração de julho de 2026
 
-✅ Integrada
+Branch:
 
-Inclui:
-
-Dashboard
-Estatísticas
-QR Code
-Check-in
-Mapa Interativo
-Melhorias da Interface do Dashboard
-Help Center
-FAQs
-Sistema de Pedidos de Suporte
-
-Validação Técnica:
-
-php artisan optimize:clear
-composer dump-autoload
-npm run build
-php artisan test
-php artisan route:list
-
-Todos os testes executados com sucesso após as integrações.
-
-Integrações realizadas
-Pull Request #1
-
-Dashboard, Estatísticas, QR Code, Check-in e Mapa Interativo.
-
-Pull Request #2
-
-Histórico e funcionalidades do módulo de Reservas.
-
-Pull Request #3
-
-Help Center e Sistema de Pedidos de Suporte.
-
-Todas as integrações foram realizadas preservando a autoria dos colaboradores através de Create a merge commit.
-
-Próximas tarefas
-Validação funcional do Dashboard
-Validação funcional do QR Code
-Validação funcional do Check-in
-Validação funcional do Help Center
-Testes Feature
-Melhorias de interface
-Otimização geral do Dashboard
-Continuação do desenvolvimento das funcionalidades previstas no Roadmap
-# Integração Julho 2026
-
-## Branch integrada
-
+```text
 feature/update-eduardo
+```
 
-## Funcionalidades
+Funcionalidades:
 
-- Laravel Reverb
-- Laravel Echo
-- Broadcasting
-- Sistema de Chat
-- ChatController
-- Evento EnviarMensagem
-- Página React TesteChat
-- Configuração de WebSockets
+- Laravel Reverb;
+- Laravel Echo;
+- Broadcasting;
+- sistema de chat;
+- WebSockets.
 
-## Validação Técnica
+Validação executada na integração:
 
-Executado:
-
+```bash
 php artisan optimize:clear
-
 composer dump-autoload
-
 npm install
-
-npm run build
-
+npm.cmd run build
 php artisan test
-
 php artisan route:list
+```
 
-Resultado:
+---
 
-- Build concluído.
-- 25 testes passaram.
-- 61 assertions.
-- Rotas registadas corretamente.
-- Integração funcional.
+# 22. Estado das Sprints
 
-## Processo de Integração
+## Sprint 1 — Base de Dados
 
-A integração foi realizada através da branch:
+Estado:
 
-integration/update-eduardo
+```text
+Concluída
+```
 
-seguindo o fluxo:
+Inclui:
 
-feature/update-eduardo
-        ↓
-merge
-        ↓
-integration/update-eduardo
-        ↓
-Pull Request
-        ↓
-Create a merge commit
-        ↓
-main
+- migrations;
+- Models;
+- relações;
+- seeders;
+- documentação inicial.
 
-A autoria dos commits da branch feature/update-eduardo foi preservada.
+---
 
-Não foi efetuado rebase.
+## Sprint 2 — Autenticação
 
-Não foi utilizado Squash and merge.
+Estado:
 
-Não foi alterado o histórico da branch do colaborador.
+```text
+Concluída
+```
+
+Inclui:
+
+- registo;
+- login;
+- logout;
+- consulta do utilizador autenticado;
+- Laravel Sanctum.
+
+---
+
+## Sprint 3 — Recuperação de Password
+
+Estado:
+
+```text
+Concluída
+```
+
+Inclui:
+
+- pedido de recuperação;
+- redefinição de password;
+- revogação dos tokens antigos.
+
+---
+
+## Sprint 4 — Gestão de Utilizadores
+
+Estado:
+
+```text
+Concluída
+```
+
+Inclui:
+
+- listagem;
+- criação;
+- atualização;
+- ativação e desativação;
+- papéis;
+- fotografia;
+- pesquisa;
+- filtros;
+- ordenação;
+- paginação.
+
+---
+
+## Sprint 5 — Gestão de Espaços
+
+Estado:
+
+```text
+Concluída
+```
+
+Inclui:
+
+- edifícios;
+- pisos;
+- setores;
+- secretárias;
+- plantas;
+- mapa;
+- QR Codes.
+
+---
+
+## Sprint 6 — Reservas
+
+Estado:
+
+```text
+Concluída
+```
+
+Inclui:
+
+- criação;
+- atualização;
+- consulta;
+- disponibilidade;
+- cancelamento;
+- regras de negócio;
+- check-in.
+
+---
+
+## Sprint 7 — Funcionalidades Avançadas
+
+Estado:
+
+```text
+Integrada
+```
+
+Inclui:
+
+- dashboard;
+- estatísticas;
+- QR Code;
+- check-in;
+- mapa interativo;
+- editor gráfico;
+- Help Center;
+- FAQs;
+- pedidos de suporte;
+- atualização em tempo real.
+
+---
+
+# 23. Estado Atual
+
+Concluído:
+
+- backend;
+- autenticação;
+- autorização;
+- CRUDs;
+- reservas;
+- disponibilidade;
+- QR Code;
+- check-in;
+- dashboard;
+- estatísticas;
+- mapa;
+- uploads;
+- Help Center;
+- suporte;
+- testes automatizados;
+- revisão de Models;
+- revisão de Form Requests;
+- revisão de Resources;
+- revisão de Policies;
+- revisão de Controllers;
+- reforço das regras das reservas;
+- atualização da documentação técnica.
+
+Em curso:
+
+- atualização do README;
+- revisão final do frontend;
+- limpeza de rotas e código temporário;
+- preparação da apresentação;
+- preparação da entrega.
+
+Trabalho futuro:
+
+- auditoria persistente em base de dados;
+- notificações;
+- integração com calendários;
+- aplicação mobile;
+- estatísticas avançadas;
+- SSO;
+- Inteligência Artificial para previsão de ocupação;
+- eventual estado `concluida` com ciclo de vida formal.
+
+---
+
+# 24. Regras de Continuidade
+
+Ao continuar o projeto:
+
+- não alterar a arquitetura sem explicar o impacto;
+- não renomear ficheiros, classes, métodos ou rotas sem necessidade;
+- não efetuar refactors automáticos globais;
+- manter compatibilidade com os testes existentes;
+- utilizar Route Model Binding;
+- utilizar Form Requests nos CRUDs;
+- utilizar Resources na API;
+- utilizar Policies e Gates;
+- preservar a desativação lógica;
+- não criar CRUD de papéis;
+- não recriar a entidade Localidade;
+- não adicionar o estado `concluida` sem definir o ciclo de vida;
+- executar os testes após cada bloco;
+- fornecer ficheiros completos quando forem necessárias alterações;
+- confirmar nomes reais das rotas, campos e estados antes de documentar;
+- evitar funcionalidades novas durante a fase final, salvo requisito obrigatório.
+
+---
+
+# 25. Estado Técnico Resumido
+
+```text
+Backend:
+Laravel 12
+PHP 8
+Laravel Sanctum
+Eloquent ORM
+Policies
+Form Requests
+Resources
+Events
+Broadcasting
+
+Frontend:
+React
+Inertia.js
+Tailwind CSS
+Vite
+Recharts
+html5-qrcode
+Laravel Echo
+
+Tempo real:
+Laravel Reverb
+Broadcasting
+MapaAtualizado
+EnviarMensagem
+
+Base de dados:
+MySQL
+
+Uploads:
+Fotografia dos utilizadores
+Planta dos pisos
+
+Testes:
+111 testes aprovados
+
+API:
+38 rotas registadas
+
+Estado geral:
+Projeto estável, revisto, documentado e em preparação para entrega.

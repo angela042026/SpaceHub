@@ -1,476 +1,314 @@
-# Arquitetura
+# 4. Arquitetura da Aplicação
 
-## Tecnologias
+# 4.1 Introdução
 
-Backend
-- Laravel 12
+O SpaceHub foi desenvolvido segundo uma arquitetura em camadas baseada no padrão **Model-View-Controller (MVC)**, utilizando o framework Laravel para o backend e React com Inertia.js para o frontend.
 
-Base de Dados
-- MySQL
+Esta arquitetura promove uma clara separação de responsabilidades, facilitando a manutenção, reutilização de código e evolução futura da aplicação.
 
-Autenticação
-- Laravel Sanctum ✔
-
-Frontend
-- Inertia.js
-- React
-- Tailwind CSS
-- JavaScript
-
-Bibliotecas adicionais
-- Recharts
-- Simple QR Code
-- html5-qrcode
+A comunicação entre frontend e backend é efetuada através de uma API REST protegida por autenticação baseada em tokens utilizando Laravel Sanctum.
 
 ---
 
-## Organização
+# 4.2 Arquitetura Geral
 
-Models
+A arquitetura do sistema encontra-se dividida em dois componentes principais.
 
-Controllers
-
-Requests
-
-Middleware
-
-Services
-
-Seeders
-
-Resources
-
-Policies
-
----
-
-## Arquitetura da API
-
-A API segue o padrão:
-
-Routes
-↓
-Controllers (Api)
-↓
-Form Requests
-↓
-Models
-↓
-Resources
-↓
-JSON
-
-Os Controllers da API encontram-se em:
-
-App\Http\Controllers\Api
-
-Todos os novos CRUD devem utilizar:
-
-- Form Requests
-- Route Model Binding
-- Relações Eloquent
-- Resources
-- Laravel Sanctum
-- RoleMiddleware, quando aplicável
-
-Nunca deve ser utilizada validação diretamente nos Controllers.
-
-Não utilizar:
-
-$request->validate(...)
+```
+                +-----------------------------+
+                |         React + Inertia     |
+                |        Interface Web        |
+                +-------------+---------------+
+                              |
+                              |
+                    HTTP / JSON / API
+                              |
+                              ▼
+                +-----------------------------+
+                |          Laravel 12         |
+                |        Backend API          |
+                +-------------+---------------+
+                              |
+               +--------------+--------------+
+               |              |              |
+               ▼              ▼              ▼
+        Controllers      Services      Policies
+               |
+               ▼
+        Form Requests
+               |
+               ▼
+            Models
+               |
+               ▼
+          Base de Dados
+```
 
 ---
 
-## Arquitetura Web
+# 4.3 Organização do Backend
 
-As funcionalidades Web utilizam:
+O backend encontra-se organizado segundo a estrutura recomendada pelo Laravel.
 
-Routes
-↓
-Controllers
-↓
-Models
-↓
-Inertia
-↓
-React
+## Models
 
-Os Controllers Web encontram-se em:
+Representam as entidades persistidas na base de dados.
 
-App\Http\Controllers
+Exemplos:
 
-Atualmente são utilizados para:
+- User
+- Role
+- Edificio
+- Piso
+- Setor
+- Secretaria
+- Reserva
 
-- Dashboard
-- QR Code
-- Check-in
-- Mapa Interativo
-- Perfil
+Os Models implementam relações Eloquent como:
+
+- belongsTo()
+- hasMany()
+- hasOne()
 
 ---
 
-## Estrutura da Base de Dados
+## Controllers
 
-Roles
-│
-Users
-│
-Reservas
-│
-Secretárias
-│
-Setores
-│
-Pisos
-│
-Edifícios
+Os Controllers recebem os pedidos HTTP, validam permissões, coordenam a lógica da aplicação e devolvem respostas à API.
 
----
+Cada entidade principal possui um Controller próprio.
 
-## Relações Principais
+Exemplos:
 
-Role
-- hasMany User
-
-User
-- belongsTo Role
-- hasMany Reserva
-
-Edifício
-- hasMany Piso
-
-Piso
-- belongsTo Edifício
-- hasMany Setor
-
-Setor
-- belongsTo Piso
-- hasMany Secretária
-
-Secretária
-- belongsTo Setor
-- hasMany Reserva
-
-Reserva
-- belongsTo User
-- belongsTo Secretária
-
-Sempre utilizar relações Eloquent.
-
-Evitar queries manuais quando existir uma relação adequada.
-
----
-
-## Funcionalidades
-
-✔ Gestão de utilizadores
-
-✔ Gestão de edifícios
-
-✔ Gestão de pisos
-
-✔ Gestão de setores
-
-✔ Gestão de secretárias
-
-✔ Reservas
-
-✔ Disponibilidade de secretárias
-
-✔ Cancelamento de reservas
-
-✔ Dashboard
-
-✔ Estatísticas
-
-✔ QR Code
-
-✔ Check-in
-
-✔ Mapa Interativo
-
----
-
-## Autenticação
-
-A autenticação da API é realizada através do Laravel Sanctum.
-
-Após o login, é gerado um Personal Access Token que deve ser enviado em cada pedido protegido utilizando o esquema Bearer Token.
-
-As rotas protegidas da API utilizam o middleware:
-
-auth:sanctum
-
-As rotas privadas da aplicação Web utilizam:
-
-auth
-
-O Dashboard utiliza:
-
-auth
-verified
-
----
-
-## Autorização
-
-A aplicação utiliza um middleware personalizado:
-
-RoleMiddleware
-
-O alias registado é:
-
-role
-
-Exemplo:
-
-Route::middleware([
-    'auth:sanctum',
-    'role:Administrador'
-]);
-
-Os Roles existentes são:
-
-- Administrador
-- Gestor
-- Colaborador
-- Utilizador
-
-Os Roles são fixos.
-
-Não existe CRUD de Roles.
-
----
-
-## Gestão de Utilizadores
-
-A gestão de utilizadores é protegida por autenticação (`auth:sanctum`) e pelo middleware personalizado (`role`).
-
-Apenas utilizadores autorizados podem:
-
-- listar utilizadores;
-- consultar utilizadores;
-- criar utilizadores;
-- editar utilizadores;
-- ativar/desativar utilizadores.
-
-Os utilizadores não são eliminados.
-
-É utilizado o campo:
-
-ativo
-
----
-
-## Sprint 5 — Gestão de Espaços
-
-Foi implementado o CRUD completo das entidades:
-
-- Edifícios
-- Pisos
-- Setores
-- Secretárias
-
-Todos seguem o padrão arquitetural definido:
-
-Controllers
-→ Form Requests
-→ Models
-→ Resources
-→ JSON
-
-Foi utilizado:
-
-- Route Model Binding
-- Form Requests
-- Resources
-- Middleware auth:sanctum
-- RoleMiddleware
-- Relações Eloquent
-
----
-
-## Gestão de Reservas
-
-O módulo de Reservas segue a arquitetura definida para a API:
-
-Routes
-↓
-Controllers (Api)
-↓
-Form Requests
-↓
-Models
-↓
-Resources
-↓
-JSON
-
-Componentes implementados:
-
+- UserController
+- EdificioController
+- PisoController
+- SetorController
+- SecretariaController
 - ReservaController
+- DashboardController
+- AuthController
+
+---
+
+## Form Requests
+
+A validação da entrada de dados é realizada através de Form Requests.
+
+Cada operação possui regras específicas de validação.
+
+Exemplos:
+
+- StoreUserRequest
+- UpdateUserRequest
 - StoreReservaRequest
 - UpdateReservaRequest
-- DisponibilidadeReservaRequest
+
+Esta abordagem permite separar a validação da lógica de negócio.
+
+---
+
+## Resources
+
+As respostas da API utilizam Resources para serializar os dados devolvidos ao frontend.
+
+Exemplos:
+
+- UserResource
 - ReservaResource
+- PisoResource
+- SecretariaResource
 
-Funcionalidades implementadas:
-
-- listar reservas;
-- consultar reservas;
-- criar reservas;
-- atualizar reservas;
-- cancelar reservas;
-- consultar disponibilidade;
-- cancelamento automático de reservas expiradas.
-
-Utiliza:
-
-- Route Model Binding
-- Relações Eloquent
-- Laravel Sanctum
-- RoleMiddleware
-- Form Requests
-- Resources
+Os Resources garantem consistência nas respostas da API e ocultam informação desnecessária.
 
 ---
 
-## Dashboard
+## Policies
 
-O Dashboard utiliza Laravel, Inertia e React.
+O controlo de permissões é realizado através de Policies.
 
-Controller:
+Cada entidade possui uma política própria.
 
-DashboardController
+Exemplos:
 
-Rota:
+- UserPolicy
+- ReservaPolicy
+- SecretariaPolicy
 
-GET /dashboard
+Os Controllers recorrem ao método:
 
-O Dashboard apresenta:
+```php
+Gate::authorize(...)
+```
 
-- estatísticas de ocupação;
+garantindo que apenas utilizadores autorizados executam determinadas operações.
+
+---
+
+# 4.4 Persistência dos Dados
+
+A persistência é assegurada através do ORM Eloquent.
+
+Cada Model representa uma tabela da base de dados.
+
+As relações são carregadas utilizando:
+
+- eager loading;
+- lazy loading quando necessário.
+
+A utilização do Eloquent simplifica:
+
+- consultas;
+- inserções;
+- atualizações;
+- gestão das relações.
+
+---
+
+# 4.5 Gestão de Ficheiros
+
+O sistema suporta armazenamento de ficheiros.
+
+Atualmente são suportados:
+
+| Entidade | Ficheiro |
+|----------|----------|
+| User | Fotografia |
+| Piso | Planta |
+
+Os ficheiros são armazenados em:
+
+```
+storage/app/public
+```
+
+e disponibilizados através do link simbólico:
+
+```
+public/storage
+```
+
+utilizando o sistema Storage do Laravel.
+
+---
+
+# 4.6 Autenticação
+
+A autenticação é implementada através de Laravel Sanctum.
+
+Após autenticação é gerado um token associado ao utilizador autenticado.
+
+As principais funcionalidades disponíveis incluem:
+
+- login;
+- logout;
+- recuperação de password;
+- alteração de password;
+- consulta do utilizador autenticado.
+
+Os utilizadores inativos não podem iniciar sessão.
+
+---
+
+# 4.7 Autorização
+
+O acesso às funcionalidades encontra-se protegido por Policies.
+
+Os diferentes papéis possuem permissões distintas.
+
+| Papel | Permissões |
+|--------|------------|
+| Administrador | Gestão completa |
+| Gestor | Gestão operacional |
+| Colaborador | Consulta |
+| Utilizador | Reservas e perfil |
+
+---
+
+# 4.8 Atualização em Tempo Real
+
+Sempre que ocorre uma alteração relevante nas reservas, o sistema emite o evento:
+
+```
+MapaAtualizado
+```
+
+Este evento permite atualizar automaticamente o estado de ocupação apresentado no mapa sem necessidade de recarregar a página.
+
+---
+
+# 4.9 Estrutura do Projeto
+
+A organização principal do projeto segue a seguinte estrutura.
+
+```
+app
+ ├── Events
+ ├── Http
+ │     ├── Controllers
+ │     ├── Middleware
+ │     ├── Requests
+ │     └── Resources
+ ├── Models
+ ├── Policies
+ └── Providers
+
+database
+ ├── factories
+ ├── migrations
+ └── seeders
+
+resources
+ ├── js
+ └── views
+
+routes
+
+tests
+```
+
+---
+
+# 4.10 Testes
+
+O projeto possui uma suíte de testes automatizados desenvolvida com PHPUnit.
+
+Os testes cobrem, entre outras áreas:
+
+- autenticação;
+- autorização;
+- uploads;
 - reservas;
-- disponibilidade;
-- gráficos;
-- mapa dos espaços;
-- informação de acordo com o papel do utilizador.
+- dashboard;
+- mapa;
+- QR Code;
+- gestão das entidades;
+- validação das regras de negócio.
 
-Os gráficos utilizam:
-
-Recharts
-
----
-
-## QR Code
-
-Cada secretária possui um token único:
-
-qr_token
-
-O token é gerado automaticamente através de UUID.
-
-A biblioteca utilizada para geração dos QR Codes é:
-
-simplesoftwareio/simple-qrcode
-
-Controller:
-
-SecretariaQrCodeController
-
-Funcionalidades:
-
-- listar QR Codes das secretárias;
-- gerar QR Code por secretária;
-- criar uma URL de Check-in associada à secretária.
+À data da conclusão do projeto, a suíte é composta por **111 testes automatizados**.
 
 ---
 
-## Check-in
+# 4.11 Princípios de Desenvolvimento
 
-O Check-in é realizado através da leitura do QR Code da secretária.
+Durante o desenvolvimento foram seguidos vários princípios de boas práticas.
 
-Controller:
+Entre eles destacam-se:
 
-CheckInController
-
-A leitura do QR Code no browser utiliza:
-
-html5-qrcode
-
-Fluxo:
-
-Câmara
-↓
-Leitura do QR Code
-↓
-Validação do token
-↓
-Identificação da secretária
-↓
-Validação da reserva
-↓
-Confirmação do Check-in
+- separação de responsabilidades;
+- reutilização de código;
+- utilização de Form Requests;
+- utilização de Resources;
+- utilização de Policies;
+- utilização de Eloquent ORM;
+- utilização de eventos para comunicação interna;
+- testes automatizados;
+- tipagem explícita sempre que possível.
 
 ---
 
-## Mapa Interativo
+# 4.12 Considerações Finais
 
-O mapa interativo permite visualizar e editar a posição dos espaços na planta.
+A arquitetura adotada permite que o SpaceHub seja facilmente extensível e mantenha uma organização consistente entre os diferentes componentes da aplicação.
 
-Controller:
-
-SetorMapaController
-
-As plantas encontram-se em:
-
-public/images/maps
-
-A posição dos elementos é guardada através de coordenadas na base de dados.
-
----
-
-## Validação Técnica
-
-Antes de cada commit de integração devem ser executados:
-
-php artisan optimize:clear
-
-composer dump-autoload
-
-npm.cmd run build
-
-php artisan test
-
-php artisan route:list
-## WebSockets
-
-O projeto passa a suportar comunicação em tempo real através de Laravel Reverb.
-
-Arquitetura:
-
-React
-↓
-Laravel Echo
-↓
-Broadcasting
-↓
-Laravel Reverb
-↓
-Eventos Laravel
-
-Evento implementado:
-
-EnviarMensagem
-
-Controlador:
-
-ChatController
-
-Configuração:
-
-config/broadcasting.php
-
-config/reverb.php
-
-routes/channels.php
+A utilização do ecossistema Laravel, em conjunto com React e Inertia.js, possibilita uma solução moderna, modular e preparada para evolução futura, mantendo simultaneamente elevados níveis de segurança, desempenho e manutenibilidade.
