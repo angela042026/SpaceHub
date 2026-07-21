@@ -219,38 +219,46 @@ export default function Index({ reservas, setores, filters }) {
                                                 <td className="px-4 py-3">
 
                                                     <div className="font-medium">
-                                                        {reserva.secretaria.setor.nome}
+                                                        {reserva.secretaria?.setor?.nome ?? '-'}
                                                     </div>
-
                                                     <div className="text-sm text-gray-500">
-                                                        Código: {reserva.secretaria.codigo}
+                                                        Código: {reserva.secretaria?.codigo ?? '-'}
                                                     </div>
 
                                                 </td>
 
                                                 <td className="px-4 py-3">
 
-                                                    <span
-                                                        className={`rounded px-2 py-1 text-sm
-                                                            ${reserva.estadoReserva.codigo === 'pendente'
-                                                                ? 'bg-yellow-100 text-yellow-800'
-                                                                : reserva.estadoReserva.codigo === 'confirmada'
-                                                                    ? 'bg-blue-100 text-blue-800'
-                                                                    : reserva.estadoReserva.codigo === 'cancelada'
-                                                                        ? 'bg-red-100 text-red-800'
-                                                                        : reserva.estadoReserva.codigo === 'expirada'
-                                                                            ? 'bg-gray-200 text-gray-700'
-                                                                            : 'bg-green-100 text-green-800'
-                                                            }`}
-                                                    >
-                                                        {reserva.estadoReserva.nome}
-                                                    </span>
+                                                    {/* Setor */}
+                                                    <div className="font-medium">
+                                                        {reserva.secretaria?.setor?.nome ?? '-'}
+                                                    </div>
+
+                                                    {/* Badge do Estado */}
+                                                    {(() => {
+                                                        const estadoCodigo = reserva.estadoReserva?.codigo;
+
+                                                        const cores = {
+                                                            pendente: 'bg-yellow-100 text-yellow-800',
+                                                            confirmada: 'bg-blue-100 text-blue-800',
+                                                            cancelada: 'bg-red-100 text-red-800',
+                                                            expirada: 'bg-gray-200 text-gray-700',
+                                                        };
+
+                                                        const classeCor = cores[estadoCodigo] ?? 'bg-green-100 text-green-800';
+
+                                                        return (
+                                                            <span className={`rounded px-2 py-1 text-sm ${classeCor}`}>
+                                                                {reserva.estadoReserva?.nome ?? '-'}
+                                                            </span>
+                                                        );
+                                                    })()}
 
                                                 </td>
 
                                                 <td className="px-4 py-3">
 
-                                                    {reserva.estadoReserva.codigo === 'pendente' ? (
+                                                    {reserva.estadoReserva?.codigo === 'pendente' ? (
 
                                                         <div className="flex gap-2">
                                                             <Link

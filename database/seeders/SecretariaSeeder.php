@@ -13,65 +13,44 @@ class SecretariaSeeder extends Seeder
      */
     public function run(): void
     {
-        $osc = Setor::where('codigo', 'OSC')->firstOrFail();
-        $osn = Setor::where('codigo', 'OSN')->firstOrFail();
-        $pb = Setor::where('codigo', 'PB')->firstOrFail();
+        // Obtém todos os setores reserváveis
+        $setores = Setor::where('reservavel', true)->get();
 
-        // Open Space Central (34 lugares)
-        for ($i = 1; $i <= 34; $i++) {
+        foreach ($setores as $setor) {
 
-            Secretaria::updateOrCreate(
-                [
-                    'setor_id' => $osc->id,
-                    'codigo' => 'OSC' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                ],
-                [
-                    'monitor' => true,
-                    'dock_usb' => true,
-                    'junto_janela' => false,
-                    'ergonomica' => true,
-                    'reservavel' => true,
-                    'ativo' => true,
-                ]
-            );
-        }
+            for ($i = 1; $i <= $setor->capacidade; $i++) {
 
-        // Open Space Norte (15 lugares)
-        for ($i = 1; $i <= 15; $i++) {
+                Secretaria::updateOrCreate(
+                    [
+                        'setor_id' => $setor->id,
+                        'codigo' => $setor->codigo . str_pad($i, 2, '0', STR_PAD_LEFT),
+                    ],
+                    [
+                        'descricao' => $setor->nome,
 
-            Secretaria::updateOrCreate(
-                [
-                    'setor_id' => $osn->id,
-                    'codigo' => 'OSN' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                ],
-                [
-                    'monitor' => true,
-                    'dock_usb' => true,
-                    'junto_janela' => true,
-                    'ergonomica' => true,
-                    'reservavel' => true,
-                    'ativo' => true,
-                ]
-            );
-        }
+                        // Características do lugar
+                        'monitor' => in_array($setor->tipo, [
+                            'open_space',
+                            'escritorio',
+                            'escritorio_executivo'
+                        ]),
 
-        // Phone Booths (10 cabines)
-        for ($i = 1; $i <= 10; $i++) {
+                        'dock_usb' => in_array($setor->tipo, [
+                            'open_space',
+                            'escritorio',
+                            'escritorio_executivo'
+                        ]),
 
-            Secretaria::updateOrCreate(
-                [
-                    'setor_id' => $pb->id,
-                    'codigo' => 'PB' . str_pad($i, 3, '0', STR_PAD_LEFT),
-                ],
-                [
-                    'monitor' => false,
-                    'dock_usb' => false,
-                    'junto_janela' => false,
-                    'ergonomica' => true,
-                    'reservavel' => true,
-                    'ativo' => true,
-                ]
-            );
+                        'junto_janela' => false,
+
+                        'ergonomica' => $setor->tipo !== 'phone_booth',
+
+                        'reservavel' => true,
+                        'ativo' => true,
+                    ]
+                );
+
+            }
         }
     }
 }

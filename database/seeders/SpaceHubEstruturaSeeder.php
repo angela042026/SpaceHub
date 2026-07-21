@@ -39,7 +39,7 @@ class SpaceHubEstruturaSeeder extends Seeder
                 'nome' => 'Piso -1 Garagem',
                 'numero' => -1,
                 'planta' => '/images/maps/Piso-1Garagem.png',
-                'descricao' => 'Garagem e zonas técnicas.',
+                'descricao' => 'Piso -1 - Garagem e zonas técnicas.',
                 'ativo' => true,
             ]
         );
@@ -53,7 +53,7 @@ class SpaceHubEstruturaSeeder extends Seeder
                 'nome' => 'Piso 0',
                 'numero' => 0,
                 'planta' => '/images/maps/Piso0.png',
-                'descricao' => 'Receção, lounge, cafetaria e open space.',
+                'descricao' => 'Piso 0',
                 'ativo' => true,
             ]
         );
@@ -67,7 +67,7 @@ class SpaceHubEstruturaSeeder extends Seeder
                 'nome' => 'Piso 1',
                 'numero' => 1,
                 'planta' => '/images/maps/Piso1.png',
-                'descricao' => 'Salas de reunião, escritórios e zonas de concentração.',
+                'descricao' => 'Piso 1',
                 'ativo' => true,
             ]
         );
@@ -78,52 +78,113 @@ class SpaceHubEstruturaSeeder extends Seeder
                 'codigo' => 'P2',
             ],
             [
-                'nome' => 'Piso 2 / Terraço',
+                'nome' => 'Piso 2',
                 'numero' => 2,
                 'planta' => '/images/maps/Piso2Terraco.png',
-                'descricao' => 'Escritórios premium, coworking exterior e terraço.',
+                'descricao' => 'Piso 2',
                 'ativo' => true,
             ]
         );
 
-        $this->criarSetor($garagem, 'G-EST', 'Estacionamento', 'estacionamento', false, 20);
-        $this->criarSetor($garagem, 'G-TEC', 'Zona Técnica', 'tecnico', false, 5);
+                // =====================================================
+        // GARAGEM (não reservável)
+        // =====================================================
 
-        $p0Coworking = $this->criarSetor($piso0, 'P0-COW', 'Open Space', 'coworking', true, 20);
-        $p0Rececao = $this->criarSetor($piso0, 'P0-REC', 'Receção', 'rececao', false, 4);
-        $p0Cafe = $this->criarSetor($piso0, 'P0-CAF', 'Cafetaria', 'cafetaria', false, 20);
-        $p0Lounge = $this->criarSetor($piso0, 'P0-LOU', 'Lounge', 'lounge', false, 15);
-        $p0Reuniao = $this->criarSetor($piso0, 'P0-REU', 'Salas de Reunião', 'reuniao', true, 12);
-        $p0Phone = $this->criarSetor($piso0, 'P0-PHO', 'Phone Booths', 'phone_booth', true, 4);
+        $this->criarSetor($garagem, 'EST', 'Estacionamento', 'estacionamento', false, 20);
+        $this->criarSetor($garagem, 'TEC', 'Zona Técnica', 'tecnico', false, 5);
 
-        $p1Coworking = $this->criarSetor($piso1, 'P1-COW', 'Coworking Piso 1', 'coworking', true, 24);
-        $p1Reuniao = $this->criarSetor($piso1, 'P1-REU', 'Salas de Reunião Piso 1', 'reuniao', true, 18);
-        $p1Concentracao = $this->criarSetor($piso1, 'P1-CON', 'Zona de Concentração', 'concentracao', true, 10);
-        $p1Phone = $this->criarSetor($piso1, 'P1-PHO', 'Phone Booths Piso 1', 'phone_booth', true, 4);
-        $p1Lounge = $this->criarSetor($piso1, 'P1-LOU', 'Lounge Piso 1', 'lounge', false, 15);
+        // =====================================================
+        // PISO 0
+        // =====================================================
 
-        $p2Coworking = $this->criarSetor($piso2, 'P2-COW', 'Coworking Premium', 'coworking', true, 26);
-        $p2Reuniao = $this->criarSetor($piso2, 'P2-REU', 'Sala Executiva', 'reuniao', true, 12);
-        $p2Lounge = $this->criarSetor($piso2, 'P2-LOU', 'Lounge Privado', 'lounge', false, 20);
-        $p2Exterior = $this->criarSetor($piso2, 'P2-EXT', 'Coworking Exterior', 'coworking', true, 20);
+        $osc = $this->criarSetor($piso0, 'OSC', 'Open Space Central', 'open_space', true, 34);
 
-        // Coordenadas em grelha (% da imagem da planta) — aproximação para dar
-        // vida ao mapa de ocupação; não são posições pixel-perfect das plantas reais.
-        $this->criarSecretarias($p0Coworking, 'A', 1, 16, xInicio: 10, yInicio: 15, colunas: 8);
-        $this->criarSecretarias($p0Reuniao, 'A', 17, 22, xInicio: 10, yInicio: 55, colunas: 6);
-        $this->criarSecretarias($p0Phone, 'A', 23, 26, xInicio: 70, yInicio: 55, colunas: 4);
+        $osn = $this->criarSetor($piso0, 'OSN', 'Open Space Norte', 'open_space', true, 14);
 
-        $this->criarSecretarias($p1Coworking, 'B', 1, 18, xInicio: 10, yInicio: 15, colunas: 9);
-        $this->criarSecretarias($p1Reuniao, 'B', 19, 26, xInicio: 10, yInicio: 55, colunas: 8);
-        $this->criarSecretarias($p1Concentracao, 'B', 27, 34, xInicio: 10, yInicio: 75, colunas: 8);
-        $this->criarSecretarias($p1Phone, 'B', 35, 38, xInicio: 75, yInicio: 75, colunas: 4);
+        $pb0 = $this->criarSetor($piso0, 'PB', 'Phone Booth', 'phone_booth', true, 10);
 
-        $this->criarSecretarias($p2Coworking, 'C', 1, 20, xInicio: 10, yInicio: 15, colunas: 10);
-        $this->criarSecretarias($p2Reuniao, 'C', 21, 26, xInicio: 10, yInicio: 55, colunas: 6);
-        $this->criarSecretarias($p2Exterior, 'C', 27, 36, xInicio: 10, yInicio: 75, colunas: 10);
+        $this->criarSetor($piso0, 'REC', 'Receção', 'rececao', false, 1);
+
+        $this->criarSetor($piso0, 'LOU', 'Lounge', 'lounge', false, 1);
+
+        $this->criarSetor($piso0, 'COP', 'Copa', 'copa', false, 1);
+
+        $this->criarSetor($piso0, 'WC', 'Instalações Sanitárias', 'wc', false, 2);
+
+        // =====================================================
+        // PISO 1
+        // =====================================================
+
+        $e = $this->criarSetor($piso1, 'E', 'Escritório', 'escritorio', true, 5);
+
+        $srg = $this->criarSetor($piso1, 'SRG', 'Sala de Reuniões Grande', 'sala_reunioes', true, 2);
+
+        $srm = $this->criarSetor($piso1, 'SRM', 'Sala de Reuniões Média', 'sala_reunioes', true, 1);
+
+        $srr = $this->criarSetor($piso1, 'SRR', 'Sala de Reuniões Redonda', 'sala_reunioes', true, 1);
+
+        $pb1 = $this->criarSetor($piso1, 'PB', 'Phone Booth', 'phone_booth', true, 5);
+
+        $this->criarSetor($piso1, 'COP', 'Copa', 'copa', false, 1);
+
+        $this->criarSetor($piso1, 'SE', 'Sala de Espera', 'sala_espera', false, 1);
+
+        // =====================================================
+        // PISO 2
+        // =====================================================
+
+        $ee = $this->criarSetor($piso2, 'EE', 'Escritório Executivo', 'escritorio_executivo', true, 7);
+
+        $sre = $this->criarSetor($piso2, 'SRE', 'Sala de Reuniões Executiva', 'sala_reunioes', true, 1);
+
+        $scr = $this->criarSetor($piso2, 'SCR', 'Sala Criativa', 'sala_criativa', true, 1);
+
+        $pb2 = $this->criarSetor($piso2, 'PB', 'Phone Booth', 'phone_booth', true, 2);
+
+        $this->criarSetor($piso2, 'SE', 'Sala de Espera', 'sala_espera', false, 1);
+
+        $this->criarSetor($piso2, 'COP', 'Copa', 'copa', false, 2);
+
+        $this->criarSetor($piso2, 'WC', 'Instalações Sanitárias', 'wc', false, 4);
+
+                // =====================================================
+        // SECRETÁRIAS - PISO 0
+        // =====================================================
+
+        $this->criarSecretarias($osc, 'OSC', 1, 34, xInicio: 10, yInicio: 15, colunas: 8);
+
+        $this->criarSecretarias($osn, 'OSN', 1, 14, xInicio: 10, yInicio: 55, colunas: 7);
+
+        $this->criarSecretarias($pb0, 'PB', 1, 10, xInicio: 75, yInicio: 15, colunas: 2);
+
+        // =====================================================
+        // SECRETÁRIAS - PISO 1
+        // =====================================================
+
+        $this->criarSecretarias($e, 'E', 1, 5, xInicio: 10, yInicio: 15, colunas: 5);
+
+        $this->criarSecretarias($srg, 'SRG', 1, 2, xInicio: 10, yInicio: 50, colunas: 2);
+
+        $this->criarSecretarias($srm, 'SRM', 1, 1, xInicio: 35, yInicio: 50, colunas: 1);
+
+        $this->criarSecretarias($srr, 'SRR', 1, 1, xInicio: 55, yInicio: 50, colunas: 1);
+
+        $this->criarSecretarias($pb1, 'PB', 1, 5, xInicio: 75, yInicio: 20, colunas: 1);
+
+        // =====================================================
+        // SECRETÁRIAS - PISO 2
+        // =====================================================
+
+        $this->criarSecretarias($ee, 'EE', 1, 7, xInicio: 10, yInicio: 15, colunas: 4);
+
+        $this->criarSecretarias($sre, 'SRE', 1, 1, xInicio: 20, yInicio: 55, colunas: 1);
+
+        $this->criarSecretarias($scr, 'SCR', 1, 1, xInicio: 50, yInicio: 55, colunas: 1);
+
+        $this->criarSecretarias($pb2, 'PB', 1, 2, xInicio: 80, yInicio: 20, colunas: 1);
     }
 
-    private function criarSetor(
+        private function criarSetor(
         Piso $piso,
         string $codigo,
         string $nome,
@@ -131,23 +192,28 @@ class SpaceHubEstruturaSeeder extends Seeder
         bool $reservavel,
         int $capacidade
     ): Setor {
+
         return Setor::updateOrCreate(
+
             [
                 'piso_id' => $piso->id,
                 'codigo' => $codigo,
             ],
+
             [
                 'nome' => $nome,
                 'tipo' => $tipo,
                 'reservavel' => $reservavel,
                 'capacidade' => $capacidade,
-                'descricao' => $nome . ' do ' . $piso->nome,
+                'descricao' => $nome . ' - ' . $piso->nome,
                 'ativo' => true,
             ]
+
         );
     }
 
-    private function criarSecretarias(
+
+        private function criarSecretarias(
         Setor $setor,
         string $prefixo,
         int $inicio,
@@ -158,29 +224,63 @@ class SpaceHubEstruturaSeeder extends Seeder
         float $xPasso = 8,
         float $yPasso = 14
     ): void {
+
         for ($i = $inicio; $i <= $fim; $i++) {
+
             $indice = $i - $inicio;
+
             $coluna = $indice % $colunas;
             $linha = intdiv($indice, $colunas);
 
             Secretaria::updateOrCreate(
+
                 [
                     'setor_id' => $setor->id,
-                    'codigo' => $prefixo . '-' . str_pad($i, 2, '0', STR_PAD_LEFT),
+                    'codigo' => $prefixo . str_pad($i, 2, '0', STR_PAD_LEFT),
                 ],
+
                 [
+
+                    'descricao' => $setor->nome . ' ' . str_pad($i, 2, '0', STR_PAD_LEFT),
+
                     'planta_x' => (int) min($xInicio + ($coluna * $xPasso), 95),
+
                     'planta_y' => (int) min($yInicio + ($linha * $yPasso), 95),
+
                     'angulo' => 0,
-                    'monitor' => $i % 2 === 0,
-                    'dock_usb' => $i % 3 === 0,
-                    'junto_janela' => $i % 4 === 0,
-                    'ergonomica' => true,
+
+                    'monitor' => in_array(
+                        $setor->tipo,
+                        [
+                            'open_space',
+                            'escritorio',
+                            'escritorio_executivo'
+                        ]
+                    ),
+
+                    'dock_usb' => in_array(
+                        $setor->tipo,
+                        [
+                            'open_space',
+                            'escritorio',
+                            'escritorio_executivo'
+                        ]
+                    ),
+
+                    'junto_janela' => false,
+
+                    'ergonomica' => $setor->tipo !== 'phone_booth',
+
                     'reservavel' => true,
+
                     'ativo' => true,
-                    'descricao' => 'Secretária de trabalho SpaceHub.',
+
                 ]
+
             );
         }
     }
+
 }
+
+

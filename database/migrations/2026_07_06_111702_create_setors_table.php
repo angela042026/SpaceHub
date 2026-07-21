@@ -12,22 +12,25 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('piso_id')
-                  ->constrained('pisos')
-                  ->cascadeOnDelete();
+                ->constrained('pisos')
+                ->cascadeOnDelete();
 
             $table->string('nome', 100);
             $table->string('codigo', 20);
 
             $table->enum('tipo', [
-                'coworking',
-                'reuniao',
+                'open_space',
+                'escritorio',
+                'escritorio_executivo',
+                'sala_reunioes',
+                'sala_criativa',
+                'sala_espera',
                 'rececao',
-                'cafetaria',
+                'copa',
                 'lounge',
-                'estacionamento',
-                'concentracao',
                 'phone_booth',
                 'wc',
+                'estacionamento',
                 'tecnico',
                 'outro',
             ])->default('outro');
@@ -49,5 +52,3 @@ return new class extends Migration
         Schema::dropIfExists('setores');
     }
 };
-
-
