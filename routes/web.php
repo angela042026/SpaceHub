@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\SetorController as AdminSetorController;
 use App\Http\Controllers\Admin\StatisticsController as AdminStatisticsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
@@ -94,6 +95,20 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::get('/secretarias/{secretaria}/qrcode', [SecretariaQrCodeController::class, 'show'])
         ->name('secretarias.qrcode');
+
+    // ==========================
+    // Android App: Autenticação e Registo
+    // ==========================
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+
+    // ======= Rotas protegidas por Sanctum
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+    });
 
     // ==========================
     // Mapa do Escritório
@@ -286,7 +301,7 @@ Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
             ->name('reports.suporte');
     });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 /*
 |--------------------------------------------------------------------------

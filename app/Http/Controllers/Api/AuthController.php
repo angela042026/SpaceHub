@@ -73,6 +73,9 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
+        \Illuminate\Support\Facades\Log::info('Login Android Email:', ['email' => $request->email]);
+    \Illuminate\Support\Facades\Log::info('Login Android Pass:', ['pass' => $request->password]);
+    
         $dados = $request->validate([
             'email' => [
                 'required',
