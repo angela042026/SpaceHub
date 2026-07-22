@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateReservaRequest;
 use App\Http\Resources\ReservaResource;
 use App\Http\Resources\SecretariaResource;
 use App\Models\EstadoReserva;
+use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use Illuminate\Http\JsonResponse;
@@ -100,7 +101,7 @@ class ReservaController extends Controller
             )
         ) {
             return response()->json([
-                'message' => 'Já possui uma reserva para esta data e período.',
+                'message' => 'Já possui uma reserva incompatível com este período na data selecionada.',
             ], 422);
         }
 
@@ -193,7 +194,7 @@ class ReservaController extends Controller
             )
         ) {
             return response()->json([
-                'message' => 'Este utilizador já possui uma reserva para esta data e período.',
+                'message' => 'Este utilizador já possui outra reserva incompatível com este período.',
             ], 422);
         }
 
@@ -282,9 +283,13 @@ class ReservaController extends Controller
 
         $dados = $request->validated();
 
+        $periodosConflito = $this->periodosEmConflito(
+            (int) $dados['periodo_id']
+        );
+
         $secretariasReservadas = Reserva::query()
-            ->where('data', $dados['data'])
-            ->where('periodo_id', $dados['periodo_id'])
+            ->whereDate('data', $dados['data'])
+            ->whereIn('periodo_id', $periodosConflito)
             ->whereNull('cancelada_at')
             ->whereHas('estadoReserva', function ($query): void {
                 $query->whereNotIn('codigo', [
@@ -304,6 +309,9 @@ class ReservaController extends Controller
         return SecretariaResource::collection($secretarias);
     }
 
+    /**
+     * Carrega as relações da reserva.
+     */
     private function carregarRelacoes(Reserva $reserva): void
     {
         $reserva->load([
@@ -314,16 +322,21 @@ class ReservaController extends Controller
         ]);
     }
 
+    /**
+     * Verifica se a secretária já possui uma reserva incompatível.
+     */
     private function secretariaJaReservada(
         int $secretariaId,
         string $data,
         int $periodoId,
         ?int $ignorarReservaId = null
     ): bool {
+        $periodosConflito = $this->periodosEmConflito($periodoId);
+
         $query = Reserva::query()
             ->where('secretaria_id', $secretariaId)
-            ->where('data', $data)
-            ->where('periodo_id', $periodoId)
+            ->whereDate('data', $data)
+            ->whereIn('periodo_id', $periodosConflito)
             ->whereNull('cancelada_at')
             ->whereHas('estadoReserva', function ($query): void {
                 $query->whereNotIn('codigo', [
@@ -339,16 +352,21 @@ class ReservaController extends Controller
         return $query->exists();
     }
 
+    /**
+     * Verifica se o utilizador já possui outra reserva incompatível.
+     */
     private function utilizadorJaTemReserva(
         int $userId,
         string $data,
         int $periodoId,
         ?int $ignorarReservaId = null
     ): bool {
+        $periodosConflito = $this->periodosEmConflito($periodoId);
+
         $query = Reserva::query()
             ->where('user_id', $userId)
-            ->where('data', $data)
-            ->where('periodo_id', $periodoId)
+            ->whereDate('data', $data)
+            ->whereIn('periodo_id', $periodosConflito)
             ->whereNull('cancelada_at')
             ->whereHas('estadoReserva', function ($query): void {
                 $query->whereNotIn('codigo', [
@@ -364,6 +382,60 @@ class ReservaController extends Controller
         return $query->exists();
     }
 
+    /**
+     * Devolve os IDs dos períodos incompatíveis
+     * com o período escolhido.
+     *
+     * Manhã:
+     * - Manhã
+     * - Dia inteiro
+     *
+     * Tarde:
+     * - Tarde
+     * - Dia inteiro
+     *
+     * Dia inteiro:
+     * - Manhã
+     * - Tarde
+     * - Dia inteiro
+     */
+    private function periodosEmConflito(int $periodoId): array
+    {
+        $periodoSelecionado = Periodo::query()
+            ->findOrFail($periodoId);
+
+        $nomesPeriodos = match ($periodoSelecionado->nome) {
+            'Manhã' => [
+                'Manhã',
+                'Dia inteiro',
+            ],
+
+            'Tarde' => [
+                'Tarde',
+                'Dia inteiro',
+            ],
+
+            'Dia inteiro' => [
+                'Manhã',
+                'Tarde',
+                'Dia inteiro',
+            ],
+
+            default => [
+                $periodoSelecionado->nome,
+            ],
+        };
+
+        return Periodo::query()
+            ->whereIn('nome', $nomesPeriodos)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /**
+     * Obtém um estado de reserva pelo código.
+     */
     private function obterEstado(string $codigo): EstadoReserva
     {
         return EstadoReserva::query()
@@ -371,6 +443,9 @@ class ReservaController extends Controller
             ->firstOrFail();
     }
 
+    /**
+     * Verifica se o utilizador autenticado é Administrador.
+     */
     private function isAdministrador(Request $request): bool
     {
         return $request->user()->role?->nome === 'Administrador';
