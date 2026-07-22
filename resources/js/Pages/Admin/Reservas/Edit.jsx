@@ -2,7 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, CalendarPlus } from 'lucide-react';
+import { ArrowLeft, Pencil, UserRound } from 'lucide-react';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -10,98 +10,115 @@ const fieldClass =
 const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
-export default function Create({ periodos, pisos, setores }) {
+export default function Edit({ reserva, secretarias, periodos, pisos, setores }) {
 
-    const [setoresFiltrados, setSetoresFiltrados] = useState([]);
-    const [secretariasDisponiveis, setSecretariasDisponiveis] = useState([]);
+    const [pisoId, setPisoId] = useState(String(reserva.secretaria.setor.piso_id));
+    const [setorId, setSetorId] = useState(String(reserva.secretaria.setor_id));
 
-    const { data, setData, post, processing, errors } = useForm({
-        data: '',
-        periodo_id: '',
-        piso_id: '',
-        setor_id: '',
-        secretaria_id: '',
-        observacoes: '',
+    const [secretariasDisponiveis, setSecretariasDisponiveis] = useState(
+        secretarias.filter((s) => String(s.setor_id) === String(reserva.secretaria.setor_id))
+    );
+
+    const { data, setData, put, processing, errors } = useForm({
+        data: reserva.data,
+        periodo_id: String(reserva.periodo_id),
+        secretaria_id: String(reserva.secretaria_id),
+        observacoes: reserva.observacoes ?? '',
     });
 
-    // Filtra os tipos de espaço conforme o piso selecionado
-    useEffect(() => {
+    const setoresDoPiso = setores.filter(
+        (setor) => String(setor.piso_id) === String(pisoId)
+    );
 
-        if (!data.piso_id) {
-            setSetoresFiltrados([]);
-            setSecretariasDisponiveis([]);
-            setData('setor_id', '');
-            setData('secretaria_id', '');
-            return;
-        }
-
-        const lista = setores.filter(setor => setor.piso_id == data.piso_id);
-
-        setSetoresFiltrados(lista);
-        setSecretariasDisponiveis([]);
-        setData('setor_id', '');
+    const selecionarPiso = (value) => {
+        setPisoId(value);
+        setSetorId('');
         setData('secretaria_id', '');
+    };
 
-    }, [data.piso_id]);
+    const selecionarSetor = (value) => {
+        setSetorId(value);
+        setData('secretaria_id', '');
+    };
 
-    // Atualiza os lugares disponíveis
     useEffect(() => {
 
-        if (!data.data || !data.periodo_id || !data.setor_id) {
+        if (!data.data || !data.periodo_id || !setorId) {
             setSecretariasDisponiveis([]);
-            setData('secretaria_id', '');
             return;
         }
 
         fetch(route('reservas.availability', {
             data: data.data,
             periodo_id: data.periodo_id,
-            setor_id: data.setor_id,
+            setor_id: setorId,
         }), {
-            headers: {
-                Accept: 'application/json',
-            },
+            headers: { Accept: 'application/json' },
         })
             .then((response) => {
-
                 if (!response.ok) {
                     throw new Error('Erro ao consultar disponibilidade.');
                 }
+
                 return response.json();
             })
-            .then((secretarias) => {
+            .then((disponiveis) => {
 
-                setSecretariasDisponiveis(secretarias);
-                setData('secretaria_id', '');
+                const jaIncluida = disponiveis.some((s) => String(s.id) === data.secretaria_id);
+
+                if (!jaIncluida) {
+                    const atual = secretarias.find((s) => String(s.id) === data.secretaria_id);
+
+                    if (atual) {
+                        disponiveis = [...disponiveis, atual];
+                    }
+                }
+
+                setSecretariasDisponiveis(disponiveis);
             })
             .catch((error) => {
                 console.error(error);
             });
 
-    }, [data.data, data.periodo_id, data.setor_id]);
+    }, [data.data, data.periodo_id, setorId]);
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('reservas.store'));
+        put(route('admin.reservas.update', reserva.id));
     };
 
     return (
         <DashboardLayout>
-            <Head title="Nova Reserva" />
+            <Head title="Editar Reserva" />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
-                        <CalendarPlus size={22} strokeWidth={1.9} />
+                        <Pencil size={22} strokeWidth={1.9} />
                     </div>
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Nova Reserva
+                            Editar Reserva
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Escolhe a data, o período e o espaço que pretendes reservar.
+                            Altera a data, o período ou o espaço desta reserva.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/60 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/40">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+                        <UserRound size={17} strokeWidth={1.9} />
+                    </div>
+
+                    <div>
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                            {reserva.user?.name ?? '-'}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {reserva.user?.email ?? '-'}
                         </p>
                     </div>
                 </div>
@@ -145,8 +162,8 @@ export default function Create({ periodos, pisos, setores }) {
                             <label htmlFor="piso_id" className={labelClass}>Piso</label>
                             <select
                                 id="piso_id"
-                                value={data.piso_id}
-                                onChange={(e) => setData('piso_id', e.target.value)}
+                                value={pisoId}
+                                onChange={(e) => selecionarPiso(e.target.value)}
                                 required
                                 className={fieldClass}
                             >
@@ -164,17 +181,17 @@ export default function Create({ periodos, pisos, setores }) {
                             <label htmlFor="setor_id" className={labelClass}>Categoria do Espaço</label>
                             <select
                                 id="setor_id"
-                                value={data.setor_id}
-                                onChange={(e) => setData('setor_id', e.target.value)}
-                                disabled={!data.piso_id}
+                                value={setorId}
+                                onChange={(e) => selecionarSetor(e.target.value)}
+                                disabled={!pisoId}
                                 required
                                 className={fieldClass}
                             >
                                 <option value="" disabled>
-                                    {data.piso_id ? 'Selecione...' : 'Selecione primeiro o piso'}
+                                    {pisoId ? 'Selecione...' : 'Selecione primeiro o piso'}
                                 </option>
 
-                                {setoresFiltrados.map((setor) => (
+                                {setoresDoPiso.map((setor) => (
                                     <option key={setor.id} value={setor.id}>
                                         {setor.nome}
                                     </option>
@@ -188,12 +205,12 @@ export default function Create({ periodos, pisos, setores }) {
                                 id="secretaria_id"
                                 value={data.secretaria_id}
                                 onChange={(e) => setData('secretaria_id', e.target.value)}
-                                disabled={!data.setor_id}
+                                disabled={!setorId}
                                 required
                                 className={fieldClass}
                             >
                                 <option value="" disabled>
-                                    {data.setor_id ? 'Selecione...' : 'Selecione primeiro a categoria'}
+                                    {setorId ? 'Selecione...' : 'Selecione primeiro a categoria'}
                                 </option>
 
                                 {secretariasDisponiveis.map((secretaria) => (
@@ -202,12 +219,6 @@ export default function Create({ periodos, pisos, setores }) {
                                     </option>
                                 ))}
                             </select>
-
-                            {data.setor_id && secretariasDisponiveis.length === 0 && (
-                                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                                    Não existem lugares disponíveis para a data, período e categoria selecionados.
-                                </p>
-                            )}
                             <InputError message={errors.secretaria_id} className="mt-2" />
                         </div>
 
@@ -230,11 +241,11 @@ export default function Create({ periodos, pisos, setores }) {
                             disabled={processing}
                             className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {processing ? 'A guardar...' : 'Reservar'}
+                            {processing ? 'A guardar...' : 'Guardar Alterações'}
                         </button>
 
                         <Link
-                            href={route('reservas.index')}
+                            href={route('admin.reservas.index')}
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
                             <ArrowLeft size={16} strokeWidth={1.9} />

@@ -1,134 +1,134 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import Table from '@/Components/Table';
+import { Head, Link, router } from '@inertiajs/react';
+import { ChevronLeft, ChevronRight, History as HistoryIcon } from 'lucide-react';
 
-const badgeClasses = {
-    pendente: 'bg-yellow-100 text-yellow-800',
-    confirmada: 'bg-blue-100 text-blue-800',
-    cancelada: 'bg-red-100 text-red-800',
-    expirada: 'bg-gray-200 text-gray-700',
-    concluida: 'bg-green-100 text-green-800',
+const ESTADO_CLASSES = {
+    pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    confirmada: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
+    cancelada: 'bg-red-500/10 text-red-600 dark:text-red-400',
+    expirada: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
+    concluida: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
 };
 
 export default function History({ reservas }) {
 
+    const irParaPagina = (url) => {
+        if (!url) {
+            return;
+        }
+
+        router.get(url, {}, { preserveState: true, preserveScroll: true });
+    };
+
+    const columns = [
+        {
+            key: 'data',
+            label: 'Data',
+            render: (reserva) => new Date(reserva.data).toLocaleDateString('pt-PT'),
+        },
+        {
+            key: 'periodo',
+            label: 'Período',
+            render: (reserva) => reserva.periodo?.nome ?? '-',
+        },
+        {
+            key: 'espaco',
+            label: 'Espaço',
+            render: (reserva) => (
+                <div>
+                    <p className="font-semibold text-slate-800 dark:text-slate-100">
+                        {reserva.secretaria?.setor?.nome ?? '-'}
+                    </p>
+
+                    <p className="text-xs text-slate-400">
+                        {reserva.secretaria?.codigo ?? '-'}
+                    </p>
+                </div>
+            ),
+        },
+        {
+            key: 'estado',
+            label: 'Estado',
+            render: (reserva) => (
+                <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
+                        ESTADO_CLASSES[reserva.estado_reserva?.codigo] ??
+                        'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                    }`}
+                >
+                    {reserva.estado_reserva?.nome ?? '-'}
+                </span>
+            ),
+        },
+    ];
+
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Histórico de Reservas
-                </h2>
-            }
-        >
+        <DashboardLayout>
             <Head title="Histórico de Reservas" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-
-                        <div className="p-6">
-
-                            <div className="mb-6 flex items-center justify-between">
-                                <h3 className="text-lg font-semibold">
-                                    Reservas Passadas
-                                </h3>
-
-                                <Link
-                                    href={route('reservas.index')}
-                                    className="text-sm text-blue-600 hover:underline"
-                                >
-                                    Ver reservas atuais
-                                </Link>
-                            </div>
-
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Data
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Período
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Espaço
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Estado
-                                        </th>
-                                    </tr>
-                                </thead>
-
-                                <tbody className="divide-y divide-gray-200 bg-white">
-                                    {reservas.data.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="4" className="px-4 py-6 text-center text-gray-500">
-                                                Ainda não existem reservas no histórico.
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        reservas.data.map((reserva) => (
-                                            <tr key={reserva.id}>
-                                                <td className="px-4 py-3">
-                                                    {new Date(reserva.data).toLocaleDateString('pt-PT')}
-                                                </td>
-
-                                                <td className="px-4 py-3">
-                                                    {reserva.periodo.nome}
-                                                </td>
-
-                                                <td className="px-4 py-3">
-                                                    <div className="font-medium">
-                                                        {reserva.secretaria.setor.nome}
-                                                    </div>
-
-                                                    <div className="text-sm text-gray-500">
-                                                        Código: {reserva.secretaria.codigo}
-                                                    </div>
-                                                </td>
-
-                                                <td className="px-4 py-3">
-                                                    <span
-                                                        className={`rounded px-2 py-1 text-sm ${badgeClasses[reserva.estadoReserva.codigo] ?? 'bg-gray-100 text-gray-700'}`}
-                                                    >
-                                                        {reserva.estadoReserva.nome}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-
-                            {reservas.data.length > 0 && (
-                                <div className="mt-6 flex flex-wrap items-center justify-center gap-1">
-                                    {reservas.links.map((link, index) => (
-                                        link.url === null ? (
-                                            <span
-                                                key={index}
-                                                className="rounded px-3 py-1 text-sm text-gray-400"
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                            />
-                                        ) : (
-                                            <Link
-                                                key={index}
-                                                href={link.url}
-                                                preserveScroll
-                                                className={`rounded px-3 py-1 text-sm ${link.active ? 'bg-blue-600 text-white' : 'text-blue-600 hover:bg-blue-50'}`}
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                            />
-                                        )
-                                    ))}
-                                </div>
-                            )}
-
+            <section className="dashboard-card overflow-hidden">
+                <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+                            <HistoryIcon size={22} strokeWidth={1.9} />
                         </div>
 
+                        <div>
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                                Histórico de Reservas
+                            </h1>
+
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                Reservas passadas, {reservas.total} no total.
+                            </p>
+                        </div>
                     </div>
 
+                    <Link
+                        href={route('reservas.index')}
+                        className="text-sm font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400"
+                    >
+                        Ver reservas atuais
+                    </Link>
                 </div>
-            </div>
 
-        </AuthenticatedLayout>
+                <div className="p-6">
+                    <Table
+                        columns={columns}
+                        data={reservas.data}
+                        emptyMessage="Ainda não existem reservas no histórico."
+                    />
+
+                    {reservas.last_page > 1 && (
+                        <div className="mt-5 flex items-center justify-between">
+                            <p className="text-xs text-slate-400">
+                                Página {reservas.current_page} de {reservas.last_page}
+                            </p>
+
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    disabled={!reservas.prev_page_url}
+                                    onClick={() => irParaPagina(reservas.prev_page_url)}
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
+                                >
+                                    <ChevronLeft size={16} strokeWidth={1.9} />
+                                </button>
+
+                                <button
+                                    type="button"
+                                    disabled={!reservas.next_page_url}
+                                    onClick={() => irParaPagina(reservas.next_page_url)}
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
+                                >
+                                    <ChevronRight size={16} strokeWidth={1.9} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </section>
+        </DashboardLayout>
     );
 }
