@@ -27,7 +27,7 @@ class ReportController extends Controller
 
     public function reservas(Request $request): Response
     {
-        Gate::authorize('viewAny', Setor::class);
+        Gate::authorize('viewAny', Reserva::class);
 
         $query = Reserva::query()
             ->with(['user', 'secretaria.setor.piso.edificio', 'periodo', 'estadoReserva']);

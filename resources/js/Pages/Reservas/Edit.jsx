@@ -1,11 +1,26 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, useForm } from '@inertiajs/react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import InputError from '@/Components/InputError';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { ArrowLeft, Pencil } from 'lucide-react';
 
-export default function Edit({ reserva, secretarias, periodos }) {
+const fieldClass =
+    'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
-    // Lista de secretárias disponíveis para a data/período selecionados
-    const [secretariasDisponiveis, setSecretariasDisponiveis] = useState(secretarias);
+const labelClass =
+    'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
+
+export default function Edit({ reserva, secretarias, periodos, pisos, setores }) {
+
+    // Seleção intermédia do fluxo Piso -> Categoria -> Lugar,
+    // inicializada com a categoria/piso atuais da reserva.
+    const [pisoId, setPisoId] = useState(String(reserva.secretaria.setor.piso_id));
+    const [setorId, setSetorId] = useState(String(reserva.secretaria.setor_id));
+
+    // Lista de secretárias disponíveis para a data/período/categoria selecionados
+    const [secretariasDisponiveis, setSecretariasDisponiveis] = useState(
+        secretarias.filter((s) => String(s.setor_id) === String(reserva.secretaria.setor_id))
+    );
 
     const { data, setData, put, processing, errors } = useForm({
         data: reserva.data,
@@ -14,15 +29,37 @@ export default function Edit({ reserva, secretarias, periodos }) {
         observacoes: reserva.observacoes ?? '',
     });
 
-    // Atualiza a lista de secretárias disponíveis quando a data ou o
-    // período são alterados (mantém a secretária atual na lista).
+    // Categorias (setores) do piso selecionado
+    const setoresDoPiso = setores.filter(
+        (setor) => String(setor.piso_id) === String(pisoId)
+    );
+
+    const selecionarPiso = (value) => {
+        setPisoId(value);
+        setSetorId('');
+        setData('secretaria_id', '');
+    };
+
+    const selecionarSetor = (value) => {
+        setSetorId(value);
+        setData('secretaria_id', '');
+    };
+
+    // Atualiza a lista de secretárias disponíveis quando a data, o
+    // período ou a categoria são alterados (mantém a secretária atual
+    // na lista, mesmo que já não conste como "disponível").
     useEffect(() => {
 
-        if (!data.data || !data.periodo_id) {
+        if (!data.data || !data.periodo_id || !setorId) {
+            setSecretariasDisponiveis([]);
             return;
         }
 
-        fetch(route('reservas.availability', { data: data.data, periodo_id: data.periodo_id }), {
+        fetch(route('reservas.availability', {
+            data: data.data,
+            periodo_id: data.periodo_id,
+            setor_id: setorId,
+        }), {
             headers: { Accept: 'application/json' },
         })
             .then((response) => {
@@ -34,8 +71,6 @@ export default function Edit({ reserva, secretarias, periodos }) {
             })
             .then((disponiveis) => {
 
-                // Garante que a secretária atualmente atribuída continua
-                // selecionável, mesmo que já não conste como "disponível".
                 const jaIncluida = disponiveis.some((s) => String(s.id) === data.secretaria_id);
 
                 if (!jaIncluida) {
@@ -52,7 +87,7 @@ export default function Edit({ reserva, secretarias, periodos }) {
                 console.error(error);
             });
 
-    }, [data.data, data.periodo_id]);
+    }, [data.data, data.periodo_id, setorId]);
 
     const submit = (e) => {
         e.preventDefault();
@@ -60,150 +95,157 @@ export default function Edit({ reserva, secretarias, periodos }) {
     };
 
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Editar Reserva
-                </h2>
-            }
-        >
+        <DashboardLayout>
             <Head title="Editar Reserva" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-4xl sm:px-6 lg:px-8">
-
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-
-                        <div className="p-6">
-
-                            <h3 className="mb-6 text-lg font-semibold">
-                                Editar Reserva
-                            </h3>
-
-                            <form onSubmit={submit}>
-
-                                {/* Data */}
-                                <div className="mb-4">
-                                    <label className="mb-2 block font-medium">
-                                        Data
-                                    </label>
-
-                                    <input
-                                        type="date"
-                                        value={data.data}
-                                        onChange={(e) => setData('data', e.target.value)}
-                                        className="w-full rounded border p-2"
-                                    />
-
-                                    {errors.data && (
-                                        <p className="mt-1 text-sm text-red-600">
-                                            {errors.data}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Período */}
-                                <div className="mb-4">
-                                    <label className="mb-2 block font-medium">
-                                        Período
-                                    </label>
-
-                                    <select
-                                        value={data.periodo_id}
-                                        onChange={(e) => setData('periodo_id', e.target.value)}
-                                        className="w-full rounded border p-2"
-                                    >
-                                        <option value="">
-                                            Selecione...
-                                        </option>
-
-                                        {periodos.map((periodo) => (
-                                            <option
-                                                key={periodo.id}
-                                                value={periodo.id}
-                                            >
-                                                {periodo.nome}
-                                            </option>
-                                        ))}
-                                    </select>
-
-                                    {errors.periodo_id && (
-                                        <p className="mt-1 text-sm text-red-600">
-                                            {errors.periodo_id}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Espaço */}
-                                <div className="mb-4">
-                                    <label className="mb-2 block font-medium">
-                                        Espaço
-                                    </label>
-
-                                    <select
-                                        value={data.secretaria_id}
-                                        onChange={(e) => setData('secretaria_id', e.target.value)}
-                                        className="w-full rounded border p-2"
-                                    >
-                                        <option value="">
-                                            Selecione...
-                                        </option>
-
-                                        {secretariasDisponiveis.map((secretaria) => (
-                                            <option
-                                                key={secretaria.id}
-                                                value={secretaria.id}
-                                            >
-                                                {secretaria.codigo}
-                                            </option>
-                                        ))}
-                                    </select>
-
-                                    {errors.secretaria_id && (
-                                        <p className="mt-1 text-sm text-red-600">
-                                            {errors.secretaria_id}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Observações */}
-                                <div className="mb-6">
-                                    <label className="mb-2 block font-medium">
-                                        Observações
-                                    </label>
-
-                                    <textarea
-                                        rows={4}
-                                        value={data.observacoes}
-                                        onChange={(e) => setData('observacoes', e.target.value)}
-                                        className="w-full rounded border p-2"
-                                    />
-
-                                    {errors.observacoes && (
-                                        <p className="mt-1 text-sm text-red-600">
-                                            {errors.observacoes}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Botão */}
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
-                                >
-                                    {processing ? 'A guardar...' : 'Guardar Alterações'}
-                                </button>
-
-                            </form>
-
-                        </div>
-
+            <section className="dashboard-card overflow-hidden">
+                <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+                        <Pencil size={22} strokeWidth={1.9} />
                     </div>
 
-                </div>
-            </div>
+                    <div>
+                        <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                            Editar Reserva
+                        </h1>
 
-        </AuthenticatedLayout>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Altera a data, o período ou o espaço desta reserva.
+                        </p>
+                    </div>
+                </div>
+
+                <form onSubmit={submit} className="p-6" noValidate>
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <div>
+                            <label htmlFor="data" className={labelClass}>Data</label>
+                            <input
+                                id="data"
+                                type="date"
+                                value={data.data}
+                                onChange={(e) => setData('data', e.target.value)}
+                                required
+                                className={fieldClass}
+                            />
+                            <InputError message={errors.data} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <label htmlFor="periodo_id" className={labelClass}>Período</label>
+                            <select
+                                id="periodo_id"
+                                value={data.periodo_id}
+                                onChange={(e) => setData('periodo_id', e.target.value)}
+                                required
+                                className={fieldClass}
+                            >
+                                <option value="" disabled>Selecione...</option>
+
+                                {periodos.map((periodo) => (
+                                    <option key={periodo.id} value={periodo.id}>
+                                        {periodo.nome}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError message={errors.periodo_id} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <label htmlFor="piso_id" className={labelClass}>Piso</label>
+                            <select
+                                id="piso_id"
+                                value={pisoId}
+                                onChange={(e) => selecionarPiso(e.target.value)}
+                                required
+                                className={fieldClass}
+                            >
+                                <option value="" disabled>Selecione...</option>
+
+                                {pisos.map((piso) => (
+                                    <option key={piso.id} value={piso.id}>
+                                        {piso.nome}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="setor_id" className={labelClass}>Categoria do Espaço</label>
+                            <select
+                                id="setor_id"
+                                value={setorId}
+                                onChange={(e) => selecionarSetor(e.target.value)}
+                                disabled={!pisoId}
+                                required
+                                className={fieldClass}
+                            >
+                                <option value="" disabled>
+                                    {pisoId ? 'Selecione...' : 'Selecione primeiro o piso'}
+                                </option>
+
+                                {setoresDoPiso.map((setor) => (
+                                    <option key={setor.id} value={setor.id}>
+                                        {setor.nome}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="sm:col-span-2">
+                            <label htmlFor="secretaria_id" className={labelClass}>Lugar</label>
+                            <select
+                                id="secretaria_id"
+                                value={data.secretaria_id}
+                                onChange={(e) => setData('secretaria_id', e.target.value)}
+                                disabled={!setorId}
+                                required
+                                className={fieldClass}
+                            >
+                                <option value="" disabled>
+                                    {setorId ? 'Selecione...' : 'Selecione primeiro a categoria'}
+                                </option>
+
+                                {secretariasDisponiveis.map((secretaria) => (
+                                    <option key={secretaria.id} value={secretaria.id}>
+                                        {secretaria.codigo} — {secretaria.descricao}
+                                    </option>
+                                ))}
+                            </select>
+                            <InputError message={errors.secretaria_id} className="mt-2" />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                            <label htmlFor="observacoes" className={labelClass}>Observações</label>
+                            <textarea
+                                id="observacoes"
+                                rows={4}
+                                value={data.observacoes}
+                                onChange={(e) => setData('observacoes', e.target.value)}
+                                className={`${fieldClass} h-auto py-2.5`}
+                            />
+                            <InputError message={errors.observacoes} className="mt-2" />
+                        </div>
+                    </div>
+
+                    <div className="mt-8 flex items-center gap-3">
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {processing ? 'A guardar...' : 'Guardar Alterações'}
+                        </button>
+
+                        <Link
+                            href={route('reservas.index')}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
+                        >
+                            <ArrowLeft size={16} strokeWidth={1.9} />
+                            Cancelar
+                        </Link>
+                    </div>
+                </form>
+            </section>
+        </DashboardLayout>
     );
 }

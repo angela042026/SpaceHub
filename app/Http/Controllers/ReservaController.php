@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\Setor;
 use App\Models\Piso;
+use App\Models\Edificio;
 
 class ReservaController extends Controller
 {
@@ -47,6 +48,20 @@ class ReservaController extends Controller
             });
         }
 
+        // Filtrar por piso
+        if ($request->filled('piso')) {
+            $query->whereHas('secretaria.setor.piso', function ($q) use ($request) {
+                $q->where('id', $request->piso);
+            });
+        }
+
+        // Filtrar por edifício
+        if ($request->filled('edificio')) {
+            $query->whereHas('secretaria.setor.piso.edificio', function ($q) use ($request) {
+                $q->where('id', $request->edificio);
+            });
+        }
+
         $reservas = $query
             ->orderBy('data', 'desc')
             ->get();
@@ -55,13 +70,25 @@ class ReservaController extends Controller
             ->orderBy('nome')
             ->get();
 
+        $pisos = Piso::where('ativo', true)
+            ->orderBy('numero')
+            ->get();
+
+        $edificios = Edificio::where('ativo', true)
+            ->orderBy('nome')
+            ->get();
+
         return Inertia::render('Reservas/Index', [
             'reservas' => $reservas,
             'setores' => $setores,
+            'pisos' => $pisos,
+            'edificios' => $edificios,
             'filters' => $request->only([
                 'estado',
                 'data',
                 'setor',
+                'piso',
+                'edificio',
             ]),
         ]);
     }
@@ -348,7 +375,7 @@ class ReservaController extends Controller
             $request->validate([
                 'data' => ['required', 'date'],
                 'periodo_id' => ['required', 'exists:periodos,id'],
-                'setor_id' => ['required', 'exists:setores,id'],
+                'setor_id' => ['nullable', 'exists:setores,id'],
             ]);
 
             return response()->json(
@@ -362,6 +389,16 @@ class ReservaController extends Controller
 
         $periodos = Periodo::where('ativo', true)
             ->orderBy('hora_inicio')
+            ->get();
+
+        $pisos = Piso::where('ativo', true)
+            ->orderBy('numero')
+            ->get();
+
+        $setores = Setor::where('reservavel', true)
+            ->with('piso')
+            ->orderBy('piso_id')
+            ->orderBy('nome')
             ->get();
 
         $secretariasDisponiveis = null;
@@ -387,6 +424,8 @@ class ReservaController extends Controller
 
         return Inertia::render('Reservas/Availability', [
             'periodos' => $periodos,
+            'pisos' => $pisos,
+            'setores' => $setores,
             'secretariasDisponiveis' => $secretariasDisponiveis,
             'filters' => $request->only([
                 'data',
@@ -401,11 +440,15 @@ class ReservaController extends Controller
 
     /**
      * Lugares reserváveis e ativos sem reserva ativa numa data/período.
+     *
+     * Quando $setorId é omitido, devolve a disponibilidade em todas as
+     * categorias (usado pela consulta geral); quando indicado, restringe
+     * à categoria selecionada (usado pelo fluxo Piso -> Categoria -> Lugar).
      */
     private function secretariasDisponiveis(
         string $data,
         int|string $periodoId,
-        int|string $setorId
+        int|string|null $setorId = null
     ) {
         $secretariasReservadas = Reserva::whereDate('data', $data)
             ->where('periodo_id', $periodoId)
@@ -414,7 +457,9 @@ class ReservaController extends Controller
 
         return Secretaria::where('reservavel', true)
             ->where('ativo', true)
-            ->where('setor_id', $setorId)
+            ->when($setorId !== null, function ($query) use ($setorId) {
+                $query->where('setor_id', $setorId);
+            })
             ->whereNotIn('id', $secretariasReservadas)
             ->orderBy('codigo')
             ->get();

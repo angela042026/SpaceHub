@@ -25,6 +25,16 @@ class User extends Authenticatable
         'fotografia',
     ];
 
+    /**
+     * Espelha o DEFAULT true da coluna "ativo" na instância em memória,
+     * para que uma nova instância criada sem indicar "ativo" explicitamente
+     * (ex.: User::factory()->create()) já reflita o valor correto sem
+     * precisar de um refresh() após o INSERT.
+     */
+    protected $attributes = [
+        'ativo' => true,
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',

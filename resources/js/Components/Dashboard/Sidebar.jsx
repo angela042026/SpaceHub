@@ -214,6 +214,9 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                                 <SidebarItem
                                     icon={CalendarDays}
                                     label="Reservas"
+                                    href={route('admin.reservas.index')}
+                                    active={route().current('admin.reservas.*')}
+                                    onNavigate={onClose}
                                 />
 
                                 <SidebarItem
