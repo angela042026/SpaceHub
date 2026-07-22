@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Edificio;
+use App\Models\EstadoReserva;
+use App\Models\Periodo;
+use App\Models\Piso;
 use App\Models\Reserva;
 use App\Models\Secretaria;
-use App\Models\Periodo;
-use App\Models\EstadoReserva;
+use App\Models\Setor;
+use App\Services\PagamentoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use App\Models\Setor;
-use App\Models\Piso;
-use App\Models\Edificio;
 
 class ReservaController extends Controller
 {
@@ -137,81 +139,103 @@ class ReservaController extends Controller
     /**
      * Guardar uma nova reserva.
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'data' => ['required', 'date'],
-            'periodo_id' => ['required', 'exists:periodos,id'],
-            'secretaria_id' => ['required', 'exists:secretarias,id'],
-            'observacoes' => ['nullable', 'string', 'max:500'],
-        ]);
+/**
+ * Guardar uma nova reserva.
+ */
+public function store(
+    Request $request,
+    PagamentoService $pagamentoService
+) {
+    $dadosValidados = $request->validate([
+        'data' => ['required', 'date'],
+        'periodo_id' => ['required', 'exists:periodos,id'],
+        'secretaria_id' => ['required', 'exists:secretarias,id'],
+        'observacoes' => ['nullable', 'string', 'max:500'],
+    ]);
 
-        /*
-         * Obtém os períodos incompatíveis com o período escolhido.
-         *
-         * Manhã       -> Manhã e Dia inteiro
-         * Tarde       -> Tarde e Dia inteiro
-         * Dia inteiro -> Manhã, Tarde e Dia inteiro
-         */
-        $periodosConflito = $this->periodosEmConflito(
-            (int) $request->periodo_id
-        );
+    /*
+     * Obtém os períodos incompatíveis com o período escolhido.
+     *
+     * Manhã       -> Manhã e Dia inteiro
+     * Tarde       -> Tarde e Dia inteiro
+     * Dia inteiro -> Manhã, Tarde e Dia inteiro
+     */
+    $periodosConflito = $this->periodosEmConflito(
+        (int) $dadosValidados['periodo_id']
+    );
 
-        // Verifica se a secretária já está ocupada.
-        $reservaExistente = Reserva::where(
-            'secretaria_id',
-            $request->secretaria_id
-        )
-            ->whereDate('data', $request->data)
-            ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
-            ->exists();
+    // Verifica se a secretária já está ocupada.
+    $reservaExistente = Reserva::where(
+        'secretaria_id',
+        $dadosValidados['secretaria_id']
+    )
+        ->whereDate('data', $dadosValidados['data'])
+        ->whereIn('periodo_id', $periodosConflito)
+        ->whereNull('cancelada_at')
+        ->exists();
 
-        if ($reservaExistente) {
-            return back()
-                ->withErrors([
-                    'secretaria_id' =>
-                        'Esta secretária já se encontra reservada para a data e período selecionados.',
-                ])
-                ->withInput();
-        }
-
-        // Verifica se o utilizador já possui uma reserva incompatível.
-        $reservaUtilizador = Reserva::where('user_id', Auth::id())
-            ->whereDate('data', $request->data)
-            ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
-            ->exists();
-
-        if ($reservaUtilizador) {
-            return back()
-                ->withErrors([
-                    'data' =>
-                        'Já possui uma reserva incompatível com este período na data selecionada.',
-                ])
-                ->withInput();
-        }
-
-        // Obtém o estado "Pendente"
-        $estadoPendente = EstadoReserva::where(
-            'codigo',
-            'pendente'
-        )->firstOrFail();
-
-        // Cria a reserva
-        Reserva::create([
-            'user_id' => Auth::id(),
-            'secretaria_id' => $request->secretaria_id,
-            'periodo_id' => $request->periodo_id,
-            'estado_reserva_id' => $estadoPendente->id,
-            'data' => $request->data,
-            'observacoes' => $request->observacoes,
-        ]);
-
-        return redirect()
-            ->route('reservas.index')
-            ->with('success', 'Reserva criada com sucesso.');
+    if ($reservaExistente) {
+        return back()
+            ->withErrors([
+                'secretaria_id' =>
+                    'Esta secretária já se encontra reservada para a data e período selecionados.',
+            ])
+            ->withInput();
     }
+
+    // Verifica se o utilizador já possui uma reserva incompatível.
+    $reservaUtilizador = Reserva::where(
+        'user_id',
+        Auth::id()
+    )
+        ->whereDate('data', $dadosValidados['data'])
+        ->whereIn('periodo_id', $periodosConflito)
+        ->whereNull('cancelada_at')
+        ->exists();
+
+    if ($reservaUtilizador) {
+        return back()
+            ->withErrors([
+                'data' =>
+                    'Já possui uma reserva incompatível com este período na data selecionada.',
+            ])
+            ->withInput();
+    }
+
+    // Obtém o estado "Pendente".
+    $estadoPendente = EstadoReserva::where(
+        'codigo',
+        'pendente'
+    )->firstOrFail();
+
+    DB::transaction(function () use (
+        $dadosValidados,
+        $estadoPendente,
+        $pagamentoService
+    ) {
+        $reserva = Reserva::create([
+            'user_id' => Auth::id(),
+            'secretaria_id' =>
+                $dadosValidados['secretaria_id'],
+            'periodo_id' =>
+                $dadosValidados['periodo_id'],
+            'estado_reserva_id' =>
+                $estadoPendente->id,
+            'data' => $dadosValidados['data'],
+            'observacoes' =>
+                $dadosValidados['observacoes'] ?? null,
+        ]);
+
+        $pagamentoService->criarParaReserva($reserva);
+    });
+
+    return redirect()
+        ->route('reservas.index')
+        ->with(
+            'success',
+            'Reserva criada. O pagamento encontra-se pendente.'
+        );
+}
 
     /**
      * Cancelar uma reserva.

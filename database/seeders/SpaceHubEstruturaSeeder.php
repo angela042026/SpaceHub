@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Edificio;
 use App\Models\Piso;
-use App\Models\Setor;
 use App\Models\Secretaria;
+use App\Models\Setor;
 use Illuminate\Database\Seeder;
 
 class SpaceHubEstruturaSeeder extends Seeder
@@ -86,134 +86,419 @@ class SpaceHubEstruturaSeeder extends Seeder
             ]
         );
 
-                // =====================================================
+        // =====================================================
         // GARAGEM (não reservável)
         // =====================================================
 
-        $this->criarSetor($garagem, 'EST', 'Estacionamento', 'estacionamento', false, 20);
-        $this->criarSetor($garagem, 'TEC', 'Zona Técnica', 'tecnico', false, 5);
+        $this->criarSetor(
+            piso: $garagem,
+            codigo: 'EST',
+            nome: 'Estacionamento',
+            tipo: 'estacionamento',
+            reservavel: false,
+            capacidade: 20
+        );
+
+        $this->criarSetor(
+            piso: $garagem,
+            codigo: 'TEC',
+            nome: 'Zona Técnica',
+            tipo: 'tecnico',
+            reservavel: false,
+            capacidade: 5
+        );
 
         // =====================================================
         // PISO 0
         // =====================================================
 
-        $osc = $this->criarSetor($piso0, 'OSC', 'Open Space Central', 'open_space', true, 34);
+        $osc = $this->criarSetor(
+            piso: $piso0,
+            codigo: 'OSC',
+            nome: 'Open Space Central',
+            tipo: 'open_space',
+            reservavel: true,
+            capacidade: 34,
+            precoMeioDia: 8.00,
+            precoDiaInteiro: 14.00
+        );
 
-        $osn = $this->criarSetor($piso0, 'OSN', 'Open Space Norte', 'open_space', true, 14);
+        $osn = $this->criarSetor(
+            piso: $piso0,
+            codigo: 'OSN',
+            nome: 'Open Space Norte',
+            tipo: 'open_space',
+            reservavel: true,
+            capacidade: 14,
+            precoMeioDia: 7.00,
+            precoDiaInteiro: 12.00
+        );
 
-        $pb0 = $this->criarSetor($piso0, 'PB', 'Phone Booth', 'phone_booth', true, 10);
+        $pb0 = $this->criarSetor(
+            piso: $piso0,
+            codigo: 'PB',
+            nome: 'Phone Booth',
+            tipo: 'phone_booth',
+            reservavel: true,
+            capacidade: 10,
+            precoMeioDia: 5.00,
+            precoDiaInteiro: 9.00
+        );
 
-        $this->criarSetor($piso0, 'REC', 'Receção', 'rececao', false, 1);
+        $this->criarSetor(
+            piso: $piso0,
+            codigo: 'REC',
+            nome: 'Receção',
+            tipo: 'rececao',
+            reservavel: false,
+            capacidade: 1
+        );
 
-        $this->criarSetor($piso0, 'LOU', 'Lounge', 'lounge', false, 1);
+        $this->criarSetor(
+            piso: $piso0,
+            codigo: 'LOU',
+            nome: 'Lounge',
+            tipo: 'lounge',
+            reservavel: false,
+            capacidade: 1
+        );
 
-        $this->criarSetor($piso0, 'COP', 'Copa', 'copa', false, 1);
+        $this->criarSetor(
+            piso: $piso0,
+            codigo: 'COP',
+            nome: 'Copa',
+            tipo: 'copa',
+            reservavel: false,
+            capacidade: 1
+        );
 
-        $this->criarSetor($piso0, 'WC', 'Instalações Sanitárias', 'wc', false, 2);
+        $this->criarSetor(
+            piso: $piso0,
+            codigo: 'WC',
+            nome: 'Instalações Sanitárias',
+            tipo: 'wc',
+            reservavel: false,
+            capacidade: 2
+        );
 
         // =====================================================
         // PISO 1
         // =====================================================
 
-        $e = $this->criarSetor($piso1, 'E', 'Escritório', 'escritorio', true, 5);
+        $e = $this->criarSetor(
+            piso: $piso1,
+            codigo: 'E',
+            nome: 'Escritório',
+            tipo: 'escritorio',
+            reservavel: true,
+            capacidade: 5,
+            precoMeioDia: 25.00,
+            precoDiaInteiro: 45.00
+        );
 
-        $srg = $this->criarSetor($piso1, 'SRG', 'Sala de Reuniões Grande', 'sala_reunioes', true, 2);
+        $srg = $this->criarSetor(
+            piso: $piso1,
+            codigo: 'SRG',
+            nome: 'Sala de Reuniões Grande',
+            tipo: 'sala_reunioes',
+            reservavel: true,
+            capacidade: 2,
+            precoMeioDia: 45.00,
+            precoDiaInteiro: 80.00
+        );
 
-        $srm = $this->criarSetor($piso1, 'SRM', 'Sala de Reuniões Média', 'sala_reunioes', true, 1);
+        $srm = $this->criarSetor(
+            piso: $piso1,
+            codigo: 'SRM',
+            nome: 'Sala de Reuniões Média',
+            tipo: 'sala_reunioes',
+            reservavel: true,
+            capacidade: 1,
+            precoMeioDia: 30.00,
+            precoDiaInteiro: 55.00
+        );
 
-        $srr = $this->criarSetor($piso1, 'SRR', 'Sala de Reuniões Redonda', 'sala_reunioes', true, 1);
+        $srr = $this->criarSetor(
+            piso: $piso1,
+            codigo: 'SRR',
+            nome: 'Sala de Reuniões Redonda',
+            tipo: 'sala_reunioes',
+            reservavel: true,
+            capacidade: 1,
+            precoMeioDia: 25.00,
+            precoDiaInteiro: 45.00
+        );
 
-        $pb1 = $this->criarSetor($piso1, 'PB', 'Phone Booth', 'phone_booth', true, 5);
+        $pb1 = $this->criarSetor(
+            piso: $piso1,
+            codigo: 'PB',
+            nome: 'Phone Booth',
+            tipo: 'phone_booth',
+            reservavel: true,
+            capacidade: 5,
+            precoMeioDia: 5.00,
+            precoDiaInteiro: 9.00
+        );
 
-        $this->criarSetor($piso1, 'COP', 'Copa', 'copa', false, 1);
+        $this->criarSetor(
+            piso: $piso1,
+            codigo: 'COP',
+            nome: 'Copa',
+            tipo: 'copa',
+            reservavel: false,
+            capacidade: 1
+        );
 
-        $this->criarSetor($piso1, 'SE', 'Sala de Espera', 'sala_espera', false, 1);
+        $this->criarSetor(
+            piso: $piso1,
+            codigo: 'SE',
+            nome: 'Sala de Espera',
+            tipo: 'sala_espera',
+            reservavel: false,
+            capacidade: 1
+        );
 
         // =====================================================
         // PISO 2
         // =====================================================
 
-        $ee = $this->criarSetor($piso2, 'EE', 'Escritório Executivo', 'escritorio_executivo', true, 7);
+        $ee = $this->criarSetor(
+            piso: $piso2,
+            codigo: 'EE',
+            nome: 'Escritório Executivo',
+            tipo: 'escritorio_executivo',
+            reservavel: true,
+            capacidade: 7,
+            precoMeioDia: 35.00,
+            precoDiaInteiro: 65.00
+        );
 
-        $sre = $this->criarSetor($piso2, 'SRE', 'Sala de Reuniões Executiva', 'sala_reunioes', true, 1);
+        $sre = $this->criarSetor(
+            piso: $piso2,
+            codigo: 'SRE',
+            nome: 'Sala de Reuniões Executiva',
+            tipo: 'sala_reunioes',
+            reservavel: true,
+            capacidade: 1,
+            precoMeioDia: 55.00,
+            precoDiaInteiro: 100.00
+        );
 
-        $scr = $this->criarSetor($piso2, 'SCR', 'Sala Criativa', 'sala_criativa', true, 1);
+        $scr = $this->criarSetor(
+            piso: $piso2,
+            codigo: 'SCR',
+            nome: 'Sala Criativa',
+            tipo: 'sala_criativa',
+            reservavel: true,
+            capacidade: 1,
+            precoMeioDia: 35.00,
+            precoDiaInteiro: 65.00
+        );
 
-        $pb2 = $this->criarSetor($piso2, 'PB', 'Phone Booth', 'phone_booth', true, 2);
+        $pb2 = $this->criarSetor(
+            piso: $piso2,
+            codigo: 'PB',
+            nome: 'Phone Booth',
+            tipo: 'phone_booth',
+            reservavel: true,
+            capacidade: 2,
+            precoMeioDia: 5.00,
+            precoDiaInteiro: 9.00
+        );
 
-        $this->criarSetor($piso2, 'SE', 'Sala de Espera', 'sala_espera', false, 1);
+        $this->criarSetor(
+            piso: $piso2,
+            codigo: 'SE',
+            nome: 'Sala de Espera',
+            tipo: 'sala_espera',
+            reservavel: false,
+            capacidade: 1
+        );
 
-        $this->criarSetor($piso2, 'COP', 'Copa', 'copa', false, 2);
+        $this->criarSetor(
+            piso: $piso2,
+            codigo: 'COP',
+            nome: 'Copa',
+            tipo: 'copa',
+            reservavel: false,
+            capacidade: 2
+        );
 
-        $this->criarSetor($piso2, 'WC', 'Instalações Sanitárias', 'wc', false, 4);
+        $this->criarSetor(
+            piso: $piso2,
+            codigo: 'WC',
+            nome: 'Instalações Sanitárias',
+            tipo: 'wc',
+            reservavel: false,
+            capacidade: 4
+        );
 
-                // =====================================================
+        // =====================================================
         // SECRETÁRIAS - PISO 0
         // =====================================================
 
-        $this->criarSecretarias($osc, 'OSC', 1, 34, xInicio: 10, yInicio: 15, colunas: 8);
+        $this->criarSecretarias(
+            $osc,
+            'OSC',
+            1,
+            34,
+            xInicio: 10,
+            yInicio: 15,
+            colunas: 8
+        );
 
-        $this->criarSecretarias($osn, 'OSN', 1, 14, xInicio: 10, yInicio: 55, colunas: 7);
+        $this->criarSecretarias(
+            $osn,
+            'OSN',
+            1,
+            14,
+            xInicio: 10,
+            yInicio: 55,
+            colunas: 7
+        );
 
-        $this->criarSecretarias($pb0, 'PB', 1, 10, xInicio: 75, yInicio: 15, colunas: 2);
+        $this->criarSecretarias(
+            $pb0,
+            'PB',
+            1,
+            10,
+            xInicio: 75,
+            yInicio: 15,
+            colunas: 2
+        );
 
         // =====================================================
         // SECRETÁRIAS - PISO 1
         // =====================================================
 
-        $this->criarSecretarias($e, 'E', 1, 5, xInicio: 10, yInicio: 15, colunas: 5);
+        $this->criarSecretarias(
+            $e,
+            'E',
+            1,
+            5,
+            xInicio: 10,
+            yInicio: 15,
+            colunas: 5
+        );
 
-        $this->criarSecretarias($srg, 'SRG', 1, 2, xInicio: 10, yInicio: 50, colunas: 2);
+        $this->criarSecretarias(
+            $srg,
+            'SRG',
+            1,
+            2,
+            xInicio: 10,
+            yInicio: 50,
+            colunas: 2
+        );
 
-        $this->criarSecretarias($srm, 'SRM', 1, 1, xInicio: 35, yInicio: 50, colunas: 1);
+        $this->criarSecretarias(
+            $srm,
+            'SRM',
+            1,
+            1,
+            xInicio: 35,
+            yInicio: 50,
+            colunas: 1
+        );
 
-        $this->criarSecretarias($srr, 'SRR', 1, 1, xInicio: 55, yInicio: 50, colunas: 1);
+        $this->criarSecretarias(
+            $srr,
+            'SRR',
+            1,
+            1,
+            xInicio: 55,
+            yInicio: 50,
+            colunas: 1
+        );
 
-        $this->criarSecretarias($pb1, 'PB', 1, 5, xInicio: 75, yInicio: 20, colunas: 1);
+        $this->criarSecretarias(
+            $pb1,
+            'PB',
+            1,
+            5,
+            xInicio: 75,
+            yInicio: 20,
+            colunas: 1
+        );
 
         // =====================================================
         // SECRETÁRIAS - PISO 2
         // =====================================================
 
-        $this->criarSecretarias($ee, 'EE', 1, 7, xInicio: 10, yInicio: 15, colunas: 4);
+        $this->criarSecretarias(
+            $ee,
+            'EE',
+            1,
+            7,
+            xInicio: 10,
+            yInicio: 15,
+            colunas: 4
+        );
 
-        $this->criarSecretarias($sre, 'SRE', 1, 1, xInicio: 20, yInicio: 55, colunas: 1);
+        $this->criarSecretarias(
+            $sre,
+            'SRE',
+            1,
+            1,
+            xInicio: 20,
+            yInicio: 55,
+            colunas: 1
+        );
 
-        $this->criarSecretarias($scr, 'SCR', 1, 1, xInicio: 50, yInicio: 55, colunas: 1);
+        $this->criarSecretarias(
+            $scr,
+            'SCR',
+            1,
+            1,
+            xInicio: 50,
+            yInicio: 55,
+            colunas: 1
+        );
 
-        $this->criarSecretarias($pb2, 'PB', 1, 2, xInicio: 80, yInicio: 20, colunas: 1);
+        $this->criarSecretarias(
+            $pb2,
+            'PB',
+            1,
+            2,
+            xInicio: 80,
+            yInicio: 20,
+            colunas: 1
+        );
     }
 
-        private function criarSetor(
+    private function criarSetor(
         Piso $piso,
         string $codigo,
         string $nome,
         string $tipo,
         bool $reservavel,
-        int $capacidade
+        int $capacidade,
+        ?float $precoMeioDia = null,
+        ?float $precoDiaInteiro = null
     ): Setor {
-
         return Setor::updateOrCreate(
-
             [
                 'piso_id' => $piso->id,
                 'codigo' => $codigo,
             ],
-
             [
                 'nome' => $nome,
                 'tipo' => $tipo,
                 'reservavel' => $reservavel,
                 'capacidade' => $capacidade,
+                'preco_meio_dia' => $reservavel
+                    ? $precoMeioDia
+                    : null,
+                'preco_dia_inteiro' => $reservavel
+                    ? $precoDiaInteiro
+                    : null,
                 'descricao' => $nome . ' - ' . $piso->nome,
                 'ativo' => true,
             ]
-
         );
     }
 
-
-        private function criarSecretarias(
+    private function criarSecretarias(
         Setor $setor,
         string $prefixo,
         int $inicio,
@@ -224,28 +509,32 @@ class SpaceHubEstruturaSeeder extends Seeder
         float $xPasso = 8,
         float $yPasso = 14
     ): void {
-
         for ($i = $inicio; $i <= $fim; $i++) {
-
             $indice = $i - $inicio;
 
             $coluna = $indice % $colunas;
             $linha = intdiv($indice, $colunas);
 
             Secretaria::updateOrCreate(
-
                 [
                     'setor_id' => $setor->id,
-                    'codigo' => $prefixo . str_pad($i, 2, '0', STR_PAD_LEFT),
+                    'codigo' => $prefixo
+                        . str_pad($i, 2, '0', STR_PAD_LEFT),
                 ],
-
                 [
+                    'descricao' => $setor->nome
+                        . ' '
+                        . str_pad($i, 2, '0', STR_PAD_LEFT),
 
-                    'descricao' => $setor->nome . ' ' . str_pad($i, 2, '0', STR_PAD_LEFT),
+                    'planta_x' => (int) min(
+                        $xInicio + ($coluna * $xPasso),
+                        95
+                    ),
 
-                    'planta_x' => (int) min($xInicio + ($coluna * $xPasso), 95),
-
-                    'planta_y' => (int) min($yInicio + ($linha * $yPasso), 95),
+                    'planta_y' => (int) min(
+                        $yInicio + ($linha * $yPasso),
+                        95
+                    ),
 
                     'angulo' => 0,
 
@@ -254,7 +543,7 @@ class SpaceHubEstruturaSeeder extends Seeder
                         [
                             'open_space',
                             'escritorio',
-                            'escritorio_executivo'
+                            'escritorio_executivo',
                         ]
                     ),
 
@@ -263,24 +552,20 @@ class SpaceHubEstruturaSeeder extends Seeder
                         [
                             'open_space',
                             'escritorio',
-                            'escritorio_executivo'
+                            'escritorio_executivo',
                         ]
                     ),
 
                     'junto_janela' => false,
 
-                    'ergonomica' => $setor->tipo !== 'phone_booth',
+                    'ergonomica' =>
+                        $setor->tipo !== 'phone_booth',
 
                     'reservavel' => true,
 
                     'ativo' => true,
-
                 ]
-
             );
         }
     }
-
 }
-
-

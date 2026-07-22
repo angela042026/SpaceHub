@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Reserva extends Model
 {
@@ -50,4 +51,11 @@ class Reserva extends Model
     {
         return $this->belongsTo(EstadoReserva::class);
     }
+    /**
+ * Pagamento associado à reserva.
+ */
+public function pagamento(): HasOne
+{
+    return $this->hasOne(Pagamento::class);
+}
 }
