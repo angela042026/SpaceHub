@@ -1,6 +1,6 @@
 import LegalLayout from '@/Components/Legal/LegalLayout';
 import LegalSection from '@/Components/Legal/LegalSection';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
 
 const SECTIONS = [
@@ -214,8 +214,16 @@ export default function Privacy() {
                         estritamente necessários ao funcionamento da
                         plataforma, nomeadamente para manter a sua sessão
                         iniciada e guardar a sua preferência de tema
-                        (claro/escuro). Não utilizamos cookies de
-                        publicidade ou de rastreamento de terceiros.
+                        (claro/escuro). Mediante o seu consentimento,
+                        utilizamos também cookies opcionais de análise de
+                        utilização. Não utilizamos cookies de publicidade
+                        ou de rastreamento de terceiros. Para mais
+                        detalhes e para alterar a sua preferência, consulte
+                        a nossa{' '}
+                        <Link href={route('legal.cookies')}>
+                            Política de Cookies
+                        </Link>
+                        .
                     </p>
                 </LegalSection>
 

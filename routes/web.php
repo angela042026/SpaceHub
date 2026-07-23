@@ -30,7 +30,7 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('home');
 
 // ==========================
 // Páginas legais (públicas)
@@ -42,6 +42,10 @@ Route::get('/termos-utilizacao', function () {
 Route::get('/politica-privacidade', function () {
     return Inertia::render('Legal/Privacy');
 })->name('legal.privacy');
+
+Route::get('/politica-cookies', function () {
+    return Inertia::render('Legal/Cookies');
+})->name('legal.cookies');
 
 /*
 |--------------------------------------------------------------------------
