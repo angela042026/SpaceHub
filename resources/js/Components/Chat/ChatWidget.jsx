@@ -1,13 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HelpCircle, MessageSquare, X, ArrowRight, BookOpen } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import ChatBot from './ChatBot';
+import useCookieBannerVisible from '@/Lib/useCookieBannerVisible';
 
 export default function ChatWidget() {
+    const { auth } = usePage().props;
     const [isOpen, setIsOpen] = useState(false);
     const [modoAtivo, setModoAtivo] = useState('menu');
     const popUpRef = useRef(null);
     const buttonRef = useRef(null); // Nova referência para blindar o botão redondo
+    const cookieBannerVisible = useCookieBannerVisible();
 
     useEffect(() => {
         function handleClickOut(event) {
@@ -27,13 +30,19 @@ export default function ChatWidget() {
     }, [isOpen]);
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 font-sans">
+        <div
+            className={`fixed right-6 z-50 font-sans transition-all duration-300 ${
+                cookieBannerVisible
+                    ? 'bottom-48 lg:bottom-28'
+                    : 'bottom-6'
+            }`}
+        >
 
             {/* O Pop-up Retangular */}
             {isOpen && (
                 <div
                     ref={popUpRef}
-                    className={`absolute bottom-16 right-0 mb-2 w-[360px] h-[500px] flex flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all duration-200 dark:border-slate-700 dark:bg-slate-900 overflow-hidden
+                    className={`absolute bottom-16 right-0 mb-2 w-[calc(100vw-3rem)] sm:w-[360px] h-[500px] max-h-[75vh] flex flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all duration-200 dark:border-slate-700 dark:bg-slate-900 overflow-hidden
                         ${modoAtivo === 'menu' ? 'p-4' : 'p-0'}`}
                 >
                     {/* MENU PRINCIPAL DO WIDGET */}
@@ -50,6 +59,7 @@ export default function ChatWidget() {
                                         setIsOpen(false);
                                         setModoAtivo('menu');
                                     }}
+                                    aria-label="Fechar chat de suporte"
                                     className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
                                 >
                                     <X size={18} />
@@ -62,7 +72,11 @@ export default function ChatWidget() {
                                 </p>
 
                                 <Link
-                                    href={route('faqs.index')}
+                                    href={
+                                        auth?.user
+                                            ? route('faqs.index')
+                                            : route('login')
+                                    }
                                     className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3 text-left transition-all hover:border-teal-500 hover:bg-teal-500/5 dark:border-slate-800 dark:bg-slate-800/50"
                                     onClick={() => setIsOpen(false)}
                                 >
@@ -110,6 +124,11 @@ export default function ChatWidget() {
                     e.stopPropagation();
                     setIsOpen(!isOpen);
                 }}
+                aria-label={
+                    isOpen
+                        ? 'Fechar chat de suporte'
+                        : 'Abrir chat de suporte'
+                }
                 className={`flex h-14 w-14 items-center justify-center rounded-full text-white transition-all duration-250 active:scale-95
                     ${isOpen ? 'bg-rose-500 hover:bg-rose-600' : 'bg-[#14B8A6]/80 hover:bg-[#14B8A6]/100'} border border-white/10`}
                 style={{

@@ -5,11 +5,13 @@ import HeroSection from '@/Components/landing/HeroSection';
 import FeaturesSection from '@/Components/landing/FeaturesSection';
 import HowItWorksSection from '@/Components/landing/HowItWorksSection';
 import SpacesCarousel from '@/Components/landing/SpacesCarousel';
+import TestimonialsSection from '@/Components/landing/TestimonialsSection';
 import BenefitsSection from '@/Components/landing/BenefitsSection';
 import PricingSection from '@/Components/landing/PricingSection';
 import Footer from '@/Components/landing/Footer';
 import CookieBanner from '@/Components/CookieBanner';
 import ScrollToTopButton from '@/Components/ScrollToTopButton';
+import ChatWidget from '@/Components/Chat/ChatWidget';
 
 export default function Welcome() {
     return (
@@ -26,12 +28,14 @@ export default function Welcome() {
                     <SpacesCarousel />
                     <PricingSection />
                     <BenefitsSection />
+                    <TestimonialsSection />
                 </main>
 
                 <Footer />
 
                 <CookieBanner />
                 <ScrollToTopButton />
+                <ChatWidget />
             </div>
         </>
     );

@@ -12,7 +12,7 @@ const quickLinks = [
         href: '#funcionalidades',
     },
     {
-        label: 'Como funciona',
+        label: 'Como reservar',
         href: '#como-funciona',
     },
     {

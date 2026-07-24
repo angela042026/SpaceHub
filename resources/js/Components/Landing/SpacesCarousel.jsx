@@ -123,7 +123,7 @@ export default function SpacesCarousel() {
         >
             <div className="relative mx-auto max-w-[1450px]">
                 <div className="mx-auto mb-14 max-w-3xl text-center">
-                    <span className="text-xs font-bold uppercase tracking-[0.24em] text-[#14B8A6]">
+                    <span className="text-sm font-bold uppercase tracking-[0.2em] text-[#14B8A6]">
                         Os nossos espaços
                     </span>
 

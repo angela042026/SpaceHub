@@ -1,24 +1,24 @@
 import {
     BarChart3,
     Building2,
-    CalendarDays,
+    History,
     Map,
-    QrCode,
+    MessageSquare,
     ShieldCheck,
 } from 'lucide-react';
 
 const features = [
     {
-        title: 'Reservas simples',
+        title: 'Suporte em tempo real',
         description:
-            'Reserve secretárias e salas em poucos segundos, com um processo rápido e intuitivo.',
-        icon: CalendarDays,
+            'Tire dúvidas a qualquer momento através do chat e do Centro de Ajuda, sem sair da plataforma.',
+        icon: MessageSquare,
     },
     {
-        title: 'Check-in por QR Code',
+        title: 'Histórico e cancelamento',
         description:
-            'Confirme a sua chegada de forma rápida e segura através do QR Code da reserva.',
-        icon: QrCode,
+            'Consulte reservas passadas e cancele quando precisar, tudo numa única área.',
+        icon: History,
     },
     {
         title: 'Mapa interativo',
@@ -77,7 +77,7 @@ export default function FeaturesSection() {
                             <div className="absolute bottom-0 left-0 top-0 w-1 bg-[#14B8A6] opacity-70 transition-all duration-300 group-hover:w-1.5 group-hover:opacity-100" />
 
                             <div className="flex items-start gap-5">
-                                <div className="grid h-13 w-13 shrink-0 place-items-center rounded-xl border border-[#14B8A6]/20 bg-[#EAFBF8] text-[#14B8A6] transition-all duration-300 group-hover:bg-[#14B8A6] group-hover:text-white">
+                                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-[#14B8A6]/20 bg-[#EAFBF8] text-[#14B8A6] transition-all duration-300 group-hover:bg-[#14B8A6] group-hover:text-white">
                                     <Icon size={25} strokeWidth={1.8} />
                                 </div>
 

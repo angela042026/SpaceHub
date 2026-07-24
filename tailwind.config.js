@@ -56,6 +56,17 @@ export default {
                 card: 'var(--shadow-card)',
                 'card-hover': 'var(--shadow-card-hover)',
             },
+
+            keyframes: {
+                marquee: {
+                    '0%': { transform: 'translateX(0)' },
+                    '100%': { transform: 'translateX(-50%)' },
+                },
+            },
+
+            animation: {
+                marquee: 'marquee 32s linear infinite',
+            },
         },
     },
 

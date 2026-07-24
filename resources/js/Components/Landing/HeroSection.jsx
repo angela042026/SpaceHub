@@ -64,7 +64,7 @@ export default function HeroSection() {
                                     ? route('reservas.create')
                                     : route('login')
                             }
-                            className="inline-flex items-center gap-2 rounded-lg bg-[#14B8A6] px-6 py-2.5 text-base font-semibold text-[#03172B] shadow-lg shadow-[#14B8A6]/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0F9F91] hover:shadow-[#14B8A6]/40 active:translate-y-0"
+                            className="inline-flex items-center gap-2 rounded-lg bg-[#14B8A6]/80 px-6 py-2.5 text-base font-semibold text-[#03172B] shadow-lg shadow-[#14B8A6]/30 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#14B8A6] hover:shadow-[#14B8A6]/40 active:translate-y-0"
                         >
                             <CalendarPlus className="h-[18px] w-[18px]" />
 

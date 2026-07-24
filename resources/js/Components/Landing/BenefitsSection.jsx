@@ -2,20 +2,20 @@ import {
     BarChart3,
     CheckCircle2,
     Clock3,
+    Lock,
     QrCode,
-    ShieldCheck,
 } from 'lucide-react';
 
 const benefits = [
-    'Reservas rápidas e intuitivas',
-    'Check-in através de QR Code',
-    'Ocupação atualizada em tempo real',
-    'Gestão centralizada de espaços e utilizadores',
+    'Menos tempo perdido à procura de um lugar livre',
+    'Sem confusões de agenda entre colegas de equipa',
+    'Decisões de espaço baseadas em dados reais',
+    'Suporte disponível sempre que precisar',
 ];
 
 const highlights = [
     {
-        value: '24/7',
+        value: '24h',
         label: 'Acesso à plataforma',
         icon: Clock3,
     },
@@ -41,7 +41,7 @@ export default function BenefitsSection() {
                 <div className="grid items-center gap-12 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
                     {/* Conteúdo */}
                     <div>
-                        <span className="text-xs font-bold uppercase tracking-[0.24em] text-[#14B8A6]">
+                        <span className="text-sm font-bold uppercase tracking-[0.2em] text-[#14B8A6]">
                             Benefícios
                         </span>
 
@@ -77,12 +77,13 @@ export default function BenefitsSection() {
                         </div>
 
                         <div className="mt-10 flex items-center gap-3 text-sm font-semibold text-[#071A33]">
-                            <ShieldCheck
+                            <Lock
                                 size={20}
                                 className="text-[#14B8A6]"
                             />
 
-                            Dados protegidos e acesso controlado
+                            Em conformidade com o RGPD, sempre sob o seu
+                            controlo
                         </div>
                     </div>
 
@@ -97,7 +98,7 @@ export default function BenefitsSection() {
 
                                 <img
                                     src="/images/landing/dashboard-spacehub.png"
-                                    alt="Espaço de coworking SpaceHub"
+                                    alt="Painel do SpaceHub com reservas, ocupação e estatísticas em tempo real"
                                     loading="lazy"
                                     className="h-[480px] w-full object-cover object-center lg:h-[590px]"
                                 />

@@ -88,7 +88,7 @@ export default function CookieBanner() {
                         <button
                             type="button"
                             onClick={acceptCookies}
-                            className="h-11 rounded-xl bg-[#14B8A6] px-5 text-sm font-semibold text-[#03172B] shadow-lg shadow-[#14B8A6]/20 transition hover:bg-[#0F9F91]"
+                            className="h-11 rounded-xl bg-[#14B8A6]/80 px-5 text-sm font-semibold text-[#03172B] shadow-lg shadow-[#14B8A6]/20 transition hover:bg-[#14B8A6]"
                         >
                             Aceitar todos
                         </button>

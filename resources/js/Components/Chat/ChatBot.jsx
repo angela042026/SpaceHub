@@ -48,7 +48,7 @@ export default function ChatBot({ aoVoltar }) {
                 {
                     id: 'precos',
                     triggers: ['preco', 'precos', 'valores', 'plano', 'planos', 'pagar', 'valor', 'custo', 'custos'],
-                    resposta: "Os nossos planos de Coworking começam em 49€/mês! 💼"
+                    resposta: "Temos passes a partir de 8€ (meio-dia) e planos mensais a partir de 149€. Pode ver todos os detalhes na secção de Preços da página inicial! 💼"
                 },
                 {
                     id: 'espaco',
@@ -162,7 +162,7 @@ export default function ChatBot({ aoVoltar }) {
                 <div>
                     <h4 className="text-sm font-bold leading-tight">Assistente Virtual</h4>
                     <span className="text-[11px] text-teal-100 flex items-center gap-1">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> Disponível
+                        <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse" /> Disponível
                     </span>
                 </div>
             </div>
@@ -240,6 +240,7 @@ export default function ChatBot({ aoVoltar }) {
                 <button
                     type="submit"
                     disabled={!input.trim()}
+                    aria-label="Enviar mensagem"
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500 text-white shadow-md shadow-teal-500/10 transition-all hover:bg-teal-600 disabled:opacity-40 disabled:hover:bg-teal-500 active:scale-95"
                 >
                     <Send size={16} />

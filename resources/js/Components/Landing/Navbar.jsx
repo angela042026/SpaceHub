@@ -10,10 +10,10 @@ import {
 
 const navigation = [
     { label: 'Funcionalidades', href: '#funcionalidades' },
-    { label: 'Como funciona', href: '#como-funciona' },
-    { label: 'Benefícios', href: '#beneficios' },
+    { label: 'Como reservar', href: '#como-funciona' },
     { label: 'Espaços', href: '#espacos' },
     { label: 'Preços', href: '#precos' },
+    { label: 'Benefícios', href: '#beneficios' },
     { label: 'Contacto', href: '#contacto' },
 ];
 
@@ -72,7 +72,7 @@ export default function Navbar() {
                     />
                 </Link>
 
-                <nav className="hidden items-center gap-8 xl:flex">
+                <nav className="hidden items-center gap-5 lg:flex xl:gap-8">
                     {navigation.map((item) => (
                         <a
                             key={item.label}
@@ -140,7 +140,7 @@ export default function Navbar() {
                                 ? route('dashboard')
                                 : route('login')
                         }
-                        className="group inline-flex h-11 items-center gap-2 rounded-xl bg-[#14B8A6] px-6 text-sm font-bold text-[#032238] shadow-lg shadow-[#14B8A6]/25 transition duration-300 hover:-translate-y-0.5 hover:bg-[#0F9F91] hover:shadow-[#14B8A6]/40"
+                        className="group inline-flex h-11 items-center gap-2 rounded-xl bg-[#14B8A6]/80 px-6 text-sm font-bold text-[#032238] shadow-lg shadow-[#14B8A6]/25 transition duration-300 hover:-translate-y-0.5 hover:bg-[#14B8A6] hover:shadow-[#14B8A6]/40"
                     >
                         <LogIn size={17} />
 
@@ -202,7 +202,7 @@ export default function Navbar() {
                                 ? route('dashboard')
                                 : route('login')
                         }
-                        className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#14B8A6] px-5 text-sm font-bold text-[#032238] shadow-lg shadow-[#14B8A6]/25 transition hover:bg-[#0F9F91]"
+                        className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#14B8A6]/80 px-5 text-sm font-bold text-[#032238] shadow-lg shadow-[#14B8A6]/25 transition hover:bg-[#14B8A6]"
                     >
                         <LogIn size={17} />
 

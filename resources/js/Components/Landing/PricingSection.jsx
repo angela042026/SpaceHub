@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import {
-    ArrowRight,
+    CalendarCheck,
     CalendarDays,
     Check,
     Clock3,
     Sparkles,
+    UserPlus,
 } from 'lucide-react';
 
 const periods = [
@@ -107,8 +108,6 @@ const benefits = [
 ];
 
 export default function PricingSection() {
-    const { auth } = usePage().props;
-
     const [selectedPeriod, setSelectedPeriod] = useState('daily');
 
     const [selectedDailyPeriod, setSelectedDailyPeriod] =
@@ -126,12 +125,12 @@ export default function PricingSection() {
     return (
         <section
             id="precos"
-            className="relative scroll-mt-[74px] overflow-hidden bg-[#F8FAFC] px-5 py-14 sm:px-8 sm:py-16 lg:px-10 lg:py-20"
+            className="relative scroll-mt-[74px] overflow-hidden bg-[#F8FAFC] px-5 py-20 sm:px-8 lg:px-10 lg:py-28"
         >
             <div className="mx-auto max-w-[1250px]">
                 {/* Cabeçalho */}
                 <div className="mx-auto max-w-3xl text-center">
-                    <span className="text-xs font-bold uppercase tracking-[0.24em] text-[#14B8A6]">
+                    <span className="text-sm font-bold uppercase tracking-[0.2em] text-[#14B8A6]">
                         Preços
                     </span>
 
@@ -292,23 +291,23 @@ export default function PricingSection() {
                                 ))}
                             </div>
 
-                            <Link
-                                href={
-                                    auth?.user
-                                        ? route('reservas.create')
-                                        : route('register')
-                                }
-                                className="group mt-8 inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-[#14B8A6] px-9 py-3.5 text-base font-black text-[#03172B] shadow-lg shadow-[#14B8A6]/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#0F9F91] hover:shadow-[#14B8A6]/35 sm:w-auto sm:min-w-[260px]"
-                            >
-                                {auth?.user
-                                    ? 'Reservar agora'
-                                    : 'Criar conta e reservar'}
+                            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                                <Link
+                                    href={route('register')}
+                                    className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-xl bg-[#14B8A6]/80 px-9 py-3.5 text-base font-black text-[#03172B] shadow-lg shadow-[#14B8A6]/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#14B8A6] hover:shadow-[#14B8A6]/35 sm:min-w-[220px]"
+                                >
+                                    <UserPlus size={19} />
+                                    Criar conta
+                                </Link>
 
-                                <ArrowRight
-                                    size={19}
-                                    className="transition-transform duration-300 group-hover:translate-x-1"
-                                />
-                            </Link>
+                                <Link
+                                    href={route('login')}
+                                    className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-9 py-3.5 text-base font-black text-[#071A33] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#14B8A6]/50 hover:bg-[#EAFBF8] sm:min-w-[220px]"
+                                >
+                                    <CalendarCheck size={19} />
+                                    Reservar
+                                </Link>
+                            </div>
 
                             <p className="mt-3 text-xs leading-5 text-slate-400">
                                 Pode consultar a disponibilidade antes de
