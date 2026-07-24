@@ -110,8 +110,9 @@ class ReservaController extends Controller
             ->orderBy('hora_inicio')
             ->get();
 
-        // Pisos ativos
+        // Pisos ativos (exclui a garagem)
         $pisos = Piso::where('ativo', true)
+            ->where('numero', '>=', 0)
             ->orderBy('numero')
             ->get();
 
@@ -172,7 +173,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'secretaria_id' =>
-                        'Esta secretária já se encontra reservada para a data e período selecionados.',
+                    'Esta secretária já se encontra reservada para a data e período selecionados.',
                 ])
                 ->withInput();
         }
@@ -187,7 +188,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'data' =>
-                        'Já possui uma reserva incompatível com este período na data selecionada.',
+                    'Já possui uma reserva incompatível com este período na data selecionada.',
                 ])
                 ->withInput();
         }
@@ -258,13 +259,13 @@ class ReservaController extends Controller
 
         if (
             $reservasDaSecretaria->contains(
-                fn ($reserva) => $reserva->user_id !== Auth::id()
+                fn($reserva) => $reserva->user_id !== Auth::id()
             )
         ) {
             return back()
                 ->withErrors([
                     'secretaria_id' =>
-                        'Esta secretária já se encontra reservada por outra pessoa para pelo menos um período desta data.',
+                    'Esta secretária já se encontra reservada por outra pessoa para pelo menos um período desta data.',
                 ])
                 ->withInput();
         }
@@ -280,21 +281,21 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'data' =>
-                        'Já possui uma reserva para esta data noutro espaço.',
+                    'Já possui uma reserva para esta data noutro espaço.',
                 ])
                 ->withInput();
         }
 
         $periodosJaReservados = $reservasDaSecretaria->pluck('periodo_id');
         $periodosEmFalta = $periodos->reject(
-            fn ($periodo) => $periodosJaReservados->contains($periodo->id)
+            fn($periodo) => $periodosJaReservados->contains($periodo->id)
         );
 
         if ($periodosEmFalta->isEmpty()) {
             return back()
                 ->withErrors([
                     'secretaria_id' =>
-                        'Já tem esta secretária reservada para o dia inteiro nesta data.',
+                    'Já tem esta secretária reservada para o dia inteiro nesta data.',
                 ])
                 ->withInput();
         }
@@ -405,6 +406,7 @@ class ReservaController extends Controller
             ->get();
 
         $pisos = Piso::where('ativo', true)
+            ->where('numero', '>=', 0)
             ->orderBy('numero')
             ->get();
 
@@ -485,7 +487,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'secretaria_id' =>
-                        'Esta secretária já se encontra reservada para a data e período selecionados.',
+                    'Esta secretária já se encontra reservada para a data e período selecionados.',
                 ])
                 ->withInput();
         }
@@ -501,17 +503,17 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'data' =>
-                        'Já possui outra reserva incompatível com este período na data selecionada.',
+                    'Já possui outra reserva incompatível com este período na data selecionada.',
                 ])
                 ->withInput();
         }
 
         $alterouDadosComPreco =
             (int) $reserva->periodo_id !==
-                (int) $dadosValidados['periodo_id']
+            (int) $dadosValidados['periodo_id']
             ||
             (int) $reserva->secretaria_id !==
-                (int) $dadosValidados['secretaria_id'];
+            (int) $dadosValidados['secretaria_id'];
 
         try {
             DB::transaction(function () use (
@@ -529,7 +531,7 @@ class ReservaController extends Controller
                     'periodo_id' => $dadosValidados['periodo_id'],
                     'secretaria_id' => $dadosValidados['secretaria_id'],
                     'observacoes' =>
-                        $dadosValidados['observacoes'] ?? null,
+                    $dadosValidados['observacoes'] ?? null,
                 ]);
 
                 if ($alterouDadosComPreco) {
@@ -599,6 +601,7 @@ class ReservaController extends Controller
             ->get();
 
         $pisos = Piso::where('ativo', true)
+            ->where('numero', '>=', 0)
             ->orderBy('numero')
             ->get();
 
@@ -744,19 +747,19 @@ class ReservaController extends Controller
             ->where('setor_id', $setorId)
             ->when(
                 $preferencias['monitor'] ?? false,
-                fn ($query) => $query->where('monitor', true)
+                fn($query) => $query->where('monitor', true)
             )
             ->when(
                 $preferencias['dock_usb'] ?? false,
-                fn ($query) => $query->where('dock_usb', true)
+                fn($query) => $query->where('dock_usb', true)
             )
             ->when(
                 $preferencias['junto_janela'] ?? false,
-                fn ($query) => $query->where('junto_janela', true)
+                fn($query) => $query->where('junto_janela', true)
             )
             ->when(
                 $preferencias['ergonomica'] ?? false,
-                fn ($query) => $query->where('ergonomica', true)
+                fn($query) => $query->where('ergonomica', true)
             )
             ->orderBy('codigo')
             ->get();
@@ -766,11 +769,11 @@ class ReservaController extends Controller
             ->whereNull('cancelada_at')
             ->when(
                 $excluirReservaId !== null,
-                fn ($query) => $query->where('id', '!=', $excluirReservaId)
+                fn($query) => $query->where('id', '!=', $excluirReservaId)
             )
             ->get()
             ->groupBy('secretaria_id')
-            ->map(fn ($reservas) => $reservas->pluck('periodo_id'));
+            ->map(fn($reservas) => $reservas->pluck('periodo_id'));
 
         return $secretarias->map(function ($secretaria) use (
             $periodos,
@@ -827,8 +830,7 @@ class ReservaController extends Controller
 
         return Periodo::whereIn('nome', $nomesPeriodos)
             ->pluck('id')
-            ->map(fn ($id) => (int) $id)
+            ->map(fn($id) => (int) $id)
             ->all();
     }
-
 }
