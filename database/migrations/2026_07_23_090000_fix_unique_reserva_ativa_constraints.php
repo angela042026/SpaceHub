@@ -2,45 +2,93 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     /**
-     * O índice único original (secretaria_id, data, periodo_id) não excluía
-     * reservas canceladas/expiradas, pelo que, depois de uma reserva ser
-     * cancelada, esse lugar/data/período ficava bloqueado para sempre.
+     * O índice único original (secretaria_id, data, periodo_id)
+     * também estava a ser utilizado pelo MySQL para suportar
+     * a chave estrangeira de secretaria_id.
      *
-     * As colunas virtuais abaixo só têm valor quando a reserva está ativa
-     * (cancelada_at IS NULL); o MySQL trata NULL como distinto em índices
-     * únicos, por isso reservas canceladas deixam de contar para a
-     * unicidade, ao mesmo tempo que continuam a impedir reservas ativas
-     * em duplicado (proteção contra pedidos em simultâneo).
+     * Antes de remover esse índice único, criamos um índice normal
+     * para secretaria_id, mantendo a foreign key válida.
+     *
+     * As colunas virtuais apenas possuem valor quando a reserva
+     * está ativa, ou seja, quando cancelada_at é NULL.
      */
     public function up(): void
     {
+        /*
+         * Cria primeiro um índice normal para suportar
+         * a foreign key de secretaria_id.
+         */
         Schema::table('reservas', function (Blueprint $table) {
-            $table->dropUnique('unique_reserva_secretaria_periodo');
+            $table->index(
+                'secretaria_id',
+                'reservas_secretaria_id_index'
+            );
         });
 
+        /*
+         * Agora o índice único antigo pode ser removido.
+         */
         Schema::table('reservas', function (Blueprint $table) {
+            $table->dropUnique(
+                'unique_reserva_secretaria_periodo'
+            );
+        });
+
+        /*
+         * O MySQL aceita a função IF().
+         * O SQLite, utilizado nos testes, utiliza CASE WHEN.
+         */
+        $driver = DB::connection()->getDriverName();
+
+        $expressaoSecretaria = $driver === 'sqlite'
+            ? 'CASE WHEN cancelada_at IS NULL THEN secretaria_id ELSE NULL END'
+            : 'IF(cancelada_at IS NULL, secretaria_id, NULL)';
+
+        $expressaoUtilizador = $driver === 'sqlite'
+            ? 'CASE WHEN cancelada_at IS NULL THEN user_id ELSE NULL END'
+            : 'IF(cancelada_at IS NULL, user_id, NULL)';
+
+        /*
+         * Colunas virtuais usadas apenas para reservas ativas.
+         */
+        Schema::table('reservas', function (Blueprint $table) use (
+            $expressaoSecretaria,
+            $expressaoUtilizador
+        ) {
             $table->unsignedBigInteger('secretaria_id_ativa')
                 ->nullable()
-                ->virtualAs('IF(cancelada_at IS NULL, secretaria_id, NULL)');
+                ->virtualAs($expressaoSecretaria);
 
             $table->unsignedBigInteger('user_id_ativo')
                 ->nullable()
-                ->virtualAs('IF(cancelada_at IS NULL, user_id, NULL)');
+                ->virtualAs($expressaoUtilizador);
         });
 
+        /*
+         * Impede reservas ativas duplicadas.
+         */
         Schema::table('reservas', function (Blueprint $table) {
             $table->unique(
-                ['secretaria_id_ativa', 'data', 'periodo_id'],
+                [
+                    'secretaria_id_ativa',
+                    'data',
+                    'periodo_id',
+                ],
                 'unique_reserva_secretaria_periodo_ativa'
             );
 
             $table->unique(
-                ['user_id_ativo', 'data', 'periodo_id'],
+                [
+                    'user_id_ativo',
+                    'data',
+                    'periodo_id',
+                ],
                 'unique_reserva_utilizador_periodo_ativo'
             );
         });
@@ -48,14 +96,51 @@ return new class extends Migration
 
     public function down(): void
     {
+        /*
+         * Remove os novos índices únicos.
+         */
         Schema::table('reservas', function (Blueprint $table) {
-            $table->dropUnique('unique_reserva_secretaria_periodo_ativa');
-            $table->dropUnique('unique_reserva_utilizador_periodo_ativo');
-            $table->dropColumn(['secretaria_id_ativa', 'user_id_ativo']);
+            $table->dropUnique(
+                'unique_reserva_secretaria_periodo_ativa'
+            );
+
+            $table->dropUnique(
+                'unique_reserva_utilizador_periodo_ativo'
+            );
         });
 
+        /*
+         * Remove as colunas virtuais.
+         */
         Schema::table('reservas', function (Blueprint $table) {
-            $table->unique(['secretaria_id', 'data', 'periodo_id'], 'unique_reserva_secretaria_periodo');
+            $table->dropColumn([
+                'secretaria_id_ativa',
+                'user_id_ativo',
+            ]);
+        });
+
+        /*
+         * Recria o índice único original.
+         */
+        Schema::table('reservas', function (Blueprint $table) {
+            $table->unique(
+                [
+                    'secretaria_id',
+                    'data',
+                    'periodo_id',
+                ],
+                'unique_reserva_secretaria_periodo'
+            );
+        });
+
+        /*
+         * O índice normal já não é necessário porque o índice
+         * único original voltou a suportar a foreign key.
+         */
+        Schema::table('reservas', function (Blueprint $table) {
+            $table->dropIndex(
+                'reservas_secretaria_id_index'
+            );
         });
     }
 };

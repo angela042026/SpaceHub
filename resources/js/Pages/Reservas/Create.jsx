@@ -35,6 +35,12 @@ export default function Create({ periodos, pisos, setores, filters }) {
     const [periodosEscolhidos, setPeriodosEscolhidos] = useState({});
     const [aReservar, setAReservar] = useState(null);
 
+    // "Dia inteiro" é uma ação especial que cria uma reserva por cada
+    // período real. Por isso, não deve ser apresentado como período normal.
+    const periodosReserva = periodos.filter(
+        (periodo) => periodo.nome !== 'Dia inteiro',
+    );
+
     // Filtra os tipos de espaço conforme o piso selecionado. Mantém o
     // setor atual se continuar válido para o piso (ex: vindo pré-preenchido
     // pela página de Disponibilidade), só o limpa quando o utilizador muda
@@ -232,10 +238,10 @@ export default function Create({ periodos, pisos, setores, filters }) {
                             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                                 {lugares.map((secretaria) => {
                                     const periodoEscolhido = periodosEscolhidos[secretaria.id] ?? null;
-                                    const semDisponibilidade = periodos.every(
+                                    const semDisponibilidade = periodosReserva.every(
                                         (periodo) => !secretaria.periodos_disponiveis[periodo.id],
                                     );
-                                    const diaInteiroDisponivel = periodos.length > 1 && periodos.every(
+                                    const diaInteiroDisponivel = periodosReserva.length > 1 && periodosReserva.every(
                                         (periodo) => secretaria.periodos_disponiveis[periodo.id],
                                     );
 
@@ -268,7 +274,7 @@ export default function Create({ periodos, pisos, setores, filters }) {
                                                 )}
 
                                                 <div className="mt-4 flex gap-2">
-                                                    {periodos.map((periodo) => {
+                                                    {periodosReserva.map((periodo) => {
                                                         const disponivel = secretaria.periodos_disponiveis[periodo.id];
                                                         const selecionado = periodoEscolhido === periodo.id;
 

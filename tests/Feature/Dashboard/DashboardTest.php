@@ -63,7 +63,9 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($user)->get('/dashboard');
 
         $response->assertOk();
-        $response->assertInertia(fn (Assert $page) => $page->component('Dashboard/Admin'));
+        $response->assertInertia(
+            fn (Assert $page) => $page->component('Dashboard/Admin')
+        );
     }
 
     public function test_colaborador_ve_dashboard_funcionario(): void
@@ -73,7 +75,9 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($user)->get('/dashboard');
 
         $response->assertOk();
-        $response->assertInertia(fn (Assert $page) => $page->component('Dashboard/Funcionario'));
+        $response->assertInertia(
+            fn (Assert $page) => $page->component('Dashboard/Funcionario')
+        );
     }
 
     public function test_utilizador_comum_ve_dashboard_utilizador(): void
@@ -83,7 +87,9 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($user)->get('/dashboard');
 
         $response->assertOk();
-        $response->assertInertia(fn (Assert $page) => $page->component('Dashboard/Utilizador'));
+        $response->assertInertia(
+            fn (Assert $page) => $page->component('Dashboard/Utilizador')
+        );
     }
 
     public function test_stats_basicos_aparecem_sem_reservas(): void
@@ -104,7 +110,10 @@ class DashboardTest extends TestCase
 
     public function test_kpis_com_dados_reais(): void
     {
-        $user = $this->criarUsuarioComRole('Administrador');
+        $admin = $this->criarUsuarioComRole('Administrador');
+        $utilizadorPendente = $this->criarUsuarioComRole('Utilizador');
+        $utilizadorConfirmado = $this->criarUsuarioComRole('Utilizador');
+
         $periodo = $this->criarPeriodo();
         $pendente = $this->criarEstadoReserva('pendente');
         $confirmada = $this->criarEstadoReserva('confirmada');
@@ -115,7 +124,7 @@ class DashboardTest extends TestCase
         $secretaria3 = $this->criarSecretaria();
 
         Reserva::create([
-            'user_id' => $user->id,
+            'user_id' => $utilizadorPendente->id,
             'secretaria_id' => $secretaria1->id,
             'periodo_id' => $periodo->id,
             'estado_reserva_id' => $pendente->id,
@@ -123,7 +132,7 @@ class DashboardTest extends TestCase
         ]);
 
         Reserva::create([
-            'user_id' => $user->id,
+            'user_id' => $utilizadorConfirmado->id,
             'secretaria_id' => $secretaria2->id,
             'periodo_id' => $periodo->id,
             'estado_reserva_id' => $confirmada->id,
@@ -132,7 +141,7 @@ class DashboardTest extends TestCase
         ]);
 
         Reserva::create([
-            'user_id' => $user->id,
+            'user_id' => $admin->id,
             'secretaria_id' => $secretaria3->id,
             'periodo_id' => $periodo->id,
             'estado_reserva_id' => $cancelada->id,
@@ -140,7 +149,7 @@ class DashboardTest extends TestCase
             'cancelada_at' => now(),
         ]);
 
-        $response = $this->actingAs($user)->get('/dashboard');
+        $response = $this->actingAs($admin)->get('/dashboard');
 
         $response->assertOk();
         $response->assertInertia(function (Assert $page) {
@@ -212,33 +221,45 @@ class DashboardTest extends TestCase
             'data' => Carbon::today()->subWeeks(2)->format('Y-m-d'),
         ]);
 
-        $respostaSemana = $this->actingAs($user)->get('/dashboard?periodo=semana');
-        $respostaSemana->assertOk();
-        $respostaSemana->assertInertia(fn (Assert $page) => $page
-            ->component('Dashboard/Admin')
-            ->has('estatisticas.diasComMaiorOcupacao', 1)
-            ->etc());
+        $respostaSemana = $this->actingAs($user)
+            ->get('/dashboard?periodo=semana');
 
-        $respostaGeral = $this->actingAs($user)->get('/dashboard?periodo=geral');
+        $respostaSemana->assertOk();
+        $respostaSemana->assertInertia(
+            fn (Assert $page) => $page
+                ->component('Dashboard/Admin')
+                ->has('estatisticas.diasComMaiorOcupacao', 1)
+                ->etc()
+        );
+
+        $respostaGeral = $this->actingAs($user)
+            ->get('/dashboard?periodo=geral');
+
         $respostaGeral->assertOk();
-        $respostaGeral->assertInertia(fn (Assert $page) => $page
-            ->component('Dashboard/Admin')
-            ->has('estatisticas.diasComMaiorOcupacao', 2)
-            ->etc());
+        $respostaGeral->assertInertia(
+            fn (Assert $page) => $page
+                ->component('Dashboard/Admin')
+                ->has('estatisticas.diasComMaiorOcupacao', 2)
+                ->etc()
+        );
     }
 
     public function test_dashboard_nao_gera_queries_que_escalam_com_dados(): void
     {
-        $user = $this->criarUsuarioComRole('Administrador');
+        $admin = $this->criarUsuarioComRole('Administrador');
         $periodo = $this->criarPeriodo();
         $pendente = $this->criarEstadoReserva('pendente');
 
-        $criarCenario = function (int $quantidade) use ($user, $periodo, $pendente) {
+        $criarCenario = function (int $quantidade) use (
+            $periodo,
+            $pendente
+        ) {
             for ($i = 0; $i < $quantidade; $i++) {
+                $utilizador = $this->criarUsuarioComRole('Utilizador');
                 $secretaria = $this->criarSecretaria();
 
                 Reserva::create([
-                    'user_id' => $user->id,
+                    'user_id' => $utilizador->id,
                     'secretaria_id' => $secretaria->id,
                     'periodo_id' => $periodo->id,
                     'estado_reserva_id' => $pendente->id,
@@ -250,19 +271,35 @@ class DashboardTest extends TestCase
         $criarCenario(2);
 
         DB::enableQueryLog();
-        $this->actingAs($user)->get('/dashboard')->assertOk();
+
+        $this->actingAs($admin)
+            ->get('/dashboard')
+            ->assertOk();
+
         $queriesCenarioPequeno = count(DB::getQueryLog());
+
         DB::flushQueryLog();
 
         $criarCenario(18);
+
+        /*
+         * As queries de preparação dos dados não devem entrar
+         * na contagem do dashboard.
+         */
         DB::flushQueryLog();
 
-        $this->actingAs($user)->get('/dashboard')->assertOk();
+        $this->actingAs($admin)
+            ->get('/dashboard')
+            ->assertOk();
+
         $queriesCenarioGrande = count(DB::getQueryLog());
+
         DB::disableQueryLog();
 
-        // Tolerância pequena e constante: uma query N+1 real escalaria proporcionalmente
-        // à quantidade de linhas (aqui, dezenas), não por uma diferença fixa de 1 ou 2.
+        /*
+         * Uma query N+1 real aumentaria proporcionalmente ao número
+         * de secretárias e reservas, não apenas por uma diferença fixa.
+         */
         $this->assertLessThanOrEqual(
             $queriesCenarioPequeno + 3,
             $queriesCenarioGrande,

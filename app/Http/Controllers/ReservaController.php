@@ -30,6 +30,7 @@ class ReservaController extends Controller
                 'secretaria.setor',
                 'periodo',
                 'estadoReserva',
+                'pagamento',
             ]);
 
         // Filtrar por estado
@@ -105,6 +106,7 @@ class ReservaController extends Controller
     {
         // Períodos ativos
         $periodos = Periodo::where('ativo', true)
+            ->where('nome', '!=', 'Dia inteiro')
             ->orderBy('hora_inicio')
             ->get();
 
@@ -240,7 +242,10 @@ class ReservaController extends Controller
             'secretaria_id' => ['required', 'exists:secretarias,id'],
         ]);
 
-        $periodos = Periodo::where('ativo', true)->get();
+        $periodos = Periodo::where('ativo', true)
+            ->where('nome', '!=', 'Dia inteiro')
+            ->orderBy('hora_inicio')
+            ->get();
 
         $reservasDaSecretaria = Reserva::where(
             'secretaria_id',
@@ -395,6 +400,7 @@ class ReservaController extends Controller
         }
 
         $periodos = Periodo::where('ativo', true)
+            ->where('nome', '!=', 'Dia inteiro')
             ->orderBy('hora_inicio')
             ->get();
 
@@ -588,6 +594,7 @@ class ReservaController extends Controller
         }
 
         $periodos = Periodo::where('ativo', true)
+            ->where('nome', '!=', 'Dia inteiro')
             ->orderBy('hora_inicio')
             ->get();
 
@@ -728,6 +735,7 @@ class ReservaController extends Controller
         ?int $excluirReservaId = null
     ) {
         $periodos = Periodo::where('ativo', true)
+            ->where('nome', '!=', 'Dia inteiro')
             ->orderBy('hora_inicio')
             ->get();
 

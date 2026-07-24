@@ -2,6 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     CalendarDays,
+    CreditCard,
     ImageOff,
     Pencil,
     Plus,
@@ -224,10 +225,10 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                                         </p>
 
                                         {reserva.estado_reserva?.codigo === 'pendente' ? (
-                                            <div className="mt-4 flex gap-2">
+                                            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
                                                 <Link
                                                     href={route('reservas.edit', reserva.id)}
-                                                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
+                                                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                                                 >
                                                     <Pencil size={16} strokeWidth={1.9} />
                                                     Editar
@@ -236,11 +237,28 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                                                 <button
                                                     type="button"
                                                     onClick={() => cancelarReserva(reserva.id)}
-                                                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
+                                                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
                                                 >
                                                     <XCircle size={16} strokeWidth={1.9} />
                                                     Cancelar
                                                 </button>
+
+                                                {reserva.pagamento?.estado === 'pendente' && (
+                                                    <Link
+                                                        href={route('pagamentos.show', reserva.pagamento.id)}
+                                                        className="flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-md"
+                                                    >
+                                                        <CreditCard size={16} strokeWidth={1.9} />
+                                                        Pagar
+                                                    </Link>
+                                                )}
+
+                                                {reserva.pagamento?.estado === 'pago' && (
+                                                    <div className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                                        <CreditCard size={16} strokeWidth={1.9} />
+                                                        Pago
+                                                    </div>
+                                                )}
                                             </div>
                                         ) : (
                                             <p className="mt-4 text-center text-xs text-slate-400">
