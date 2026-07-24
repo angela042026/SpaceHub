@@ -2,6 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
+    Armchair,
     CalendarDays,
     ChevronLeft,
     ChevronRight,
@@ -88,13 +89,27 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
             key: 'espaco',
             label: 'Espaço',
             render: (reserva) => (
-                <div>
-                    <p className="font-semibold text-slate-800 dark:text-slate-100">
-                        {reserva.secretaria?.setor?.nome ?? '-'}
-                    </p>
-                    <p className="text-xs text-slate-400">
-                        {reserva.secretaria?.codigo ?? '-'} · {reserva.secretaria?.setor?.piso?.edificio?.nome ?? '-'}
-                    </p>
+                <div className="flex items-center gap-2.5">
+                    {reserva.secretaria?.imagem ? (
+                        <img
+                            src={reserva.secretaria.imagem}
+                            alt={reserva.secretaria?.codigo ?? ''}
+                            className="h-9 w-9 shrink-0 rounded-lg object-cover"
+                        />
+                    ) : (
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-500/10 text-teal-500">
+                            <Armchair size={16} strokeWidth={1.9} />
+                        </div>
+                    )}
+
+                    <div>
+                        <p className="font-semibold text-slate-800 dark:text-slate-100">
+                            {reserva.secretaria?.setor?.nome ?? '-'}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                            {reserva.secretaria?.codigo ?? '-'} · {reserva.secretaria?.setor?.piso?.edificio?.nome ?? '-'}
+                        </p>
+                    </div>
                 </div>
             ),
         },

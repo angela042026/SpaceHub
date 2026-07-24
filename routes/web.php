@@ -123,11 +123,17 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/reservas', [ReservaController::class, 'store'])
         ->name('reservas.store');
 
+    Route::post('/reservas/dia-inteiro', [ReservaController::class, 'storeDiaInteiro'])
+        ->name('reservas.storeDiaInteiro');
+
     Route::get('/reservas/historico', [ReservaController::class, 'history'])
         ->name('reservas.history');
 
     Route::get('/reservas/disponibilidade', [ReservaController::class, 'availability'])
         ->name('reservas.availability');
+
+    Route::get('/reservas/lugares-por-setor', [ReservaController::class, 'lugaresPorSetor'])
+        ->name('reservas.lugaresPorSetor');
 
     Route::patch(
         '/reservas/{reserva}/cancelar',

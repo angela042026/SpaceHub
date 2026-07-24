@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSecretariaRequest;
 use App\Http\Requests\UpdateSecretariaRequest;
 use App\Http\Resources\SecretariaResource;
+use App\Models\Piso;
 use App\Models\Secretaria;
 use App\Models\Setor;
 use Illuminate\Http\RedirectResponse;
@@ -77,7 +78,8 @@ class SecretariaController extends Controller
         Gate::authorize('create', Secretaria::class);
 
         return Inertia::render('Admin/Secretarias/Create', [
-            'setores' => Setor::orderBy('nome')->get(['id', 'nome']),
+            'pisos' => Piso::orderBy('numero')->get(['id', 'nome']),
+            'setores' => Setor::where('reservavel', true)->orderBy('nome')->get(['id', 'nome', 'piso_id']),
         ]);
     }
 
@@ -100,7 +102,8 @@ class SecretariaController extends Controller
 
         return Inertia::render('Admin/Secretarias/Edit', [
             'secretaria' => new SecretariaResource($secretaria),
-            'setores' => Setor::orderBy('nome')->get(['id', 'nome']),
+            'pisos' => Piso::orderBy('numero')->get(['id', 'nome']),
+            'setores' => Setor::where('reservavel', true)->orderBy('nome')->get(['id', 'nome', 'piso_id']),
         ]);
     }
 

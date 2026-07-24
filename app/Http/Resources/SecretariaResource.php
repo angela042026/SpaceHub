@@ -18,6 +18,11 @@ class SecretariaResource extends JsonResource
                 fn () => $this->setor->nome
             ),
 
+            'piso' => $this->whenLoaded(
+                'setor',
+                fn () => $this->setor->piso?->nome
+            ),
+
             'codigo' => $this->codigo,
             'planta_x' => $this->planta_x,
             'planta_y' => $this->planta_y,
@@ -31,6 +36,7 @@ class SecretariaResource extends JsonResource
             'ativo' => (bool) $this->ativo,
 
             'descricao' => $this->descricao,
+            'imagem' => $this->imagem,
 
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),

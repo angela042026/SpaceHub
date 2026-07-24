@@ -90,6 +90,13 @@ class UpdateSecretariaRequest extends FormRequest
                 'string',
             ],
 
+            'imagem' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:2048',
+            ],
+
             'ativo' => [
                 'prohibited',
             ],

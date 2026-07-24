@@ -1,10 +1,11 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, Pencil } from 'lucide-react';
 
 const fieldClass =
-    'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+    'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
 const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
@@ -16,7 +17,14 @@ const AMENIDADES = [
     { key: 'ergonomica', label: 'Cadeira ergonómica' },
 ];
 
-export default function Edit({ secretaria, setores }) {
+export default function Edit({ secretaria, pisos, setores }) {
+    const setorAtual = setores.find((setor) => setor.id === secretaria.setor_id);
+
+    const [pisoId, setPisoId] = useState(setorAtual?.piso_id ?? '');
+    const [setoresFiltrados, setSetoresFiltrados] = useState(
+        setorAtual ? setores.filter((setor) => setor.piso_id === setorAtual.piso_id) : [],
+    );
+
     const { data, setData, put, processing, errors } = useForm({
         setor_id: secretaria.setor_id ?? '',
         codigo: secretaria.codigo ?? '',
@@ -26,7 +34,26 @@ export default function Edit({ secretaria, setores }) {
         junto_janela: secretaria.junto_janela ?? false,
         ergonomica: secretaria.ergonomica ?? false,
         descricao: secretaria.descricao ?? '',
+        imagem: secretaria.imagem ?? '',
     });
+
+    // Filtra os setores conforme o piso selecionado
+    useEffect(() => {
+        if (!pisoId) {
+            setSetoresFiltrados([]);
+            return;
+        }
+
+        setSetoresFiltrados(setores.filter((setor) => setor.piso_id == pisoId));
+    }, [pisoId]);
+
+    const alterarPiso = (novoPisoId) => {
+        setPisoId(novoPisoId);
+
+        if (novoPisoId != pisoId) {
+            setData('setor_id', '');
+        }
+    };
 
     const submit = (event) => {
         event.preventDefault();
@@ -56,16 +83,38 @@ export default function Edit({ secretaria, setores }) {
 
                 <form onSubmit={submit} className="p-6" noValidate>
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                        <div className="sm:col-span-2">
+                        <div>
+                            <label htmlFor="piso_id" className={labelClass}>Piso</label>
+                            <select
+                                id="piso_id"
+                                value={pisoId}
+                                onChange={(e) => alterarPiso(e.target.value)}
+                                required
+                                className={fieldClass}
+                            >
+                                <option value="" disabled>Selecione...</option>
+
+                                {pisos.map((piso) => (
+                                    <option key={piso.id} value={piso.id}>{piso.nome}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
                             <label htmlFor="setor_id" className={labelClass}>Setor</label>
                             <select
                                 id="setor_id"
                                 value={data.setor_id}
                                 onChange={(e) => setData('setor_id', e.target.value)}
+                                disabled={!pisoId}
                                 required
                                 className={fieldClass}
                             >
-                                {setores.map((setor) => (
+                                <option value="" disabled>
+                                    {pisoId ? 'Selecione...' : 'Selecione primeiro o piso'}
+                                </option>
+
+                                {setoresFiltrados.map((setor) => (
                                     <option key={setor.id} value={setor.id}>{setor.nome}</option>
                                 ))}
                             </select>
@@ -108,6 +157,12 @@ export default function Edit({ secretaria, setores }) {
                                     </label>
                                 ))}
                             </div>
+                        </div>
+
+                        <div className="sm:col-span-2">
+                            <label htmlFor="imagem" className={labelClass}>URL da imagem</label>
+                            <input id="imagem" type="text" value={data.imagem} onChange={(e) => setData('imagem', e.target.value)} placeholder="https://..." className={fieldClass} />
+                            <InputError message={errors.imagem} className="mt-2" />
                         </div>
 
                         <div className="sm:col-span-2">
