@@ -2,17 +2,10 @@
 
 ## 5.1 Introdução
 
-O SpaceHub disponibiliza uma API REST responsável pela autenticação, gestão dos espaços, reservas, disponibilidade de secretárias e check-in.
+O SpaceHub disponibiliza uma API REST responsável pela autenticação, gestão de utilizadores, gestão dos espaços, reservas, disponibilidade de secretárias, pagamentos e operações administrativas.
 
-A API foi desenvolvida com Laravel e utiliza:
+A aplicação inclui ainda funcionalidades web integradas através de Laravel, Inertia.js e React, nomeadamente o dashboard, o mapa interativo, o check-in por QR Code, o Help Center e a atualização em tempo real através do Laravel Reverb.
 
-- Laravel Sanctum para autenticação;
-- Form Requests para validação;
-- Policies e Gates para autorização;
-- API Resources para uniformização das respostas;
-- Eloquent ORM para acesso à base de dados.
-
-Os pedidos e respostas utilizam, por regra, o formato JSON.
 
 ---
 
@@ -748,7 +741,192 @@ Cada secretária possui um `qr_token` único, utilizado pelas rotas específicas
 
 Estas rotas não pertencem ao grupo `/api` apresentado neste documento e encontram-se documentadas no módulo web da aplicação.
 
-# 5.15 Dashboard
+# 5.15 Pagamentos
+
+O módulo de pagamentos encontra-se associado às reservas.
+
+Cada reserva pode possuir um único pagamento, através da relação:
+
+```text
+Reserva 1 ------ 0..1 Pagamento
+```
+
+Nesta versão do projeto, os pagamentos são simulados, não existindo movimentação financeira real.
+
+Os métodos de pagamento suportados são:
+
+* Cartão;
+* MB Way;
+* Transferência Bancária.
+
+Os pagamentos podem apresentar estados como:
+
+* pendente;
+* pago;
+* cancelado.
+
+A lógica de negócio deste módulo encontra-se centralizada no `PagamentoService`.
+
+---
+
+## Listar pagamentos
+
+```http
+GET /api/pagamentos
+```
+
+### Autenticação
+
+Obrigatória.
+
+### Visibilidade
+
+* o Administrador pode consultar todos os pagamentos;
+* os restantes utilizadores apenas podem consultar pagamentos associados às próprias reservas.
+
+### Parâmetros
+
+| Parâmetro      | Descrição                             |
+| -------------- | ------------------------------------- |
+| search         | Pesquisa por referência ou utilizador |
+| estado         | Filtra pelo estado do pagamento       |
+| metodo         | Filtra pelo método de pagamento       |
+| sort_by        | Campo de ordenação                    |
+| sort_direction | `asc` ou `desc`                       |
+| per_page       | Número de registos por página         |
+
+### Exemplo
+
+```http
+GET /api/pagamentos?estado=pendente&metodo=mbway&per_page=10
+```
+
+---
+
+## Consultar pagamento
+
+```http
+GET /api/pagamentos/{pagamento}
+```
+
+A consulta depende da `PagamentoPolicy`.
+
+---
+
+## Confirmar pagamento
+
+```http
+PATCH /api/pagamentos/{pagamento}/confirmar
+```
+
+### Regras
+
+* o pagamento deve estar no estado `pendente`;
+* o utilizador deve possuir autorização;
+* a reserva associada deve existir;
+* um pagamento já confirmado não pode ser novamente confirmado.
+
+Após a confirmação, o pagamento passa para o estado `pago`.
+
+---
+
+## Cancelar pagamento
+
+```http
+PATCH /api/pagamentos/{pagamento}/cancelar
+```
+
+### Regras
+
+* o pagamento deve estar num estado que permita cancelamento;
+* o utilizador deve possuir autorização;
+* um pagamento já cancelado não pode ser novamente cancelado.
+
+Após o cancelamento, o pagamento passa para o estado `cancelado`.
+
+---
+
+## Criação automática
+
+O pagamento é criado automaticamente quando é criada uma reserva elegível.
+
+O `PagamentoService` é responsável por:
+
+* calcular o valor;
+* gerar uma referência única;
+* associar o pagamento à reserva;
+* definir o estado inicial;
+* atualizar o valor quando necessário;
+* confirmar o pagamento;
+* cancelar o pagamento.
+
+Fluxo simplificado:
+
+```text
+Reserva criada
+      |
+      ▼
+PagamentoService
+      |
+      ▼
+Pagamento criado
+      |
+      ▼
+Estado pendente
+      |
+      +-- Confirmação --> pago
+      |
+      +-- Cancelamento --> cancelado
+```
+
+---
+
+# 5.16 Help Center
+
+O Help Center inclui dois módulos:
+
+* FAQs;
+* pedidos de suporte.
+
+Estas funcionalidades encontram-se integradas principalmente nas rotas web da aplicação.
+
+---
+
+## FAQs
+
+As FAQs permitem disponibilizar perguntas e respostas frequentes aos utilizadores.
+
+As operações incluem:
+
+* listagem;
+* pesquisa;
+* criação;
+* atualização;
+* ativação;
+* desativação.
+
+A gestão das FAQs encontra-se limitada aos utilizadores com permissões adequadas.
+
+---
+
+## Pedidos de suporte
+
+Os pedidos de suporte permitem que um utilizador solicite assistência através da plataforma.
+
+Um pedido pode incluir:
+
+* assunto;
+* descrição;
+* utilizador;
+* estado;
+* prioridade;
+* data de criação;
+* acompanhamento ou resposta.
+
+O acesso aos pedidos depende da autenticação e das regras de autorização definidas no sistema.
+
+
+# 5.16 Dashboard
 
 O dashboard disponibiliza informação estatística sobre a utilização do SpaceHub.
 
@@ -765,7 +943,7 @@ O acesso depende do papel do utilizador.
 
 ---
 
-# 5.16 Pesquisa, Filtros e Ordenação
+# 5.17 Pesquisa, Filtros e Ordenação
 
 As listagens administrativas adotam parâmetros comuns.
 
@@ -802,7 +980,7 @@ O número de elementos por página é limitado pelo servidor.
 
 ---
 
-# 5.17 Formato das Respostas Paginadas
+# 5.18 Formato das Respostas Paginadas
 
 Uma resposta paginada apresenta uma estrutura semelhante a:
 
@@ -833,7 +1011,7 @@ Uma resposta paginada apresenta uma estrutura semelhante a:
 
 ---
 
-# 5.18 Uploads
+# 5.19 Uploads
 
 ## Fotografia do utilizador
 
@@ -870,7 +1048,7 @@ Na base de dados é guardado apenas o caminho relativo do ficheiro.
 
 ---
 
-# 5.19 Segurança da API
+# 5.20 Segurança da API
 
 A API aplica várias camadas de proteção:
 
@@ -888,63 +1066,139 @@ A API aplica várias camadas de proteção:
 
 ---
 
-# 5.20 Eventos em Tempo Real
+# 5.21 Eventos em Tempo Real
 
-As alterações relevantes nas reservas emitem o evento:
+As alterações relevantes nas reservas e na ocupação dos espaços podem emitir o evento:
 
 ```text
 MapaAtualizado
 ```
 
-Este evento permite atualizar o mapa de disponibilidade e ocupação sem necessidade de recarregar manualmente a página.
+O evento é transmitido através do sistema de broadcasting do Laravel e do servidor WebSocket Laravel Reverb.
 
----
+No frontend, o Laravel Echo permite ouvir o evento e atualizar os componentes React sem necessidade de recarregar manualmente toda a página.
 
-# 5.21 Testes da API
+Fluxo simplificado:
 
-A API encontra-se coberta por testes automatizados que validam:
+```text
+Alteração de reserva
+        |
+        ▼
+Evento MapaAtualizado
+        |
+        ▼
+Laravel Broadcasting
+        |
+        ▼
+Laravel Reverb
+        |
+        ▼
+Laravel Echo
+        |
+        ▼
+Atualização do mapa
+```
 
-- autenticação;
-- autorização;
-- Policies;
-- utilizadores inativos;
-- CRUD administrativo;
-- reservas;
-- disponibilidade;
-- check-in;
-- QR Code;
-- dashboard;
-- pesquisa;
-- filtros;
-- ordenação;
-- paginação;
-- uploads.
+Entre as operações que podem originar uma atualização encontram-se:
 
-À data da revisão da documentação, a suíte possui **111 testes automatizados**.
+* criação de uma reserva;
+* alteração de uma reserva;
+* cancelamento;
+* check-in;
+* expiração automática;
+* alteração do estado de uma secretária.
 
-# 5.22 Resumo das Rotas
+As funcionalidades de tempo real utilizam canais definidos na configuração de broadcasting e no ficheiro:
 
-À data da revisão, a aplicação possui 38 rotas registadas no grupo da API.
+```text
+routes/channels.php
+```
 
-Estas rotas abrangem:
+# 5.22 Testes da API
 
-- registo e autenticação;
-- recuperação e redefinição de password;
-- consulta do utilizador autenticado;
-- gestão de utilizadores;
-- gestão de edifícios;
-- gestão de pisos;
-- gestão de setores;
-- gestão de secretárias;
-- gestão de reservas;
-- consulta da disponibilidade;
-- ativação e desativação lógica das entidades;
-- cancelamento de reservas.
+A API e os restantes módulos da aplicação encontram-se cobertos por testes automatizados que validam:
 
-As funcionalidades de dashboard, QR Code e check-in encontram-se integradas nas rotas web da aplicação e não fazem parte deste grupo de rotas da API.
+* autenticação;
+* registo;
+* login;
+* logout;
+* recuperação e redefinição da password;
+* autorização;
+* Policies;
+* utilizadores inativos;
+* middleware;
+* gestão de utilizadores;
+* gestão de edifícios;
+* gestão de pisos;
+* gestão de setores;
+* gestão de secretárias;
+* reservas;
+* disponibilidade;
+* conflitos de reservas;
+* cancelamento;
+* check-in;
+* QR Code;
+* dashboard;
+* mapa interativo;
+* pesquisa;
+* filtros;
+* ordenação;
+* paginação;
+* uploads;
+* pagamentos;
+* `PagamentoService`;
+* Help Center;
+* FAQs;
+* pedidos de suporte;
+* eventos em tempo real.
 
-# 5.23 Considerações Finais
+À data da atualização desta documentação, a suíte apresenta o seguinte resultado:
+
+```text
+154 testes executados
+154 testes aprovados
+0 testes falhados
+```
+
+
+# 5.24 Resumo das Rotas
+
+As rotas da aplicação abrangem:
+
+* registo e autenticação;
+* recuperação e redefinição da password;
+* consulta do utilizador autenticado;
+* gestão de utilizadores;
+* gestão de edifícios;
+* gestão de pisos;
+* gestão de setores;
+* gestão de secretárias;
+* gestão de reservas;
+* consulta de disponibilidade;
+* ativação e desativação lógica das entidades;
+* cancelamento de reservas;
+* consulta e gestão de pagamentos;
+* confirmação de pagamentos;
+* cancelamento de pagamentos.
+
+As funcionalidades de dashboard, mapa interativo, QR Code, check-in e Help Center encontram-se principalmente integradas nas rotas web da aplicação.
+
+A comunicação em tempo real utiliza ainda as rotas e canais necessários ao Laravel Reverb e ao sistema de broadcasting.
+
+
+# 5.25 Considerações Finais
 
 A API do SpaceHub foi estruturada para apresentar respostas consistentes, aplicar as regras de negócio e garantir a segurança das operações.
 
-A separação entre Controllers, Form Requests, Policies, Models e Resources facilita a manutenção e permite a evolução futura dos endpoints sem comprometer a organização geral da aplicação.
+A separação entre Controllers, Form Requests, Policies, Models, Resources e Services facilita a manutenção e permite a evolução futura dos endpoints sem comprometer a organização geral da aplicação.
+
+A integração do módulo de pagamentos demonstra a utilização de uma camada Service para centralizar regras de negócio e controlar as transições de estado.
+
+O Help Center acrescenta funcionalidades de apoio ao utilizador através de FAQs e pedidos de suporte.
+
+A utilização do Laravel Sanctum protege os endpoints autenticados, enquanto as Policies, Gates e middleware garantem que cada utilizador apenas executa operações compatíveis com o respetivo papel e com os recursos a que tem acesso.
+
+A integração com Laravel Reverb permite atualizar o mapa e outros componentes em tempo real após alterações relevantes nas reservas.
+
+A suíte de **154 testes automatizados, todos aprovados**, reforça a estabilidade da API e das restantes funcionalidades da aplicação.
+.

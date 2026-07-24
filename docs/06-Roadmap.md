@@ -36,6 +36,14 @@ Após estabilização das funcionalidades principais foram introduzidos diversos
 - editor gráfico do mapa;
 - atualização do mapa em tempo real;
 - testes automatizados.
+Numa fase posterior foram ainda desenvolvidos novos módulos que expandiram significativamente as funcionalidades da aplicação, destacando-se:
+
+- sistema de pagamentos associado às reservas;
+- Help Center com FAQs e pedidos de suporte;
+- atualização em tempo real através de Laravel Reverb;
+- melhoria da segurança através de middleware e Policies adicionais;
+- automatização da expiração de reservas através do Laravel Scheduler;
+- aumento da cobertura da suíte de testes automatizados.
 
 ---
 
@@ -54,6 +62,12 @@ Entre as principais melhorias destacam-se:
 - melhoria das consultas através de eager loading.
 
 Estas alterações permitiram tornar o código mais organizado, reutilizável e fácil de manter.
+- introdução da camada Service para centralização da lógica de negócio dos pagamentos;
+- separação entre rotas web e API;
+- integração do Laravel Reverb para comunicação em tempo real;
+- implementação de tarefas automáticas através do Laravel Scheduler;
+- melhoria da organização da documentação técnica;
+- reforço da cobertura de testes automatizados.
 
 ---
 
@@ -78,7 +92,16 @@ No final do desenvolvimento encontram-se implementadas as seguintes funcionalida
 - estatísticas;
 - uploads;
 - testes automatizados.
-
+- pagamentos;
+- histórico de pagamentos;
+- Help Center;
+- FAQs;
+- pedidos de suporte;
+- atualização em tempo real com Laravel Reverb;
+- expiração automática de reservas;
+- middleware de contas ativas;
+- Policies de autorização;
+- 154 testes automatizados.
 ---
 
 # 6.5 Trabalho Futuro
@@ -134,6 +157,44 @@ Possibilidade de associar equipamentos às secretárias, como:
 
 ---
 
+---
+
+## Sistema de Avaliações
+
+Possibilidade de os utilizadores avaliarem:
+
+- a experiência de utilização;
+- os espaços;
+- os equipamentos;
+- o processo de reserva.
+
+As avaliações poderão contribuir para melhorar continuamente a qualidade do serviço disponibilizado.
+
+---
+
+## Comunicados Administrativos
+
+Implementação de um sistema de comunicados apresentado após o início de sessão.
+
+O módulo poderá incluir:
+
+- mensagem do dia;
+- avisos importantes;
+- período de validade;
+- confirmação de leitura;
+- público-alvo por papel.
+
+---
+
+## Integração com Gateways de Pagamento
+
+Substituição do sistema de pagamento simulado por integração com plataformas reais, como:
+
+- Stripe;
+- PayPal;
+- MB Way;
+- referências Multibanco.
+
 ## Auditoria
 
 Registo detalhado das operações realizadas pelos utilizadores, incluindo:
@@ -174,12 +235,21 @@ Entre as possíveis evoluções destacam-se:
 - integração com Microsoft Entra ID;
 - integração com Active Directory;
 - APIs públicas;
+- arquitetura baseada em microsserviços;
+- integração com gateways externos de pagamento;
+- comunicação entre serviços através de eventos;
+- suporte para múltiplas localizações geográficas;
+- infraestrutura cloud distribuída.
 - relatórios exportáveis.
 
 ---
 
 # 6.7 Considerações Finais
 
-A arquitetura desenvolvida durante este projeto permite que o SpaceHub evolua de forma sustentada, mantendo uma organização consistente do código e reduzindo o impacto da introdução de novas funcionalidades.
+A evolução do SpaceHub ao longo do projeto permitiu desenvolver uma plataforma mais completa, segura e preparada para futuras extensões.
 
-A utilização das boas práticas disponibilizadas pelo Laravel, aliada à separação de responsabilidades e à cobertura por testes automatizados, constitui uma base sólida para futuras evoluções da aplicação.
+A introdução de módulos como os pagamentos, o Help Center, o sistema de comunicação em tempo real através do Laravel Reverb e a automatização de processos com o Laravel Scheduler demonstram a capacidade de evolução da arquitetura inicialmente definida.
+
+A utilização de boas práticas de desenvolvimento, da separação de responsabilidades e de uma suíte composta por **154 testes automatizados**, todos aprovados, reforça a qualidade e a robustez da solução desenvolvida.
+
+Desta forma, o SpaceHub apresenta uma base sólida para futuras evoluções e para uma eventual utilização em contextos organizacionais de maior dimensão.
