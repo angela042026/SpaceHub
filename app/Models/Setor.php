@@ -17,23 +17,27 @@ class Setor extends Model
         'tipo',
         'reservavel',
         'capacidade',
+        'preco_meio_dia',
+        'preco_dia_inteiro',
         'descricao',
         'ativo',
         'planta_x',
         'planta_y',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'piso_id' => 'integer',
-            'reservavel' => 'boolean',
-            'ativo' => 'boolean',
-            'capacidade' => 'integer',
-            'planta_x' => 'integer',
-            'planta_y' => 'integer',
-        ];
-    }
+   protected function casts(): array
+{
+    return [
+        'capacidade' => 'integer',
+        'preco_meio_dia' => 'decimal:2',
+        'preco_dia_inteiro' => 'decimal:2',
+        'reservavel' => 'boolean',
+        'planta_x' => 'integer',
+        'planta_y' => 'integer',
+        'planta_largura' => 'integer',
+        'planta_altura' => 'integer',
+    ];
+}
 
     public function piso(): BelongsTo
     {

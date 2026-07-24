@@ -23,6 +23,7 @@ use App\Http\Controllers\SetorMapaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\PagamentoController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -78,7 +79,19 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+// ==========================
+// Pagamentos
+// ==========================
+Route::get('/pagamentos', [PagamentoController::class, 'index'])
+    ->name('pagamentos.index');
 
+Route::get('/pagamentos/{pagamento}', [PagamentoController::class, 'show'])
+    ->name('pagamentos.show');
+
+Route::patch('/pagamentos/{pagamento}/confirmar',[PagamentoController::class, 'confirmar']
+)->name('pagamentos.confirmar');
+
+    
     // ==========================
     // Check-in
     // ==========================

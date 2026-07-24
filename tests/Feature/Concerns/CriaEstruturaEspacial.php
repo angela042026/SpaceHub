@@ -12,7 +12,10 @@ trait CriaEstruturaEspacial
 {
     protected function criarRole(string $nome): Role
     {
-        return Role::firstOrCreate(['nome' => $nome], ['descricao' => $nome]);
+        return Role::firstOrCreate(
+            ['nome' => $nome],
+            ['descricao' => $nome]
+        );
     }
 
     protected function criarUsuarioComRole(string $nomeRole): User
@@ -26,7 +29,7 @@ trait CriaEstruturaEspacial
     {
         $edificio = \App\Models\Edificio::create([
             'nome' => 'Edifício Central',
-            'codigo' => 'ED-'.uniqid(),
+            'codigo' => 'ED-' . uniqid(),
             'morada' => 'Rua Principal, 1',
             'cidade' => 'Lisboa',
         ]);
@@ -42,17 +45,21 @@ trait CriaEstruturaEspacial
             'codigo' => 'A',
             'tipo' => 'coworking',
             'reservavel' => true,
+            'preco_meio_dia' => 8.00,
+            'preco_dia_inteiro' => 14.00,
         ]);
 
         return $setor->secretarias()->create([
-            'codigo' => 'SEC-'.uniqid(),
+            'codigo' => 'SEC-' . uniqid(),
             'reservavel' => true,
             'ativo' => true,
         ]);
     }
 
-    protected function criarPeriodo(string $horaInicio = '08:00:00', string $horaFim = '13:00:00'): Periodo
-    {
+    protected function criarPeriodo(
+        string $horaInicio = '08:00:00',
+        string $horaFim = '13:00:00'
+    ): Periodo {
         return Periodo::create([
             'nome' => 'Manhã',
             'hora_inicio' => $horaInicio,
@@ -61,8 +68,9 @@ trait CriaEstruturaEspacial
         ]);
     }
 
-    protected function criarEstadoReserva(string $codigo): EstadoReserva
-    {
+    protected function criarEstadoReserva(
+        string $codigo
+    ): EstadoReserva {
         return EstadoReserva::firstOrCreate(
             ['codigo' => $codigo],
             ['nome' => ucfirst($codigo)]

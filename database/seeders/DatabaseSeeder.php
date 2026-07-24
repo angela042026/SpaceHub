@@ -18,7 +18,9 @@ class DatabaseSeeder extends Seeder
     SpaceHubEstruturaSeeder::class,
     UserSeeder::class,
     ReservaSeeder::class,
+    PagamentoSeeder::class,
+    FaqSeeder::class,
     FaqSeeder::class,
 ]);
-    }
-}
+
+}}

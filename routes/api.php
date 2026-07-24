@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EdificioController;
+use App\Http\Controllers\Api\PagamentoController;
 use App\Http\Controllers\Api\PisoController;
 use App\Http\Controllers\Api\ReservaController;
 use App\Http\Controllers\Api\SecretariaController;
 use App\Http\Controllers\Api\SetorController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +41,27 @@ Route::middleware([
 ])->group(function (): void {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pagamentos
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/pagamentos',
+        [PagamentoController::class, 'index']
+    )->name('api.pagamentos.index');
+
+    Route::get(
+        '/pagamentos/{pagamento}',
+        [PagamentoController::class, 'show']
+    )->name('api.pagamentos.show');
+
+    Route::patch(
+        '/pagamentos/{pagamento}/confirmar',
+        [PagamentoController::class, 'confirmar']
+    )->name('api.pagamentos.confirmar');
 
     /*
     |--------------------------------------------------------------------------
