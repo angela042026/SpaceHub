@@ -51,11 +51,12 @@ class Reserva extends Model
     {
         return $this->belongsTo(EstadoReserva::class);
     }
+
     /**
- * Pagamento associado à reserva.
- */
-public function pagamento(): HasOne
-{
-    return $this->hasOne(Pagamento::class);
-}
+     * Pagamento associado à reserva.
+     */
+    public function pagamento(): HasOne
+    {
+        return $this->hasOne(Pagamento::class);
+    }
 }

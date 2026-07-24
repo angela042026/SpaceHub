@@ -139,114 +139,112 @@ class ReservaController extends Controller
     /**
      * Guardar uma nova reserva.
      */
-/**
- * Guardar uma nova reserva.
- */
-public function store(
-    Request $request,
-    PagamentoService $pagamentoService
-) {
-    $dadosValidados = $request->validate([
-        'data' => ['required', 'date'],
-        'periodo_id' => ['required', 'exists:periodos,id'],
-        'secretaria_id' => ['required', 'exists:secretarias,id'],
-        'observacoes' => ['nullable', 'string', 'max:500'],
-    ]);
-
-    /*
-     * Obtém os períodos incompatíveis com o período escolhido.
-     *
-     * Manhã       -> Manhã e Dia inteiro
-     * Tarde       -> Tarde e Dia inteiro
-     * Dia inteiro -> Manhã, Tarde e Dia inteiro
-     */
-    $periodosConflito = $this->periodosEmConflito(
-        (int) $dadosValidados['periodo_id']
-    );
-
-    // Verifica se a secretária já está ocupada.
-    $reservaExistente = Reserva::where(
-        'secretaria_id',
-        $dadosValidados['secretaria_id']
-    )
-        ->whereDate('data', $dadosValidados['data'])
-        ->whereIn('periodo_id', $periodosConflito)
-        ->whereNull('cancelada_at')
-        ->exists();
-
-    if ($reservaExistente) {
-        return back()
-            ->withErrors([
-                'secretaria_id' =>
-                    'Esta secretária já se encontra reservada para a data e período selecionados.',
-            ])
-            ->withInput();
-    }
-
-    // Verifica se o utilizador já possui uma reserva incompatível.
-    $reservaUtilizador = Reserva::where(
-        'user_id',
-        Auth::id()
-    )
-        ->whereDate('data', $dadosValidados['data'])
-        ->whereIn('periodo_id', $periodosConflito)
-        ->whereNull('cancelada_at')
-        ->exists();
-
-    if ($reservaUtilizador) {
-        return back()
-            ->withErrors([
-                'data' =>
-                    'Já possui uma reserva incompatível com este período na data selecionada.',
-            ])
-            ->withInput();
-    }
-
-    // Obtém o estado "Pendente".
-    $estadoPendente = EstadoReserva::where(
-        'codigo',
-        'pendente'
-    )->firstOrFail();
-
-    DB::transaction(function () use (
-        $dadosValidados,
-        $estadoPendente,
-        $pagamentoService
+    public function store(
+        Request $request,
+        PagamentoService $pagamentoService
     ) {
-        $reserva = Reserva::create([
-            'user_id' => Auth::id(),
-            'secretaria_id' =>
-                $dadosValidados['secretaria_id'],
-            'periodo_id' =>
-                $dadosValidados['periodo_id'],
-            'estado_reserva_id' =>
-                $estadoPendente->id,
-            'data' => $dadosValidados['data'],
-            'observacoes' =>
-                $dadosValidados['observacoes'] ?? null,
+        $dadosValidados = $request->validate([
+            'data' => ['required', 'date'],
+            'periodo_id' => ['required', 'exists:periodos,id'],
+            'secretaria_id' => ['required', 'exists:secretarias,id'],
+            'observacoes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $pagamentoService->criarParaReserva($reserva);
-    });
-
-    return redirect()
-        ->route('reservas.index')
-        ->with(
-            'success',
-            'Reserva criada. O pagamento encontra-se pendente.'
+        /*
+         * Obtém os períodos incompatíveis com o período escolhido.
+         *
+         * Manhã       -> Manhã e Dia inteiro
+         * Tarde       -> Tarde e Dia inteiro
+         * Dia inteiro -> Manhã, Tarde e Dia inteiro
+         */
+        $periodosConflito = $this->periodosEmConflito(
+            (int) $dadosValidados['periodo_id']
         );
-}
+
+        // Verifica se a secretária já está ocupada.
+        $reservaExistente = Reserva::where(
+            'secretaria_id',
+            $dadosValidados['secretaria_id']
+        )
+            ->whereDate('data', $dadosValidados['data'])
+            ->whereIn('periodo_id', $periodosConflito)
+            ->whereNull('cancelada_at')
+            ->exists();
+
+        if ($reservaExistente) {
+            return back()
+                ->withErrors([
+                    'secretaria_id' =>
+                        'Esta secretária já se encontra reservada para a data e período selecionados.',
+                ])
+                ->withInput();
+        }
+
+        // Verifica se o utilizador já possui uma reserva incompatível.
+        $reservaUtilizador = Reserva::where(
+            'user_id',
+            Auth::id()
+        )
+            ->whereDate('data', $dadosValidados['data'])
+            ->whereIn('periodo_id', $periodosConflito)
+            ->whereNull('cancelada_at')
+            ->exists();
+
+        if ($reservaUtilizador) {
+            return back()
+                ->withErrors([
+                    'data' =>
+                        'Já possui uma reserva incompatível com este período na data selecionada.',
+                ])
+                ->withInput();
+        }
+
+        // Obtém o estado "Pendente".
+        $estadoPendente = EstadoReserva::where(
+            'codigo',
+            'pendente'
+        )->firstOrFail();
+
+        DB::transaction(function () use (
+            $dadosValidados,
+            $estadoPendente,
+            $pagamentoService
+        ) {
+            $reserva = Reserva::create([
+                'user_id' => Auth::id(),
+                'secretaria_id' =>
+                    $dadosValidados['secretaria_id'],
+                'periodo_id' =>
+                    $dadosValidados['periodo_id'],
+                'estado_reserva_id' =>
+                    $estadoPendente->id,
+                'data' => $dadosValidados['data'],
+                'observacoes' =>
+                    $dadosValidados['observacoes'] ?? null,
+            ]);
+
+            $pagamentoService->criarParaReserva($reserva);
+        });
+
+        return redirect()
+            ->route('reservas.index')
+            ->with(
+                'success',
+                'Reserva criada. O pagamento encontra-se pendente.'
+            );
+    }
 
     /**
      * Cancelar uma reserva.
      */
-    public function cancelar(Reserva $reserva)
-    {
+    public function cancelar(
+        Reserva $reserva,
+        PagamentoService $pagamentoService
+    ) {
         if ($reserva->user_id !== Auth::id()) {
             abort(403, 'Esta reserva não te pertence.');
         }
 
-        // Verifica se a reserva já foi cancelada
         if ($reserva->cancelada_at !== null) {
             return redirect()
                 ->route('reservas.index')
@@ -256,21 +254,54 @@ public function store(
                 );
         }
 
-        // Obtém o estado "Cancelada"
         $estadoCancelada = EstadoReserva::where(
             'codigo',
             'cancelada'
         )->firstOrFail();
 
-        // Atualiza a reserva
-        $reserva->update([
-            'estado_reserva_id' => $estadoCancelada->id,
-            'cancelada_at' => now(),
-        ]);
+        DB::transaction(function () use (
+            $reserva,
+            $estadoCancelada,
+            $pagamentoService
+        ) {
+            /*
+             * Volta a obter a reserva com bloqueio durante
+             * a transação, evitando alterações simultâneas.
+             */
+            $reservaBloqueada = Reserva::whereKey($reserva->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            /*
+             * A verificação é repetida dentro da transação,
+             * porque a reserva pode ter sido cancelada entretanto.
+             */
+            if ($reservaBloqueada->cancelada_at !== null) {
+                return;
+            }
+
+            /*
+             * Primeiro verifica e cancela o pagamento.
+             *
+             * Se estiver pago, o serviço lança uma exceção
+             * e toda a transação é anulada.
+             */
+            $pagamentoService->cancelarParaReserva(
+                $reservaBloqueada
+            );
+
+            $reservaBloqueada->update([
+                'estado_reserva_id' => $estadoCancelada->id,
+                'cancelada_at' => now(),
+            ]);
+        });
 
         return redirect()
             ->route('reservas.index')
-            ->with('success', 'Reserva cancelada com sucesso.');
+            ->with(
+                'success',
+                'Reserva e pagamento cancelados com sucesso.'
+            );
     }
 
     /**
@@ -320,83 +351,118 @@ public function store(
         ]);
     }
 
-    /**
-     * Atualizar uma reserva existente.
-     */
-    public function update(Request $request, Reserva $reserva)
-    {
-        if ($reserva->user_id !== Auth::id()) {
-            abort(403, 'Esta reserva não te pertence.');
-        }
+   /**
+ * Atualizar uma reserva existente.
+ */
+public function update(
+    Request $request,
+    Reserva $reserva,
+    PagamentoService $pagamentoService
+) {
+    if ($reserva->user_id !== Auth::id()) {
+        abort(403, 'Esta reserva não te pertence.');
+    }
 
-        if ($reserva->cancelada_at !== null) {
-            return redirect()
-                ->route('reservas.index')
-                ->with(
-                    'error',
-                    'Não é possível alterar uma reserva cancelada.'
-                );
-        }
-
-        $request->validate([
-            'data' => ['required', 'date'],
-            'periodo_id' => ['required', 'exists:periodos,id'],
-            'secretaria_id' => ['required', 'exists:secretarias,id'],
-            'observacoes' => ['nullable', 'string', 'max:500'],
-        ]);
-
-        $periodosConflito = $this->periodosEmConflito(
-            (int) $request->periodo_id
-        );
-
-        // Verifica se outra reserva ocupa a secretária.
-        $reservaExistente = Reserva::where(
-            'secretaria_id',
-            $request->secretaria_id
-        )
-            ->whereDate('data', $request->data)
-            ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
-            ->where('id', '!=', $reserva->id)
-            ->exists();
-
-        if ($reservaExistente) {
-            return back()
-                ->withErrors([
-                    'secretaria_id' =>
-                        'Esta secretária já se encontra reservada para a data e período selecionados.',
-                ])
-                ->withInput();
-        }
-
-        // Verifica se o utilizador já tem outra reserva incompatível.
-        $reservaUtilizador = Reserva::where('user_id', Auth::id())
-            ->whereDate('data', $request->data)
-            ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
-            ->where('id', '!=', $reserva->id)
-            ->exists();
-
-        if ($reservaUtilizador) {
-            return back()
-                ->withErrors([
-                    'data' =>
-                        'Já possui outra reserva incompatível com este período na data selecionada.',
-                ])
-                ->withInput();
-        }
-
-        $reserva->update([
-            'data' => $request->data,
-            'periodo_id' => $request->periodo_id,
-            'secretaria_id' => $request->secretaria_id,
-            'observacoes' => $request->observacoes,
-        ]);
-
+    if ($reserva->cancelada_at !== null) {
         return redirect()
             ->route('reservas.index')
-            ->with('success', 'Reserva atualizada com sucesso.');
+            ->with(
+                'error',
+                'Não é possível alterar uma reserva cancelada.'
+            );
     }
+
+    $dadosValidados = $request->validate([
+        'data' => ['required', 'date'],
+        'periodo_id' => ['required', 'exists:periodos,id'],
+        'secretaria_id' => ['required', 'exists:secretarias,id'],
+        'observacoes' => ['nullable', 'string', 'max:500'],
+    ]);
+
+    $periodosConflito = $this->periodosEmConflito(
+        (int) $dadosValidados['periodo_id']
+    );
+
+    // Verifica se outra reserva ocupa a secretária.
+    $reservaExistente = Reserva::where(
+        'secretaria_id',
+        $dadosValidados['secretaria_id']
+    )
+        ->whereDate('data', $dadosValidados['data'])
+        ->whereIn('periodo_id', $periodosConflito)
+        ->whereNull('cancelada_at')
+        ->where('id', '!=', $reserva->id)
+        ->exists();
+
+    if ($reservaExistente) {
+        return back()
+            ->withErrors([
+                'secretaria_id' =>
+                    'Esta secretária já se encontra reservada para a data e período selecionados.',
+            ])
+            ->withInput();
+    }
+
+    // Verifica se o utilizador já tem outra reserva incompatível.
+    $reservaUtilizador = Reserva::where(
+        'user_id',
+        Auth::id()
+    )
+        ->whereDate('data', $dadosValidados['data'])
+        ->whereIn('periodo_id', $periodosConflito)
+        ->whereNull('cancelada_at')
+        ->where('id', '!=', $reserva->id)
+        ->exists();
+
+    if ($reservaUtilizador) {
+        return back()
+            ->withErrors([
+                'data' =>
+                    'Já possui outra reserva incompatível com este período na data selecionada.',
+            ])
+            ->withInput();
+    }
+
+    $alterouDadosComPreco =
+        (int) $reserva->periodo_id !==
+            (int) $dadosValidados['periodo_id']
+        ||
+        (int) $reserva->secretaria_id !==
+            (int) $dadosValidados['secretaria_id'];
+
+    DB::transaction(function () use (
+        $reserva,
+        $dadosValidados,
+        $alterouDadosComPreco,
+        $pagamentoService
+    ) {
+        $reservaBloqueada = Reserva::whereKey($reserva->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        $reservaBloqueada->update([
+            'data' => $dadosValidados['data'],
+            'periodo_id' => $dadosValidados['periodo_id'],
+            'secretaria_id' => $dadosValidados['secretaria_id'],
+            'observacoes' =>
+                $dadosValidados['observacoes'] ?? null,
+        ]);
+
+        /*
+         * O preço só precisa de ser recalculado quando muda
+         * a secretária ou o período.
+         */
+        if ($alterouDadosComPreco) {
+            $pagamentoService->atualizarValorParaReserva(
+                $reservaBloqueada
+            );
+        }
+    });
+
+    return redirect()
+        ->route('reservas.index')
+        ->with('success', 'Reserva atualizada com sucesso.');
+}
 
     /**
      * Histórico de reservas passadas do utilizador autenticado.

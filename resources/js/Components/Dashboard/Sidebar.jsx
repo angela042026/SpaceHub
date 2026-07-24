@@ -18,6 +18,7 @@ import {
     X,
     FileText,
     Search,
+    CreditCard,
 } from 'lucide-react';
 
 function SidebarItem({
@@ -53,11 +54,17 @@ function SidebarItem({
     );
 }
 
-export default function Sidebar({ open = false, onClose = () => { } }) {
+export default function Sidebar({
+    open = false,
+    onClose = () => {},
+}) {
     const { auth } = usePage().props;
     const user = auth?.user;
     const roleName = user?.role?.nome;
-    const isAdmin = roleName === 'Administrador' || roleName === 'Gestor';
+
+    const isAdmin =
+        roleName === 'Administrador' ||
+        roleName === 'Gestor';
 
     return (
         <>
@@ -71,8 +78,11 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
             )}
 
             <aside
-                className={`fixed left-0 top-0 z-40 flex h-screen w-72 flex-col bg-navy-950 px-5 py-7 text-white shadow-2xl transition-transform duration-300 print:hidden lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'
-                    }`}
+                className={`fixed left-0 top-0 z-40 flex h-screen w-72 flex-col bg-navy-950 px-5 py-7 text-white shadow-2xl transition-transform duration-300 print:hidden lg:translate-x-0 ${
+                    open
+                        ? 'translate-x-0'
+                        : '-translate-x-full'
+                }`}
             >
                 <div className="mb-6 border-b border-white/5 pb-6">
                     <Link
@@ -109,7 +119,9 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                             icon={CalendarPlus}
                             label="Reservar Espaço"
                             href={route('reservas.create')}
-                            active={route().current('reservas.create')}
+                            active={route().current(
+                                'reservas.create',
+                            )}
                             onNavigate={onClose}
                         />
 
@@ -117,15 +129,21 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                             icon={CalendarDays}
                             label="Minhas Reservas"
                             href={route('reservas.index')}
-                            active={route().current('reservas.index')}
+                            active={route().current(
+                                'reservas.index',
+                            )}
                             onNavigate={onClose}
                         />
 
                         <SidebarItem
                             icon={Search}
                             label="Disponibilidade"
-                            href={route('reservas.availability')}
-                            active={route().current('reservas.availability')}
+                            href={route(
+                                'reservas.availability',
+                            )}
+                            active={route().current(
+                                'reservas.availability',
+                            )}
                             onNavigate={onClose}
                         />
 
@@ -141,7 +159,9 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                             icon={Map}
                             label="Mapa do Escritório"
                             href={route('mapa.index')}
-                            active={route().current('mapa.index')}
+                            active={route().current(
+                                'mapa.index',
+                            )}
                             onNavigate={onClose}
                         />
 
@@ -149,7 +169,19 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                             icon={History}
                             label="Histórico"
                             href={route('reservas.history')}
-                            active={route().current('reservas.history')}
+                            active={route().current(
+                                'reservas.history',
+                            )}
+                            onNavigate={onClose}
+                        />
+
+                        <SidebarItem
+                            icon={CreditCard}
+                            label="Pagamentos"
+                            href={route('pagamentos.index')}
+                            active={route().current(
+                                'pagamentos.*',
+                            )}
                             onNavigate={onClose}
                         />
 
@@ -157,7 +189,9 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                             icon={Settings}
                             label="Definições"
                             href={route('profile.edit')}
-                            active={route().current('profile.edit')}
+                            active={route().current(
+                                'profile.edit',
+                            )}
                             onNavigate={onClose}
                         />
                     </nav>
@@ -174,80 +208,120 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                                 <SidebarItem
                                     icon={Users}
                                     label="Utilizadores"
-                                    href={route('admin.users.index')}
-                                    active={route().current('admin.users.*')}
+                                    href={route(
+                                        'admin.users.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.users.*',
+                                    )}
                                     onNavigate={onClose}
                                 />
 
                                 <SidebarItem
                                     icon={Building2}
                                     label="Edifícios"
-                                    href={route('admin.edificios.index')}
-                                    active={route().current('admin.edificios.*')}
+                                    href={route(
+                                        'admin.edificios.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.edificios.*',
+                                    )}
                                     onNavigate={onClose}
                                 />
 
                                 <SidebarItem
                                     icon={Layers}
                                     label="Pisos"
-                                    href={route('admin.pisos.index')}
-                                    active={route().current('admin.pisos.*')}
+                                    href={route(
+                                        'admin.pisos.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.pisos.*',
+                                    )}
                                     onNavigate={onClose}
                                 />
 
                                 <SidebarItem
                                     icon={MapPinned}
                                     label="Setores"
-                                    href={route('admin.setores.index')}
-                                    active={route().current('admin.setores.*')}
+                                    href={route(
+                                        'admin.setores.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.setores.*',
+                                    )}
                                     onNavigate={onClose}
                                 />
 
                                 <SidebarItem
                                     icon={Armchair}
                                     label="Secretárias"
-                                    href={route('admin.secretarias.index')}
-                                    active={route().current('admin.secretarias.*')}
+                                    href={route(
+                                        'admin.secretarias.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.secretarias.*',
+                                    )}
                                     onNavigate={onClose}
                                 />
 
                                 <SidebarItem
                                     icon={CalendarDays}
                                     label="Reservas"
-                                    href={route('admin.reservas.index')}
-                                    active={route().current('admin.reservas.*')}
+                                    href={route(
+                                        'admin.reservas.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.reservas.*',
+                                    )}
                                     onNavigate={onClose}
                                 />
 
                                 <SidebarItem
                                     icon={QrCode}
                                     label="QR Codes"
-                                    href={route('secretarias.qrcodes')}
-                                    active={route().current('secretarias.qrcodes')}
+                                    href={route(
+                                        'secretarias.qrcodes',
+                                    )}
+                                    active={route().current(
+                                        'secretarias.qrcodes',
+                                    )}
                                     onNavigate={onClose}
                                 />
 
                                 <SidebarItem
                                     icon={MapPinned}
                                     label="Editor do Mapa"
-                                    href={route('setores.mapa.edit')}
-                                    active={route().current('setores.mapa.edit')}
+                                    href={route(
+                                        'setores.mapa.edit',
+                                    )}
+                                    active={route().current(
+                                        'setores.mapa.edit',
+                                    )}
                                     onNavigate={onClose}
                                 />
 
                                 <SidebarItem
                                     icon={BarChart3}
                                     label="Estatísticas"
-                                    href={route('admin.statistics.index')}
-                                    active={route().current('admin.statistics.*')}
+                                    href={route(
+                                        'admin.statistics.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.statistics.*',
+                                    )}
                                     onNavigate={onClose}
                                 />
 
                                 <SidebarItem
                                     icon={FileText}
                                     label="Relatórios"
-                                    href={route('admin.reports.index')}
-                                    active={route().current('admin.reports.*')}
+                                    href={route(
+                                        'admin.reports.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.reports.*',
+                                    )}
                                     onNavigate={onClose}
                                 />
                             </nav>
@@ -257,7 +331,9 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
 
                 <div className="mt-5 flex items-center gap-3 border-t border-white/10 pt-5">
                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-teal-500 text-lg font-bold text-white">
-                        {user?.name?.charAt(0)?.toUpperCase() ?? '?'}
+                        {user?.name
+                            ?.charAt(0)
+                            ?.toUpperCase() ?? '?'}
                     </div>
 
                     <div className="min-w-0 flex-1">
@@ -277,7 +353,10 @@ export default function Sidebar({ open = false, onClose = () => { } }) {
                         title="Terminar sessão"
                         className="rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
                     >
-                        <LogOut size={18} strokeWidth={1.8} />
+                        <LogOut
+                            size={18}
+                            strokeWidth={1.8}
+                        />
                     </Link>
                 </div>
             </aside>

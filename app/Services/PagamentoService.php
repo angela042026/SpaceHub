@@ -6,6 +6,7 @@ use App\Models\Pagamento;
 use App\Models\Reserva;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 class PagamentoService
 {
@@ -53,6 +54,75 @@ class PagamentoService
     }
 
     /**
+     * Cancela o pagamento associado a uma reserva.
+     *
+     * Um pagamento pendente passa para cancelado.
+     * Um pagamento pago impede o cancelamento da reserva,
+     * enquanto o fluxo de reembolso não estiver implementado.
+     */
+    public function cancelarParaReserva(Reserva $reserva): void
+    {
+        $pagamento = Pagamento::where(
+            'reserva_id',
+            $reserva->id
+        )
+            ->lockForUpdate()
+            ->first();
+
+        /*
+         * Uma reserva antiga pode não possuir pagamento.
+         * Nesse caso, o cancelamento da reserva pode continuar.
+         */
+        if ($pagamento === null) {
+            return;
+        }
+
+        if ($pagamento->estado === 'pendente') {
+            $pagamento->update([
+                'estado' => 'cancelado',
+                'data_pagamento' => null,
+            ]);
+
+            return;
+        }
+
+        /*
+         * O pagamento já está cancelado.
+         * Não é necessário alterar novamente.
+         */
+        if ($pagamento->estado === 'cancelado') {
+            return;
+        }
+
+        /*
+         * Um pagamento reembolsado já não representa
+         * um valor recebido pela reserva.
+         */
+        if ($pagamento->estado === 'reembolsado') {
+            return;
+        }
+
+        /*
+         * Enquanto o reembolso não estiver implementado,
+         * não permitimos cancelar uma reserva paga.
+         */
+        if ($pagamento->estado === 'pago') {
+            throw ValidationException::withMessages([
+                'pagamento' =>
+                    'Não é possível cancelar esta reserva porque o pagamento já foi confirmado. O reembolso ainda não se encontra disponível.',
+            ]);
+        }
+
+        /*
+         * Proteção contra estados inesperados.
+         */
+        throw ValidationException::withMessages([
+            'pagamento' =>
+                'Não foi possível cancelar a reserva devido ao estado atual do pagamento.',
+        ]);
+    }
+
+    /**
      * Calcula o preço com base no período selecionado.
      */
     private function calcularValor(
@@ -90,4 +160,133 @@ class PagamentoService
 
         return $referencia;
     }
+    /**
+ * Atualiza o valor do pagamento associado a uma reserva.
+ *
+ * Apenas pagamentos pendentes podem ter o valor recalculado.
+ */
+public function atualizarValorParaReserva(Reserva $reserva): void
+{
+    $pagamento = Pagamento::where(
+        'reserva_id',
+        $reserva->id
+    )
+        ->lockForUpdate()
+        ->first();
+
+    /*
+     * Reservas antigas podem não ter pagamento associado.
+     */
+    if ($pagamento === null) {
+        return;
+    }
+
+    /*
+     * Um pagamento já concluído, cancelado ou reembolsado
+     * não deve ter o valor alterado.
+     */
+    if ($pagamento->estado !== 'pendente') {
+        throw ValidationException::withMessages([
+            'pagamento' =>
+                'Não é possível alterar o espaço ou o período porque o pagamento já não se encontra pendente.',
+        ]);
+    }
+
+    $reserva->load([
+        'secretaria.setor',
+        'periodo',
+    ]);
+
+    $setor = $reserva->secretaria?->setor;
+    $periodo = $reserva->periodo;
+
+    if ($setor === null) {
+        throw ValidationException::withMessages([
+            'secretaria_id' =>
+                'Não foi possível determinar o setor da reserva.',
+        ]);
+    }
+
+    if ($periodo === null) {
+        throw ValidationException::withMessages([
+            'periodo_id' =>
+                'Não foi possível determinar o período da reserva.',
+        ]);
+    }
+
+    $novoValor = $this->calcularValor(
+        $periodo->nome,
+        $setor->preco_meio_dia,
+        $setor->preco_dia_inteiro
+    );
+
+    $pagamento->update([
+        'valor' => $novoValor,
+    ]);
+}
+/**
+ * Confirma um pagamento simulado.
+ */
+public function confirmarPagamento(
+    Pagamento $pagamento,
+    string $metodoPagamento
+): Pagamento {
+    $metodosPermitidos = [
+        'cartao',
+        'mbway',
+        'transferencia',
+    ];
+
+    if (! in_array(
+        $metodoPagamento,
+        $metodosPermitidos,
+        true
+    )) {
+        throw ValidationException::withMessages([
+            'metodo_pagamento' =>
+                'O método de pagamento selecionado não é válido.',
+        ]);
+    }
+
+    return DB::transaction(function () use (
+        $pagamento,
+        $metodoPagamento
+    ): Pagamento {
+        $pagamentoBloqueado = Pagamento::whereKey(
+            $pagamento->id
+        )
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        if ($pagamentoBloqueado->estado !== 'pendente') {
+            throw ValidationException::withMessages([
+                'pagamento' =>
+                    'Este pagamento já não se encontra pendente.',
+            ]);
+        }
+
+        $reserva = Reserva::whereKey(
+            $pagamentoBloqueado->reserva_id
+        )
+            ->lockForUpdate()
+            ->firstOrFail();
+
+        if ($reserva->cancelada_at !== null) {
+            throw ValidationException::withMessages([
+                'pagamento' =>
+                    'Não é possível pagar uma reserva cancelada.',
+            ]);
+        }
+
+        $pagamentoBloqueado->update([
+            'metodo_pagamento' => $metodoPagamento,
+            'estado' => 'pago',
+            'data_pagamento' => now(),
+        ]);
+
+        return $pagamentoBloqueado->fresh([
+            'reserva',
+        ]);
+    });
+}
 }

@@ -7,13 +7,14 @@ use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Models\User;
+use App\Services\PagamentoService;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use RuntimeException;
 
 class ReservaSeeder extends Seeder
 {
-    public function run(): void
+    public function run(PagamentoService $pagamentoService): void
     {
         $utilizador = User::where('email', 'utilizador@spacehub.pt')->first();
         $admin = User::where('email', 'admin@spacehub.pt')->first();
@@ -55,7 +56,7 @@ class ReservaSeeder extends Seeder
             );
         }
 
-        Reserva::updateOrCreate(
+        $reserva1 = Reserva::updateOrCreate(
             [
                 'secretaria_id' => $secretarias[0]->id,
                 'data' => Carbon::today()->toDateString(),
@@ -68,7 +69,9 @@ class ReservaSeeder extends Seeder
             ]
         );
 
-        Reserva::updateOrCreate(
+        $pagamentoService->criarParaReserva($reserva1);
+
+        $reserva2 = Reserva::updateOrCreate(
             [
                 'secretaria_id' => $secretarias[1]->id,
                 'data' => Carbon::today()->toDateString(),
@@ -81,7 +84,9 @@ class ReservaSeeder extends Seeder
             ]
         );
 
-        Reserva::updateOrCreate(
+        $pagamentoService->criarParaReserva($reserva2);
+
+        $reserva3 = Reserva::updateOrCreate(
             [
                 'secretaria_id' => $secretarias[2]->id,
                 'data' => Carbon::today()->toDateString(),
@@ -94,7 +99,10 @@ class ReservaSeeder extends Seeder
             ]
         );
 
-        Reserva::updateOrCreate(
+        $pagamento3 = $pagamentoService->criarParaReserva($reserva3);
+        $pagamentoService->cancelarParaReserva($reserva3);
+
+        $reserva4 = Reserva::updateOrCreate(
             [
                 'secretaria_id' => $secretarias[3]->id,
                 'data' => Carbon::today()->toDateString(),
@@ -107,7 +115,10 @@ class ReservaSeeder extends Seeder
             ]
         );
 
-        Reserva::updateOrCreate(
+        $pagamentoService->criarParaReserva($reserva4);
+        $pagamentoService->cancelarParaReserva($reserva4);
+
+        $reserva5 = Reserva::updateOrCreate(
             [
                 'secretaria_id' => $secretarias[4]->id,
                 'data' => Carbon::tomorrow()->toDateString(),
@@ -119,5 +130,7 @@ class ReservaSeeder extends Seeder
                 'check_in_at' => null,
             ]
         );
+
+        $pagamentoService->criarParaReserva($reserva5);
     }
 }
