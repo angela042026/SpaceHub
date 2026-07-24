@@ -32,7 +32,7 @@ Route::get('/', function () {
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
-});
+})->name('home');
 
 // ==========================
 // Páginas legais (públicas)
@@ -44,6 +44,10 @@ Route::get('/termos-utilizacao', function () {
 Route::get('/politica-privacidade', function () {
     return Inertia::render('Legal/Privacy');
 })->name('legal.privacy');
+
+Route::get('/politica-cookies', function () {
+    return Inertia::render('Legal/Cookies');
+})->name('legal.cookies');
 
 /*
 |--------------------------------------------------------------------------
@@ -136,11 +140,17 @@ Route::patch('/pagamentos/{pagamento}/confirmar',[PagamentoController::class, 'c
     Route::post('/reservas', [ReservaController::class, 'store'])
         ->name('reservas.store');
 
+    Route::post('/reservas/dia-inteiro', [ReservaController::class, 'storeDiaInteiro'])
+        ->name('reservas.storeDiaInteiro');
+
     Route::get('/reservas/historico', [ReservaController::class, 'history'])
         ->name('reservas.history');
 
     Route::get('/reservas/disponibilidade', [ReservaController::class, 'availability'])
         ->name('reservas.availability');
+
+    Route::get('/reservas/lugares-por-setor', [ReservaController::class, 'lugaresPorSetor'])
+        ->name('reservas.lugaresPorSetor');
 
     Route::patch(
         '/reservas/{reserva}/cancelar',

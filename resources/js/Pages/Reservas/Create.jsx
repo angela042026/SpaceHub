@@ -1,8 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import InputError from '@/Components/InputError';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, CalendarPlus } from 'lucide-react';
+import { ArrowLeft, CalendarPlus, ImageOff } from 'lucide-react';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -10,79 +9,114 @@ const fieldClass =
 const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
-export default function Create({ periodos, pisos, setores }) {
+const PREFERENCIAS = [
+    { key: 'monitor', label: 'Monitor' },
+    { key: 'dock_usb', label: 'Dock USB' },
+    { key: 'junto_janela', label: 'Junto à janela' },
+    { key: 'ergonomica', label: 'Cadeira ergonómica' },
+];
 
-    const [setoresFiltrados, setSetoresFiltrados] = useState([]);
-    const [secretariasDisponiveis, setSecretariasDisponiveis] = useState([]);
+export default function Create({ periodos, pisos, setores, filters }) {
+    const { errors } = usePage().props;
 
-    const { data, setData, post, processing, errors } = useForm({
-        data: '',
-        periodo_id: '',
-        piso_id: '',
-        setor_id: '',
-        secretaria_id: '',
-        observacoes: '',
+    const [filtros, setFiltros] = useState({
+        data: filters?.data ?? '',
+        piso_id: filters?.piso_id ?? '',
+        setor_id: filters?.setor_id ?? '',
     });
+    const [preferencias, setPreferencias] = useState({
+        monitor: false,
+        dock_usb: false,
+        junto_janela: false,
+        ergonomica: false,
+    });
+    const [setoresFiltrados, setSetoresFiltrados] = useState([]);
+    const [lugares, setLugares] = useState([]);
+    const [periodosEscolhidos, setPeriodosEscolhidos] = useState({});
+    const [aReservar, setAReservar] = useState(null);
 
-    // Filtra os tipos de espaço conforme o piso selecionado
+    // Filtra os tipos de espaço conforme o piso selecionado. Mantém o
+    // setor atual se continuar válido para o piso (ex: vindo pré-preenchido
+    // pela página de Disponibilidade), só o limpa quando o utilizador muda
+    // de piso e o setor deixa de pertencer à nova lista.
     useEffect(() => {
-
-        if (!data.piso_id) {
+        if (!filtros.piso_id) {
             setSetoresFiltrados([]);
-            setSecretariasDisponiveis([]);
-            setData('setor_id', '');
-            setData('secretaria_id', '');
             return;
         }
 
-        const lista = setores.filter(setor => setor.piso_id == data.piso_id);
+        const filtrados = setores.filter((setor) => setor.piso_id == filtros.piso_id);
+        setSetoresFiltrados(filtrados);
 
-        setSetoresFiltrados(lista);
-        setSecretariasDisponiveis([]);
-        setData('setor_id', '');
-        setData('secretaria_id', '');
+        setFiltros((atual) => {
+            const setorAindaValido = filtrados.some((setor) => setor.id == atual.setor_id);
+            return setorAindaValido ? atual : { ...atual, setor_id: '' };
+        });
+    }, [filtros.piso_id]);
 
-    }, [data.piso_id]);
-
-    // Atualiza os lugares disponíveis
+    // Consulta os lugares do setor escolhido, com a disponibilidade por período
     useEffect(() => {
-
-        if (!data.data || !data.periodo_id || !data.setor_id) {
-            setSecretariasDisponiveis([]);
-            setData('secretaria_id', '');
+        if (!filtros.data || !filtros.setor_id) {
+            setLugares([]);
             return;
         }
 
-        fetch(route('reservas.availability', {
-            data: data.data,
-            periodo_id: data.periodo_id,
-            setor_id: data.setor_id,
+        fetch(route('reservas.lugaresPorSetor', {
+            data: filtros.data,
+            setor_id: filtros.setor_id,
+            ...preferencias,
         }), {
             headers: {
                 Accept: 'application/json',
             },
         })
             .then((response) => {
-
                 if (!response.ok) {
                     throw new Error('Erro ao consultar disponibilidade.');
                 }
                 return response.json();
             })
-            .then((secretarias) => {
-
-                setSecretariasDisponiveis(secretarias);
-                setData('secretaria_id', '');
-            })
+            .then((dados) => setLugares(dados))
             .catch((error) => {
                 console.error(error);
+                setLugares([]);
             });
+    }, [filtros.data, filtros.setor_id, preferencias]);
 
-    }, [data.data, data.periodo_id, data.setor_id]);
+    const alternarPreferencia = (chave) => {
+        setPreferencias((atual) => ({ ...atual, [chave]: !atual[chave] }));
+    };
 
-    const submit = (e) => {
-        e.preventDefault();
-        post(route('reservas.store'));
+    const escolherPeriodo = (secretariaId, escolha) => {
+        setPeriodosEscolhidos((atual) => ({ ...atual, [secretariaId]: escolha }));
+    };
+
+    const reservar = (secretaria) => {
+        const escolha = periodosEscolhidos[secretaria.id];
+
+        if (!escolha || aReservar) {
+            return;
+        }
+
+        setAReservar(secretaria.id);
+
+        if (escolha === 'dia_inteiro') {
+            router.post(route('reservas.storeDiaInteiro'), {
+                data: filtros.data,
+                secretaria_id: secretaria.id,
+            }, {
+                onFinish: () => setAReservar(null),
+            });
+            return;
+        }
+
+        router.post(route('reservas.store'), {
+            data: filtros.data,
+            periodo_id: escolha,
+            secretaria_id: secretaria.id,
+        }, {
+            onFinish: () => setAReservar(null),
+        });
     };
 
     return (
@@ -101,56 +135,39 @@ export default function Create({ periodos, pisos, setores }) {
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Escolhe a data, o período e o espaço que pretendes reservar.
+                            Escolhe a data e o tipo de espaço, depois seleciona o período e reserva.
                         </p>
                     </div>
                 </div>
 
-                <form onSubmit={submit} className="p-6" noValidate>
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div className="p-6">
+                    {(errors.secretaria_id || errors.data) && (
+                        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
+                            {errors.secretaria_id ?? errors.data}
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
                         <div>
                             <label htmlFor="data" className={labelClass}>Data</label>
                             <input
                                 id="data"
                                 type="date"
-                                value={data.data}
-                                onChange={(e) => setData('data', e.target.value)}
-                                required
+                                value={filtros.data}
+                                onChange={(e) => setFiltros((atual) => ({ ...atual, data: e.target.value }))}
                                 className={fieldClass}
                             />
-                            <InputError message={errors.data} className="mt-2" />
-                        </div>
-
-                        <div>
-                            <label htmlFor="periodo_id" className={labelClass}>Período</label>
-                            <select
-                                id="periodo_id"
-                                value={data.periodo_id}
-                                onChange={(e) => setData('periodo_id', e.target.value)}
-                                required
-                                className={fieldClass}
-                            >
-                                <option value="" disabled>Selecione...</option>
-
-                                {periodos.map((periodo) => (
-                                    <option key={periodo.id} value={periodo.id}>
-                                        {periodo.nome}
-                                    </option>
-                                ))}
-                            </select>
-                            <InputError message={errors.periodo_id} className="mt-2" />
                         </div>
 
                         <div>
                             <label htmlFor="piso_id" className={labelClass}>Piso</label>
                             <select
                                 id="piso_id"
-                                value={data.piso_id}
-                                onChange={(e) => setData('piso_id', e.target.value)}
-                                required
+                                value={filtros.piso_id}
+                                onChange={(e) => setFiltros((atual) => ({ ...atual, piso_id: e.target.value }))}
                                 className={fieldClass}
                             >
-                                <option value="" disabled>Selecione...</option>
+                                <option value="">Selecione...</option>
 
                                 {pisos.map((piso) => (
                                     <option key={piso.id} value={piso.id}>
@@ -164,14 +181,13 @@ export default function Create({ periodos, pisos, setores }) {
                             <label htmlFor="setor_id" className={labelClass}>Categoria do Espaço</label>
                             <select
                                 id="setor_id"
-                                value={data.setor_id}
-                                onChange={(e) => setData('setor_id', e.target.value)}
-                                disabled={!data.piso_id}
-                                required
+                                value={filtros.setor_id}
+                                onChange={(e) => setFiltros((atual) => ({ ...atual, setor_id: e.target.value }))}
+                                disabled={!filtros.piso_id}
                                 className={fieldClass}
                             >
-                                <option value="" disabled>
-                                    {data.piso_id ? 'Selecione...' : 'Selecione primeiro o piso'}
+                                <option value="">
+                                    {filtros.piso_id ? 'Selecione...' : 'Selecione primeiro o piso'}
                                 </option>
 
                                 {setoresFiltrados.map((setor) => (
@@ -181,58 +197,135 @@ export default function Create({ periodos, pisos, setores }) {
                                 ))}
                             </select>
                         </div>
+                    </div>
 
-                        <div className="sm:col-span-2">
-                            <label htmlFor="secretaria_id" className={labelClass}>Lugar</label>
-                            <select
-                                id="secretaria_id"
-                                value={data.secretaria_id}
-                                onChange={(e) => setData('secretaria_id', e.target.value)}
-                                disabled={!data.setor_id}
-                                required
-                                className={fieldClass}
-                            >
-                                <option value="" disabled>
-                                    {data.setor_id ? 'Selecione...' : 'Selecione primeiro a categoria'}
-                                </option>
-
-                                {secretariasDisponiveis.map((secretaria) => (
-                                    <option key={secretaria.id} value={secretaria.id}>
-                                        {secretaria.codigo} — {secretaria.descricao}
-                                    </option>
-                                ))}
-                            </select>
-
-                            {data.setor_id && secretariasDisponiveis.length === 0 && (
-                                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                                    Não existem lugares disponíveis para a data, período e categoria selecionados.
-                                </p>
-                            )}
-                            <InputError message={errors.secretaria_id} className="mt-2" />
-                        </div>
-
-                        <div className="sm:col-span-2">
-                            <label htmlFor="observacoes" className={labelClass}>Observações</label>
-                            <textarea
-                                id="observacoes"
-                                rows={4}
-                                value={data.observacoes}
-                                onChange={(e) => setData('observacoes', e.target.value)}
-                                className={`${fieldClass} h-auto py-2.5`}
-                            />
-                            <InputError message={errors.observacoes} className="mt-2" />
+                    <div className="mt-5">
+                        <p className={labelClass}>Preferências</p>
+                        <div className="flex flex-wrap gap-x-6 gap-y-2">
+                            {PREFERENCIAS.map((preferencia) => (
+                                <label
+                                    key={preferencia.key}
+                                    className="flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-300"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={preferencias[preferencia.key]}
+                                        onChange={() => alternarPreferencia(preferencia.key)}
+                                        className="h-4 w-4 rounded border-slate-300 text-teal-500 focus:ring-teal-500"
+                                    />
+                                    {preferencia.label}
+                                </label>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="mt-8 flex items-center gap-3">
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            {processing ? 'A guardar...' : 'Reservar'}
-                        </button>
+                    <div className="mt-8">
+                        {!filtros.data || !filtros.setor_id ? (
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                Escolhe a data, o piso e a categoria do espaço para veres os lugares disponíveis.
+                            </p>
+                        ) : lugares.length === 0 ? (
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                Não existem lugares disponíveis para a data e categoria selecionadas.
+                            </p>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                                {lugares.map((secretaria) => {
+                                    const periodoEscolhido = periodosEscolhidos[secretaria.id] ?? null;
+                                    const semDisponibilidade = periodos.every(
+                                        (periodo) => !secretaria.periodos_disponiveis[periodo.id],
+                                    );
+                                    const diaInteiroDisponivel = periodos.length > 1 && periodos.every(
+                                        (periodo) => secretaria.periodos_disponiveis[periodo.id],
+                                    );
 
+                                    return (
+                                        <div
+                                            key={secretaria.id}
+                                            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                                        >
+                                            {secretaria.imagem ? (
+                                                <img
+                                                    src={secretaria.imagem}
+                                                    alt={secretaria.codigo}
+                                                    className="h-40 w-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex h-40 w-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-slate-800">
+                                                    <ImageOff size={28} strokeWidth={1.6} />
+                                                </div>
+                                            )}
+
+                                            <div className="p-4">
+                                                <p className="font-bold text-slate-900 dark:text-white">
+                                                    {secretaria.codigo}
+                                                </p>
+
+                                                {secretaria.descricao && (
+                                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                        {secretaria.descricao}
+                                                    </p>
+                                                )}
+
+                                                <div className="mt-4 flex gap-2">
+                                                    {periodos.map((periodo) => {
+                                                        const disponivel = secretaria.periodos_disponiveis[periodo.id];
+                                                        const selecionado = periodoEscolhido === periodo.id;
+
+                                                        return (
+                                                            <button
+                                                                key={periodo.id}
+                                                                type="button"
+                                                                disabled={!disponivel}
+                                                                onClick={() => escolherPeriodo(secretaria.id, periodo.id)}
+                                                                className={`flex-1 rounded-xl border px-3 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                                                                    selecionado
+                                                                        ? 'border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400'
+                                                                        : 'border-slate-200 text-slate-600 hover:border-teal-500/50 dark:border-slate-700 dark:text-slate-300'
+                                                                }`}
+                                                            >
+                                                                {periodo.nome}
+                                                            </button>
+                                                        );
+                                                    })}
+
+                                                    <button
+                                                        type="button"
+                                                        disabled={!diaInteiroDisponivel}
+                                                        onClick={() => escolherPeriodo(secretaria.id, 'dia_inteiro')}
+                                                        className={`flex-1 rounded-xl border px-3 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                                                            periodoEscolhido === 'dia_inteiro'
+                                                                ? 'border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400'
+                                                                : 'border-slate-200 text-slate-600 hover:border-teal-500/50 dark:border-slate-700 dark:text-slate-300'
+                                                        }`}
+                                                    >
+                                                        Dia inteiro
+                                                    </button>
+                                                </div>
+
+                                                {semDisponibilidade ? (
+                                                    <p className="mt-3 text-center text-xs text-slate-400">
+                                                        Sem disponibilidade nesta data.
+                                                    </p>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        disabled={!periodoEscolhido || aReservar === secretaria.id}
+                                                        onClick={() => reservar(secretaria)}
+                                                        className="mt-3 w-full rounded-xl bg-teal-500 px-3 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
+                                                    >
+                                                        {aReservar === secretaria.id ? 'A reservar...' : 'Reservar'}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="mt-8">
                         <Link
                             href={route('reservas.index')}
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
@@ -241,7 +334,7 @@ export default function Create({ periodos, pisos, setores }) {
                             Cancelar
                         </Link>
                     </div>
-                </form>
+                </div>
             </section>
         </DashboardLayout>
     );

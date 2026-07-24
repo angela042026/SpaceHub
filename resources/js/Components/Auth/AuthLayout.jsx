@@ -117,7 +117,7 @@ export default function AuthLayout({
                     {/* Coluna direita */}
                     <section className="relative hidden min-h-full overflow-hidden lg:block">
                         <img
-                            src="/images/login-spacehub.jpg"
+                            src="/images/landing/hero-spacehub.jpg"
                             alt="Espaço de trabalho SpaceHub"
                             className="absolute inset-0 h-full w-full object-cover"
                         />

@@ -28,9 +28,9 @@ export default {
                 },
 
                 teal: {
-                    400: 'var(--color-teal-400)',
-                    500: 'var(--color-teal-500)',
-                    600: 'var(--color-teal-600)',
+                    400: 'rgb(var(--color-teal-400) / <alpha-value>)',
+                    500: 'rgb(var(--color-teal-500) / <alpha-value>)',
+                    600: 'rgb(var(--color-teal-600) / <alpha-value>)',
                 },
 
                 surface: 'var(--color-surface)',
@@ -55,6 +55,17 @@ export default {
             boxShadow: {
                 card: 'var(--shadow-card)',
                 'card-hover': 'var(--shadow-card-hover)',
+            },
+
+            keyframes: {
+                marquee: {
+                    '0%': { transform: 'translateX(0)' },
+                    '100%': { transform: 'translateX(-50%)' },
+                },
+            },
+
+            animation: {
+                marquee: 'marquee 32s linear infinite',
             },
         },
     },

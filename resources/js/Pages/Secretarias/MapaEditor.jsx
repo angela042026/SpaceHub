@@ -82,7 +82,7 @@ export default function MapaEditor({ pisos }) {
                                 setPisoSelecionado(e.target.value);
                                 setSetorAtivo(null);
                             }}
-                            className="mb-4 w-full rounded-xl border border-slate-200 px-4 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                            className="mb-4 w-full rounded-xl border border-slate-200 px-4 py-2 text-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                         >
                             {dadosPisos?.map((p) => (
                                 <option key={p.id} value={p.codigo}>
