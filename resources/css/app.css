@@ -16,9 +16,12 @@
         --color-navy-900: var(--primary);
         --color-navy-800: var(--primary-light);
 
-        --color-teal-400: var(--accent-light);
-        --color-teal-500: var(--accent);
-        --color-teal-600: var(--accent-dark);
+        /* Formato "R G B" (sem vírgulas nem rgb()) exigido pelo Tailwind
+           para conseguir aplicar modificadores de opacidade (ex: teal-500/10)
+           a cores baseadas em variáveis CSS. */
+        --color-teal-400: 94 234 212;
+        --color-teal-500: 20 184 166;
+        --color-teal-600: 15 158 144;
 
         --color-status-livre: #14b8a6;
         --color-status-reservada: #3b82f6;

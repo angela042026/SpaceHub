@@ -1,8 +1,8 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import Table from '@/Components/Table';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     CalendarDays,
+    ImageOff,
     Pencil,
     Plus,
     Search,
@@ -54,78 +54,6 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
     const limpar = () => {
         router.get(route('reservas.index'));
     };
-
-    const columns = [
-        {
-            key: 'data',
-            label: 'Data',
-            render: (reserva) => new Date(reserva.data).toLocaleDateString('pt-PT'),
-        },
-        {
-            key: 'periodo',
-            label: 'Período',
-            render: (reserva) => reserva.periodo?.nome ?? '-',
-        },
-        {
-            key: 'espaco',
-            label: 'Espaço',
-            render: (reserva) => (
-                <div>
-                    <p className="font-semibold text-slate-800 dark:text-slate-100">
-                        {reserva.secretaria?.setor?.nome ?? '-'}
-                    </p>
-
-                    <p className="text-xs text-slate-400">
-                        {reserva.secretaria?.codigo ?? '-'}
-                    </p>
-                </div>
-            ),
-        },
-        {
-            key: 'estado',
-            label: 'Estado',
-            render: (reserva) => (
-                <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                        ESTADO_CLASSES[reserva.estado_reserva?.codigo] ??
-                        'bg-slate-500/10 text-slate-600 dark:text-slate-400'
-                    }`}
-                >
-                    {reserva.estado_reserva?.nome ?? '-'}
-                </span>
-            ),
-        },
-        {
-            key: 'acoes',
-            label: 'Ações',
-            align: 'right',
-            render: (reserva) =>
-                reserva.estado_reserva?.codigo === 'pendente' ? (
-                    <div className="flex justify-end gap-2">
-                        <Link
-                            href={route('reservas.edit', reserva.id)}
-                            title="Editar"
-                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
-                        >
-                            <Pencil size={16} strokeWidth={1.9} />
-                        </Link>
-
-                        <button
-                            type="button"
-                            onClick={() => cancelarReserva(reserva.id)}
-                            title="Cancelar"
-                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700"
-                        >
-                            <XCircle size={16} strokeWidth={1.9} />
-                        </button>
-                    </div>
-                ) : (
-                    <span className="text-sm text-slate-400">
-                        Sem ações
-                    </span>
-                ),
-        },
-    ];
 
     return (
         <DashboardLayout>
@@ -244,11 +172,86 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                 </form>
 
                 <div className="p-6">
-                    <Table
-                        columns={columns}
-                        data={reservas}
-                        emptyMessage="Ainda não existem reservas."
-                    />
+                    {reservas.length === 0 ? (
+                        <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
+                            <p className="text-sm text-slate-400">
+                                Ainda não existem reservas.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                            {reservas.map((reserva) => (
+                                <div
+                                    key={reserva.id}
+                                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                                >
+                                    {reserva.secretaria?.imagem ? (
+                                        <img
+                                            src={reserva.secretaria.imagem}
+                                            alt={reserva.secretaria?.codigo ?? ''}
+                                            className="h-40 w-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-40 w-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-slate-800">
+                                            <ImageOff size={28} strokeWidth={1.6} />
+                                        </div>
+                                    )}
+
+                                    <div className="p-4">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div>
+                                                <p className="font-bold text-slate-900 dark:text-white">
+                                                    {reserva.secretaria?.setor?.nome ?? '-'}
+                                                </p>
+
+                                                <p className="text-xs text-slate-400">
+                                                    {reserva.secretaria?.codigo ?? '-'}
+                                                </p>
+                                            </div>
+
+                                            <span
+                                                className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ${
+                                                    ESTADO_CLASSES[reserva.estado_reserva?.codigo] ??
+                                                    'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                                                }`}
+                                            >
+                                                {reserva.estado_reserva?.nome ?? '-'}
+                                            </span>
+                                        </div>
+
+                                        <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+                                            {new Date(reserva.data).toLocaleDateString('pt-PT')} · {reserva.periodo?.nome ?? '-'}
+                                        </p>
+
+                                        {reserva.estado_reserva?.codigo === 'pendente' ? (
+                                            <div className="mt-4 flex gap-2">
+                                                <Link
+                                                    href={route('reservas.edit', reserva.id)}
+                                                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
+                                                >
+                                                    <Pencil size={16} strokeWidth={1.9} />
+                                                    Editar
+                                                </Link>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => cancelarReserva(reserva.id)}
+                                                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
+                                                >
+                                                    <XCircle size={16} strokeWidth={1.9} />
+                                                    Cancelar
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <p className="mt-4 text-center text-xs text-slate-400">
+                                                Sem ações
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
         </DashboardLayout>

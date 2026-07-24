@@ -24,6 +24,7 @@ class Secretaria extends Model
         'reservavel',
         'ativo',
         'descricao',
+        'imagem',
     ];
 
     protected function casts(): array

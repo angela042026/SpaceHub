@@ -1,7 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import { Armchair, CalendarCheck2, Layers3, MapPinned, Search } from 'lucide-react';
+import { CalendarCheck2, ImageOff, Layers3, MapPinned, Search } from 'lucide-react';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -172,46 +172,59 @@ export default function Availability({ periodos, pisos, setores, secretariasDisp
                             </p>
                         </div>
                     ) : (
-                        <div className="space-y-3">
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                             {secretariasDisponiveis.map((secretaria) => (
-                                <article
+                                <div
                                     key={secretaria.id}
-                                    className="flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/40"
+                                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
                                 >
-                                    <div className="flex min-w-0 items-center gap-3">
-                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-navy-900 text-white shadow-sm">
-                                            <Armchair size={21} strokeWidth={1.9} />
+                                    {secretaria.imagem ? (
+                                        <img
+                                            src={secretaria.imagem}
+                                            alt={secretaria.codigo}
+                                            className="h-40 w-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-40 w-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-slate-800">
+                                            <ImageOff size={28} strokeWidth={1.6} />
                                         </div>
+                                    )}
 
-                                        <div className="min-w-0">
-                                            <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
-                                                {secretaria.codigo} — {secretaria.descricao}
+                                    <div className="p-4">
+                                        <p className="font-bold text-slate-900 dark:text-white">
+                                            {secretaria.codigo}
+                                        </p>
+
+                                        {secretaria.descricao && (
+                                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                {secretaria.descricao}
                                             </p>
+                                        )}
 
-                                            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-                                                <span className="flex items-center gap-1.5">
-                                                    <Layers3 size={14} strokeWidth={1.9} className="text-teal-500" />
-                                                    {secretaria.setor?.piso?.nome ?? '-'}
-                                                </span>
+                                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                                            <span className="flex items-center gap-1.5">
+                                                <Layers3 size={14} strokeWidth={1.9} className="text-teal-500" />
+                                                {secretaria.setor?.piso?.nome ?? '-'}
+                                            </span>
 
-                                                <span className="flex items-center gap-1.5">
-                                                    <MapPinned size={14} strokeWidth={1.9} className="text-teal-500" />
-                                                    {secretaria.setor?.piso?.edificio?.nome} · {secretaria.setor?.nome}
-                                                </span>
-                                            </div>
+                                            <span className="flex items-center gap-1.5">
+                                                <MapPinned size={14} strokeWidth={1.9} className="text-teal-500" />
+                                                {secretaria.setor?.piso?.edificio?.nome} · {secretaria.setor?.nome}
+                                            </span>
                                         </div>
-                                    </div>
 
-                                    <Link
-                                        href={route('reservas.create', {
-                                            data: data.data,
-                                            periodo_id: data.periodo_id,
-                                        })}
-                                        className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-teal-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
-                                    >
-                                        Reservar
-                                    </Link>
-                                </article>
+                                        <Link
+                                            href={route('reservas.create', {
+                                                data: data.data,
+                                                piso_id: pisoId,
+                                                setor_id: data.setor_id,
+                                            })}
+                                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-teal-500 px-3 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
+                                        >
+                                            Reservar
+                                        </Link>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     )}

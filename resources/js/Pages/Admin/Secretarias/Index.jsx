@@ -77,6 +77,11 @@ export default function Index({ secretarias, setores, filters }) {
             render: (secretaria) => secretaria.setor ?? '-',
         },
         {
+            key: 'piso',
+            label: 'Piso',
+            render: (secretaria) => secretaria.piso ?? '-',
+        },
+        {
             key: 'reservavel',
             label: 'Reservável',
             render: (secretaria) => (secretaria.reservavel ? 'Sim' : 'Não'),

@@ -48,7 +48,7 @@ export default function Create() {
                                         type="text"
                                         value={auth.user.name}
                                         disabled
-                                        className="w-full rounded border bg-gray-100 p-2" />
+                                        className="w-full rounded border border-slate-200 bg-gray-100 p-2 outline-none" />
                                 </div>
 
                                 {/* Email */}
@@ -60,7 +60,7 @@ export default function Create() {
                                         type="email"
                                         value={auth.user.email}
                                         disabled
-                                        className="w-full rounded border bg-gray-100 p-2" />
+                                        className="w-full rounded border border-slate-200 bg-gray-100 p-2 outline-none" />
                                 </div>
 
                                 {/* Assunto */}
@@ -71,7 +71,7 @@ export default function Create() {
                                     <select
                                         value={data.assunto}
                                         onChange={(e) => setData('assunto', e.target.value)}
-                                        className="w-full rounded border p-2"
+                                        className="w-full rounded border border-slate-200 p-2 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
                                     >
                                         <option value="">Selecione...</option>
                                         <option>Reservas</option>
@@ -98,7 +98,7 @@ export default function Create() {
                                         rows="6"
                                         value={data.mensagem}
                                         onChange={(e) => setData('mensagem', e.target.value)}
-                                        className="w-full rounded border p-2" />
+                                        className="w-full rounded border border-slate-200 p-2 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10" />
 
                                     {errors.mensagem && (
                                         <p className="mt-1 text-sm text-red-600">
