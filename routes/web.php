@@ -4,6 +4,7 @@ use App\Events\EnviarMensagem;
 use App\Http\Controllers\Admin\EdificioController as AdminEdificioController;
 use App\Http\Controllers\Admin\PisoController as AdminPisoController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\ReservaController as AdminReservaController;
 use App\Http\Controllers\Admin\SecretariaController as AdminSecretariaController;
 use App\Http\Controllers\Admin\SetorController as AdminSetorController;
 use App\Http\Controllers\Admin\StatisticsController as AdminStatisticsController;
@@ -195,6 +196,18 @@ Route::middleware(['auth', 'active', 'role:Administrador'])
 
         Route::patch('/utilizadores/{user}/toggle-ativo', [AdminUserController::class, 'toggleAtivo'])
             ->name('users.toggleAtivo');
+
+        Route::get('/reservas', [AdminReservaController::class, 'index'])
+            ->name('reservas.index');
+
+        Route::get('/reservas/{reserva}/editar', [AdminReservaController::class, 'edit'])
+            ->name('reservas.edit');
+
+        Route::put('/reservas/{reserva}', [AdminReservaController::class, 'update'])
+            ->name('reservas.update');
+
+        Route::patch('/reservas/{reserva}/cancelar', [AdminReservaController::class, 'cancelar'])
+            ->name('reservas.cancelar');
     });
 
 // Gestão de espaços: acessível a Administrador e Gestor (ver *Policy::before()).
