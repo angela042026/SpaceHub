@@ -1951,6 +1951,21 @@ O módulo inclui:
 * filtros;
 * paginação;
 * testes automatizados.
+Módulo de Pagamentos
+
+- Gestão de pagamentos associados às reservas.
+- Métodos suportados:
+  - Cartão
+  - MB Way
+  - Transferência Bancária
+  - PayPal
+- Estados:
+  - Pendente
+  - Pago
+  - Falhado
+  - Reembolsado
+- Comprovativo de pagamento.
+- Ambiente de demonstração (sem transações reais).
 
 As funcionalidades implementadas incluem:
 
