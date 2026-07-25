@@ -232,10 +232,11 @@ public function confirmarPagamento(
     string $metodoPagamento
 ): Pagamento {
     $metodosPermitidos = [
-        'cartao',
-        'mbway',
-        'transferencia',
-    ];
+    'cartao',
+    'mbway',
+    'transferencia',
+    'paypal',
+];
 
     if (! in_array(
         $metodoPagamento,

@@ -28,6 +28,7 @@ const METODO_LABELS = {
     cartao: 'Cartão',
     mbway: 'MB Way',
     transferencia: 'Transferência',
+    paypal: 'PayPal',
 };
 
 export default function Index({
@@ -209,7 +210,9 @@ export default function Index({
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                {isAdmin ? 'Pagamentos' : 'Os meus pagamentos'}
+                                {isAdmin
+                                    ? 'Pagamentos'
+                                    : 'Os meus pagamentos'}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -223,7 +226,10 @@ export default function Index({
                         <select
                             value={filters?.estado ?? ''}
                             onChange={(event) =>
-                                aplicarFiltro('estado', event.target.value)
+                                aplicarFiltro(
+                                    'estado',
+                                    event.target.value,
+                                )
                             }
                             className="rounded-xl border-slate-200 bg-white text-sm text-slate-700 shadow-sm focus:border-teal-500 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                         >
@@ -231,7 +237,9 @@ export default function Index({
                             <option value="pendente">Pendente</option>
                             <option value="pago">Pago</option>
                             <option value="recusado">Recusado</option>
-                            <option value="reembolsado">Reembolsado</option>
+                            <option value="reembolsado">
+                                Reembolsado
+                            </option>
                             <option value="cancelado">Cancelado</option>
                         </select>
 
@@ -251,6 +259,7 @@ export default function Index({
                             <option value="transferencia">
                                 Transferência
                             </option>
+                            <option value="paypal">PayPal</option>
                         </select>
                     </div>
                 </div>

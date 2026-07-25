@@ -103,7 +103,7 @@ class PagamentoTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('Pagamentos/Index')
                 ->where('isAdmin', false)
                 ->where('pagamentos.total', 1)
@@ -141,7 +141,7 @@ class PagamentoTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('Pagamentos/Index')
                 ->where('isAdmin', false)
                 ->where('pagamentos.total', 1)
@@ -188,7 +188,7 @@ class PagamentoTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('Pagamentos/Index')
                 ->where('isAdmin', true)
                 ->where('pagamentos.total', 2)
@@ -234,7 +234,7 @@ class PagamentoTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('Pagamentos/Index')
                 ->where('pagamentos.total', 12)
                 ->where('pagamentos.per_page', 10)
@@ -270,7 +270,7 @@ class PagamentoTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('Pagamentos/Index')
                 ->where('filters.estado', 'pendente')
                 ->where('pagamentos.total', 1)
@@ -319,7 +319,7 @@ class PagamentoTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('Pagamentos/Index')
                 ->where(
                     'filters.metodo_pagamento',
@@ -351,7 +351,7 @@ class PagamentoTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('Pagamentos/Show')
                 ->where('pagamento.id', $pagamento->id)
                 ->where(
@@ -397,7 +397,7 @@ class PagamentoTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn (Assert $page) => $page
+            fn(Assert $page) => $page
                 ->component('Pagamentos/Show')
                 ->where('pagamento.id', $pagamento->id)
         );
@@ -408,11 +408,11 @@ class PagamentoTest extends TestCase
         $user = $this->criarUsuarioComRole('Utilizador');
 
         $pagamento = $this->criarPagamento($user);
-
         $response = $this->actingAs($user)->patch(
             route('pagamentos.confirmar', $pagamento),
             [
                 'metodo_pagamento' => 'mbway',
+                'telefone_mbway' => '912345678',
             ]
         );
 

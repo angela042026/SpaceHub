@@ -79,19 +79,29 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
-// ==========================
-// Pagamentos
-// ==========================
-Route::get('/pagamentos', [PagamentoController::class, 'index'])
-    ->name('pagamentos.index');
+    // ==========================
+    // Pagamentos
+    // ==========================
+    Route::get('/pagamentos', [PagamentoController::class, 'index'])
+        ->name('pagamentos.index');
 
-Route::get('/pagamentos/{pagamento}', [PagamentoController::class, 'show'])
-    ->name('pagamentos.show');
+    Route::get('/pagamentos/{pagamento}', [PagamentoController::class, 'show'])
+        ->name('pagamentos.show');
 
-Route::patch('/pagamentos/{pagamento}/confirmar',[PagamentoController::class, 'confirmar']
+    Route::get('/pagamentos/{pagamento}/pagar', [PagamentoController::class, 'pagar'])
+        ->name('pagamentos.pagar');
+
+  Route::patch(
+    '/pagamentos/{pagamento}/confirmar',
+    [PagamentoController::class, 'confirmar']
 )->name('pagamentos.confirmar');
 
-    
+    Route::get(
+        '/pagamentos/{pagamento}/comprovativo',
+        [PagamentoController::class, 'comprovativo']
+    )->name('pagamentos.comprovativo');
+
+
     // ==========================
     // Check-in
     // ==========================
@@ -322,7 +332,7 @@ Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
             ->name('reports.suporte');
     });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 /*
 |--------------------------------------------------------------------------

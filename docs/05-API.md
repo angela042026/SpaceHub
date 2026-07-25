@@ -818,6 +818,11 @@ A consulta depende da `PagamentoPolicy`.
 ```http
 PATCH /api/pagamentos/{pagamento}/confirmar
 ```
+GET    /pagamentos
+GET    /pagamentos/{pagamento}
+GET    /pagamentos/{pagamento}/pagar
+PATCH  /pagamentos/{pagamento}/confirmar
+GET    /pagamentos/{pagamento}/comprovativo
 
 ### Regras
 
