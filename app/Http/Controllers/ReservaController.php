@@ -133,6 +133,7 @@ class ReservaController extends Controller
                 'periodo_id',
                 'piso_id',
                 'setor_id',
+                'secretaria_id',
             ]),
         ]);
     }

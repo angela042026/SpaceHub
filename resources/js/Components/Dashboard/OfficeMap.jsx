@@ -9,6 +9,7 @@ import {
     ChevronDown,
     Layers3,
     MapPinned,
+    X,
 } from 'lucide-react';
 
 const ESTADOS = {
@@ -26,6 +27,13 @@ const ESTADOS = {
         label: 'Parcialmente ocupada',
     },
 
+    expira: {
+        marker: 'bg-status-expira',
+        soft: 'bg-amber-500/10',
+        text: 'text-amber-600 dark:text-amber-400',
+        label: 'Reservada — a começar em breve',
+    },
+
     ocupada: {
         marker: 'bg-status-ocupada',
         soft: 'bg-red-500/10',
@@ -37,7 +45,7 @@ const ESTADOS = {
         marker: 'bg-status-indisponivel',
         soft: 'bg-slate-500/10',
         text: 'text-slate-500 dark:text-slate-400',
-        label: 'Sem secretárias',
+        label: 'Não reservável',
     },
 };
 
@@ -55,11 +63,14 @@ export default function OfficeMap({
     expandido = false,
 }) {
     const [selectedSector, setSelectedSector] = useState(null);
+    const [selectedSecretaria, setSelectedSecretaria] = useState(null);
     const larguraClass = expandido ? 'w-full' : 'mx-auto w-full max-w-5xl';
     const [atualizando, setAtualizando] = useState(false);
 
     const pisosDoEdificio = (pisos ?? []).filter(
-        (piso) => !selectedEdificio || piso.edificio_id === selectedEdificio,
+        (piso) =>
+            (!selectedEdificio || piso.edificio_id === selectedEdificio) &&
+            (expandido || piso.numero !== -1),
     );
 
     const pisoAtual =
@@ -68,6 +79,7 @@ export default function OfficeMap({
 
     useEffect(() => {
         setSelectedSector(null);
+        setSelectedSecretaria(null);
     }, [selectedFloor]);
 
     useEffect(() => {
@@ -138,7 +150,25 @@ export default function OfficeMap({
     );
 
     function handleSectorClick(setor) {
-        setSelectedSector(setor);
+        setSelectedSector((atual) => (atual?.id === setor.id ? null : setor));
+        setSelectedSecretaria(null);
+    }
+
+    function handleSecretariaClick(secretaria) {
+        if (!expandido) {
+            const hoje = new Date().toISOString().slice(0, 10);
+
+            router.get(route('reservas.create'), {
+                data: hoje,
+                piso_id: pisoAtual.id,
+                setor_id: selectedSector.id,
+                secretaria_id: secretaria.id,
+            });
+
+            return;
+        }
+
+        setSelectedSecretaria((atual) => (atual?.id === secretaria.id ? null : secretaria));
     }
 
     return (
@@ -328,38 +358,69 @@ export default function OfficeMap({
                         </div>
                     )}
 
-                    {setoresComPosicao.map((setor) => {
-                        const estado = getEstado(setor.status);
-                        const isSelected =
-                            selectedSector?.id === setor.id;
+                    {setoresComPosicao
+                        .filter((setor) => setor.id !== selectedSector?.id)
+                        .map((setor) => {
+                            const estado = getEstado(setor.status);
 
-                        let markerStateClass =
-                            'ring-white/90 dark:ring-slate-950/80';
+                            return (
+                                <button
+                                    key={setor.id}
+                                    type="button"
+                                    onClick={() =>
+                                        handleSectorClick(setor)
+                                    }
+                                    aria-label={`Ver detalhes do setor ${setor.nome}`}
+                                    title={setor.nome}
+                                    className={`absolute flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[11px] font-extrabold text-white shadow-lg ring-3 ring-white/90 transition duration-200 hover:z-20 hover:scale-125 focus:outline-none focus:ring-4 focus:ring-teal-300 dark:ring-slate-950/80 ${estado.marker}`}
+                                    style={{
+                                        left: `${setor.planta_x}%`,
+                                        top: `${setor.planta_y}%`,
+                                    }}
+                                >
+                                    {setor.numero}
+                                </button>
+                            );
+                        })}
 
-                        if (isSelected) {
-                            markerStateClass =
-                                'z-20 scale-125 ring-teal-300/70';
-                        }
+                    {selectedSector?.secretarias
+                        ?.filter(
+                            (secretaria) =>
+                                secretaria.planta_x !== null &&
+                                secretaria.planta_x !== undefined &&
+                                secretaria.planta_y !== null &&
+                                secretaria.planta_y !== undefined,
+                        )
+                        .map((secretaria) => {
+                            const estado = getEstado(secretaria.status);
+                            const isSelected =
+                                selectedSecretaria?.id === secretaria.id;
 
-                        return (
-                            <button
-                                key={setor.id}
-                                type="button"
-                                onClick={() =>
-                                    handleSectorClick(setor)
-                                }
-                                aria-label={`Ver detalhes do setor ${setor.nome}`}
-                                title={setor.nome}
-                                className={`absolute flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[11px] font-extrabold text-white shadow-lg ring-3 transition duration-200 hover:z-20 hover:scale-125 focus:outline-none focus:ring-4 focus:ring-teal-300 ${estado.marker} ${markerStateClass}`}
-                                style={{
-                                    left: `${setor.planta_x}%`,
-                                    top: `${setor.planta_y}%`,
-                                }}
-                            >
-                                {setor.numero}
-                            </button>
-                        );
-                    })}
+                            return (
+                                <button
+                                    key={secretaria.id}
+                                    type="button"
+                                    onClick={() =>
+                                        handleSecretariaClick(secretaria)
+                                    }
+                                    aria-label={
+                                        expandido
+                                            ? `Ver detalhes da secretária ${secretaria.codigo}`
+                                            : `Reservar a secretária ${secretaria.codigo}`
+                                    }
+                                    title={`${secretaria.codigo} — ${estado.label}`}
+                                    className={`absolute z-20 flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[9px] font-bold text-white shadow ring-2 ring-white/90 transition duration-200 hover:z-30 hover:scale-125 focus:outline-none focus:ring-4 focus:ring-teal-300 dark:ring-slate-950/80 ${estado.marker} ${
+                                        isSelected ? 'z-30 scale-125 ring-teal-300' : ''
+                                    }`}
+                                    style={{
+                                        left: `${secretaria.planta_x}%`,
+                                        top: `${secretaria.planta_y}%`,
+                                    }}
+                                >
+                                    {secretaria.numero}
+                                </button>
+                            );
+                        })}
                 </div>
             </div>
 
@@ -384,21 +445,63 @@ export default function OfficeMap({
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
                                     {selectedSector.livres ?? 0} de{' '}
                                     {selectedSector.totalSecretarias ?? 0}{' '}
-                                    secretárias disponíveis
+                                    secretárias disponíveis — clica numa bolinha para ver o lugar
                                 </p>
                             </div>
                         </div>
 
-                        <span
-                            className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                                getEstado(selectedSector.status).soft
-                            } ${
-                                getEstado(selectedSector.status).text
-                            }`}
-                        >
-                            {getEstado(selectedSector.status).label}
-                        </span>
+                        <div className="flex items-center gap-2">
+                            <span
+                                className={`inline-flex w-fit items-center rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                                    getEstado(selectedSector.status).soft
+                                } ${
+                                    getEstado(selectedSector.status).text
+                                }`}
+                            >
+                                {getEstado(selectedSector.status).label}
+                            </span>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectedSector(null);
+                                    setSelectedSecretaria(null);
+                                }}
+                                aria-label="Fechar zona selecionada"
+                                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-200/60 hover:text-slate-600 dark:hover:bg-slate-700/60 dark:hover:text-slate-200"
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
                     </div>
+
+                    {selectedSecretaria && (
+                        <div className="mt-3 flex items-center justify-between rounded-lg bg-white/70 px-3 py-2 dark:bg-slate-900/40">
+                            <div className="flex items-center gap-2">
+                                <span
+                                    className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white ${
+                                        getEstado(selectedSecretaria.status).marker
+                                    }`}
+                                >
+                                    {selectedSecretaria.numero}
+                                </span>
+
+                                <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                                    {selectedSecretaria.codigo}
+                                </span>
+                            </div>
+
+                            <span
+                                className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                                    getEstado(selectedSecretaria.status).soft
+                                } ${
+                                    getEstado(selectedSecretaria.status).text
+                                }`}
+                            >
+                                {getEstado(selectedSecretaria.status).label}
+                            </span>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -438,11 +541,11 @@ export default function OfficeMap({
                                         {setor.nome}
                                     </span>
 
-                                    <span className="mt-0.5 block text-[11px] text-slate-400">
-                                        {setor.totalSecretarias > 0
-                                            ? `${setor.livres}/${setor.totalSecretarias} livres`
-                                            : 'Sem secretárias'}
-                                    </span>
+                                    {setor.totalSecretarias > 0 && (
+                                        <span className="mt-0.5 block text-[11px] text-slate-400">
+                                            {setor.livres}/{setor.totalSecretarias} livres
+                                        </span>
+                                    )}
                                 </span>
 
                                 <span

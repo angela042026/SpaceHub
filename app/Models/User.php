@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -23,6 +24,10 @@ class User extends Authenticatable
         'role_id',
         'ativo',
         'fotografia',
+    ];
+
+    protected $appends = [
+        'fotografia_url',
     ];
 
     /**
@@ -48,6 +53,13 @@ class User extends Authenticatable
             'ativo' => 'boolean',
             'role_id' => 'integer',
         ];
+    }
+
+    protected function fotografiaUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->fotografia ? asset('storage/' . $this->fotografia) : null,
+        );
     }
 
     public function role(): BelongsTo

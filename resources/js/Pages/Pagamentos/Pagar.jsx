@@ -10,9 +10,6 @@ import {
     Hash,
     Info,
     LockKeyhole,
-    Smartphone,
-    University,
-    WalletCards,
 } from 'lucide-react';
 
 const METODOS_PAGAMENTO = [
@@ -20,25 +17,25 @@ const METODOS_PAGAMENTO = [
         valor: 'cartao',
         titulo: 'Cartão',
         descricao: 'Visa, Mastercard ou outro cartão bancário.',
-        Icone: CreditCard,
+        imagem: '/images/payment/cartao.jpeg',
     },
     {
         valor: 'mbway',
         titulo: 'MB Way',
         descricao: 'Confirmação através do número de telemóvel.',
-        Icone: Smartphone,
+        imagem: '/images/payment/mbway.jpeg',
     },
     {
         valor: 'transferencia',
         titulo: 'Transferência',
         descricao: 'Consulta o IBAN e utiliza a referência indicada.',
-        Icone: University,
+        imagem: '/images/payment/transferencia.jpeg',
     },
     {
         valor: 'paypal',
         titulo: 'PayPal',
         descricao: 'Pagamento através de uma conta PayPal.',
-        Icone: WalletCards,
+        imagem: '/images/payment/paypal.jpeg',
     },
 ];
 
@@ -134,14 +131,14 @@ export default function Pagar({ pagamento }) {
 
                     <Link
                         href={route('pagamentos.show', pagamento.id)}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-semibold text-slate-700 shadow-sm transition hover:border-teal-500 hover:bg-teal-50 hover:text-teal-600 outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-teal-500 dark:hover:bg-slate-800 dark:hover:text-teal-400 dark:focus-visible:ring-offset-slate-950"
                     >
                         <ArrowLeft size={18} />
                         Voltar ao detalhe
                     </Link>
                 </header>
 
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <section className="dashboard-card overflow-hidden">
                     <div className="grid gap-0 lg:grid-cols-[1fr_280px]">
                         <div className="p-6 sm:p-8">
                             <div className="mb-6 flex items-start justify-between gap-4">
@@ -149,6 +146,7 @@ export default function Pagar({ pagamento }) {
                                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                                         Resumo da reserva
                                     </p>
+
                                     <h2 className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100">
                                         Reserva #{reserva?.id ?? '-'}
                                     </h2>
@@ -165,16 +163,19 @@ export default function Pagar({ pagamento }) {
                                     titulo="Data"
                                     valor={formatarData(reserva?.data)}
                                 />
+
                                 <ResumoItem
                                     Icone={CreditCard}
                                     titulo="Período"
                                     valor={reserva?.periodo?.nome ?? '-'}
                                 />
+
                                 <ResumoItem
                                     Icone={Building2}
                                     titulo="Secretária"
                                     valor={secretaria?.codigo ?? '-'}
                                 />
+
                                 <ResumoItem
                                     Icone={Building2}
                                     titulo="Setor"
@@ -188,6 +189,7 @@ export default function Pagar({ pagamento }) {
                                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                                     Total a pagar
                                 </p>
+
                                 <p className="mt-2 text-4xl font-black tracking-tight text-slate-900 dark:text-white">
                                     {formatarValor(pagamento.valor)}
                                 </p>
@@ -195,11 +197,16 @@ export default function Pagar({ pagamento }) {
 
                             <div className="mt-6 border-t border-slate-200 pt-4 dark:border-slate-800">
                                 <div className="flex items-start gap-3">
-                                    <Hash className="mt-0.5 shrink-0 text-slate-400" size={17} />
+                                    <Hash
+                                        className="mt-0.5 shrink-0 text-slate-400"
+                                        size={17}
+                                    />
+
                                     <div className="min-w-0">
                                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                                             Referência
                                         </p>
+
                                         <p className="mt-1 break-all text-sm font-semibold text-slate-700 dark:text-slate-300">
                                             {pagamento.referencia ?? '-'}
                                         </p>
@@ -212,122 +219,156 @@ export default function Pagar({ pagamento }) {
 
                 <form onSubmit={confirmarPagamento} className="space-y-6">
                     {Object.keys(errors).length > 0 && (
-                        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+                        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
                             <p className="font-bold">
                                 O pagamento não foi confirmado:
                             </p>
 
                             <ul className="mt-2 list-disc space-y-1 pl-5">
                                 {Object.entries(errors).map(([campo, mensagem]) => (
-                                    <li key={campo}>
-                                        {mensagem}
-                                    </li>
+                                    <li key={campo}>{mensagem}</li>
                                 ))}
                             </ul>
                         </div>
                     )}
-                    <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
-                        <p className="font-semibold text-blue-800">
-                            ℹ️ Ambiente de demonstração
-                        </p>
 
-                        <p className="mt-2 text-sm text-blue-700">
-                            Os pagamentos apresentados nesta aplicação são simulados para fins
-                            académicos. Não é efetuada qualquer transação financeira real.
-                        </p>
+                    <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-500/30 dark:bg-amber-500/10">
+                        <Info
+                            className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
+                            size={18}
+                        />
+
+                        <div>
+                            <p className="font-semibold text-amber-800 dark:text-amber-300">
+                                Ambiente de demonstração
+                            </p>
+
+                            <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
+                                Os pagamentos apresentados nesta aplicação são simulados para fins
+                                académicos. Não é efetuada qualquer transação financeira real.
+                            </p>
+                        </div>
                     </div>
-                    <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+
+                    <section className="dashboard-card p-6 sm:p-8">
                         <div className="mb-6">
                             <p className="text-sm font-semibold text-teal-600 dark:text-teal-400">
                                 Passo 1
                             </p>
+
                             <h2 className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100">
                                 Escolhe o método de pagamento
                             </h2>
+
                             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                 Seleciona uma das opções disponíveis para continuar.
                             </p>
                         </div>
 
                         <fieldset>
-                            <legend className="sr-only">Método de pagamento</legend>
+                            <legend className="sr-only">
+                                Método de pagamento
+                            </legend>
 
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                {METODOS_PAGAMENTO.map(({ valor, titulo, descricao, Icone }) => {
-                                    const selecionado = data.metodo_pagamento === valor;
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                {METODOS_PAGAMENTO.map(
+                                    ({
+                                        valor,
+                                        titulo,
+                                        descricao,
+                                        imagem,
+                                    }) => {
+                                        const selecionado =
+                                            data.metodo_pagamento === valor;
 
-                                    return (
-                                        <label
-                                            key={valor}
-                                            className={`group relative cursor-pointer rounded-2xl border-2 p-5 transition duration-200 ${selecionado
-                                                    ? 'border-teal-500 bg-teal-50 shadow-sm ring-4 ring-teal-500/10 dark:bg-teal-950/20'
-                                                    : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'
+                                        return (
+                                            <label
+                                                key={valor}
+                                                className={`group relative cursor-pointer rounded-2xl border p-4 transition duration-200 ${
+                                                    selecionado
+                                                        ? 'border-teal-500 bg-white shadow-sm ring-2 ring-teal-500/10 dark:bg-slate-900'
+                                                        : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'
                                                 }`}
-                                        >
-                                            <input
-                                                type="radio"
-                                                name="metodo_pagamento"
-                                                value={valor}
-                                                checked={selecionado}
-                                                onChange={(evento) => selecionarMetodo(evento.target.value)}
-                                                className="sr-only"
-                                            />
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="metodo_pagamento"
+                                                    value={valor}
+                                                    checked={selecionado}
+                                                    onChange={(evento) =>
+                                                        selecionarMetodo(
+                                                            evento.target.value,
+                                                        )
+                                                    }
+                                                    className="sr-only"
+                                                />
 
-                                            <div className="flex items-start gap-4">
-                                                <div
-                                                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition ${selecionado
-                                                            ? 'bg-teal-600 text-white shadow-sm'
-                                                            : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:group-hover:bg-slate-700'
-                                                        }`}
-                                                >
-                                                    <Icone size={23} />
-                                                </div>
-
-                                                <div className="min-w-0 flex-1">
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <p className="font-bold text-slate-900 dark:text-slate-100">
-                                                            {titulo}
-                                                        </p>
-
-                                                        <span
-                                                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${selecionado
-                                                                    ? 'border-teal-600 bg-teal-600 text-white'
-                                                                    : 'border-slate-300 bg-white text-transparent dark:border-slate-600 dark:bg-slate-900'
-                                                                }`}
-                                                        >
-                                                            <Check size={14} strokeWidth={3} />
-                                                        </span>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                                                        <img
+                                                            src={imagem}
+                                                            alt={titulo}
+                                                            className="h-full w-full object-contain"
+                                                        />
                                                     </div>
 
-                                                    <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                                        {descricao}
-                                                    </p>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex items-center justify-between gap-3">
+                                                            <div className="min-w-0">
+                                                                <p className="font-bold leading-5 text-slate-900 dark:text-slate-100">
+                                                                    {titulo}
+                                                                </p>
+
+                                                                <p className="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">
+                                                                    {descricao}
+                                                                </p>
+                                                            </div>
+
+                                                            <span
+                                                                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${
+                                                                    selecionado
+                                                                        ? 'border-teal-600 bg-teal-600 text-white'
+                                                                        : 'border-slate-300 bg-white text-transparent dark:border-slate-600 dark:bg-slate-900'
+                                                                }`}
+                                                            >
+                                                                <Check
+                                                                    size={14}
+                                                                    strokeWidth={3}
+                                                                />
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </label>
-                                    );
-                                })}
+                                            </label>
+                                        );
+                                    },
+                                )}
                             </div>
 
                             {errors.metodo_pagamento && (
-                                <MensagemErro>{errors.metodo_pagamento}</MensagemErro>
+                                <MensagemErro>
+                                    {errors.metodo_pagamento}
+                                </MensagemErro>
                             )}
                         </fieldset>
                     </section>
 
                     {data.metodo_pagamento && (
-                        <section className="animate-[fadeIn_250ms_ease-out] rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+                        <section className="dashboard-card animate-[fadeIn_250ms_ease-out] p-6 sm:p-8">
                             <div className="mb-6 flex items-start gap-4">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-700 dark:bg-teal-950/50 dark:text-teal-300">
                                     <LockKeyhole size={20} />
                                 </div>
+
                                 <div>
                                     <p className="text-sm font-semibold text-teal-600 dark:text-teal-400">
                                         Passo 2
                                     </p>
+
                                     <h2 className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100">
                                         Dados do pagamento
                                     </h2>
+
                                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                         Preenche apenas os dados necessários para o método selecionado.
                                     </p>
@@ -343,7 +384,12 @@ export default function Pagar({ pagamento }) {
                                         <input
                                             type="text"
                                             value={data.nome_titular}
-                                            onChange={(evento) => setData('nome_titular', evento.target.value)}
+                                            onChange={(evento) =>
+                                                setData(
+                                                    'nome_titular',
+                                                    evento.target.value,
+                                                )
+                                            }
                                             placeholder="Nome como aparece no cartão"
                                             autoComplete="cc-name"
                                             className={inputClasses}
@@ -362,7 +408,10 @@ export default function Pagar({ pagamento }) {
                                             onChange={(evento) =>
                                                 setData(
                                                     'numero_cartao',
-                                                    evento.target.value.replace(/\D/g, ''),
+                                                    evento.target.value.replace(
+                                                        /\D/g,
+                                                        '',
+                                                    ),
                                                 )
                                             }
                                             placeholder="1234567812345678"
@@ -382,15 +431,22 @@ export default function Pagar({ pagamento }) {
                                                 maxLength={5}
                                                 value={data.validade_cartao}
                                                 onChange={(evento) => {
-                                                    let valor = evento.target.value
-                                                        .replace(/\D/g, '')
-                                                        .slice(0, 4);
+                                                    let valor =
+                                                        evento.target.value
+                                                            .replace(/\D/g, '')
+                                                            .slice(0, 4);
 
                                                     if (valor.length > 2) {
-                                                        valor = `${valor.slice(0, 2)}/${valor.slice(2)}`;
+                                                        valor = `${valor.slice(
+                                                            0,
+                                                            2,
+                                                        )}/${valor.slice(2)}`;
                                                     }
 
-                                                    setData('validade_cartao', valor);
+                                                    setData(
+                                                        'validade_cartao',
+                                                        valor,
+                                                    );
                                                 }}
                                                 placeholder="MM/AA"
                                                 autoComplete="cc-exp"
@@ -407,7 +463,10 @@ export default function Pagar({ pagamento }) {
                                                 onChange={(evento) =>
                                                     setData(
                                                         'cvv',
-                                                        evento.target.value.replace(/\D/g, ''),
+                                                        evento.target.value.replace(
+                                                            /\D/g,
+                                                            '',
+                                                        ),
                                                     )
                                                 }
                                                 placeholder="123"
@@ -437,7 +496,10 @@ export default function Pagar({ pagamento }) {
                                             onChange={(evento) =>
                                                 setData(
                                                     'telefone_mbway',
-                                                    evento.target.value.replace(/\D/g, ''),
+                                                    evento.target.value.replace(
+                                                        /\D/g,
+                                                        '',
+                                                    ),
                                                 )
                                             }
                                             placeholder="912345678"
@@ -455,15 +517,28 @@ export default function Pagar({ pagamento }) {
                             {data.metodo_pagamento === 'transferencia' && (
                                 <div className="space-y-5">
                                     <div className="divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-950/50">
-                                        <LinhaDados titulo="IBAN" valor="PT50 0002 0123 1234 5678 9015 4" />
-                                        <LinhaDados titulo="Referência" valor={pagamento.referencia ?? '-'} />
-                                        <LinhaDados titulo="Valor" valor={formatarValor(pagamento.valor)} />
+                                        <LinhaDados
+                                            titulo="IBAN"
+                                            valor="PT50 0002 0123 1234 5678 9015 4"
+                                        />
+
+                                        <LinhaDados
+                                            titulo="Referência"
+                                            valor={pagamento.referencia ?? '-'}
+                                        />
+
+                                        <LinhaDados
+                                            titulo="Valor"
+                                            valor={formatarValor(pagamento.valor)}
+                                        />
                                     </div>
 
                                     <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 transition hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/50">
                                         <input
                                             type="checkbox"
-                                            checked={data.confirmacao_transferencia}
+                                            checked={
+                                                data.confirmacao_transferencia
+                                            }
                                             onChange={(evento) =>
                                                 setData(
                                                     'confirmacao_transferencia',
@@ -480,7 +555,9 @@ export default function Pagar({ pagamento }) {
 
                                     {errors.confirmacao_transferencia && (
                                         <MensagemErro>
-                                            {errors.confirmacao_transferencia}
+                                            {
+                                                errors.confirmacao_transferencia
+                                            }
                                         </MensagemErro>
                                     )}
                                 </div>
@@ -496,7 +573,10 @@ export default function Pagar({ pagamento }) {
                                             type="email"
                                             value={data.email_paypal}
                                             onChange={(evento) =>
-                                                setData('email_paypal', evento.target.value)
+                                                setData(
+                                                    'email_paypal',
+                                                    evento.target.value,
+                                                )
                                             }
                                             placeholder="utilizador@exemplo.pt"
                                             autoComplete="email"
@@ -518,7 +598,7 @@ export default function Pagar({ pagamento }) {
                         </section>
                     )}
 
-                    <section className="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+                    <section className="dashboard-card flex flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                             <LockKeyhole size={15} />
                             Simulação segura: os dados sensíveis não são guardados.
@@ -534,11 +614,17 @@ export default function Pagar({ pagamento }) {
 
                             <button
                                 type="submit"
-                                disabled={processing || !data.metodo_pagamento}
+                                disabled={
+                                    processing ||
+                                    !data.metodo_pagamento
+                                }
                                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <CheckCircle2 size={18} />
-                                {processing ? 'A confirmar...' : 'Confirmar pagamento'}
+
+                                {processing
+                                    ? 'A confirmar...'
+                                    : 'Confirmar pagamento'}
                             </button>
                         </div>
                     </section>
@@ -554,10 +640,12 @@ function ResumoItem({ Icone, titulo, valor }) {
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300">
                 <Icone size={19} />
             </div>
+
             <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                     {titulo}
                 </p>
+
                 <p className="mt-0.5 truncate font-semibold text-slate-800 dark:text-slate-200">
                     {valor}
                 </p>
@@ -572,7 +660,9 @@ function Campo({ label, erro, children }) {
             <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
                 {label}
             </label>
+
             {children}
+
             {erro && <MensagemErro>{erro}</MensagemErro>}
         </div>
     );
@@ -588,7 +678,7 @@ function MensagemErro({ children }) {
 
 function Nota({ children }) {
     return (
-        <div className="flex items-start gap-3 rounded-xl bg-blue-50 p-4 text-sm leading-6 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300">
+        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
             <Info className="mt-0.5 shrink-0" size={18} />
             <p>{children}</p>
         </div>
@@ -601,6 +691,7 @@ function LinhaDados({ titulo, valor }) {
             <span className="text-sm text-slate-500 dark:text-slate-400">
                 {titulo}
             </span>
+
             <span className="break-all text-sm font-bold text-slate-900 dark:text-slate-100 sm:text-right">
                 {valor}
             </span>

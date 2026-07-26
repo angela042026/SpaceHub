@@ -7,9 +7,11 @@ import {
     Pencil,
     Plus,
     Power,
+    RotateCcw,
     Search,
     UserRound,
 } from 'lucide-react';
+import { useState } from 'react';
 
 const ESTADO_BADGE = {
     true: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
@@ -17,6 +19,8 @@ const ESTADO_BADGE = {
 };
 
 export default function Index({ users, roles, filters }) {
+    const [processingId, setProcessingId] = useState(null);
+
     const { data, setData, get } = useForm({
         search: filters.search ?? '',
         role_id: filters.role_id ?? '',
@@ -45,10 +49,15 @@ export default function Index({ users, roles, filters }) {
             return;
         }
 
+        setProcessingId(user.id);
+
         router.patch(
             route('admin.users.toggleAtivo', user.id),
             {},
-            { preserveScroll: true },
+            {
+                preserveScroll: true,
+                onFinish: () => setProcessingId(null),
+            },
         );
     };
 
@@ -123,14 +132,19 @@ export default function Index({ users, roles, filters }) {
                     <button
                         type="button"
                         onClick={() => alternarAtivo(user)}
+                        disabled={processingId === user.id}
                         title={user.ativo ? 'Desativar' : 'Ativar'}
-                        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition ${
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
                             user.ativo
                                 ? 'border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-500 dark:border-slate-700'
                                 : 'border-slate-200 text-slate-500 hover:border-teal-500 hover:text-teal-500 dark:border-slate-700'
                         }`}
                     >
-                        <Power size={16} strokeWidth={1.9} />
+                        {processingId === user.id ? (
+                            <RotateCcw size={16} strokeWidth={1.9} className="animate-spin" />
+                        ) : (
+                            <Power size={16} strokeWidth={1.9} />
+                        )}
                     </button>
                 </div>
             ),

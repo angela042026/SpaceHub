@@ -9,10 +9,14 @@ import {
     Plus,
     Power,
     QrCode,
+    RotateCcw,
     Search,
 } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Index({ secretarias, setores, filters }) {
+    const [processingId, setProcessingId] = useState(null);
+
     const { data, setData, get } = useForm({
         search: filters.search ?? '',
         setor_id: filters.setor_id ?? '',
@@ -41,10 +45,15 @@ export default function Index({ secretarias, setores, filters }) {
             return;
         }
 
+        setProcessingId(secretaria.id);
+
         router.patch(
             route('admin.secretarias.toggleAtivo', secretaria.id),
             {},
-            { preserveScroll: true },
+            {
+                preserveScroll: true,
+                onFinish: () => setProcessingId(null),
+            },
         );
     };
 
@@ -128,10 +137,19 @@ export default function Index({ secretarias, setores, filters }) {
                     <button
                         type="button"
                         onClick={() => alternarAtivo(secretaria)}
+                        disabled={processingId === secretaria.id}
                         title={secretaria.ativo ? 'Desativar' : 'Ativar'}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700"
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                            secretaria.ativo
+                                ? 'border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-500 dark:border-slate-700'
+                                : 'border-slate-200 text-slate-500 hover:border-teal-500 hover:text-teal-500 dark:border-slate-700'
+                        }`}
                     >
-                        <Power size={16} strokeWidth={1.9} />
+                        {processingId === secretaria.id ? (
+                            <RotateCcw size={16} strokeWidth={1.9} className="animate-spin" />
+                        ) : (
+                            <Power size={16} strokeWidth={1.9} />
+                        )}
                     </button>
                 </div>
             ),

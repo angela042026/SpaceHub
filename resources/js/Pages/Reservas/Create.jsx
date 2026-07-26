@@ -35,6 +35,19 @@ export default function Create({ periodos, pisos, setores, filters }) {
     const [periodosEscolhidos, setPeriodosEscolhidos] = useState({});
     const [aReservar, setAReservar] = useState(null);
 
+    // Secretária vinda do mapa do Dashboard (clique numa bolinha), para
+    // destacar e trazer para a vista assim que os lugares carregarem.
+    const secretariaAlvo = filters?.secretaria_id ? Number(filters.secretaria_id) : null;
+
+    useEffect(() => {
+        if (!secretariaAlvo) {
+            return;
+        }
+
+        const elemento = document.getElementById(`lugar-${secretariaAlvo}`);
+        elemento?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, [lugares, secretariaAlvo]);
+
     // "Dia inteiro" é uma ação especial que cria uma reserva por cada
     // período real. Por isso, não deve ser apresentado como período normal.
     const periodosReserva = periodos.filter(
@@ -147,9 +160,17 @@ export default function Create({ periodos, pisos, setores, filters }) {
                 </div>
 
                 <div className="p-6">
-                    {(errors.secretaria_id || errors.data) && (
+                    {Object.keys(errors).length > 0 && (
                         <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
-                            {errors.secretaria_id ?? errors.data}
+                            {Object.keys(errors).length === 1 ? (
+                                Object.values(errors)[0]
+                            ) : (
+                                <ul className="list-disc space-y-1 pl-4">
+                                    {Object.values(errors).map((mensagem, indice) => (
+                                        <li key={indice}>{mensagem}</li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     )}
 
@@ -244,11 +265,17 @@ export default function Create({ periodos, pisos, setores, filters }) {
                                     const diaInteiroDisponivel = periodosReserva.length > 1 && periodosReserva.every(
                                         (periodo) => secretaria.periodos_disponiveis[periodo.id],
                                     );
+                                    const ehAlvo = secretaria.id === secretariaAlvo;
 
                                     return (
                                         <div
                                             key={secretaria.id}
-                                            className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                                            id={`lugar-${secretaria.id}`}
+                                            className={`overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-slate-900 ${
+                                                ehAlvo
+                                                    ? 'border-teal-500 ring-4 ring-teal-500/20'
+                                                    : 'border-slate-200 dark:border-slate-800'
+                                            }`}
                                         >
                                             {secretaria.imagem ? (
                                                 <img

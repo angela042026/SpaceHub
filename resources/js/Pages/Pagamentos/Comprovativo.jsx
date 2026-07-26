@@ -99,7 +99,7 @@ export default function Comprovativo({ pagamento }) {
                     <div className="flex flex-col gap-3 sm:flex-row">
                         <Link
                             href={route('pagamentos.show', pagamento.id)}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-semibold text-slate-700 shadow-sm transition hover:border-teal-500 hover:bg-teal-50 hover:text-teal-600 outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-teal-500 dark:hover:bg-slate-800 dark:hover:text-teal-400 dark:focus-visible:ring-offset-slate-950"
                         >
                             <ArrowLeft size={18} />
                             Voltar ao detalhe
@@ -108,7 +108,7 @@ export default function Comprovativo({ pagamento }) {
                         <button
                             type="button"
                             onClick={imprimirComprovativo}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 dark:focus:ring-offset-slate-950"
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 font-semibold text-white shadow-sm transition hover:bg-teal-700 outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
                         >
                             <Printer size={18} />
                             Imprimir
@@ -127,19 +127,11 @@ export default function Comprovativo({ pagamento }) {
                         <div className="relative flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
                             <div>
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500 text-white shadow-lg shadow-teal-500/20">
-                                        <Building2 size={25} />
-                                    </div>
-
-                                    <div>
-                                        <p className="text-xl font-black tracking-tight">
-                                            SpaceHub
-                                        </p>
-
-                                        <p className="text-sm text-slate-400">
-                                            Gestão de espaços e reservas
-                                        </p>
-                                    </div>
+                                    <img
+                                        src="/images/logo/logoprincipalbranco.png"
+                                        alt="SpaceHub"
+                                        className="h-20 w-auto object-contain"
+                                    />
                                 </div>
 
                                 <div className="mt-8">

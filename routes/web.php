@@ -138,6 +138,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::patch('/setores/{setor}/posicao', [SetorMapaController::class, 'atualizarPosicao'])
         ->name('setores.posicao.update');
 
+    Route::patch('/secretarias/{secretaria}/posicao', [SetorMapaController::class, 'atualizarPosicaoSecretaria'])
+        ->name('secretarias.posicao.update');
+
     // ==========================
     // Sistema de Reservas
     // ==========================
@@ -188,14 +191,16 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/suporte', [PedidoSuporteController::class, 'store'])
         ->name('support.store');
 
-    Route::get('/suporte/pedidos', [PedidoSuporteController::class, 'index'])
-        ->name('support.index');
+    Route::middleware('role:Administrador,Gestor')->group(function () {
+        Route::get('/suporte/pedidos', [PedidoSuporteController::class, 'index'])
+            ->name('support.index');
 
-    Route::get('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'show'])
-        ->name('support.show');
+        Route::get('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'show'])
+            ->name('support.show');
 
-    Route::patch('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'update'])
-        ->name('support.update');
+        Route::patch('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'update'])
+            ->name('support.update');
+    });
 
     Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
         ->name('chat.enviar');

@@ -7,9 +7,11 @@ import {
     ChevronLeft,
     ChevronRight,
     Pencil,
+    RotateCcw,
     Search,
     XCircle,
 } from 'lucide-react';
+import { useState } from 'react';
 
 const ESTADO_CLASSES = {
     pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
@@ -23,6 +25,8 @@ const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
 export default function Index({ reservas, estados, edificios, pisos, setores, filters }) {
+
+    const [processingId, setProcessingId] = useState(null);
 
     const { data, setData, get } = useForm({
         search: filters.search ?? '',
@@ -51,7 +55,12 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
             return;
         }
 
-        router.patch(route('admin.reservas.cancelar', reserva.id), {}, { preserveScroll: true });
+        setProcessingId(reserva.id);
+
+        router.patch(route('admin.reservas.cancelar', reserva.id), {}, {
+            preserveScroll: true,
+            onFinish: () => setProcessingId(null),
+        });
     };
 
     const irParaPagina = (url) => {
@@ -145,10 +154,15 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                         <button
                             type="button"
                             onClick={() => cancelarReserva(reserva)}
+                            disabled={processingId === reserva.id}
                             title="Cancelar"
-                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-400 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700"
                         >
-                            <XCircle size={16} strokeWidth={1.9} />
+                            {processingId === reserva.id ? (
+                                <RotateCcw size={16} strokeWidth={1.9} className="animate-spin" />
+                            ) : (
+                                <XCircle size={16} strokeWidth={1.9} />
+                            )}
                         </button>
                     </div>
                 ) : (

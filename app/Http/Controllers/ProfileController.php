@@ -8,8 +8,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class ProfileController extends Controller
 {
@@ -29,13 +31,42 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $dados = $request->validated();
+        $fotografiaAntiga = $user->fotografia;
+        $novaFotografia = null;
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if ($request->hasFile('fotografia')) {
+            $novaFotografia = $request
+                ->file('fotografia')
+                ->store('utilizadores/fotografias', 'public');
+
+            $dados['fotografia'] = $novaFotografia;
         }
 
-        $request->user()->save();
+        $user->fill($dados);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        try {
+            $user->save();
+        } catch (Throwable $exception) {
+            if ($novaFotografia !== null) {
+                Storage::disk('public')->delete($novaFotografia);
+            }
+
+            throw $exception;
+        }
+
+        if (
+            $novaFotografia !== null
+            && $fotografiaAntiga !== null
+            && $fotografiaAntiga !== $novaFotografia
+        ) {
+            Storage::disk('public')->delete($fotografiaAntiga);
+        }
 
         return Redirect::route('profile.edit');
     }

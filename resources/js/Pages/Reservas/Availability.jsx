@@ -145,7 +145,7 @@ export default function Availability({ periodos, pisos, setores, secretariasDisp
                             className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-navy-900 text-sm font-bold text-white transition hover:bg-navy-950 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Search size={16} strokeWidth={2} />
-                            Consultar
+                            {processing ? 'A consultar...' : 'Consultar'}
                         </button>
                     </div>
                 </form>
