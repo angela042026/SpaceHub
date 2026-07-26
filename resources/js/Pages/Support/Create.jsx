@@ -1,5 +1,16 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import InputError from '@/Components/InputError';
 import { Head, useForm, usePage } from '@inertiajs/react';
+import { LifeBuoy } from 'lucide-react';
+
+const fieldClass =
+    'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+
+const disabledFieldClass =
+    'h-11 w-full rounded-xl border border-slate-200 bg-slate-100 px-3 text-sm text-slate-500 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400';
+
+const labelClass =
+    'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
 export default function Create() {
 
@@ -19,108 +30,80 @@ export default function Create() {
     };
 
     return (
-        <AuthenticatedLayout header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Contactar Suporte
-                </h2>
-            }
-        >
-
+        <DashboardLayout>
             <Head title="Contactar Suporte" />
-            <div className="py-12">
-                <div className="mx-auto max-w-3xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6">
-                            <h3 className="mb-6 text-2xl font-bold">
-                                Contactar Suporte
-                            </h3>
-                            <p className="mb-8 text-gray-600">
-                                Não encontrou a resposta que procurava?
-                                Envie-nos a sua questão e responderemos com a maior brevidade possível.
-                            </p>
-                            <form onSubmit={submit}>
-                                {/* Nome */}
-                                <div className="mb-4">
-                                    <label className="mb-2 block font-medium">
-                                        Nome
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={auth.user.name}
-                                        disabled
-                                        className="w-full rounded border border-slate-200 bg-gray-100 p-2 outline-none" />
-                                </div>
 
-                                {/* Email */}
-                                <div className="mb-4">
-                                    <label className="mb-2 block font-medium">
-                                        Email
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={auth.user.email}
-                                        disabled
-                                        className="w-full rounded border border-slate-200 bg-gray-100 p-2 outline-none" />
-                                </div>
+            <section className="dashboard-card overflow-hidden">
+                <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+                        <LifeBuoy size={22} strokeWidth={1.9} />
+                    </div>
 
-                                {/* Assunto */}
-                                <div className="mb-4">
-                                    <label className="mb-2 block font-medium">
-                                        Assunto
-                                    </label>
-                                    <select
-                                        value={data.assunto}
-                                        onChange={(e) => setData('assunto', e.target.value)}
-                                        className="w-full rounded border border-slate-200 p-2 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
-                                    >
-                                        <option value="">Selecione...</option>
-                                        <option>Reservas</option>
-                                        <option>Check-in</option>
-                                        <option>Conta</option>
-                                        <option>Problema Técnico</option>
-                                        <option>Outro</option>
-                                    </select>
+                    <div>
+                        <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                            Contactar Suporte
+                        </h1>
 
-                                    {errors.assunto && (
-                                        <p className="mt-1 text-sm text-red-600">
-                                            {errors.assunto}
-                                        </p>
-                                    )}
-
-                                </div>
-
-                                {/* Mensagem */}
-                                <div className="mb-6">
-                                    <label className="mb-2 block font-medium">
-                                        Mensagem
-                                    </label>
-                                    <textarea
-                                        rows="6"
-                                        value={data.mensagem}
-                                        onChange={(e) => setData('mensagem', e.target.value)}
-                                        className="w-full rounded border border-slate-200 p-2 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10" />
-
-                                    {errors.mensagem && (
-                                        <p className="mt-1 text-sm text-red-600">
-                                            {errors.mensagem}
-                                        </p> 
-                                    )}
-
-                                </div>
-
-                                {/* Botão */}
-                                <button type="submit" disabled={processing} className="rounded-lg px-6 py-3 font-semibold text-white transition hover:opacity-90" style={{ backgroundColor: '#14B8A6' }}>
-                                    {processing
-                                        ? 'A enviar...'
-                                        : 'Enviar Pedido'}
-                                </button>
-                            </form>
-                        </div>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Não encontrou a resposta que procurava? Envie-nos a sua questão e responderemos com a maior brevidade possível.
+                        </p>
                     </div>
                 </div>
-            </div>
 
-        </AuthenticatedLayout>
+                <form onSubmit={submit} className="p-6" noValidate>
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <div>
+                            <label className={labelClass}>Nome</label>
+                            <input type="text" value={auth.user.name} disabled className={disabledFieldClass} />
+                        </div>
 
+                        <div>
+                            <label className={labelClass}>Email</label>
+                            <input type="email" value={auth.user.email} disabled className={disabledFieldClass} />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                            <label htmlFor="assunto" className={labelClass}>Assunto</label>
+                            <select
+                                id="assunto"
+                                value={data.assunto}
+                                onChange={(e) => setData('assunto', e.target.value)}
+                                className={fieldClass}
+                            >
+                                <option value="">Selecione...</option>
+                                <option>Reservas</option>
+                                <option>Check-in</option>
+                                <option>Conta</option>
+                                <option>Problema Técnico</option>
+                                <option>Outro</option>
+                            </select>
+                            <InputError message={errors.assunto} className="mt-2" />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                            <label htmlFor="mensagem" className={labelClass}>Mensagem</label>
+                            <textarea
+                                id="mensagem"
+                                rows={6}
+                                value={data.mensagem}
+                                onChange={(e) => setData('mensagem', e.target.value)}
+                                className={`${fieldClass} h-auto py-2`}
+                            />
+                            <InputError message={errors.mensagem} className="mt-2" />
+                        </div>
+                    </div>
+
+                    <div className="mt-8">
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {processing ? 'A enviar...' : 'Enviar Pedido'}
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </DashboardLayout>
     );
 }

@@ -79,16 +79,29 @@ class MapaOcupacaoService
                     $totalSecretarias =
                         $setor->secretarias->count();
 
-                    $ocupadas = $setor->secretarias
+                    $secretarias = $setor->secretarias
+                        ->values()
+                        ->map(
+                            fn (Secretaria $secretaria, int $indiceSecretaria) => [
+                                'id' => $secretaria->id,
+                                'numero' => $indiceSecretaria + 1,
+                                'codigo' => $secretaria->codigo,
+                                'planta_x' => $secretaria->planta_x,
+                                'planta_y' => $secretaria->planta_y,
+                                'status' => $this->statusDaSecretaria(
+                                    $secretaria,
+                                    $reservasAtivasHoje->get(
+                                        $secretaria->id
+                                    )
+                                ),
+                            ]
+                        );
+
+                    $ocupadas = $secretarias
                         ->filter(
-                            fn (Secretaria $secretaria) =>
+                            fn (array $secretaria) =>
                                 in_array(
-                                    $this->statusDaSecretaria(
-                                        $secretaria,
-                                        $reservasAtivasHoje->get(
-                                            $secretaria->id
-                                        )
-                                    ),
+                                    $secretaria['status'],
                                     [
                                         'ocupada',
                                         'reservada',
@@ -117,6 +130,7 @@ class MapaOcupacaoService
                             $totalSecretarias,
                             $ocupadas
                         ),
+                        'secretarias' => $secretarias,
                     ];
                 }
             );
@@ -149,17 +163,15 @@ class MapaOcupacaoService
 
         $agora = now();
 
-        $reserva = $reservasAtivas->first(
-            function (Reserva $reserva) use ($agora): bool {
+        // Considera qualquer reserva de hoje cujo período ainda não tenha
+        // terminado — não só as que já estão dentro da janela horária ativa.
+        // Sem isto, uma reserva para mais tarde hoje (ex: reservou a Tarde
+        // e ainda é de manhã) era ignorada e a secretária aparecia livre.
+        $reserva = $reservasAtivas
+            ->filter(function (Reserva $reserva) use ($agora): bool {
                 if (! $reserva->periodo) {
                     return false;
                 }
-
-                $inicio = Carbon::parse(
-                    $reserva->data->format('Y-m-d')
-                    .' '
-                    .$reserva->periodo->hora_inicio->format('H:i')
-                );
 
                 $fim = Carbon::parse(
                     $reserva->data->format('Y-m-d')
@@ -167,12 +179,10 @@ class MapaOcupacaoService
                     .$reserva->periodo->hora_fim->format('H:i')
                 );
 
-                return $agora->between(
-                    $inicio->copy()->subMinutes(30),
-                    $fim
-                );
-            }
-        );
+                return $agora->lessThan($fim);
+            })
+            ->sortBy(fn (Reserva $reserva) => $reserva->periodo->hora_inicio)
+            ->first();
 
         if (! $reserva || ! $reserva->periodo) {
             return 'livre';
@@ -190,11 +200,10 @@ class MapaOcupacaoService
             .$reserva->periodo->hora_fim->format('H:i')
         );
 
-        if ($agora->greaterThan($fimPeriodo)) {
-            return 'livre';
-        }
-
-        if ($reserva->check_in_at !== null) {
+        if (
+            $agora->between($inicioPeriodo, $fimPeriodo)
+            && $reserva->check_in_at !== null
+        ) {
             return 'ocupada';
         }
 

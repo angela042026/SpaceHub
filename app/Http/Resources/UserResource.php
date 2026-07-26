@@ -18,10 +18,7 @@ class UserResource extends JsonResource
             'ativo' => (bool) $this->ativo,
 
             'fotografia' => $this->fotografia,
-
-            'fotografia_url' => $this->fotografia
-    ? asset('storage/' . $this->fotografia)
-    : null,
+            'fotografia_url' => $this->fotografia_url,
 
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
         ];

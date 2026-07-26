@@ -1,14 +1,18 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
+import Modal from '@/Components/Modal';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
+    AlertTriangle,
     CalendarDays,
     CreditCard,
     ImageOff,
     Pencil,
     Plus,
+    RotateCcw,
     Search,
     XCircle,
 } from 'lucide-react';
+import { useState } from 'react';
 
 const ESTADO_CLASSES = {
     pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
@@ -24,12 +28,19 @@ const fieldClass =
 export default function Index({ reservas, setores, pisos, edificios, filters }) {
 
     // Cancelar reserva
-    const cancelarReserva = (id) => {
-        if (!confirm('Tem a certeza que pretende cancelar esta reserva?')) {
-            return;
-        }
+    const [reservaParaCancelar, setReservaParaCancelar] = useState(null);
+    const [aCancelar, setACancelar] = useState(false);
 
-        router.patch(route('reservas.cancelar', id), {});
+    const cancelarReserva = () => {
+        setACancelar(true);
+
+        router.patch(route('reservas.cancelar', reservaParaCancelar.id), {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                setACancelar(false);
+                setReservaParaCancelar(null);
+            },
+        });
     };
 
     // Filtros
@@ -236,7 +247,7 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
 
                                                 <button
                                                     type="button"
-                                                    onClick={() => cancelarReserva(reserva.id)}
+                                                    onClick={() => setReservaParaCancelar(reserva)}
                                                     className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
                                                 >
                                                     <XCircle size={16} strokeWidth={1.9} />
@@ -272,6 +283,52 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                     )}
                 </div>
             </section>
+
+            <Modal show={reservaParaCancelar !== null} onClose={() => setReservaParaCancelar(null)}>
+                <div className="p-6">
+                    <div className="flex items-start gap-3">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
+                            <AlertTriangle size={22} strokeWidth={1.9} />
+                        </div>
+
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                                Cancelar esta reserva?
+                            </h2>
+
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                A secretária {reservaParaCancelar?.secretaria?.codigo} no período {reservaParaCancelar?.periodo?.nome} fica livre para outra pessoa reservar. Esta ação não pode ser desfeita.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setReservaParaCancelar(null)}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
+                        >
+                            Voltar
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={cancelarReserva}
+                            disabled={aCancelar}
+                            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {aCancelar ? (
+                                <>
+                                    <RotateCcw size={16} strokeWidth={2} className="animate-spin" />
+                                    A cancelar...
+                                </>
+                            ) : (
+                                'Cancelar Reserva'
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </DashboardLayout>
     );
 }

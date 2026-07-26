@@ -1,98 +1,102 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import DashboardLayout from '@/Layouts/DashboardLayout';
+import Table from '@/Components/Table';
+import { Head, Link } from '@inertiajs/react';
+import { Eye, LifeBuoy } from 'lucide-react';
+
+const ESTADO_BADGE = {
+    Pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    Resolvido: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
+};
 
 export default function Index({ pedidos }) {
 
+    const columns = [
+        {
+            key: 'data',
+            label: 'Data',
+            render: (pedido) => new Date(pedido.created_at).toLocaleDateString('pt-PT'),
+        },
+        {
+            key: 'utilizador',
+            label: 'Utilizador',
+            render: (pedido) => (
+                <div>
+                    <p className="font-semibold text-slate-800 dark:text-slate-100">
+                        {pedido.user.name}
+                    </p>
+
+                    <p className="text-xs text-slate-400">
+                        {pedido.user.email}
+                    </p>
+                </div>
+            ),
+        },
+        {
+            key: 'assunto',
+            label: 'Assunto',
+            render: (pedido) => pedido.assunto,
+        },
+        {
+            key: 'estado',
+            label: 'Estado',
+            render: (pedido) => (
+                <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
+                        ESTADO_BADGE[pedido.estado] ??
+                        'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                    }`}
+                >
+                    {pedido.estado}
+                </span>
+            ),
+        },
+        {
+            key: 'acoes',
+            label: 'Ações',
+            align: 'right',
+            render: (pedido) => (
+                <div className="flex justify-end">
+                    <Link
+                        href={route('support.show', pedido.id)}
+                        title="Ver"
+                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
+                    >
+                        <Eye size={16} strokeWidth={1.9} />
+                    </Link>
+                </div>
+            ),
+        },
+    ];
+
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Pedidos de Suporte
-                </h2>
-            }
-        >
+        <DashboardLayout>
             <Head title="Pedidos de Suporte" />
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6">
-                            <h3 className="mb-6 text-2xl font-bold">
-                                Pedidos de Suporte
-                            </h3>
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Data
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Utilizador
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Email
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Assunto
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Estado
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                                            Ações
-                                        </th>
-                                    </tr>
-                                </thead>
 
-                                <tbody className="divide-y divide-gray-200 bg-white">
-                                    {pedidos.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="6" className="px-4 py-6 text-center text-gray-500">
-                                                Ainda não existem pedidos de suporte.
-                                            </td>
-                                        </tr>
-
-                                    ) : (
-                                        pedidos.map((pedido) => (
-                                            <tr key={pedido.id}>
-                                                <td className="px-4 py-3">
-                                                    {new Date(pedido.created_at).toLocaleDateString('pt-PT')}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {pedido.user.name}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {pedido.user.email}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    {pedido.assunto}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <span className="rounded bg-yellow-100 px-2 py-1 text-sm text-yellow-800">
-                                                        {pedido.estado}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <button className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700">
-                                                        Ver
-                                                    </button>
-                                                </td>
-                                            </tr>
-
-                                        ))
-
-                                    )}
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
+            <section className="dashboard-card overflow-hidden">
+                <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+                        <LifeBuoy size={22} strokeWidth={1.9} />
                     </div>
 
-                </div>
-            </div>
+                    <div>
+                        <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                            Pedidos de Suporte
+                        </h1>
 
-        </AuthenticatedLayout>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            {pedidos.length} pedido{pedidos.length === 1 ? '' : 's'} registado{pedidos.length === 1 ? '' : 's'}.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="p-6">
+                    <Table
+                        columns={columns}
+                        data={pedidos}
+                        emptyMessage="Ainda não existem pedidos de suporte."
+                    />
+                </div>
+            </section>
+        </DashboardLayout>
     );
 }

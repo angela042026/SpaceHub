@@ -1,7 +1,8 @@
 import InputError from '@/Components/InputError';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
-import { CheckCircle2, Mail, UserCog } from 'lucide-react';
+import { CheckCircle2, Mail, UserCog, UserRound } from 'lucide-react';
+import { useState } from 'react';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -11,17 +12,28 @@ const labelClass =
 
 export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
     const user = usePage().props.auth.user;
+    const [preview, setPreview] = useState(null);
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({
             name: user.name,
             email: user.email,
+            fotografia: null,
         });
+
+    const handleFotografia = (e) => {
+        const file = e.target.files?.[0] ?? null;
+
+        setData('fotografia', file);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    };
 
     const submit = (e) => {
         e.preventDefault();
 
-        patch(route('profile.update'));
+        patch(route('profile.update'), {
+            forceFormData: true,
+        });
     };
 
     return (
@@ -43,6 +55,39 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
             </div>
 
             <form onSubmit={submit} className="p-6">
+                <div className="mb-6 flex items-center gap-4">
+                    {preview || user.fotografia_url ? (
+                        <img
+                            src={preview ?? user.fotografia_url}
+                            alt={user.name}
+                            className="h-16 w-16 rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-teal-500/10 text-teal-500">
+                            <UserRound size={26} strokeWidth={1.8} />
+                        </div>
+                    )}
+
+                    <div>
+                        <label
+                            htmlFor="fotografia"
+                            className="inline-flex cursor-pointer items-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
+                        >
+                            Trocar fotografia
+                        </label>
+
+                        <input
+                            id="fotografia"
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp"
+                            onChange={handleFotografia}
+                            className="hidden"
+                        />
+
+                        <InputError message={errors.fotografia} className="mt-2" />
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
                         <label htmlFor="name" className={labelClass}>Nome</label>

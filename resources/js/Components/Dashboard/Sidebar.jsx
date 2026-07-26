@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 
 import {
+    Home,
     LayoutDashboard,
     CalendarPlus,
     CalendarDays,
@@ -19,6 +20,8 @@ import {
     FileText,
     Search,
     CreditCard,
+    HelpCircle,
+    LifeBuoy,
 } from 'lucide-react';
 
 function SidebarItem({
@@ -108,6 +111,14 @@ export default function Sidebar({
                 <div className="spacehub-scroll flex-1 overflow-y-auto pr-2">
                     <nav className="space-y-2">
                         <SidebarItem
+                            icon={Home}
+                            label="Página Inicial"
+                            href={route('home')}
+                            active={route().current('home')}
+                            onNavigate={onClose}
+                        />
+
+                        <SidebarItem
                             icon={LayoutDashboard}
                             label="Dashboard"
                             href={route('dashboard')}
@@ -181,6 +192,18 @@ export default function Sidebar({
                             href={route('pagamentos.index')}
                             active={route().current(
                                 'pagamentos.*',
+                            )}
+                            onNavigate={onClose}
+                        />
+
+                        <SidebarItem
+                            icon={HelpCircle}
+                            label="Help Center"
+                            href={route('faqs.index')}
+                            active={route().current(
+                                'faqs.index',
+                            ) || route().current(
+                                'support.create',
                             )}
                             onNavigate={onClose}
                         />
@@ -324,17 +347,39 @@ export default function Sidebar({
                                     )}
                                     onNavigate={onClose}
                                 />
+
+                                <SidebarItem
+                                    icon={LifeBuoy}
+                                    label="Pedidos de Suporte"
+                                    href={route(
+                                        'support.index',
+                                    )}
+                                    active={route().current(
+                                        'support.index',
+                                    ) || route().current(
+                                        'support.show',
+                                    )}
+                                    onNavigate={onClose}
+                                />
                             </nav>
                         </>
                     )}
                 </div>
 
                 <div className="mt-5 flex items-center gap-3 border-t border-white/10 pt-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-teal-500 text-lg font-bold text-white">
-                        {user?.name
-                            ?.charAt(0)
-                            ?.toUpperCase() ?? '?'}
-                    </div>
+                    {user?.fotografia_url ? (
+                        <img
+                            src={user.fotografia_url}
+                            alt={user.name}
+                            className="h-12 w-12 shrink-0 rounded-full object-cover"
+                        />
+                    ) : (
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-teal-500 text-lg font-bold text-white">
+                            {user?.name
+                                ?.charAt(0)
+                                ?.toUpperCase() ?? '?'}
+                        </div>
+                    )}
 
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">

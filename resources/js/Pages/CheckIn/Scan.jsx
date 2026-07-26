@@ -96,7 +96,7 @@ export default function Scan({ secretaria, reserva, status }) {
                                 disabled={processing}
                                 className="btn-accent mt-6 w-full"
                             >
-                                Confirmar Check-in
+                                {processing ? 'A confirmar...' : 'Confirmar Check-in'}
                             </button>
                         )}
                     </div>

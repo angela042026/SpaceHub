@@ -144,9 +144,17 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                         </div>
                     )}
 
-                    {(errors.secretaria_id || errors.data) && (
+                    {Object.keys(errors).length > 0 && (
                         <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
-                            {errors.secretaria_id ?? errors.data}
+                            {Object.keys(errors).length === 1 ? (
+                                Object.values(errors)[0]
+                            ) : (
+                                <ul className="list-disc space-y-1 pl-4">
+                                    {Object.values(errors).map((mensagem, indice) => (
+                                        <li key={indice}>{mensagem}</li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     )}
 

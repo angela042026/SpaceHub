@@ -2,7 +2,11 @@ import { router, usePage } from '@inertiajs/react';
 
 import { useState } from 'react';
 
+import Modal from '@/Components/Modal';
+
 import {
+
+    AlertTriangle,
 
     Building2,
 
@@ -100,6 +104,8 @@ export default function ReservationCard({ reserva }) {
 
     const [processing, setProcessing] = useState(false);
 
+    const [aConfirmarCancelamento, setAConfirmarCancelamento] = useState(false);
+
     const { errors } = usePage().props;
 
     if (!reserva) {
@@ -192,7 +198,7 @@ export default function ReservationCard({ reserva }) {
 
         setProcessing(true);
 
-        router.post(
+        router.patch(
 
             route('reservas.cancelar', reserva.id),
 
@@ -202,7 +208,10 @@ export default function ReservationCard({ reserva }) {
 
                 preserveScroll: true,
 
-                onFinish: () => setProcessing(false),
+                onFinish: () => {
+                    setProcessing(false);
+                    setAConfirmarCancelamento(false);
+                },
 
             },
 
@@ -349,39 +358,65 @@ export default function ReservationCard({ reserva }) {
 
                         type="button"
 
-                        onClick={cancelarReserva}
+                        onClick={() => setAConfirmarCancelamento(true)}
 
                         disabled={processing || !podeCancelar}
 
                         className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-bold text-red-600 transition hover:-translate-y-0.5 hover:bg-red-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-900/50 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/30"
                     >
 
-                        {processing ? (
-                            <>
-                                <RotateCcw
+                        <XCircle size={18} strokeWidth={2} />
 
-                                    size={18}
-
-                                    strokeWidth={2}
-
-                                    className="animate-spin"
-
-                                />
-
-                                A processar...
-                            </>
-
-                        ) : (
-                            <>
-                                <XCircle size={18} strokeWidth={2} />
-
-                                Cancelar Reserva
-                            </>
-
-                        )}
+                        Cancelar Reserva
                     </button>
                 </div>
             </div>
+
+            <Modal show={aConfirmarCancelamento} onClose={() => setAConfirmarCancelamento(false)}>
+                <div className="p-6">
+                    <div className="flex items-start gap-3">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
+                            <AlertTriangle size={22} strokeWidth={1.9} />
+                        </div>
+
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                                Cancelar esta reserva?
+                            </h2>
+
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                A secretária {reserva.secretaria?.codigo} no período {reserva.periodo?.nome} fica livre para outra pessoa reservar. Esta ação não pode ser desfeita.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setAConfirmarCancelamento(false)}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
+                        >
+                            Voltar
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={cancelarReserva}
+                            disabled={processing}
+                            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {processing ? (
+                                <>
+                                    <RotateCcw size={16} strokeWidth={2} className="animate-spin" />
+                                    A cancelar...
+                                </>
+                            ) : (
+                                'Cancelar Reserva'
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </section>
 
     );

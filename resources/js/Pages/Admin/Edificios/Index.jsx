@@ -8,10 +8,14 @@ import {
     Pencil,
     Plus,
     Power,
+    RotateCcw,
     Search,
 } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Index({ edificios, filters }) {
+    const [processingId, setProcessingId] = useState(null);
+
     const { data, setData, get } = useForm({
         search: filters.search ?? '',
         ativo: filters.ativo ?? '',
@@ -39,10 +43,15 @@ export default function Index({ edificios, filters }) {
             return;
         }
 
+        setProcessingId(edificio.id);
+
         router.patch(
             route('admin.edificios.toggleAtivo', edificio.id),
             {},
-            { preserveScroll: true },
+            {
+                preserveScroll: true,
+                onFinish: () => setProcessingId(null),
+            },
         );
     };
 
@@ -108,10 +117,19 @@ export default function Index({ edificios, filters }) {
                     <button
                         type="button"
                         onClick={() => alternarAtivo(edificio)}
+                        disabled={processingId === edificio.id}
                         title={edificio.ativo ? 'Desativar' : 'Ativar'}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700"
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                            edificio.ativo
+                                ? 'border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-500 dark:border-slate-700'
+                                : 'border-slate-200 text-slate-500 hover:border-teal-500 hover:text-teal-500 dark:border-slate-700'
+                        }`}
                     >
-                        <Power size={16} strokeWidth={1.9} />
+                        {processingId === edificio.id ? (
+                            <RotateCcw size={16} strokeWidth={1.9} className="animate-spin" />
+                        ) : (
+                            <Power size={16} strokeWidth={1.9} />
+                        )}
                     </button>
                 </div>
             ),
