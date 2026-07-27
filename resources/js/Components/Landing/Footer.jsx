@@ -196,7 +196,7 @@ export default function Footer() {
                                     <Phone size={17} />
                                 </div>
 
-                                <span>+351 000 000 000</span>
+                                <span>+351 253 000 000</span>
                             </a>
 
                             <div className="flex items-center gap-3 text-sm text-slate-300">

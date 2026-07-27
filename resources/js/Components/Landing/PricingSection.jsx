@@ -49,7 +49,7 @@ const dailyPeriods = [
 const pricing = {
     daily: {
         morning: {
-            price: '8',
+            price: '5',
             suffix: '/ manhã',
             title: 'Passe diário — Manhã',
             description:
@@ -57,7 +57,7 @@ const pricing = {
         },
 
         afternoon: {
-            price: '8',
+            price: '5',
             suffix: '/ tarde',
             title: 'Passe diário — Tarde',
             description:
@@ -65,7 +65,7 @@ const pricing = {
         },
 
         fullDay: {
-            price: '14',
+            price: '9',
             suffix: '/ dia',
             title: 'Passe diário — Dia inteiro',
             description:
@@ -74,27 +74,27 @@ const pricing = {
     },
 
     weekly: {
-        price: '55',
+        price: '45',
         suffix: '/ semana',
         title: 'Plano semanal',
         description:
-            'Flexibilidade para utilizar os espaços durante toda a semana.',
+            'A partir de €45 por semana para utilização durante o dia inteiro.',
     },
 
     monthly: {
-        price: '149',
+        price: '179',
         suffix: '/ mês',
         title: 'Plano mensal',
         description:
-            'A melhor escolha para quem utiliza o SpaceHub com frequência.',
+            'Plano mensal com 10% de desconto.',
     },
 
     annual: {
-        price: '1.490',
+        price: '1 899',
         suffix: '/ ano',
         title: 'Plano anual',
         description:
-            'Poupe com um plano completo para utilização durante todo o ano.',
+            'Plano anual com 20% de desconto.',
     },
 };
 
@@ -228,7 +228,11 @@ export default function PricingSection() {
                                 </div>
                             )}
 
-                            <div className="mt-7 flex items-end gap-2">
+                            <p className="mt-7 text-sm font-semibold uppercase tracking-wider text-[#5EEAD4]">
+                                A partir de
+                            </p>
+
+                            <div className="mt-2 flex items-end gap-2">
                                 <span className="mb-1.5 text-lg font-bold text-[#5EEAD4]">
                                     €
                                 </span>
@@ -243,9 +247,10 @@ export default function PricingSection() {
                             </div>
 
                             {selectedPeriod === 'annual' && (
-                                <p className="mt-3 text-sm font-semibold text-[#5EEAD4]">
-                                    Equivale a aproximadamente €124 por mês
+                                <p className="mt-3 text-sm text-slate-300">
+                                    Equivale a aproximadamente €158 por mês.
                                 </p>
+
                             )}
                         </div>
 

@@ -16,7 +16,7 @@ import ChatWidget from '@/Components/Chat/ChatWidget';
 export default function Welcome() {
     return (
         <>
-            <Head title="SpaceHub" />
+            <Head title="" />
 
             <div className="min-h-screen bg-white text-slate-900">
                 <Navbar />

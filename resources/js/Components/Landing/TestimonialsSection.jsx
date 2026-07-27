@@ -36,7 +36,9 @@ const testimonials = [
     },
 ];
 
-const cards = [...testimonials, ...testimonials];
+// Triplicado para garantir preenchimento em qualquer largura de ecrã.
+// A keyframe marquee deve ir de 0 a -33.333% (ver tailwind.config.js).
+const cards = [...testimonials, ...testimonials, ...testimonials];
 
 function Avatar({ photo, initials, color, name }) {
     const [failed, setFailed] = useState(false);
@@ -84,12 +86,12 @@ export default function TestimonialsSection() {
             </div>
 
             <div className="group relative mt-14 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_8%,black_92%,transparent)]">
-                <div className="flex w-max gap-6 animate-marquee group-hover:[animation-play-state:paused]">
+                <div className="flex w-max animate-marquee group-hover:[animation-play-state:paused]">
                     {cards.map((testimonial, index) => (
                         <article
                             key={`${testimonial.name}-${index}`}
                             aria-hidden={index >= testimonials.length}
-                            className="flex h-[280px] w-[320px] shrink-0 flex-col rounded-2xl border border-slate-200 bg-white p-7 shadow-[0_8px_30px_rgba(15,23,42,0.05)]"
+                            className="mr-6 flex h-[280px] w-[320px] shrink-0 flex-col rounded-2xl border border-slate-200 bg-white p-7 shadow-[0_8px_30px_rgba(15,23,42,0.05)]"
                         >
                             <div className="flex gap-0.5 text-amber-400">
                                 {Array.from({ length: 5 }).map((_, starIndex) => (
