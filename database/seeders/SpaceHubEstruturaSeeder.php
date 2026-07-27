@@ -476,6 +476,27 @@ class SpaceHubEstruturaSeeder extends Seeder
         ?float $precoMeioDia = null,
         ?float $precoDiaInteiro = null
     ): Setor {
+        $precoSemanal = null;
+        $precoMensal = null;
+        $precoAnual = null;
+
+        if ($reservavel && $precoDiaInteiro !== null) {
+            // Reserva semanal: 5 dias completos, sem desconto.
+            $precoSemanal = round($precoDiaInteiro * 5, 2);
+
+            // Reserva mensal: 22 dias completos, com 10% de desconto.
+            $precoMensal = round(
+                ($precoDiaInteiro * 22) * 0.90,
+                2
+            );
+
+            // Reserva anual: 264 dias completos, com 20% de desconto.
+            $precoAnual = round(
+                ($precoDiaInteiro * 264) * 0.80,
+                2
+            );
+        }
+
         return Setor::updateOrCreate(
             [
                 'piso_id' => $piso->id,
@@ -486,12 +507,19 @@ class SpaceHubEstruturaSeeder extends Seeder
                 'tipo' => $tipo,
                 'reservavel' => $reservavel,
                 'capacidade' => $capacidade,
+
                 'preco_meio_dia' => $reservavel
                     ? $precoMeioDia
                     : null,
+
                 'preco_dia_inteiro' => $reservavel
                     ? $precoDiaInteiro
                     : null,
+
+                'preco_semanal' => $precoSemanal,
+                'preco_mensal' => $precoMensal,
+                'preco_anual' => $precoAnual,
+
                 'descricao' => $nome . ' - ' . $piso->nome,
                 'ativo' => true,
             ]
@@ -559,7 +587,7 @@ class SpaceHubEstruturaSeeder extends Seeder
                     'junto_janela' => false,
 
                     'ergonomica' =>
-                        $setor->tipo !== 'phone_booth',
+                    $setor->tipo !== 'phone_booth',
 
                     'reservavel' => true,
 

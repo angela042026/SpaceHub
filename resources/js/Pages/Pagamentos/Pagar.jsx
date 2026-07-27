@@ -166,8 +166,18 @@ export default function Pagar({ pagamento }) {
 
                                 <ResumoItem
                                     Icone={CreditCard}
-                                    titulo="Período"
-                                    valor={reserva?.periodo?.nome ?? '-'}
+                                    titulo="Duração"
+                                    valor={
+                                        reserva?.tipo_duracao === 'diaria'
+                                            ? (reserva?.periodo?.nome ?? 'Diária')
+                                            : reserva?.tipo_duracao === 'semanal'
+                                                ? 'Semanal'
+                                                : reserva?.tipo_duracao === 'mensal'
+                                                    ? 'Mensal'
+                                                    : reserva?.tipo_duracao === 'anual'
+                                                        ? 'Anual'
+                                                        : '-'
+                                    }
                                 />
 
                                 <ResumoItem
@@ -284,11 +294,10 @@ export default function Pagar({ pagamento }) {
                                         return (
                                             <label
                                                 key={valor}
-                                                className={`group relative cursor-pointer rounded-2xl border p-4 transition duration-200 ${
-                                                    selecionado
+                                                className={`group relative cursor-pointer rounded-2xl border p-4 transition duration-200 ${selecionado
                                                         ? 'border-teal-500 bg-white shadow-sm ring-2 ring-teal-500/10 dark:bg-slate-900'
                                                         : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'
-                                                }`}
+                                                    }`}
                                             >
                                                 <input
                                                     type="radio"
@@ -325,11 +334,10 @@ export default function Pagar({ pagamento }) {
                                                             </div>
 
                                                             <span
-                                                                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${
-                                                                    selecionado
+                                                                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition ${selecionado
                                                                         ? 'border-teal-600 bg-teal-600 text-white'
                                                                         : 'border-slate-300 bg-white text-transparent dark:border-slate-600 dark:bg-slate-900'
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 <Check
                                                                     size={14}
