@@ -14,6 +14,8 @@ class Reserva extends Model
         'periodo_id',
         'estado_reserva_id',
         'data',
+        'tipo_duracao',
+        'data_fim',
         'check_in_at',
         'cancelada_at',
         'observacoes',
@@ -27,6 +29,7 @@ class Reserva extends Model
             'periodo_id' => 'integer',
             'estado_reserva_id' => 'integer',
             'data' => 'date',
+            'data_fim' => 'date',
             'check_in_at' => 'datetime',
             'cancelada_at' => 'datetime',
         ];

@@ -745,118 +745,118 @@ class PagamentoServiceTest extends TestCase
         );
     }
 
-  public function test_impede_atualizar_valor_de_pagamento_pago(): void
-{
-    $pagamento = $this->criarPagamentoPendente();
-    $valorOriginal = $pagamento->valor;
+    public function test_impede_atualizar_valor_de_pagamento_pago(): void
+    {
+        $pagamento = $this->criarPagamentoPendente();
+        $valorOriginal = $pagamento->valor;
 
-    $this->pagamentoService->confirmarPagamento(
-        $pagamento,
-        'cartao'
-    );
-
-    $pagamento->reserva
-        ->secretaria
-        ->setor()
-        ->update([
-            'preco_meio_dia' => 99.00,
-            'preco_dia_inteiro' => 150.00,
-        ]);
-
-    try {
-        $this->pagamentoService
-            ->atualizarValorParaReserva($pagamento->reserva);
-
-        $this->fail(
-            'Era esperada uma ValidationException.'
+        $this->pagamentoService->confirmarPagamento(
+            $pagamento,
+            'cartao'
         );
-    } catch (ValidationException $exception) {
-        $this->assertArrayHasKey(
-            'pagamento',
-            $exception->errors()
+
+        $pagamento->reserva
+            ->secretaria
+            ->setor()
+            ->update([
+                'preco_meio_dia' => 99.00,
+                'preco_dia_inteiro' => 150.00,
+            ]);
+
+        try {
+            $this->pagamentoService
+                ->atualizarValorParaReserva($pagamento->reserva);
+
+            $this->fail(
+                'Era esperada uma ValidationException.'
+            );
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey(
+                'pagamento',
+                $exception->errors()
+            );
+
+            $this->assertSame(
+                'Não é possível alterar o espaço, o período ou a duração porque o pagamento já não se encontra pendente.',
+                $exception->errors()['pagamento'][0]
+            );
+        }
+
+        $pagamento->refresh();
+
+        $this->assertSame(
+            'pago',
+            $pagamento->estado
         );
 
         $this->assertSame(
-            'Não é possível alterar o espaço ou o período porque o pagamento já não se encontra pendente.',
-            $exception->errors()['pagamento'][0]
-        );
-    }
-
-    $pagamento->refresh();
-
-    $this->assertSame(
-        'pago',
-        $pagamento->estado
-    );
-
-    $this->assertSame(
-        $valorOriginal,
-        $pagamento->valor
-    );
-
-    $this->assertSame(
-        'cartao',
-        $pagamento->metodo_pagamento
-    );
-
-    $this->assertNotNull(
-        $pagamento->data_pagamento
-    );
-}
-
-public function test_impede_atualizar_valor_de_pagamento_cancelado(): void
-{
-    $pagamento = $this->criarPagamentoPendente();
-    $valorOriginal = $pagamento->valor;
-
-    $this->pagamentoService
-        ->cancelarParaReserva($pagamento->reserva);
-
-    $pagamento->reserva
-        ->secretaria
-        ->setor()
-        ->update([
-            'preco_meio_dia' => 99.00,
-            'preco_dia_inteiro' => 150.00,
-        ]);
-
-    try {
-        $this->pagamentoService
-            ->atualizarValorParaReserva($pagamento->reserva);
-
-        $this->fail(
-            'Era esperada uma ValidationException.'
-        );
-    } catch (ValidationException $exception) {
-        $this->assertArrayHasKey(
-            'pagamento',
-            $exception->errors()
+            $valorOriginal,
+            $pagamento->valor
         );
 
         $this->assertSame(
-            'Não é possível alterar o espaço ou o período porque o pagamento já não se encontra pendente.',
-            $exception->errors()['pagamento'][0]
+            'cartao',
+            $pagamento->metodo_pagamento
+        );
+
+        $this->assertNotNull(
+            $pagamento->data_pagamento
         );
     }
 
-    $pagamento->refresh();
+    public function test_impede_atualizar_valor_de_pagamento_cancelado(): void
+    {
+        $pagamento = $this->criarPagamentoPendente();
+        $valorOriginal = $pagamento->valor;
 
-    $this->assertSame(
-        'cancelado',
-        $pagamento->estado
-    );
+        $this->pagamentoService
+            ->cancelarParaReserva($pagamento->reserva);
 
-    $this->assertSame(
-        $valorOriginal,
-        $pagamento->valor
-    );
+        $pagamento->reserva
+            ->secretaria
+            ->setor()
+            ->update([
+                'preco_meio_dia' => 99.00,
+                'preco_dia_inteiro' => 150.00,
+            ]);
 
-    $this->assertNull(
-        $pagamento->metodo_pagamento
-    );
+        try {
+            $this->pagamentoService
+                ->atualizarValorParaReserva($pagamento->reserva);
 
-    $this->assertNull(
-        $pagamento->data_pagamento
-    );
-}
+            $this->fail(
+                'Era esperada uma ValidationException.'
+            );
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey(
+                'pagamento',
+                $exception->errors()
+            );
+
+            $this->assertSame(
+                'Não é possível alterar o espaço, o período ou a duração porque o pagamento já não se encontra pendente.',
+                $exception->errors()['pagamento'][0]
+            );
+        }
+
+        $pagamento->refresh();
+
+        $this->assertSame(
+            'cancelado',
+            $pagamento->estado
+        );
+
+        $this->assertSame(
+            $valorOriginal,
+            $pagamento->valor
+        );
+
+        $this->assertNull(
+            $pagamento->metodo_pagamento
+        );
+
+        $this->assertNull(
+            $pagamento->data_pagamento
+        );
+    }
 }

@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class ReservaController extends Controller
 {
@@ -139,12 +140,11 @@ class ReservaController extends Controller
     }
 
 
-
-
-
-
     /**
-     * Guardar uma nova reserva.
+     * Guardar uma nova reserva de meio dia.
+     *
+     * Este método é utilizado apenas para reservas diárias
+     * de Manhã ou de Tarde.
      */
     public function store(
         Request $request,
@@ -154,20 +154,60 @@ class ReservaController extends Controller
             'data' => ['required', 'date'],
             'periodo_id' => ['required', 'exists:periodos,id'],
             'secretaria_id' => ['required', 'exists:secretarias,id'],
+            'tipo_duracao' => ['required', 'in:diaria'],
             'observacoes' => ['nullable', 'string', 'max:500'],
         ]);
+
+        $periodo = Periodo::findOrFail(
+            $dadosValidados['periodo_id']
+        );
+
+        if ($periodo->nome === 'Dia inteiro') {
+            return back()
+                ->withErrors([
+                    'periodo_id' =>
+                    'As reservas de dia inteiro devem ser efetuadas através da opção Dia inteiro.',
+                ])
+                ->withInput();
+        }
+
+        $dataInicio = Carbon::parse(
+            $dadosValidados['data']
+        )->toDateString();
+
+        $dataFim = $this->calcularDataFim(
+            $dataInicio,
+            'diaria'
+        );
 
         $periodosConflito = $this->periodosEmConflito(
             (int) $dadosValidados['periodo_id']
         );
 
+        /*
+     * Verificar se a secretária já está ocupada em alguma
+     * data do intervalo solicitado.
+     *
+     * O COALESCE é representado pelas duas condições:
+     * - reservas novas: utilizam data_fim;
+     * - reservas antigas: utilizam apenas data.
+     */
         $reservaExistente = Reserva::where(
             'secretaria_id',
             $dadosValidados['secretaria_id']
         )
-            ->whereDate('data', $dadosValidados['data'])
             ->whereIn('periodo_id', $periodosConflito)
             ->whereNull('cancelada_at')
+            ->whereDate('data', '<=', $dataFim)
+            ->where(function ($query) use ($dataInicio) {
+                $query
+                    ->whereDate('data_fim', '>=', $dataInicio)
+                    ->orWhere(function ($queryAntiga) use ($dataInicio) {
+                        $queryAntiga
+                            ->whereNull('data_fim')
+                            ->whereDate('data', '>=', $dataInicio);
+                    });
+            })
             ->exists();
 
         if ($reservaExistente) {
@@ -179,10 +219,26 @@ class ReservaController extends Controller
                 ->withInput();
         }
 
-        $reservaUtilizador = Reserva::where('user_id', Auth::id())
-            ->whereDate('data', $dadosValidados['data'])
+        /*
+     * Verificar se o utilizador já possui outra reserva
+     * incompatível no mesmo intervalo.
+     */
+        $reservaUtilizador = Reserva::where(
+            'user_id',
+            Auth::id()
+        )
             ->whereIn('periodo_id', $periodosConflito)
             ->whereNull('cancelada_at')
+            ->whereDate('data', '<=', $dataFim)
+            ->where(function ($query) use ($dataInicio) {
+                $query
+                    ->whereDate('data_fim', '>=', $dataInicio)
+                    ->orWhere(function ($queryAntiga) use ($dataInicio) {
+                        $queryAntiga
+                            ->whereNull('data_fim')
+                            ->whereDate('data', '>=', $dataInicio);
+                    });
+            })
             ->exists();
 
         if ($reservaUtilizador) {
@@ -194,22 +250,32 @@ class ReservaController extends Controller
                 ->withInput();
         }
 
-        $estadoPendente = EstadoReserva::where('codigo', 'pendente')
-            ->firstOrFail();
+        $estadoPendente = EstadoReserva::where(
+            'codigo',
+            'pendente'
+        )->firstOrFail();
 
         try {
             DB::transaction(function () use (
                 $dadosValidados,
+                $dataInicio,
+                $dataFim,
                 $estadoPendente,
                 $pagamentoService
             ) {
                 $reserva = Reserva::create([
                     'user_id' => Auth::id(),
-                    'secretaria_id' => $dadosValidados['secretaria_id'],
-                    'periodo_id' => $dadosValidados['periodo_id'],
-                    'estado_reserva_id' => $estadoPendente->id,
-                    'data' => $dadosValidados['data'],
-                    'observacoes' => $dadosValidados['observacoes'] ?? null,
+                    'secretaria_id' =>
+                    $dadosValidados['secretaria_id'],
+                    'periodo_id' =>
+                    $dadosValidados['periodo_id'],
+                    'estado_reserva_id' =>
+                    $estadoPendente->id,
+                    'data' => $dataInicio,
+                    'data_fim' => $dataFim,
+                    'tipo_duracao' => 'diaria',
+                    'observacoes' =>
+                    $dadosValidados['observacoes'] ?? null,
                 ]);
 
                 $pagamentoService->criarParaReserva($reserva);
@@ -225,116 +291,225 @@ class ReservaController extends Controller
                 'Reserva criada. O pagamento encontra-se pendente.'
             );
     }
-
     /**
-     * Guardar uma reserva de dia inteiro (todos os períodos ativos numa data).
+     * Guardar uma reserva de dia inteiro.
      *
-     * Se o próprio utilizador já tiver reservado esta secretária para
-     * algum período nesta data (ex: já reservou a Manhã), completa apenas
-     * os períodos em falta em vez de falhar — só bloqueia por completo se
-     * o conflito for de outra pessoa, ou se o utilizador já tiver outra
-     * reserva ativa nesta data para uma secretária diferente.
+     * A reserva é guardada numa única linha com o período
+     * "Dia inteiro".
+     *
+     * Durações permitidas:
+     * - diária: 1 dia;
+     * - semanal: 5 dias úteis;
+     * - mensal: 22 dias úteis;
+     * - anual: 264 dias úteis.
      */
     public function storeDiaInteiro(
         Request $request,
         PagamentoService $pagamentoService
     ) {
-        $request->validate([
+        $dadosValidados = $request->validate([
             'data' => ['required', 'date'],
-            'secretaria_id' => ['required', 'exists:secretarias,id'],
+            'secretaria_id' => [
+                'required',
+                'exists:secretarias,id',
+            ],
+            'tipo_duracao' => [
+                'required',
+                'in:diaria,semanal,mensal,anual',
+            ],
+            'observacoes' => [
+                'nullable',
+                'string',
+                'max:500',
+            ],
         ]);
 
-        $periodos = Periodo::where('ativo', true)
-            ->where('nome', '!=', 'Dia inteiro')
-            ->orderBy('hora_inicio')
-            ->get();
+        $tipoDuracao = $dadosValidados['tipo_duracao'];
 
-        $reservasDaSecretaria = Reserva::where(
-            'secretaria_id',
-            $request->secretaria_id
-        )
-            ->whereDate('data', $request->data)
-            ->whereIn('periodo_id', $periodos->pluck('id'))
-            ->whereNull('cancelada_at')
-            ->get();
+        $dataInicialCarbon = Carbon::parse(
+            $dadosValidados['data']
+        );
 
+        /*
+     * As reservas de longa duração são calculadas em dias
+     * úteis, por isso não podem começar ao fim de semana.
+     */
         if (
-            $reservasDaSecretaria->contains(
-                fn($reserva) => $reserva->user_id !== Auth::id()
-            )
+            $tipoDuracao !== 'diaria' &&
+            $dataInicialCarbon->isWeekend()
         ) {
             return back()
                 ->withErrors([
-                    'secretaria_id' =>
-                    'Esta secretária já se encontra reservada por outra pessoa para pelo menos um período desta data.',
+                    'data' =>
+                    'As reservas semanais, mensais e anuais devem começar num dia útil.',
                 ])
                 ->withInput();
         }
 
-        $reservaNoutraSecretaria = Reserva::where('user_id', Auth::id())
-            ->where('secretaria_id', '!=', $request->secretaria_id)
-            ->whereDate('data', $request->data)
-            ->whereIn('periodo_id', $periodos->pluck('id'))
+        $dataInicio = $dataInicialCarbon->toDateString();
+
+        $dataFim = $this->calcularDataFim(
+            $dataInicio,
+            $tipoDuracao
+        );
+
+        /*
+         * Evita devolver 404 quando o período "Dia inteiro"
+         * não existe ou está inativo. Nesse caso, devolvemos uma
+         * mensagem de validação compreensível ao utilizador.
+         */
+        $periodoDiaInteiro = Periodo::where(
+            'nome',
+            'Dia inteiro'
+        )->first();
+
+        if ($periodoDiaInteiro === null) {
+            return back()
+                ->withErrors([
+                    'tipo_duracao' =>
+                        'O período Dia inteiro não está configurado no sistema.',
+                ])
+                ->withInput();
+        }
+
+        if (! $periodoDiaInteiro->ativo) {
+            return back()
+                ->withErrors([
+                    'tipo_duracao' =>
+                        'O período Dia inteiro encontra-se inativo.',
+                ])
+                ->withInput();
+        }
+
+        $periodosConflito = $this->periodosEmConflito(
+            (int) $periodoDiaInteiro->id
+        );
+
+        /*
+     * A secretária não pode possuir outra reserva de Manhã,
+     * Tarde ou Dia inteiro em qualquer data do intervalo.
+     */
+        $reservaExistente = Reserva::where(
+            'secretaria_id',
+            $dadosValidados['secretaria_id']
+        )
+            ->whereIn('periodo_id', $periodosConflito)
             ->whereNull('cancelada_at')
+            ->whereDate('data', '<=', $dataFim)
+            ->where(function ($query) use ($dataInicio) {
+                $query
+                    ->whereDate('data_fim', '>=', $dataInicio)
+                    ->orWhere(function ($queryAntiga) use ($dataInicio) {
+                        $queryAntiga
+                            ->whereNull('data_fim')
+                            ->whereDate('data', '>=', $dataInicio);
+                    });
+            })
             ->exists();
 
-        if ($reservaNoutraSecretaria) {
+        if ($reservaExistente) {
+            return back()
+                ->withErrors([
+                    'secretaria_id' =>
+                    'Esta secretária já possui uma reserva em pelo menos um dos dias selecionados.',
+                ])
+                ->withInput();
+        }
+
+        /*
+     * O utilizador não pode possuir outra reserva incompatível
+     * em qualquer data incluída no intervalo.
+     */
+        $reservaUtilizador = Reserva::where(
+            'user_id',
+            Auth::id()
+        )
+            ->whereIn('periodo_id', $periodosConflito)
+            ->whereNull('cancelada_at')
+            ->whereDate('data', '<=', $dataFim)
+            ->where(function ($query) use ($dataInicio) {
+                $query
+                    ->whereDate('data_fim', '>=', $dataInicio)
+                    ->orWhere(function ($queryAntiga) use ($dataInicio) {
+                        $queryAntiga
+                            ->whereNull('data_fim')
+                            ->whereDate('data', '>=', $dataInicio);
+                    });
+            })
+            ->exists();
+
+        if ($reservaUtilizador) {
             return back()
                 ->withErrors([
                     'data' =>
-                    'Já possui uma reserva para esta data noutro espaço.',
+                    'Já possui outra reserva incompatível em pelo menos um dos dias selecionados.',
                 ])
                 ->withInput();
         }
 
-        $periodosJaReservados = $reservasDaSecretaria->pluck('periodo_id');
-        $periodosEmFalta = $periodos->reject(
-            fn($periodo) => $periodosJaReservados->contains($periodo->id)
-        );
+        /*
+         * Evita uma página 404 caso o estado pendente não esteja
+         * configurado. O utilizador recebe uma mensagem normal
+         * e a reserva não é gravada parcialmente.
+         */
+        $estadoPendente = EstadoReserva::where(
+            'codigo',
+            'pendente'
+        )->first();
 
-        if ($periodosEmFalta->isEmpty()) {
+        if ($estadoPendente === null) {
             return back()
                 ->withErrors([
-                    'secretaria_id' =>
-                    'Já tem esta secretária reservada para o dia inteiro nesta data.',
+                    'reserva' =>
+                        'O estado pendente não está configurado no sistema.',
                 ])
                 ->withInput();
         }
-
-        $estadoPendente = EstadoReserva::where('codigo', 'pendente')
-            ->firstOrFail();
 
         try {
             DB::transaction(function () use (
-                $request,
-                $periodosEmFalta,
+                $dadosValidados,
+                $tipoDuracao,
+                $dataInicio,
+                $dataFim,
+                $periodoDiaInteiro,
                 $estadoPendente,
                 $pagamentoService
             ) {
-                foreach ($periodosEmFalta as $periodo) {
-                    $reserva = Reserva::create([
-                        'user_id' => Auth::id(),
-                        'secretaria_id' => $request->secretaria_id,
-                        'periodo_id' => $periodo->id,
-                        'estado_reserva_id' => $estadoPendente->id,
-                        'data' => $request->data,
-                    ]);
+                $reserva = Reserva::create([
+                    'user_id' => Auth::id(),
+                    'secretaria_id' =>
+                    $dadosValidados['secretaria_id'],
+                    'periodo_id' => $periodoDiaInteiro->id,
+                    'estado_reserva_id' =>
+                    $estadoPendente->id,
+                    'data' => $dataInicio,
+                    'data_fim' => $dataFim,
+                    'tipo_duracao' => $tipoDuracao,
+                    'observacoes' =>
+                    $dadosValidados['observacoes'] ?? null,
+                ]);
 
-                    $pagamentoService->criarParaReserva($reserva);
-                }
+                $pagamentoService->criarParaReserva($reserva);
             });
         } catch (QueryException $e) {
             return $this->respostaConflitoReserva($e);
         }
 
+        $descricaoDuracao = match ($tipoDuracao) {
+            'diaria' => 'dia inteiro',
+            'semanal' => '5 dias úteis',
+            'mensal' => '22 dias úteis',
+            'anual' => '264 dias úteis',
+        };
+
         return redirect()
             ->route('reservas.index')
             ->with(
                 'success',
-                'Reserva de dia inteiro criada. Os pagamentos encontram-se pendentes.'
+                "Reserva de {$descricaoDuracao} criada. O pagamento encontra-se pendente."
             );
     }
-
     /**
      * Cancelar uma reserva.
      */
@@ -802,7 +977,37 @@ class ReservaController extends Controller
             return $secretaria;
         })->values();
     }
+    private function calcularDataFim(
+        string $dataInicio,
+        string $tipoDuracao
+    ): string {
+        $quantidadeDiasUteis = match ($tipoDuracao) {
+            'diaria' => 1,
+            'semanal' => 5,
+            'mensal' => 22,
+            'anual' => 264,
+            default => 1,
+        };
 
+        $dataFim = Carbon::parse($dataInicio);
+
+        if ($quantidadeDiasUteis === 1) {
+            return $dataFim->toDateString();
+        }
+
+        $diasContados = $dataFim->isWeekday() ? 1 : 0;
+
+        while ($diasContados < $quantidadeDiasUteis) {
+            $dataFim->addDay();
+
+            if ($dataFim->isWeekday()) {
+                $diasContados++;
+            }
+        }
+
+        return $dataFim->toDateString();
+    }
+    
     /**
      * Devolve os IDs dos períodos incompatíveis com o período escolhido.
      */
