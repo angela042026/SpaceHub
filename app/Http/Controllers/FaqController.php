@@ -11,7 +11,15 @@ class FaqController extends Controller
     public function index()
     {
         $faqs = Faq::where('ativo', true)
-            ->orderBy('categoria')
+            ->orderByRaw("
+            CASE categoria
+                WHEN 'Check-in' THEN 1
+                WHEN 'Reservas' THEN 2
+                WHEN 'Espaços' THEN 3
+                WHEN 'Space Hub' THEN 4
+                WHEN 'Conta' THEN 5
+            END
+        ")
             ->orderBy('ordem')
             ->get()
             ->groupBy('categoria');
