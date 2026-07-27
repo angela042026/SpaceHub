@@ -9,6 +9,8 @@ use App\Models\Piso;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Models\Setor;
+use App\Notifications\ReservaCanceladaNotification;
+use App\Notifications\ReservaCriadaNotification;
 use App\Services\PagamentoService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -213,6 +215,10 @@ class ReservaController extends Controller
                 ]);
 
                 $pagamentoService->criarParaReserva($reserva);
+
+                Auth::user()->notify(
+                    new ReservaCriadaNotification($reserva->load('secretaria'))
+                );
             });
         } catch (QueryException $e) {
             return $this->respostaConflitoReserva($e);
@@ -321,6 +327,10 @@ class ReservaController extends Controller
                     ]);
 
                     $pagamentoService->criarParaReserva($reserva);
+
+                    Auth::user()->notify(
+                        new ReservaCriadaNotification($reserva->load('secretaria'))
+                    );
                 }
             });
         } catch (QueryException $e) {
@@ -374,6 +384,10 @@ class ReservaController extends Controller
                 'estado_reserva_id' => $estadoCancelada->id,
                 'cancelada_at' => now(),
             ]);
+
+            $reservaBloqueada->user->notify(
+                new ReservaCanceladaNotification($reservaBloqueada)
+            );
         });
 
         return redirect()

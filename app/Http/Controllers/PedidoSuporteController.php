@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PedidoSuporte;
+use App\Notifications\SuporteRespondidoNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -34,26 +35,41 @@ class PedidoSuporteController extends Controller
         ]);
     }
 
-    /** Marca um pedido de suporte como resolvido. */
-    public function update(string $id)
+    /** Regista a resposta do admin/gestor e marca o pedido como resolvido. */
+    public function update(Request $request, string $id)
     {
+        $request->validate([
+            'resposta' => ['required', 'string', 'min:5'],
+        ]);
+
         // Obtém o pedido de suporte
         $pedido = PedidoSuporte::findOrFail($id);
 
-        // Atualiza o estado
+        // Atualiza a resposta e o estado
         $pedido->update([
+            'resposta' => $request->resposta,
             'estado' => 'Resolvido',
         ]);
 
+        // Avisa o utilizador que o pedido foi respondido
+        $pedido->user->notify(new SuporteRespondidoNotification($pedido));
+
         return redirect()
             ->route('support.index')
-            ->with('success', 'Pedido de suporte marcado como resolvido.');
+            ->with('success', 'Resposta enviada e pedido marcado como resolvido.');
     }
 
     /**Apresenta o formulário de contacto. */
     public function create()
     {
-        return Inertia::render('Support/Create');
+        // Pedidos anteriores do próprio utilizador, para ver o estado/resposta
+        $meusPedidos = PedidoSuporte::where('user_id', Auth::id())
+            ->latest()
+            ->get();
+
+        return Inertia::render('Support/Create', [
+            'meusPedidos' => $meusPedidos,
+        ]);
     }
 
     /** Guarda um novo pedido de suporte.*/

@@ -38,6 +38,19 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'notificacoesReais' => fn () => $request->user()
+                ? $request->user()->notifications()
+                    ->latest()
+                    ->limit(20)
+                    ->get()
+                    ->map(fn ($notificacao) => [
+                        'id' => $notificacao->id,
+                        'tipo' => $notificacao->data['tipo'] ?? null,
+                        'titulo' => $notificacao->data['titulo'] ?? null,
+                        'mensagem' => $notificacao->data['mensagem'] ?? null,
+                        'lida' => $notificacao->read_at !== null,
+                    ])
+                : [],
         ];
     }
 }

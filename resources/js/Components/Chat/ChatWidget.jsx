@@ -42,28 +42,16 @@ export default function ChatWidget() {
             {isOpen && (
                 <div
                     ref={popUpRef}
-                    className={`absolute bottom-16 right-0 mb-2 w-[calc(100vw-3rem)] sm:w-[360px] h-[500px] max-h-[75vh] flex flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl transition-all duration-200 dark:border-slate-700 dark:bg-slate-900 overflow-hidden
-                        ${modoAtivo === 'menu' ? 'p-4' : 'p-0'}`}
+                    className={`dashboard-card absolute bottom-16 right-0 mb-2 flex w-[calc(100vw-3rem)] flex-col overflow-hidden transition-all duration-200 sm:w-[360px] ${
+                        modoAtivo === 'menu' ? 'p-4' : 'h-[500px] max-h-[75vh] p-0'
+                    }`}
                 >
                     {/* MENU PRINCIPAL DO WIDGET */}
                     {modoAtivo === 'menu' ? (
-                        <div className="flex flex-col h-full">
-                            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-                                <div className="flex items-center gap-2">
-                                    <span className="flex h-2.5 w-2.5 rounded-full bg-teal-500 animate-pulse" />
-                                    <h3 className="font-bold text-slate-800 dark:text-white">Suporte SpaceHub</h3>
-                                </div>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation(); // Trava a propagação aqui
-                                        setIsOpen(false);
-                                        setModoAtivo('menu');
-                                    }}
-                                    aria-label="Fechar chat de suporte"
-                                    className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
-                                >
-                                    <X size={18} />
-                                </button>
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
+                                <span className="flex h-2.5 w-2.5 rounded-full bg-teal-500 animate-pulse" />
+                                <h3 className="font-bold text-slate-800 dark:text-white">Suporte SpaceHub</h3>
                             </div>
 
                             <div className="mt-4 space-y-3 flex-1">
@@ -97,7 +85,7 @@ export default function ChatWidget() {
                                     className="flex w-full items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3 text-left transition-all hover:border-teal-500 hover:bg-teal-500/5 dark:border-slate-800 dark:bg-slate-800/50"
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#14B8A6]/0 text-teal-600">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-500/10 text-teal-600">
                                             <MessageSquare size={20} />
                                         </div>
                                         <div>
@@ -129,13 +117,11 @@ export default function ChatWidget() {
                         ? 'Fechar chat de suporte'
                         : 'Abrir chat de suporte'
                 }
-                className={`flex h-14 w-14 items-center justify-center rounded-full text-white transition-all duration-250 active:scale-95
-                    ${isOpen ? 'bg-rose-500 hover:bg-rose-600' : 'bg-[#14B8A6]/80 hover:bg-[#14B8A6]/100'} border border-white/10`}
-                style={{
-                    boxShadow: isOpen
-                        ? '0 8px 16px -4px rgba(244, 63, 94, 0.4), 0 4px 6px -2px rgba(244, 63, 94, 0.1)'
-                        : '0 10px 20px -5px rgba(0, 0, 0, 0.3), 0 4px 8px -2px rgba(0, 0, 0, 0.15)'
-                }}
+                className={`flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-all duration-250 active:scale-95 ${
+                    isOpen
+                        ? 'bg-rose-500 shadow-rose-500/30 hover:bg-rose-600'
+                        : 'bg-teal-500 shadow-teal-500/30 hover:bg-teal-600'
+                }`}
             >
                 {isOpen ? <X size={24} /> : <HelpCircle size={26} />}
             </button>

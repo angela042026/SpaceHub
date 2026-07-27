@@ -12,6 +12,7 @@ class PedidoSuporte extends Model
         'user_id',
         'assunto',
         'mensagem',
+        'resposta',
         'estado',
     ];
 

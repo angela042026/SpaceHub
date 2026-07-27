@@ -13,6 +13,8 @@ use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\Secretaria;
+use App\Notifications\ReservaCanceladaNotification;
+use App\Notifications\ReservaCriadaNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -117,6 +119,8 @@ class ReservaController extends Controller
         ]);
 
         $this->carregarRelacoes($reserva);
+
+        $reserva->user->notify(new ReservaCriadaNotification($reserva));
 
         broadcast(new MapaAtualizado());
 
@@ -267,6 +271,8 @@ class ReservaController extends Controller
         ]);
 
         $this->carregarRelacoes($reserva);
+
+        $reserva->user->notify(new ReservaCanceladaNotification($reserva));
 
         broadcast(new MapaAtualizado());
 

@@ -11,6 +11,7 @@ use App\Models\Piso;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Models\Setor;
+use App\Notifications\ReservaCanceladaNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -186,6 +187,8 @@ class ReservaController extends Controller
             'estado_reserva_id' => $estadoCancelada->id,
             'cancelada_at' => now(),
         ]);
+
+        $reserva->user->notify(new ReservaCanceladaNotification($reserva));
 
         return redirect()
             ->route('admin.reservas.index')
