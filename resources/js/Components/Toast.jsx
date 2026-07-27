@@ -2,6 +2,8 @@ import { usePage } from '@inertiajs/react';
 import { CheckCircle2, X, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import useCookieBannerVisible from '@/Lib/useCookieBannerVisible';
+
 const VARIANTS = {
     success: {
         icon: CheckCircle2,
@@ -49,6 +51,7 @@ function ToastMessage({ type, message, onDismiss }) {
 export default function Toast() {
     const { flash } = usePage().props;
     const [dismissed, setDismissed] = useState({ success: false, error: false });
+    const cookieBannerVisible = useCookieBannerVisible();
 
     useEffect(() => {
         setDismissed({ success: false, error: false });
@@ -68,7 +71,11 @@ export default function Toast() {
     }
 
     return (
-        <div className="pointer-events-none fixed inset-x-4 bottom-6 z-50 flex flex-col items-end gap-3 sm:inset-x-auto sm:right-6">
+        <div
+            className={`pointer-events-none fixed inset-x-4 z-50 flex flex-col items-end gap-3 transition-all duration-300 sm:inset-x-auto sm:right-6 ${
+                cookieBannerVisible ? 'bottom-72 lg:bottom-48' : 'bottom-24'
+            }`}
+        >
             {messages.map(({ type, message }) => (
                 <div key={type} className="pointer-events-auto w-full sm:w-96">
                     <ToastMessage

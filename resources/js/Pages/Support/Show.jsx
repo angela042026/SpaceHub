@@ -12,7 +12,9 @@ const ESTADO_BADGE = {
 export default function Show({ pedido }) {
 
     const [aConfirmar, setAConfirmar] = useState(false);
-    const { patch, processing } = useForm();
+    const { data, setData, patch, processing, errors } = useForm({
+        resposta: pedido.resposta ?? '',
+    });
 
     const marcarResolvido = () => {
         patch(route('support.update', pedido.id), {
@@ -112,14 +114,45 @@ export default function Show({ pedido }) {
                         </div>
                     </div>
 
+                    <div className="mt-6">
+                        <label htmlFor="resposta" className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-400">
+                            Resposta
+                        </label>
+
+                        {pedido.estado === 'Resolvido' ? (
+                            <div className="rounded-xl border border-teal-100 bg-teal-500/5 p-4 dark:border-teal-400/20">
+                                <p className="whitespace-pre-line text-sm text-slate-700 dark:text-slate-200">
+                                    {pedido.resposta}
+                                </p>
+                            </div>
+                        ) : (
+                            <>
+                                <textarea
+                                    id="resposta"
+                                    rows={4}
+                                    value={data.resposta}
+                                    onChange={(e) => setData('resposta', e.target.value)}
+                                    placeholder="Escreve a resposta para o utilizador..."
+                                    className="h-auto w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                                />
+                                {errors.resposta && (
+                                    <p className="mt-1.5 text-xs font-semibold text-red-600 dark:text-red-400">
+                                        {errors.resposta}
+                                    </p>
+                                )}
+                            </>
+                        )}
+                    </div>
+
                     <div className="mt-8 flex items-center gap-3">
                         {pedido.estado === 'Pendente' ? (
                             <button
                                 type="button"
+                                disabled={data.resposta.trim().length < 5}
                                 onClick={() => setAConfirmar(true)}
-                                className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
+                                className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                             >
-                                Marcar como Resolvido
+                                Enviar Resposta e Marcar como Resolvido
                             </button>
                         ) : (
                             <span className="inline-flex items-center rounded-xl bg-teal-500/10 px-5 py-3 text-sm font-bold text-teal-600 dark:text-teal-400">
@@ -146,11 +179,11 @@ export default function Show({ pedido }) {
 
                             <div>
                                 <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                    Marcar este pedido como resolvido?
+                                    Enviar esta resposta e marcar como resolvido?
                                 </h2>
 
                                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                    O pedido "{pedido.assunto}" de {pedido.user.name} passa a aparecer como resolvido. Esta ação não pode ser desfeita.
+                                    {pedido.user.name} vai receber a tua resposta e o pedido "{pedido.assunto}" passa a aparecer como resolvido. Esta ação não pode ser desfeita.
                                 </p>
                             </div>
                         </div>
@@ -170,7 +203,7 @@ export default function Show({ pedido }) {
                                 disabled={processing}
                                 className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {processing ? 'A atualizar...' : 'Marcar como Resolvido'}
+                                {processing ? 'A enviar...' : 'Enviar Resposta'}
                             </button>
                         </div>
                     </div>

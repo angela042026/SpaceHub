@@ -15,6 +15,7 @@ use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\MapaController;
+use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\PedidoSuporteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservaController;
@@ -204,6 +205,12 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
         ->name('chat.enviar');
+
+    // ==========================
+    // Notificações
+    // ==========================
+    Route::post('/notificacoes/marcar-lidas', [NotificacaoController::class, 'marcarLidas'])
+        ->name('notificacoes.marcarLidas');
 });
 
 // ==========================

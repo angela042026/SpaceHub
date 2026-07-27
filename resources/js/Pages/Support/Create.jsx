@@ -1,7 +1,13 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { LifeBuoy } from 'lucide-react';
+import { CheckCircle2, Clock3, LifeBuoy } from 'lucide-react';
+
+const ESTADO_BADGE = {
+    Pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+    'Em análise': 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    Resolvido: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
+};
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -12,7 +18,7 @@ const disabledFieldClass =
 const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
-export default function Create() {
+export default function Create({ meusPedidos = [] }) {
 
     // Dados do utilizador autenticado
     const { auth } = usePage().props;
@@ -104,6 +110,58 @@ export default function Create() {
                     </div>
                 </form>
             </section>
+
+            {meusPedidos.length > 0 && (
+                <section className="dashboard-card mt-6 overflow-hidden">
+                    <div className="border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                            Os teus pedidos anteriores
+                        </h2>
+                    </div>
+
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {meusPedidos.map((pedido) => (
+                            <div key={pedido.id} className="p-6">
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                    <p className="font-bold text-slate-900 dark:text-white">
+                                        {pedido.assunto}
+                                    </p>
+
+                                    <span
+                                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
+                                            ESTADO_BADGE[pedido.estado] ??
+                                            'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                                        }`}
+                                    >
+                                        {pedido.estado === 'Resolvido' ? (
+                                            <CheckCircle2 size={13} strokeWidth={2} />
+                                        ) : (
+                                            <Clock3 size={13} strokeWidth={2} />
+                                        )}
+                                        {pedido.estado}
+                                    </span>
+                                </div>
+
+                                <p className="mt-2 whitespace-pre-line text-sm text-slate-500 dark:text-slate-400">
+                                    {pedido.mensagem}
+                                </p>
+
+                                {pedido.resposta && (
+                                    <div className="mt-3 rounded-xl border border-teal-100 bg-teal-500/5 p-3 dark:border-teal-400/20">
+                                        <p className="text-xs font-bold uppercase tracking-wide text-teal-600 dark:text-teal-400">
+                                            Resposta
+                                        </p>
+
+                                        <p className="mt-1 whitespace-pre-line text-sm text-slate-700 dark:text-slate-200">
+                                            {pedido.resposta}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
         </DashboardLayout>
     );
 }

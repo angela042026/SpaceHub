@@ -43,6 +43,28 @@ const DURACOES = {
     },
 };
 
+// Imagem por tipo de setor (fallback quando a secretária não tem foto
+// própria) — mesmas imagens já usadas no carrossel da landing page.
+const IMAGEM_POR_TIPO_SETOR = {
+    open_space: '/images/landing/espaco-trabalho.png',
+    escritorio: '/images/landing/escritorio-privado.png',
+    escritorio_executivo: '/images/landing/escritorio-privado.png',
+    sala_reunioes: '/images/landing/saladereuniao.png',
+    sala_criativa: '/images/landing/espaco-comum.png',
+    sala_espera: '/images/landing/rececao.png',
+    rececao: '/images/landing/rececao.png',
+    copa: '/images/landing/lounge.png',
+    lounge: '/images/landing/lounge.png',
+    phone_booth: '/images/landing/phone-booth.png',
+};
+
+// Setores com imagem própria (têm prioridade sobre a imagem do tipo).
+const IMAGEM_POR_NOME_SETOR = {
+    'Sala de Reuniões Redonda': '/images/landing/salamesaredonda.png',
+    'Sala Criativa': '/images/landing/salacriativa.png',
+    'Sala de Reuniões Média': '/images/landing/salaReunioes.png',
+};
+
 /**
  * Criar um objeto Date sem problemas de conversão de fuso horário.
  */
@@ -185,10 +207,13 @@ export default function Create({
         useState({});
 
     const [aReservar, setAReservar] = useState(null);
+    const [mostrarTodos, setMostrarTodos] = useState(false);
 
     const [tipoDuracao, setTipoDuracao] =
         useState('diaria');
 
+    // Secretária vinda do mapa do Dashboard (clique numa bolinha), para
+    // ir direto àquele lugar em vez de mostrar a lista toda do setor.
     const secretariaAlvo = filters?.secretaria_id
         ? Number(filters.secretaria_id)
         : null;
@@ -215,6 +240,19 @@ export default function Create({
 
     const descricaoDuracao =
         DURACOES[tipoDuracao] ?? DURACOES.diaria;
+
+    const lugaresExibidos = secretariaAlvo && !mostrarTodos
+        ? lugares.filter((lugar) => lugar.id === secretariaAlvo)
+        : lugares;
+
+    const setorSelecionado = setoresFiltrados.find(
+        (setor) => setor.id == filtros.setor_id,
+    );
+
+    const imagemPorTipo =
+        IMAGEM_POR_NOME_SETOR[setorSelecionado?.nome] ??
+        IMAGEM_POR_TIPO_SETOR[setorSelecionado?.tipo] ??
+        null;
 
     useEffect(() => {
         if (!secretariaAlvo) {
@@ -769,8 +807,23 @@ export default function Create({
                                 categoria selecionadas.
                             </p>
                         ) : (
-                            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                                {lugares.map(
+                            <div>
+                                {secretariaAlvo && !mostrarTodos && (
+                                    <div className="mb-4 flex items-center justify-between rounded-xl border border-teal-500/20 bg-teal-500/5 px-4 py-2.5 text-sm text-teal-700 dark:text-teal-400">
+                                        <span>A reservar diretamente o lugar selecionado no mapa.</span>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => setMostrarTodos(true)}
+                                            className="font-semibold underline underline-offset-2 hover:no-underline"
+                                        >
+                                            Ver todos os lugares deste setor
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                                {lugaresExibidos.map(
                                     (secretaria) => {
                                         const periodoEscolhido =
                                             reservaLonga
@@ -830,10 +883,10 @@ export default function Create({
                                                         : 'border-slate-200 dark:border-slate-800'
                                                 }`}
                                             >
-                                                {secretaria.imagem ? (
+                                                {secretaria.imagem || imagemPorTipo ? (
                                                     <img
                                                         src={
-                                                            secretaria.imagem
+                                                            secretaria.imagem || imagemPorTipo
                                                         }
                                                         alt={
                                                             secretaria.codigo
@@ -986,6 +1039,7 @@ export default function Create({
                                         );
                                     },
                                 )}
+                                </div>
                             </div>
                         )}
                     </div>

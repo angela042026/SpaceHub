@@ -282,7 +282,7 @@ export default function MapaEditor({ pisos }) {
 
                         <div
                             onClick={colocarNaPlanta}
-                            className={`relative overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 ${
+                            className={`relative mx-auto w-fit max-w-full overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 ${
                                 setorAtivo || secretariaAtiva ? 'cursor-crosshair' : 'cursor-default'
                             }`}
                         >
@@ -290,11 +290,11 @@ export default function MapaEditor({ pisos }) {
                                 <img
                                     src={piso.planta}
                                     alt={piso.nome}
-                                    className="h-[560px] w-full select-none object-contain"
+                                    className="mx-auto max-h-[560px] w-auto max-w-full select-none object-contain"
                                     draggable={false}
                                 />
                             ) : (
-                                <div className="flex h-[560px] items-center justify-center bg-slate-50 text-sm text-slate-400 dark:bg-slate-800">
+                                <div className="flex h-[560px] w-[680px] max-w-full items-center justify-center bg-slate-50 text-sm text-slate-400 dark:bg-slate-800">
                                     Este piso ainda não tem planta associada.
                                 </div>
                             )}

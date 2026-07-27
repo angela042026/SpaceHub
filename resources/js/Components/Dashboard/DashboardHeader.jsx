@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePage } from '@inertiajs/react';
+import axios from 'axios';
 import {
     AlertTriangle,
     Bell,
@@ -7,6 +8,7 @@ import {
     CheckCircle2,
     Clock,
     Clock3,
+    LifeBuoy,
     Menu,
     Moon,
     Sun,
@@ -16,6 +18,14 @@ import {
 } from 'lucide-react';
 
 import useTheme from '@/Hooks/useTheme';
+
+// Ícone por tipo de notificação real (guardada na base de dados).
+const ICONE_POR_TIPO = {
+    suporte_respondido: LifeBuoy,
+    reserva_criada: CalendarCheck2,
+    reserva_cancelada: XCircle,
+    reserva_expirada: TimerOff,
+};
 
 function getFirstAndLastName(name) {
     if (!name) {
@@ -213,12 +223,17 @@ function construirNotificacoesUtilizador(reservaHojeUtilizador, proximasReservas
 }
 
 export default function DashboardHeader({ onOpenNav = () => {} }) {
-    const { auth, reservaHojeUtilizador, proximasReservas, stats } = usePage().props;
+    const { auth, reservaHojeUtilizador, proximasReservas, stats, notificacoesReais } = usePage().props;
     const { theme, toggleTheme } = useTheme();
 
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [agora, setAgora] = useState(() => new Date());
     const [idsVistos, setIdsVistos] = useState(() => carregarIdsVistos());
+    const [notificacoesReaisEstado, setNotificacoesReaisEstado] = useState(notificacoesReais ?? []);
+
+    useEffect(() => {
+        setNotificacoesReaisEstado(notificacoesReais ?? []);
+    }, [notificacoesReais]);
 
     useEffect(() => {
         const intervalo = setInterval(() => setAgora(new Date()), 30000);
@@ -231,17 +246,32 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
     const saudacao = saudacaoPorHora(agora);
     const papel = user?.role?.nome;
 
-    let notificacoes = [];
+    let notificacoesSinteticas = [];
 
     if (papel === 'Utilizador') {
-        notificacoes = construirNotificacoesUtilizador(reservaHojeUtilizador, proximasReservas, agora);
+        notificacoesSinteticas = construirNotificacoesUtilizador(reservaHojeUtilizador, proximasReservas, agora);
     } else if (papel === 'Administrador' || papel === 'Gestor') {
-        notificacoes = construirNotificacoesAdmin(stats);
+        notificacoesSinteticas = construirNotificacoesAdmin(stats);
     } else if (papel === 'Colaborador') {
-        notificacoes = construirNotificacoesColaborador(stats);
+        notificacoesSinteticas = construirNotificacoesColaborador(stats);
     }
 
-    const naoVistas = notificacoes.filter((notificacao) => !idsVistos.includes(notificacao.id));
+    // Notificações reais (guardadas na base de dados, ex: resposta de suporte)
+    // vêm primeiro — persistem entre sessões e não dependem do localStorage.
+    const notificacoesReaisMapeadas = notificacoesReaisEstado.map((notificacao) => ({
+        id: `real-${notificacao.id}`,
+        realId: notificacao.id,
+        icon: ICONE_POR_TIPO[notificacao.tipo] ?? Bell,
+        titulo: notificacao.titulo,
+        mensagem: notificacao.mensagem,
+        lida: notificacao.lida,
+    }));
+
+    const notificacoes = [...notificacoesReaisMapeadas, ...notificacoesSinteticas];
+
+    const naoVistas = notificacoes.filter((notificacao) =>
+        'lida' in notificacao ? !notificacao.lida : !idsVistos.includes(notificacao.id),
+    );
 
     const themeButtonClass =
         theme === 'dark'
@@ -256,13 +286,21 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
         setNotificationsOpen((currentValue) => {
             const abrindo = !currentValue;
 
-            if (abrindo && notificacoes.length > 0) {
+            if (abrindo && notificacoesSinteticas.length > 0) {
                 const novosIdsVistos = Array.from(
-                    new Set([...idsVistos, ...notificacoes.map((notificacao) => notificacao.id)]),
+                    new Set([...idsVistos, ...notificacoesSinteticas.map((notificacao) => notificacao.id)]),
                 );
 
                 setIdsVistos(novosIdsVistos);
                 guardarIdsVistos(novosIdsVistos);
+            }
+
+            if (abrindo && notificacoesReaisMapeadas.some((notificacao) => !notificacao.lida)) {
+                setNotificacoesReaisEstado((atual) =>
+                    atual.map((notificacao) => ({ ...notificacao, lida: true })),
+                );
+
+                axios.post(route('notificacoes.marcarLidas'));
             }
 
             return abrindo;

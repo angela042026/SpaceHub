@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
+use App\Notifications\ReservaExpiradaNotification;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -41,7 +42,7 @@ class CancelarReservasExpiradas extends Command
         }
 
         // Procura todas as reservas pendentes, sem check-in e ainda não canceladas
-        $candidatas = Reserva::with('periodo')
+        $candidatas = Reserva::with(['periodo', 'user'])
             ->where('estado_reserva_id', $estadoPendente->id)
             ->whereNull('check_in_at')
             ->whereNull('cancelada_at')
@@ -80,6 +81,11 @@ class CancelarReservasExpiradas extends Command
                 'estado_reserva_id' => $estadoExpirada->id,
                 'cancelada_at' => now(),
             ]);
+
+        // Avisa cada utilizador de que a sua reserva expirou
+        foreach ($candidatas as $reserva) {
+            $reserva->user?->notify(new ReservaExpiradaNotification($reserva));
+        }
 
         // Atualiza o mapa em tempo real para todos os utilizadores
         broadcast(new MapaAtualizado());
