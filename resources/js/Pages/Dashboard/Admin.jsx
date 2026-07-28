@@ -3,7 +3,7 @@ import { useState } from 'react';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import StatCard from '@/Components/Dashboard/StatCard';
-import OfficeMap from '@/Components/Dashboard/OfficeMap';
+import OfficeMap from '@/Components/Dashboard/OfficeMap/OfficeMap';
 import ReservationCard from '@/Components/Dashboard/ReservationCard';
 import RecentActivity from '@/Components/Dashboard/RecentActivity';
 import StatisticsSummary from '@/Components/Dashboard/StatisticsSummary';
