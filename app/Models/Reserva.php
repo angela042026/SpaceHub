@@ -62,4 +62,12 @@ class Reserva extends Model
     {
         return $this->hasOne(Pagamento::class);
     }
+
+    /**
+     * Avaliação deixada pelo utilizador, depois do check-in.
+     */
+    public function avaliacao(): HasOne
+    {
+        return $this->hasOne(Avaliacao::class);
+    }
 }

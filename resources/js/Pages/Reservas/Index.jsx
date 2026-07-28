@@ -10,6 +10,7 @@ import {
     Plus,
     RotateCcw,
     Search,
+    Star,
     XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -21,6 +22,12 @@ const ESTADO_CLASSES = {
     cancelada: 'bg-red-500/10 text-red-600 dark:text-red-400',
     expirada: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
     concluida: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+};
+
+const AVALIACAO_ESTADO_LABEL = {
+    pendente: 'enviada (a aguardar aprovação)',
+    aprovada: 'aprovada',
+    rejeitada: 'não aprovada',
 };
 
 const fieldClass =
@@ -41,6 +48,31 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                 setACancelar(false);
                 setReservaParaCancelar(null);
             },
+        });
+    };
+
+    // Avaliar reserva
+    const [reservaParaAvaliar, setReservaParaAvaliar] = useState(null);
+    const [notaHover, setNotaHover] = useState(0);
+
+    const avaliacaoForm = useForm({
+        nota: 0,
+        comentario: '',
+    });
+
+    const fecharModalAvaliar = () => {
+        setReservaParaAvaliar(null);
+        setNotaHover(0);
+        avaliacaoForm.reset();
+        avaliacaoForm.clearErrors();
+    };
+
+    const submeterAvaliacao = (e) => {
+        e.preventDefault();
+
+        avaliacaoForm.post(route('avaliacoes.store', reservaParaAvaliar.id), {
+            preserveScroll: true,
+            onSuccess: () => fecharModalAvaliar(),
         });
     };
 
@@ -272,6 +304,19 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                                                     </div>
                                                 )}
                                             </div>
+                                        ) : reserva.check_in_at && !reserva.avaliacao ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => setReservaParaAvaliar(reserva)}
+                                                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-amber-300 px-3 py-2 text-sm font-semibold text-amber-600 transition hover:border-amber-400 hover:bg-amber-50 dark:border-amber-500/40 dark:text-amber-400 dark:hover:bg-amber-500/10"
+                                            >
+                                                <Star size={16} strokeWidth={1.9} />
+                                                Avaliar
+                                            </button>
+                                        ) : reserva.avaliacao ? (
+                                            <p className="mt-4 text-center text-xs font-semibold text-slate-400">
+                                                Avaliação {AVALIACAO_ESTADO_LABEL[reserva.avaliacao.estado]}
+                                            </p>
                                         ) : (
                                             <p className="mt-4 text-center text-xs text-slate-400">
                                                 Sem ações
@@ -329,6 +374,114 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                         </button>
                     </div>
                 </div>
+            </Modal>
+
+            <Modal show={reservaParaAvaliar !== null} onClose={fecharModalAvaliar}>
+                <form onSubmit={submeterAvaliacao} className="p-6">
+                    <div className="flex items-start gap-3">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
+                            <Star size={22} strokeWidth={1.9} />
+                        </div>
+
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                                Avaliar {reservaParaAvaliar?.secretaria?.codigo}
+                            </h2>
+
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                A tua avaliação fica pendente de aprovação antes de ser publicada.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="mt-6">
+                        <label className="mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200">
+                            Nota
+                        </label>
+
+                        <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map((valor) => (
+                                <button
+                                    key={valor}
+                                    type="button"
+                                    onClick={() => avaliacaoForm.setData('nota', valor)}
+                                    onMouseEnter={() => setNotaHover(valor)}
+                                    onMouseLeave={() => setNotaHover(0)}
+                                    className="text-amber-400 transition"
+                                    aria-label={`${valor} estrela${valor === 1 ? '' : 's'}`}
+                                >
+                                    <Star
+                                        size={28}
+                                        strokeWidth={1.5}
+                                        fill={valor <= (notaHover || avaliacaoForm.data.nota) ? 'currentColor' : 'none'}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+
+                        {avaliacaoForm.errors.nota && (
+                            <p className="mt-1.5 text-xs font-medium text-red-600">
+                                {avaliacaoForm.errors.nota}
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mt-5">
+                        <label className="mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200">
+                            Comentário
+                        </label>
+
+                        <textarea
+                            value={avaliacaoForm.data.comentario}
+                            onChange={(e) => avaliacaoForm.setData('comentario', e.target.value)}
+                            rows={4}
+                            maxLength={1000}
+                            placeholder="Conta-nos como foi a tua experiência..."
+                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                        />
+
+                        <p className="mt-1 text-right text-xs text-slate-400">
+                            {avaliacaoForm.data.comentario.length}/1000
+                        </p>
+
+                        {avaliacaoForm.errors.comentario && (
+                            <p className="mt-1.5 text-xs font-medium text-red-600">
+                                {avaliacaoForm.errors.comentario}
+                            </p>
+                        )}
+                    </div>
+
+                    {avaliacaoForm.errors.avaliacao && (
+                        <p className="mt-3 text-sm font-medium text-red-600">
+                            {avaliacaoForm.errors.avaliacao}
+                        </p>
+                    )}
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={fecharModalAvaliar}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            type="submit"
+                            disabled={avaliacaoForm.processing}
+                            className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {avaliacaoForm.processing ? (
+                                <>
+                                    <RotateCcw size={16} strokeWidth={2} className="animate-spin" />
+                                    A enviar...
+                                </>
+                            ) : (
+                                'Enviar Avaliação'
+                            )}
+                        </button>
+                    </div>
+                </form>
             </Modal>
         </DashboardLayout>
     );

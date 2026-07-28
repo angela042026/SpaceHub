@@ -22,6 +22,7 @@ import {
     CreditCard,
     HelpCircle,
     LifeBuoy,
+    Star,
 } from 'lucide-react';
 
 function SidebarItem({
@@ -197,6 +198,16 @@ export default function Sidebar({
                         />
 
                         <SidebarItem
+                            icon={Star}
+                            label="Minhas Avaliações"
+                            href={route('avaliacoes.index')}
+                            active={route().current(
+                                'avaliacoes.index',
+                            )}
+                            onNavigate={onClose}
+                        />
+
+                        <SidebarItem
                             icon={HelpCircle}
                             label="Help Center"
                             href={route('faqs.index')}
@@ -284,6 +295,18 @@ export default function Sidebar({
                                     )}
                                     active={route().current(
                                         'admin.secretarias.*',
+                                    )}
+                                    onNavigate={onClose}
+                                />
+
+                                <SidebarItem
+                                    icon={Star}
+                                    label="Avaliações"
+                                    href={route(
+                                        'admin.avaliacoes.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.avaliacoes.*',
                                     )}
                                     onNavigate={onClose}
                                 />

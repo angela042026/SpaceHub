@@ -6,6 +6,7 @@ import {
     CalendarDays,
     CalendarPlus,
     ImageOff,
+    Star,
 } from 'lucide-react';
 import { resolverImagemPorSetor } from '@/utils/imagemSetor';
 
@@ -615,6 +616,33 @@ export default function Create({
                             </select>
                         </div>
                     </div>
+
+                    {setorSelecionado && setorSelecionado.avaliacao_total > 0 && (
+                        <div className="mt-3 flex items-center gap-2 text-sm">
+                            <div className="flex gap-0.5 text-amber-400">
+                                {Array.from({ length: 5 }).map((_, indice) => (
+                                    <Star
+                                        key={indice}
+                                        size={16}
+                                        fill={
+                                            indice < Math.round(setorSelecionado.avaliacao_media)
+                                                ? 'currentColor'
+                                                : 'none'
+                                        }
+                                        strokeWidth={1.5}
+                                    />
+                                ))}
+                            </div>
+
+                            <span className="font-semibold text-slate-700 dark:text-slate-200">
+                                {Number(setorSelecionado.avaliacao_media).toFixed(1)}
+                            </span>
+
+                            <span className="text-slate-500 dark:text-slate-400">
+                                ({setorSelecionado.avaliacao_total} avaliaç{setorSelecionado.avaliacao_total === 1 ? 'ão' : 'ões'})
+                            </span>
+                        </div>
+                    )}
 
                     {reservaLonga &&
                         filtros.data && (

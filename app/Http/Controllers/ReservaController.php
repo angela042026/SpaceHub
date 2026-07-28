@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Avaliacao;
 use App\Models\Edificio;
 use App\Models\EstadoReserva;
 use App\Models\Periodo;
@@ -34,6 +35,7 @@ class ReservaController extends Controller
                 'periodo',
                 'estadoReserva',
                 'pagamento',
+                'avaliacao',
             ]);
 
         // Filtrar por estado
@@ -125,6 +127,26 @@ class ReservaController extends Controller
             ->orderBy('piso_id')
             ->orderBy('nome')
             ->get();
+
+        // Média de avaliações aprovadas, por setor (agregada a partir de
+        // avaliacoes -> reservas -> secretarias -> setores; não há relação
+        // Eloquent dedicada porque é uma cadeia de 3 saltos).
+        $mediasPorSetor = Avaliacao::query()
+            ->selectRaw('setores.id as setor_id, AVG(avaliacoes.nota) as media, COUNT(avaliacoes.id) as total')
+            ->join('reservas', 'avaliacoes.reserva_id', '=', 'reservas.id')
+            ->join('secretarias', 'reservas.secretaria_id', '=', 'secretarias.id')
+            ->join('setores', 'secretarias.setor_id', '=', 'setores.id')
+            ->where('avaliacoes.estado', 'aprovada')
+            ->groupBy('setores.id')
+            ->get()
+            ->keyBy('setor_id');
+
+        $setores->each(function (Setor $setor) use ($mediasPorSetor) {
+            $agregado = $mediasPorSetor->get($setor->id);
+
+            $setor->avaliacao_media = $agregado ? round((float) $agregado->media, 1) : null;
+            $setor->avaliacao_total = $agregado ? (int) $agregado->total : 0;
+        });
 
         return Inertia::render('Reservas/Create', [
             'periodos' => $periodos,
