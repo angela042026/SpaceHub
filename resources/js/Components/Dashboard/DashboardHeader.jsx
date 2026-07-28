@@ -11,6 +11,7 @@ import {
     LifeBuoy,
     Menu,
     Moon,
+    Star,
     Sun,
     TimerOff,
     Users,
@@ -25,6 +26,8 @@ const ICONE_POR_TIPO = {
     reserva_criada: CalendarCheck2,
     reserva_cancelada: XCircle,
     reserva_expirada: TimerOff,
+    avaliacao_aprovada: Star,
+    avaliacao_rejeitada: XCircle,
 };
 
 function getFirstAndLastName(name) {

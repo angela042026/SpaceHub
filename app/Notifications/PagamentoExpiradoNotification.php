@@ -5,7 +5,7 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class ReservaCanceladaNotification extends Notification
+class PagamentoExpiradoNotification extends Notification
 {
     use Queueable;
 
@@ -19,9 +19,9 @@ class ReservaCanceladaNotification extends Notification
     public function toArray($notifiable): array
     {
         return [
-            'tipo' => 'reserva_cancelada',
-            'titulo' => 'Reserva cancelada',
-            'mensagem' => "A tua reserva para o dia {$this->reserva->data->format('d/m/Y')} foi cancelada com sucesso.",
+            'tipo' => 'pagamento_expirado',
+            'titulo' => 'Reserva cancelada por falta de pagamento',
+            'mensagem' => "O pagamento da tua reserva para a secretária {$this->reserva->secretaria->codigo} no dia {$this->reserva->data->format('d/m/Y')} não foi concluído a tempo e a reserva foi cancelada.",
             'reserva_id' => $this->reserva->id,
         ];
     }

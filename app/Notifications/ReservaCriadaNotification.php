@@ -21,8 +21,18 @@ class ReservaCriadaNotification extends Notification
         return [
             'tipo' => 'reserva_criada',
             'titulo' => 'Reserva criada com sucesso!',
-            'mensagem' => "A tua reserva para a secretária {$this->reserva->secretaria->codigo} no dia {$this->reserva->data} foi confirmada.",
+            'mensagem' => "A tua reserva para a secretária {$this->reserva->secretaria->codigo} no dia {$this->reserva->data->format('d/m/Y')} ({$this->duracaoLabel()}) foi confirmada.",
             'reserva_id' => $this->reserva->id,
         ];
+    }
+
+    private function duracaoLabel(): string
+    {
+        return match ($this->reserva->tipo_duracao) {
+            'semanal' => 'Semanal',
+            'mensal' => 'Mensal',
+            'anual' => 'Anual',
+            default => $this->reserva->periodo?->nome ?? 'Diária',
+        };
     }
 }

@@ -6,6 +6,7 @@ use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Notifications\ReservaExpiradaNotification;
+use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -23,7 +24,7 @@ class CancelarReservasExpiradas extends Command
      *
      * @var string
      */
-    protected $description = 'Marca como expiradas as reservas pendentes sem check-in 30 minutos após o início do período';
+    protected $description = 'Marca como expiradas as reservas pendentes sem check-in dentro da tolerância configurada (reservas.tolerancia_checkin_minutos)';
 
     /**
      * Executa o comando.
@@ -61,9 +62,9 @@ class CancelarReservasExpiradas extends Command
                 // Calcula a hora limite para realização do check-in
                 $limite = Carbon::parse(
                     "{$data} {$reserva->periodo->hora_inicio->format('H:i')}"
-                )->addMinutes(30);
+                )->addMinutes(config('reservas.tolerancia_checkin_minutos'));
 
-                // Verifica se já passaram 30 minutos desde o início do período
+                // Verifica se já passou a tolerância desde o início do período
                 return now()->greaterThanOrEqualTo($limite);
             });
 
@@ -89,6 +90,7 @@ class CancelarReservasExpiradas extends Command
 
         // Atualiza o mapa em tempo real para todos os utilizadores
         broadcast(new MapaAtualizado());
+        DashboardMetricsService::limparCacheDoDia();
 
         // Apresenta no terminal o número de reservas expiradas
         $this->info("{$candidatas->count()} reserva(s) marcada(s) como expirada(s).");

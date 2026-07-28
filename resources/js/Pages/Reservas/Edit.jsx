@@ -2,6 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ImageOff, Info, Pencil } from 'lucide-react';
+import { resolverImagemPorSetor } from '@/utils/imagemSetor';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -87,6 +88,12 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                 setLugares([]);
             });
     }, [filtros.data, filtros.setor_id, preferencias]);
+
+    const setorSelecionado = setores.find(
+        (setor) => setor.id == filtros.setor_id,
+    );
+
+    const imagemPorTipo = resolverImagemPorSetor(setorSelecionado);
 
     const escolher = (secretariaId, periodoId) => {
         setSelecao({ secretariaId, periodoId });
@@ -257,9 +264,9 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                             }`}
                                         >
                                             <div className="relative">
-                                                {secretaria.imagem ? (
+                                                {secretaria.imagem || imagemPorTipo ? (
                                                     <img
-                                                        src={secretaria.imagem}
+                                                        src={secretaria.imagem || imagemPorTipo}
                                                         alt={secretaria.codigo}
                                                         className="h-40 w-full object-cover"
                                                     />

@@ -6,7 +6,9 @@ import {
     CalendarDays,
     CalendarPlus,
     ImageOff,
+    Star,
 } from 'lucide-react';
+import { resolverImagemPorSetor } from '@/utils/imagemSetor';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -41,28 +43,6 @@ const DURACOES = {
         nome: 'Anual',
         diasUteis: 264,
     },
-};
-
-// Imagem por tipo de setor (fallback quando a secretária não tem foto
-// própria) — mesmas imagens já usadas no carrossel da landing page.
-const IMAGEM_POR_TIPO_SETOR = {
-    open_space: '/images/landing/espaco-trabalho.png',
-    escritorio: '/images/landing/escritorio-privado.png',
-    escritorio_executivo: '/images/landing/escritorio-privado.png',
-    sala_reunioes: '/images/landing/saladereuniao.png',
-    sala_criativa: '/images/landing/espaco-comum.png',
-    sala_espera: '/images/landing/rececao.png',
-    rececao: '/images/landing/rececao.png',
-    copa: '/images/landing/lounge.png',
-    lounge: '/images/landing/lounge.png',
-    phone_booth: '/images/landing/phone-booth.png',
-};
-
-// Setores com imagem própria (têm prioridade sobre a imagem do tipo).
-const IMAGEM_POR_NOME_SETOR = {
-    'Sala de Reuniões Redonda': '/images/landing/salamesaredonda.png',
-    'Sala Criativa': '/images/landing/salacriativa.png',
-    'Sala de Reuniões Média': '/images/landing/salaReunioes.png',
 };
 
 /**
@@ -249,10 +229,7 @@ export default function Create({
         (setor) => setor.id == filtros.setor_id,
     );
 
-    const imagemPorTipo =
-        IMAGEM_POR_NOME_SETOR[setorSelecionado?.nome] ??
-        IMAGEM_POR_TIPO_SETOR[setorSelecionado?.tipo] ??
-        null;
+    const imagemPorTipo = resolverImagemPorSetor(setorSelecionado);
 
     useEffect(() => {
         if (!secretariaAlvo) {
@@ -639,6 +616,33 @@ export default function Create({
                             </select>
                         </div>
                     </div>
+
+                    {setorSelecionado && setorSelecionado.avaliacao_total > 0 && (
+                        <div className="mt-3 flex items-center gap-2 text-sm">
+                            <div className="flex gap-0.5 text-amber-400">
+                                {Array.from({ length: 5 }).map((_, indice) => (
+                                    <Star
+                                        key={indice}
+                                        size={16}
+                                        fill={
+                                            indice < Math.round(setorSelecionado.avaliacao_media)
+                                                ? 'currentColor'
+                                                : 'none'
+                                        }
+                                        strokeWidth={1.5}
+                                    />
+                                ))}
+                            </div>
+
+                            <span className="font-semibold text-slate-700 dark:text-slate-200">
+                                {Number(setorSelecionado.avaliacao_media).toFixed(1)}
+                            </span>
+
+                            <span className="text-slate-500 dark:text-slate-400">
+                                ({setorSelecionado.avaliacao_total} avaliaç{setorSelecionado.avaliacao_total === 1 ? 'ão' : 'ões'})
+                            </span>
+                        </div>
+                    )}
 
                     {reservaLonga &&
                         filtros.data && (

@@ -1,8 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 
-import DashboardLayout from '@/Layouts/DashboardLayout';
-import OfficeMap from '@/Components/Dashboard/OfficeMap';
+import DashboardLayout from '@/Layouts/DashboardLayout';import OfficeMap from '@/Components/Dashboard/OfficeMap/OfficeMap';
 
 export default function Index({ pisos, edificios }) {
     const [selectedFloor, setSelectedFloor] = useState(pisos?.[0]?.codigo ?? '');

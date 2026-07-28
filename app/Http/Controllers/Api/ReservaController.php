@@ -13,6 +13,7 @@ use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\Secretaria;
+use App\Services\DashboardMetricsService;
 use App\Notifications\ReservaCanceladaNotification;
 use App\Notifications\ReservaCriadaNotification;
 use Illuminate\Http\JsonResponse;
@@ -123,6 +124,7 @@ class ReservaController extends Controller
         $reserva->user->notify(new ReservaCriadaNotification($reserva));
 
         broadcast(new MapaAtualizado());
+        DashboardMetricsService::limparCacheDoDia();
 
         return new ReservaResource($reserva);
     }
@@ -207,6 +209,7 @@ class ReservaController extends Controller
         $this->carregarRelacoes($reserva);
 
         broadcast(new MapaAtualizado());
+        DashboardMetricsService::limparCacheDoDia();
 
         return new ReservaResource($reserva);
     }
@@ -275,6 +278,7 @@ class ReservaController extends Controller
         $reserva->user->notify(new ReservaCanceladaNotification($reserva));
 
         broadcast(new MapaAtualizado());
+        DashboardMetricsService::limparCacheDoDia();
 
         return new ReservaResource($reserva);
     }

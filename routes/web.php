@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\EnviarMensagem;
+use App\Http\Controllers\Admin\AvaliacaoController as AdminAvaliacaoController;
 use App\Http\Controllers\Admin\EdificioController as AdminEdificioController;
 use App\Http\Controllers\Admin\PisoController as AdminPisoController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Admin\SecretariaController as AdminSecretariaController
 use App\Http\Controllers\Admin\SetorController as AdminSetorController;
 use App\Http\Controllers\Admin\StatisticsController as AdminStatisticsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckInController;
@@ -177,6 +179,12 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::put('/reservas/{reserva}', [ReservaController::class, 'update'])
         ->name('reservas.update');
 
+    Route::get('/minhas-avaliacoes', [AvaliacaoController::class, 'index'])
+        ->name('avaliacoes.index');
+
+    Route::post('/reservas/{reserva}/avaliacao', [AvaliacaoController::class, 'store'])
+        ->name('avaliacoes.store');
+
     // ==========================
     // Help Center
     // ==========================
@@ -327,6 +335,15 @@ Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
 
         Route::patch('/secretarias/{secretaria}/toggle-ativo', [AdminSecretariaController::class, 'toggleAtivo'])
             ->name('secretarias.toggleAtivo');
+
+        Route::get('/avaliacoes', [AdminAvaliacaoController::class, 'index'])
+            ->name('avaliacoes.index');
+
+        Route::patch('/avaliacoes/{avaliacao}/aprovar', [AdminAvaliacaoController::class, 'aprovar'])
+            ->name('avaliacoes.aprovar');
+
+        Route::patch('/avaliacoes/{avaliacao}/rejeitar', [AdminAvaliacaoController::class, 'rejeitar'])
+            ->name('avaliacoes.rejeitar');
 
         Route::get('/estatisticas', [AdminStatisticsController::class, 'index'])
             ->name('statistics.index');
