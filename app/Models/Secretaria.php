@@ -11,36 +11,51 @@ class Secretaria extends Model
 {
     protected $table = 'secretarias';
 
-    protected $fillable = [
-        'setor_id',
-        'codigo',
-        'planta_x',
-        'planta_y',
-        'angulo',
-        'monitor',
-        'dock_usb',
-        'junto_janela',
-        'ergonomica',
-        'reservavel',
-        'ativo',
-        'descricao',
-        'imagem',
-    ];
+protected $fillable = [
+    'setor_id',
+    'codigo',
+    'planta_x',
+    'planta_y',
+    'angulo',
+    // Características
+    'monitor',
+    'dois_monitores',
+    'dock_usb',
+    'hdmi',
+    'ergonomica',
+    'junto_janela',
+    'luz_natural',
+    'zona_silenciosa',
+    'proximo_copa',
+    // Estado
+    'reservavel',
+    'ativo',
+    // Outros
+    'descricao',
+    'imagem',
+];
 
     protected function casts(): array
     {
-        return [
-            'setor_id' => 'integer',
-            'planta_x' => 'integer',
-            'planta_y' => 'integer',
-            'angulo' => 'decimal:2',
-            'monitor' => 'boolean',
-            'dock_usb' => 'boolean',
-            'junto_janela' => 'boolean',
-            'ergonomica' => 'boolean',
-            'reservavel' => 'boolean',
-            'ativo' => 'boolean',
-        ];
+    return [
+        'setor_id' => 'integer',
+        'planta_x' => 'integer',
+        'planta_y' => 'integer',
+        'angulo' => 'decimal:2',
+
+        'monitor' => 'boolean',
+        'dois_monitores' => 'boolean',
+        'dock_usb' => 'boolean',
+        'hdmi' => 'boolean',
+        'ergonomica' => 'boolean',
+        'junto_janela' => 'boolean',
+        'luz_natural' => 'boolean',
+        'zona_silenciosa' => 'boolean',
+        'proximo_copa' => 'boolean',
+        
+        'reservavel' => 'boolean',
+        'ativo' => 'boolean',
+    ];
     }
 
     protected static function booted(): void

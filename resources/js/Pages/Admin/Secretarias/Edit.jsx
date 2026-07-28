@@ -12,9 +12,14 @@ const labelClass =
 
 const AMENIDADES = [
     { key: 'monitor', label: 'Monitor' },
-    { key: 'dock_usb', label: 'Dock USB' },
-    { key: 'junto_janela', label: 'Junto à janela' },
+    { key: 'dois_monitores', label: 'Dois monitores' },
+    { key: 'dock_usb', label: 'Dock USB-C' },
+    { key: 'hdmi', label: 'HDMI' },
     { key: 'ergonomica', label: 'Cadeira ergonómica' },
+    { key: 'junto_janela', label: 'Junto à janela' },
+    { key: 'luz_natural', label: 'Luz natural' },
+    { key: 'zona_silenciosa', label: 'Zona silenciosa' },
+    { key: 'proximo_copa', label: 'Próximo da copa' },
 ];
 
 export default function Edit({ secretaria, pisos, setores }) {
@@ -28,11 +33,19 @@ export default function Edit({ secretaria, pisos, setores }) {
     const { data, setData, put, processing, errors } = useForm({
         setor_id: secretaria.setor_id ?? '',
         codigo: secretaria.codigo ?? '',
+
         reservavel: secretaria.reservavel ?? true,
+
         monitor: secretaria.monitor ?? false,
+        dois_monitores: secretaria.dois_monitores ?? false,
         dock_usb: secretaria.dock_usb ?? false,
-        junto_janela: secretaria.junto_janela ?? false,
+        hdmi: secretaria.hdmi ?? false,
         ergonomica: secretaria.ergonomica ?? false,
+        junto_janela: secretaria.junto_janela ?? false,
+        luz_natural: secretaria.luz_natural ?? false,
+        zona_silenciosa: secretaria.zona_silenciosa ?? false,
+        proximo_copa: secretaria.proximo_copa ?? false,
+
         descricao: secretaria.descricao ?? '',
         imagem: secretaria.imagem ?? '',
     });

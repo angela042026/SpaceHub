@@ -12,9 +12,14 @@ const labelClass =
 
 const AMENIDADES = [
     { key: 'monitor', label: 'Monitor' },
-    { key: 'dock_usb', label: 'Dock USB' },
-    { key: 'junto_janela', label: 'Junto à janela' },
+    { key: 'dois_monitores', label: 'Dois monitores' },
+    { key: 'dock_usb', label: 'Dock USB-C' },
+    { key: 'hdmi', label: 'HDMI' },
     { key: 'ergonomica', label: 'Cadeira ergonómica' },
+    { key: 'junto_janela', label: 'Junto à janela' },
+    { key: 'luz_natural', label: 'Luz natural' },
+    { key: 'zona_silenciosa', label: 'Zona silenciosa' },
+    { key: 'proximo_copa', label: 'Próximo da copa' },
 ];
 
 export default function Create({ pisos, setores }) {
@@ -24,11 +29,19 @@ export default function Create({ pisos, setores }) {
     const { data, setData, post, processing, errors } = useForm({
         setor_id: '',
         codigo: '',
+
         reservavel: true,
+
         monitor: false,
+        dois_monitores: false,
         dock_usb: false,
-        junto_janela: false,
+        hdmi: false,
         ergonomica: false,
+        junto_janela: false,
+        luz_natural: false,
+        zona_silenciosa: false,
+        proximo_copa: false,
+
         descricao: '',
         imagem: '',
     });

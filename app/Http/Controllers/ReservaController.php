@@ -373,7 +373,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'tipo_duracao' =>
-                        'O período Dia inteiro não está configurado no sistema.',
+                    'O período Dia inteiro não está configurado no sistema.',
                 ])
                 ->withInput();
         }
@@ -382,7 +382,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'tipo_duracao' =>
-                        'O período Dia inteiro encontra-se inativo.',
+                    'O período Dia inteiro encontra-se inativo.',
                 ])
                 ->withInput();
         }
@@ -467,7 +467,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'reserva' =>
-                        'O estado pendente não está configurado no sistema.',
+                    'O estado pendente não está configurado no sistema.',
                 ])
                 ->withInput();
         }
@@ -846,18 +846,31 @@ class ReservaController extends Controller
         $request->validate([
             'data' => ['required', 'date'],
             'setor_id' => ['required', 'exists:setores,id'],
+
             'monitor' => ['sometimes', 'boolean'],
+            'dois_monitores' => ['sometimes', 'boolean'],
             'dock_usb' => ['sometimes', 'boolean'],
-            'junto_janela' => ['sometimes', 'boolean'],
+            'hdmi' => ['sometimes', 'boolean'],
             'ergonomica' => ['sometimes', 'boolean'],
+            'junto_janela' => ['sometimes', 'boolean'],
+            'luz_natural' => ['sometimes', 'boolean'],
+            'zona_silenciosa' => ['sometimes', 'boolean'],
+            'proximo_copa' => ['sometimes', 'boolean'],
+
             'excluir_reserva_id' => ['sometimes', 'nullable', 'exists:reservas,id'],
         ]);
 
+
         $preferencias = [
             'monitor' => $request->boolean('monitor'),
+            'dois_monitores' => $request->boolean('dois_monitores'),
             'dock_usb' => $request->boolean('dock_usb'),
-            'junto_janela' => $request->boolean('junto_janela'),
+            'hdmi' => $request->boolean('hdmi'),
             'ergonomica' => $request->boolean('ergonomica'),
+            'junto_janela' => $request->boolean('junto_janela'),
+            'luz_natural' => $request->boolean('luz_natural'),
+            'zona_silenciosa' => $request->boolean('zona_silenciosa'),
+            'proximo_copa' => $request->boolean('proximo_copa'),
         ];
 
         return response()->json(
@@ -935,22 +948,30 @@ class ReservaController extends Controller
         $secretarias = Secretaria::where('reservavel', true)
             ->where('ativo', true)
             ->where('setor_id', $setorId)
+
             ->when(
                 $preferencias['monitor'] ?? false,
                 fn($query) => $query->where('monitor', true)
             )
             ->when(
-                $preferencias['dock_usb'] ?? false,
-                fn($query) => $query->where('dock_usb', true)
+                $preferencias['dois_monitores'] ?? false,
+                fn($query) => $query->where('dois_monitores', true)
             )
-            ->when(
-                $preferencias['junto_janela'] ?? false,
-                fn($query) => $query->where('junto_janela', true)
-            )
-            ->when(
-                $preferencias['ergonomica'] ?? false,
-                fn($query) => $query->where('ergonomica', true)
-            )
+            ->when($preferencias['dock_usb'] ?? false,
+                fn($query) => $query->where('dock_usb', true))
+            ->when($preferencias['hdmi'] ?? false,
+                fn($query) => $query->where('hdmi', true))
+            ->when($preferencias['ergonomica'] ?? false,
+                fn($query) => $query->where('ergonomica', true))
+            ->when($preferencias['junto_janela'] ?? false,
+                fn($query) => $query->where('junto_janela', true))
+            ->when($preferencias['luz_natural'] ?? false,
+                fn($query) => $query->where('luz_natural', true))
+            ->when($preferencias['zona_silenciosa'] ?? false,
+                fn($query) => $query->where('zona_silenciosa', true))
+            ->when($preferencias['proximo_copa'] ?? false,
+                fn($query) => $query->where('proximo_copa', true))
+
             ->orderBy('codigo')
             ->get();
 
@@ -1021,7 +1042,7 @@ class ReservaController extends Controller
 
         return $dataFim->toDateString();
     }
-    
+
     /**
      * Devolve os IDs dos períodos incompatíveis com o período escolhido.
      */
