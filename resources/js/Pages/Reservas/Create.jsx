@@ -7,6 +7,7 @@ import {
     CalendarPlus,
     ImageOff,
 } from 'lucide-react';
+import { resolverImagemPorSetor } from '@/utils/imagemSetor';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -41,28 +42,6 @@ const DURACOES = {
         nome: 'Anual',
         diasUteis: 264,
     },
-};
-
-// Imagem por tipo de setor (fallback quando a secretária não tem foto
-// própria) — mesmas imagens já usadas no carrossel da landing page.
-const IMAGEM_POR_TIPO_SETOR = {
-    open_space: '/images/landing/espaco-trabalho.png',
-    escritorio: '/images/landing/escritorio-privado.png',
-    escritorio_executivo: '/images/landing/escritorio-privado.png',
-    sala_reunioes: '/images/landing/saladereuniao.png',
-    sala_criativa: '/images/landing/espaco-comum.png',
-    sala_espera: '/images/landing/rececao.png',
-    rececao: '/images/landing/rececao.png',
-    copa: '/images/landing/lounge.png',
-    lounge: '/images/landing/lounge.png',
-    phone_booth: '/images/landing/phone-booth.png',
-};
-
-// Setores com imagem própria (têm prioridade sobre a imagem do tipo).
-const IMAGEM_POR_NOME_SETOR = {
-    'Sala de Reuniões Redonda': '/images/landing/salamesaredonda.png',
-    'Sala Criativa': '/images/landing/salacriativa.png',
-    'Sala de Reuniões Média': '/images/landing/salaReunioes.png',
 };
 
 /**
@@ -249,10 +228,7 @@ export default function Create({
         (setor) => setor.id == filtros.setor_id,
     );
 
-    const imagemPorTipo =
-        IMAGEM_POR_NOME_SETOR[setorSelecionado?.nome] ??
-        IMAGEM_POR_TIPO_SETOR[setorSelecionado?.tipo] ??
-        null;
+    const imagemPorTipo = resolverImagemPorSetor(setorSelecionado);
 
     useEffect(() => {
         if (!secretariaAlvo) {

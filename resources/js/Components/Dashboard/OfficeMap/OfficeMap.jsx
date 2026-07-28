@@ -83,6 +83,24 @@ export default function OfficeMap({
         ],
     );
 
+    // Ao trocar de edifício, o piso selecionado pode deixar de pertencer à
+    // lista filtrada — mantém o seletor de piso sincronizado com o edifício
+    // atual, escolhendo o primeiro piso disponível.
+    useEffect(() => {
+        if (pisosDoEdificio.length === 0) {
+            return;
+        }
+
+        const aindaValido = pisosDoEdificio.some(
+            (piso) =>
+                String(piso.codigo) === String(selectedFloor),
+        );
+
+        if (!aindaValido) {
+            setSelectedFloor?.(pisosDoEdificio[0].codigo);
+        }
+    }, [pisosDoEdificio]);
+
     const setores = useMemo(
         () => pisoAtual?.setores ?? [],
         [pisoAtual],
@@ -304,7 +322,7 @@ export default function OfficeMap({
             setAtualizando(true);
 
             router.reload({
-                only: ['pisos'],
+                only: ['pisos', 'stats'],
                 onFinish: () =>
                     setAtualizando(false),
             });

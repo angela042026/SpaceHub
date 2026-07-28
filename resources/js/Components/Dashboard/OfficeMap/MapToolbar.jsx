@@ -31,7 +31,7 @@ export default function MapToolbar({
             {/* Seletores */}
             <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-end">
                 <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-                    {edificios?.length > 0 && (
+                    {edificios?.length > 1 && (
                         <div className="relative w-full sm:w-[200px]">
                             <Building2
                                 size={16}
@@ -40,24 +40,25 @@ export default function MapToolbar({
                             />
 
                             <select
-                                value={String(selectedFloor ?? '')}
+                                value={String(selectedEdificio ?? '')}
                                 onChange={(event) =>
-                                    setSelectedFloor?.(
+                                    setSelectedEdificio?.(
                                         event.target.value,
                                     )
                                 }
-                                aria-label="Selecionar piso"
+                                aria-label="Selecionar edifício"
                                 className="h-10 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                             >
-                                {pisosDoEdificio.map((piso) => (
+                                {edificios.map((edificio) => (
                                     <option
-                                        key={piso.id}
-                                        value={String(piso.codigo)}
+                                        key={edificio.id}
+                                        value={String(edificio.id)}
                                     >
-                                        {piso.nome}
+                                        {edificio.nome}
                                     </option>
                                 ))}
                             </select>
+
                             <ChevronDown
                                 size={16}
                                 strokeWidth={1.9}

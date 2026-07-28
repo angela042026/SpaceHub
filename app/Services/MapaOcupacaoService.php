@@ -12,19 +12,11 @@ use Illuminate\Support\Collection;
 
 class MapaOcupacaoService
 {
-    private const ESTADOS_ATIVOS = [
-        'pendente',
-        'confirmada',
-    ];
-
     public function obterDados(): array
     {
         $hoje = Carbon::today();
 
-        $idsEstadosAtivos = EstadoReserva::query()
-            ->whereIn('codigo', self::ESTADOS_ATIVOS)
-            ->pluck('id')
-            ->all();
+        $idsEstadosAtivos = EstadoReserva::idsAtivos();
 
         $reservasAtivasHoje = Reserva::query()
             ->whereDate('data', $hoje)
@@ -207,10 +199,12 @@ class MapaOcupacaoService
             return 'ocupada';
         }
 
+        $tolerancia = config('reservas.tolerancia_checkin_minutos');
+
         if (
             $agora->between(
-                $inicioPeriodo->copy()->subMinutes(30),
-                $inicioPeriodo->copy()->addMinutes(30)
+                $inicioPeriodo->copy()->subMinutes($tolerancia),
+                $inicioPeriodo->copy()->addMinutes($tolerancia)
             )
         ) {
             return 'expira';

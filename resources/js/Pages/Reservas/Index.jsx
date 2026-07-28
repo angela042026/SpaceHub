@@ -13,6 +13,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
+import { resolverImagemSecretaria } from '@/utils/imagemSetor';
 
 const ESTADO_CLASSES = {
     pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
@@ -197,9 +198,9 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                                     key={reserva.id}
                                     className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
                                 >
-                                    {reserva.secretaria?.imagem ? (
+                                    {resolverImagemSecretaria(reserva.secretaria) ? (
                                         <img
-                                            src={reserva.secretaria.imagem}
+                                            src={resolverImagemSecretaria(reserva.secretaria)}
                                             alt={reserva.secretaria?.codigo ?? ''}
                                             className="h-40 w-full object-cover"
                                         />

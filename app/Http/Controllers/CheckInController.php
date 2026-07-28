@@ -6,6 +6,7 @@ use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Models\Secretaria;
+use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -13,11 +14,6 @@ use Inertia\Response;
 
 class CheckInController extends Controller
 {
-    /**
-     * Estados de reserva considerados "ativos" (ainda não cancelados/expirados/concluídos).
-     */
-    private const ESTADOS_ATIVOS = ['pendente', 'confirmada'];
-
     /**
      * Página com leitura de câmara para ler o QR Code de uma secretária.
      */
@@ -41,13 +37,13 @@ class CheckInController extends Controller
             ->where('secretaria_id', $secretaria->id)
             ->where('user_id', auth()->id())
             ->whereDate('data', $hoje)
-            ->whereHas('estadoReserva', fn ($q) => $q->whereIn('codigo', self::ESTADOS_ATIVOS))
+            ->whereHas('estadoReserva', fn ($q) => $q->whereIn('codigo', EstadoReserva::codigosAtivos()))
             ->first();
 
         if (! $reserva) {
             $ocupadaPorOutro = Reserva::where('secretaria_id', $secretaria->id)
                 ->whereDate('data', $hoje)
-                ->whereHas('estadoReserva', fn ($q) => $q->whereIn('codigo', self::ESTADOS_ATIVOS))
+                ->whereHas('estadoReserva', fn ($q) => $q->whereIn('codigo', EstadoReserva::codigosAtivos()))
                 ->exists();
 
             return Inertia::render('CheckIn/Scan', [
@@ -87,18 +83,19 @@ class CheckInController extends Controller
             return back()->withErrors(['reserva' => 'Fora da janela horária permitida para check-in.']);
         }
 
-        if (! in_array($reserva->estadoReserva?->codigo, self::ESTADOS_ATIVOS, true)) {
+        if (! in_array($reserva->estadoReserva?->codigo, EstadoReserva::codigosAtivos(), true)) {
             return back()->withErrors(['reserva' => 'Esta reserva já não está ativa.']);
         }
 
-        $estadoConfirmada = EstadoReserva::where('codigo', 'confirmada')->first();
+        $idEstadoConfirmada = EstadoReserva::idPorCodigo('confirmada');
 
         $reserva->update([
             'check_in_at' => now(),
-            'estado_reserva_id' => optional($estadoConfirmada)->id ?? $reserva->estado_reserva_id,
+            'estado_reserva_id' => $idEstadoConfirmada ?? $reserva->estado_reserva_id,
         ]);
 
         broadcast(new MapaAtualizado());
+        DashboardMetricsService::limparCacheDoDia();
 
         return back()->with('success', 'Check-in confirmado com sucesso.');
     }
@@ -119,7 +116,8 @@ class CheckInController extends Controller
 
         $data = $reserva->data->format('Y-m-d');
 
-        $abreJanela = Carbon::parse("{$data} {$reserva->periodo->hora_inicio->format('H:i')}")->subMinutes(30);
+        $abreJanela = Carbon::parse("{$data} {$reserva->periodo->hora_inicio->format('H:i')}")
+            ->subMinutes(config('reservas.tolerancia_checkin_minutos'));
         $fechaJanela = Carbon::parse("{$data} {$reserva->periodo->hora_fim->format('H:i')}");
 
         if (! now()->between($abreJanela, $fechaJanela)) {

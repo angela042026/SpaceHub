@@ -283,7 +283,7 @@ class ReservaController extends Controller
                 $pagamentoService->criarParaReserva($reserva);
 
                 Auth::user()->notify(
-                    new ReservaCriadaNotification($reserva->load('secretaria'))
+                    new ReservaCriadaNotification($reserva->load(['secretaria', 'periodo']))
                 );
             });
         } catch (QueryException $e) {
@@ -499,7 +499,7 @@ class ReservaController extends Controller
                 $pagamentoService->criarParaReserva($reserva);
 
                 Auth::user()->notify(
-                    new ReservaCriadaNotification($reserva->load('secretaria'))
+                    new ReservaCriadaNotification($reserva->load(['secretaria', 'periodo']))
                 );
             });
         } catch (QueryException $e) {

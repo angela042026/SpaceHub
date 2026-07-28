@@ -7,14 +7,11 @@ use App\Models\Reserva;
 use App\Models\Secretaria;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 
 class EstatisticasService
 {
-    private const ESTADOS_VALIDOS = [
-        'pendente',
-        'confirmada',
-        'concluida',
-    ];
+    private const CACHE_TTL_SEGUNDOS = 60;
 
     public function obterDataInicio(string $periodo): ?Carbon
     {
@@ -25,12 +22,26 @@ class EstatisticasService
         };
     }
 
+    /**
+     * 6 queries agregadas por visita ao dashboard. Não está ligado ao
+     * refresh em tempo real do mapa (ao contrário de obterStats), por
+     * isso basta uma cache simples por TTL, sem invalidação ativa.
+     */
     public function obterEstatisticas(?Carbon $dataInicio): array
     {
-        $idsEstadosValidos = EstadoReserva::query()
-            ->whereIn('codigo', self::ESTADOS_VALIDOS)
-            ->pluck('id')
-            ->all();
+        $chave = 'dashboard:estatisticas:' . ($dataInicio?->toDateString() ?? 'geral');
+
+        return Cache::remember(
+            $chave,
+            self::CACHE_TTL_SEGUNDOS,
+            fn () => $this->calcularEstatisticas($dataInicio)
+        );
+    }
+
+    private function calcularEstatisticas(?Carbon $dataInicio): array
+    {
+        $idsEstadosValidos = EstadoReserva::idsValidos();
+        $limiteRanking = config('reservas.dashboard.top_ranking');
 
         $secretariasMaisUtilizadas = Reserva::query()
             ->selectRaw('secretaria_id, COUNT(*) as total')
@@ -42,7 +53,7 @@ class EstatisticasService
             )
             ->groupBy('secretaria_id')
             ->orderByDesc('total')
-            ->take(5)
+            ->take($limiteRanking)
             ->get();
 
         $secretariasMenosUtilizadas = Secretaria::query()
@@ -59,7 +70,7 @@ class EstatisticasService
             ->where('ativo', true)
             ->where('reservavel', true)
             ->orderBy('reservas_count')
-            ->take(5)
+            ->take($limiteRanking)
             ->get();
 
         $pisosPorUtilizacao = Reserva::query()
@@ -99,7 +110,7 @@ class EstatisticasService
             )
             ->groupBy('user_id')
             ->orderByDesc('total')
-            ->take(5)
+            ->take($limiteRanking)
             ->get();
 
         $diasComMaiorOcupacao = Reserva::query()
@@ -111,7 +122,7 @@ class EstatisticasService
             )
             ->groupBy('data')
             ->orderByDesc('total')
-            ->take(5)
+            ->take($limiteRanking)
             ->get();
 
         return [

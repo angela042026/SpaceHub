@@ -57,6 +57,12 @@ export default function RecentActivity({ eventos = [] }) {
 
     useEffect(() => {
         const intervalo = setInterval(() => {
+            // Não faz sentido gastar pedidos a atualizar uma página que
+            // o utilizador nem está a ver (separador em background).
+            if (document.hidden) {
+                return;
+            }
+
             router.reload({
                 only: ['atividadeRecente'],
                 preserveScroll: true,
