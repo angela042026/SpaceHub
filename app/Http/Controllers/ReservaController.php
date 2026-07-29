@@ -143,8 +143,8 @@ class ReservaController extends Controller
 
         $setores->each(function (Setor $setor) use ($mediasPorSetor) {
             $agregado = $mediasPorSetor->get($setor->id);
+            $setor->avaliacao_media = $agregado ? (float) round((float) $agregado->media, 1) : null;
 
-            $setor->avaliacao_media = $agregado ? round((float) $agregado->media, 1) : null;
             $setor->avaliacao_total = $agregado ? (int) $agregado->total : 0;
         });
 
@@ -395,7 +395,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'tipo_duracao' =>
-                        'O período Dia inteiro não está configurado no sistema.',
+                    'O período Dia inteiro não está configurado no sistema.',
                 ])
                 ->withInput();
         }
@@ -404,7 +404,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'tipo_duracao' =>
-                        'O período Dia inteiro encontra-se inativo.',
+                    'O período Dia inteiro encontra-se inativo.',
                 ])
                 ->withInput();
         }
@@ -489,7 +489,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'reserva' =>
-                        'O estado pendente não está configurado no sistema.',
+                    'O estado pendente não está configurado no sistema.',
                 ])
                 ->withInput();
         }
@@ -1043,7 +1043,7 @@ class ReservaController extends Controller
 
         return $dataFim->toDateString();
     }
-    
+
     /**
      * Devolve os IDs dos períodos incompatíveis com o período escolhido.
      */
