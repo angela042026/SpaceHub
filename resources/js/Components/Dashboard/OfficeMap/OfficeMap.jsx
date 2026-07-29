@@ -28,8 +28,10 @@ export default function OfficeMap({
     edificios,
     selectedEdificio,
     setSelectedEdificio,
-    expandido = false,
+    variant = 'full',
 }) {
+    const isDashboard = variant === 'dashboard';
+
     const [selectedSector, setSelectedSector] =
         useState(null);
 
@@ -40,10 +42,11 @@ export default function OfficeMap({
         useState(false);
 
     const [pesquisa, setPesquisa] = useState('');
+
     const [filtroEstado, setFiltroEstado] =
         useState('todos');
 
-    const larguraClass = expandido
+    const larguraClass = isDashboard
         ? 'w-full'
         : 'mx-auto w-full max-w-5xl';
 
@@ -53,10 +56,10 @@ export default function OfficeMap({
                 const pertenceAoEdificio =
                     !selectedEdificio ||
                     String(piso.edificio_id) ===
-                    String(selectedEdificio);
+                        String(selectedEdificio);
 
                 const pisoVisivel =
-                    expandido ||
+                    isDashboard ||
                     Number(piso.numero) !== -1;
 
                 return (
@@ -67,9 +70,10 @@ export default function OfficeMap({
         [
             pisos,
             selectedEdificio,
-            expandido,
+            isDashboard,
         ],
     );
+
     const pisoAtual = useMemo(
         () =>
             pisosDoEdificio.find(
@@ -83,32 +87,34 @@ export default function OfficeMap({
         ],
     );
 
-    // Ao trocar de edifício, o piso selecionado pode deixar de pertencer à
-    // lista filtrada — mantém o seletor de piso sincronizado com o edifício
-    // atual, escolhendo o primeiro piso disponível.
     useEffect(() => {
         if (pisosDoEdificio.length === 0) {
             return;
         }
 
-        const aindaValido = pisosDoEdificio.some(
-            (piso) =>
-                String(piso.codigo) === String(selectedFloor),
-        );
+        const aindaValido =
+            pisosDoEdificio.some(
+                (piso) =>
+                    String(piso.codigo) ===
+                    String(selectedFloor),
+            );
 
         if (!aindaValido) {
-            setSelectedFloor?.(pisosDoEdificio[0].codigo);
+            setSelectedFloor?.(
+                pisosDoEdificio[0].codigo,
+            );
         }
-    }, [pisosDoEdificio]);
+    }, [
+        pisosDoEdificio,
+        selectedFloor,
+        setSelectedFloor,
+    ]);
 
     const setores = useMemo(
         () => pisoAtual?.setores ?? [],
         [pisoAtual],
     );
 
-    /**
-     * Apenas setores com posição definida na planta.
-     */
     const setoresComPosicao = useMemo(
         () =>
             setores.filter((setor) => {
@@ -125,10 +131,6 @@ export default function OfficeMap({
         [setores],
     );
 
-    /**
-     * Todas as secretárias do piso, com referência
-     * ao setor a que pertencem.
-     */
     const todasSecretarias = useMemo(
         () =>
             setores.flatMap((setor) =>
@@ -142,17 +144,15 @@ export default function OfficeMap({
         [setores],
     );
 
-    /**
-     * Quantidades de secretárias por estado.
-     */
     const contadores = useMemo(() => {
         return todasSecretarias.reduce(
             (totais, secretaria) => {
                 totais.todos += 1;
 
-                const estado = normalizarEstadoFiltro(
-                    secretaria.status,
-                );
+                const estado =
+                    normalizarEstadoFiltro(
+                        secretaria.status,
+                    );
 
                 if (estado === 'livre') {
                     totais.livre += 1;
@@ -182,47 +182,15 @@ export default function OfficeMap({
         );
     }, [todasSecretarias]);
 
-    /**
-     * Secretárias apresentadas dentro do setor aberto.
-     */
-    const secretariasFiltradasDoSetor = useMemo(() => {
-        if (!selectedSector) {
-            return [];
-        }
+    const secretariasFiltradasDoSetor =
+        useMemo(() => {
+            if (!selectedSector) {
+                return [];
+            }
 
-        return (
-            selectedSector.secretarias ?? []
-        ).filter(
-            (secretaria) =>
-                correspondePesquisa(
-                    secretaria,
-                    pesquisa,
-                ) &&
-                correspondeFiltro(
-                    secretaria,
-                    filtroEstado,
-                ),
-        );
-    }, [
-        selectedSector,
-        pesquisa,
-        filtroEstado,
-    ]);
-
-    /**
-     * Setores que devem continuar visíveis conforme
-     * a pesquisa e o filtro selecionado.
-     */
-    const setoresVisiveis = useMemo(() => {
-        if (
-            !pesquisa.trim() &&
-            filtroEstado === 'todos'
-        ) {
-            return setoresComPosicao;
-        }
-
-        return setoresComPosicao.filter((setor) =>
-            (setor.secretarias ?? []).some(
+            return (
+                selectedSector.secretarias ?? []
+            ).filter(
                 (secretaria) =>
                     correspondePesquisa(
                         secretaria,
@@ -232,7 +200,34 @@ export default function OfficeMap({
                         secretaria,
                         filtroEstado,
                     ),
-            ),
+            );
+        }, [
+            selectedSector,
+            pesquisa,
+            filtroEstado,
+        ]);
+
+    const setoresVisiveis = useMemo(() => {
+        if (
+            !pesquisa.trim() &&
+            filtroEstado === 'todos'
+        ) {
+            return setoresComPosicao;
+        }
+
+        return setoresComPosicao.filter(
+            (setor) =>
+                (setor.secretarias ?? []).some(
+                    (secretaria) =>
+                        correspondePesquisa(
+                            secretaria,
+                            pesquisa,
+                        ) &&
+                        correspondeFiltro(
+                            secretaria,
+                            filtroEstado,
+                        ),
+                ),
         );
     }, [
         setoresComPosicao,
@@ -240,27 +235,24 @@ export default function OfficeMap({
         filtroEstado,
     ]);
 
-    /**
-     * Número de resultados encontrados pela pesquisa
-     * e pelo filtro atual.
-     */
-    const totalResultadosPesquisa = useMemo(() => {
-        return todasSecretarias.filter(
-            (secretaria) =>
-                correspondePesquisa(
-                    secretaria,
-                    pesquisa,
-                ) &&
-                correspondeFiltro(
-                    secretaria,
-                    filtroEstado,
-                ),
-        ).length;
-    }, [
-        todasSecretarias,
-        pesquisa,
-        filtroEstado,
-    ]);
+    const totalResultadosPesquisa =
+        useMemo(() => {
+            return todasSecretarias.filter(
+                (secretaria) =>
+                    correspondePesquisa(
+                        secretaria,
+                        pesquisa,
+                    ) &&
+                    correspondeFiltro(
+                        secretaria,
+                        filtroEstado,
+                    ),
+            ).length;
+        }, [
+            todasSecretarias,
+            pesquisa,
+            filtroEstado,
+        ]);
 
     const totalSecretarias =
         pisoAtual?.totalSecretarias ??
@@ -272,21 +264,16 @@ export default function OfficeMap({
         pesquisa.trim() !== '' ||
         filtroEstado !== 'todos';
 
-    /**
-     * Limpa seleção e filtros quando o edifício
-     * ou o piso é alterado.
-     */
     useEffect(() => {
         setSelectedSector(null);
         setSelectedSecretaria(null);
         setPesquisa('');
         setFiltroEstado('todos');
-    }, [selectedFloor, selectedEdificio]);
+    }, [
+        selectedFloor,
+        selectedEdificio,
+    ]);
 
-    /**
-     * Garante que existe sempre um piso válido
-     * selecionado para o edifício atual.
-     */
     useEffect(() => {
         if (!pisoAtual) {
             return;
@@ -307,9 +294,6 @@ export default function OfficeMap({
         setSelectedFloor,
     ]);
 
-    /**
-     * Atualização em tempo real do mapa.
-     */
     useEffect(() => {
         if (!window.Echo) {
             return undefined;
@@ -335,13 +319,6 @@ export default function OfficeMap({
         };
     }, []);
 
-    /**
-     * Ao pesquisar uma secretária:
-     *
-     * - encontra as correspondências;
-     * - abre automaticamente o setor;
-     * - destaca a secretária encontrada.
-     */
     useEffect(() => {
         const termo = pesquisa.trim();
 
@@ -375,10 +352,12 @@ export default function OfficeMap({
                 (secretaria) =>
                     normalizarTexto(
                         secretaria.codigo,
-                    ) === pesquisaNormalizada ||
+                    ) ===
+                        pesquisaNormalizada ||
                     normalizarTexto(
                         secretaria.numero,
-                    ) === pesquisaNormalizada,
+                    ) ===
+                        pesquisaNormalizada,
             ) ?? correspondencias[0];
 
         setSelectedSector(
@@ -405,34 +384,27 @@ export default function OfficeMap({
     }
 
     function handleSecretariaClick(secretaria) {
-        if (!expandido) {
-            if (!pisoAtual || !selectedSector) {
-                return;
-            }
-
-            const hoje = new Date()
-                .toISOString()
-                .slice(0, 10);
-
-            router.get(
-                route('reservas.create'),
-                {
-                    data: hoje,
-                    piso_id: pisoAtual.id,
-                    setor_id: selectedSector.id,
-                    secretaria_id: secretaria.id,
-                },
-            );
-
+        if (
+            !pisoAtual ||
+            !selectedSector
+        ) {
             return;
         }
 
-        setSelectedSecretaria(
-            (secretariaAtual) =>
-                secretariaAtual?.id ===
-                    secretaria.id
-                    ? null
-                    : secretaria,
+        setSelectedSecretaria(secretaria);
+
+        const hoje = new Date()
+            .toISOString()
+            .slice(0, 10);
+
+        router.get(
+            route('reservas.create'),
+            {
+                data: hoje,
+                piso_id: pisoAtual.id,
+                setor_id: selectedSector.id,
+                secretaria_id: secretaria.id,
+            },
         );
     }
 
@@ -479,7 +451,6 @@ export default function OfficeMap({
         <section
             className={`dashboard-card overflow-hidden ${larguraClass}`}
         >
-            {/* Cabeçalho */}
             <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800">
                 <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500">
@@ -529,79 +500,91 @@ export default function OfficeMap({
                 </div>
             </div>
 
-            {/* Seletores, pesquisa e filtros */}
             <MapToolbar
                 edificios={edificios}
                 selectedEdificio={selectedEdificio}
                 setSelectedEdificio={
                     setSelectedEdificio
                 }
-                pisosDoEdificio={pisosDoEdificio}
+                pisosDoEdificio={
+                    pisosDoEdificio
+                }
                 selectedFloor={selectedFloor}
-                setSelectedFloor={setSelectedFloor}
+                setSelectedFloor={
+                    setSelectedFloor
+                }
                 pesquisa={pesquisa}
                 setPesquisa={setPesquisa}
                 filtroEstado={filtroEstado}
-                setFiltroEstado={setFiltroEstado}
+                setFiltroEstado={
+                    setFiltroEstado
+                }
                 contadores={contadores}
                 filtrosAtivos={filtrosAtivos}
-                setoresVisiveis={setoresVisiveis}
+                setoresVisiveis={
+                    setoresVisiveis
+                }
                 totalResultadosPesquisa={
                     totalResultadosPesquisa
                 }
                 onClearFilters={limparFiltros}
+                isDashboard={isDashboard}
             />
 
-            {/* Resumo */}
-            <div className="grid grid-cols-2 gap-2 px-4 pt-3 sm:grid-cols-3">
-                <div className="rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                        Secretárias
-                    </p>
+            {!isDashboard && (
+                <div className="grid grid-cols-2 gap-2 px-4 pt-3 sm:grid-cols-3">
+                    <div className="rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                            Secretárias
+                        </p>
 
-                    <div className="mt-0.5 flex items-center gap-2">
-                        <Armchair
-                            size={15}
-                            strokeWidth={1.9}
-                            className="text-teal-500"
-                        />
+                        <div className="mt-0.5 flex items-center gap-2">
+                            <Armchair
+                                size={15}
+                                strokeWidth={1.9}
+                                className="text-teal-500"
+                            />
 
-                        <strong className="text-lg text-slate-900 dark:text-white">
-                            {totalSecretarias}
+                            <strong className="text-lg text-slate-900 dark:text-white">
+                                {totalSecretarias}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div className="rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                            Livres
+                        </p>
+
+                        <div className="mt-0.5 flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-status-livre" />
+
+                            <strong className="text-lg text-slate-900 dark:text-white">
+                                {totalLivres}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div className="col-span-2 rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60 sm:col-span-1">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                            Setores
+                        </p>
+
+                        <strong className="mt-0.5 block text-lg text-slate-900 dark:text-white">
+                            {setores.length}
                         </strong>
                     </div>
                 </div>
+            )}
 
-                <div className="rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                        Livres
-                    </p>
-
-                    <div className="mt-0.5 flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-status-livre" />
-
-                        <strong className="text-lg text-slate-900 dark:text-white">
-                            {totalLivres}
-                        </strong>
-                    </div>
-                </div>
-
-                <div className="col-span-2 rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60 sm:col-span-1">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                        Setores
-                    </p>
-
-                    <strong className="mt-0.5 block text-lg text-slate-900 dark:text-white">
-                        {setores.length}
-                    </strong>
-                </div>
-            </div>
-
-            {/* Planta interativa */}
             <MapCanvas
                 pisoAtual={pisoAtual}
-                setoresVisiveis={setoresVisiveis}
-                selectedSector={selectedSector}
+                setoresVisiveis={
+                    setoresVisiveis
+                }
+                selectedSector={
+                    selectedSector
+                }
                 secretariasFiltradasDoSetor={
                     secretariasFiltradasDoSetor
                 }
@@ -609,30 +592,48 @@ export default function OfficeMap({
                     selectedSecretaria
                 }
                 pesquisa={pesquisa}
-                expandido={expandido}
-                onSectorClick={handleSectorClick}
+                expandido={isDashboard}
+                onSectorClick={
+                    handleSectorClick
+                }
                 onSecretariaClick={
                     handleSecretariaClick
                 }
             />
 
-            {/* Setor selecionado */}
-            <SelectedSectorCard
-                selectedSector={selectedSector}
-                selectedSecretaria={
-                    selectedSecretaria
-                }
-                onClose={fecharSetorSelecionado}
-            />
+            {!isDashboard && (
+                <>
+                    <SelectedSectorCard
+                        selectedSector={
+                            selectedSector
+                        }
+                        selectedSecretaria={
+                            selectedSecretaria
+                        }
+                        onClose={
+                            fecharSetorSelecionado
+                        }
+                    />
 
-            {/* Lista de setores */}
-            <SectorList
-                setoresVisiveis={setoresVisiveis}
-                totalSetores={setores.length}
-                selectedSector={selectedSector}
-                onSectorClick={handleSectorClick}
-                onClearFilters={limparFiltros}
-            />
+                    <SectorList
+                        setoresVisiveis={
+                            setoresVisiveis
+                        }
+                        totalSetores={
+                            setores.length
+                        }
+                        selectedSector={
+                            selectedSector
+                        }
+                        onSectorClick={
+                            handleSectorClick
+                        }
+                        onClearFilters={
+                            limparFiltros
+                        }
+                    />
+                </>
+            )}
         </section>
     );
 }
