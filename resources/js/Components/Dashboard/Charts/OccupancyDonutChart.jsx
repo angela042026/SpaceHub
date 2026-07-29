@@ -1,0 +1,222 @@
+import {
+    Cell,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+} from 'recharts';
+
+import { PieChart as PieChartIcon } from 'lucide-react';
+
+const COLORS = {
+    livre: '#14b8a6',
+    reservada: '#3b82f6',
+    ocupada: '#ef4444',
+    indisponivel: '#94a3b8',
+};
+
+const LABELS = {
+    livre: 'Livres',
+    reservada: 'Reservadas',
+    ocupada: 'Ocupadas',
+    indisponivel: 'Manutenção',
+};
+
+function DonutTooltip({ active, payload }) {
+    if (!active || !payload?.length) {
+        return null;
+    }
+
+    const item = payload[0];
+
+    return (
+        <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+            <p className="text-xs font-semibold text-slate-500">
+                {item.name}
+            </p>
+
+            <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
+                {item.value} secretárias
+            </p>
+        </div>
+    );
+}
+
+export default function OccupancyDonutChart({
+    data,
+    taxaOcupacao = 0,
+}) {
+    const chartData = [
+        {
+            key: 'livre',
+            name: LABELS.livre,
+            value: Number(data?.livre ?? 0),
+        },
+        {
+            key: 'reservada',
+            name: LABELS.reservada,
+            value: Number(data?.reservada ?? 0),
+        },
+        {
+            key: 'ocupada',
+            name: LABELS.ocupada,
+            value: Number(data?.ocupada ?? 0),
+        },
+        {
+            key: 'indisponivel',
+            name: LABELS.indisponivel,
+            value: Number(data?.indisponivel ?? 0),
+        },
+    ].filter((item) => item.value > 0);
+
+    const totalSecretarias = chartData.reduce(
+        (total, item) => total + item.value,
+        0,
+    );
+
+    return (
+        <section className="dashboard-card overflow-hidden">
+            <header className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+                <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500">
+                        <PieChartIcon
+                            size={20}
+                            strokeWidth={1.9}
+                        />
+                    </div>
+
+                    <div>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                            Ocupação Atual
+                        </h3>
+
+                        <p className="mt-0.5 text-xs text-slate-400">
+                            Estado das secretárias
+                        </p>
+                    </div>
+                </div>
+
+                <div className="text-right">
+                    <strong className="block text-lg font-bold text-slate-900 dark:text-white">
+                        {totalSecretarias}
+                    </strong>
+
+                    <span className="text-[11px] text-slate-400">
+                        Secretárias
+                    </span>
+                </div>
+            </header>
+
+            <div className="grid gap-5 p-5 sm:grid-cols-[190px_1fr] xl:grid-cols-1 2xl:grid-cols-[190px_1fr]">
+                <div className="relative h-[190px]">
+                    <ResponsiveContainer
+                        width="100%"
+                        height="100%"
+                    >
+                        <PieChart>
+                            <Pie
+                                data={chartData}
+                                dataKey="value"
+                                nameKey="name"
+                                innerRadius={60}
+                                outerRadius={86}
+                                paddingAngle={2}
+                                stroke="none"
+                                isAnimationActive
+                                animationDuration={800}
+                            >
+                                {chartData.map((item) => (
+                                    <Cell
+                                        key={item.key}
+                                        fill={
+                                            COLORS[item.key]
+                                        }
+                                    />
+                                ))}
+                            </Pie>
+
+                            <Tooltip
+                                content={<DonutTooltip />}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
+
+                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                        <strong className="text-3xl font-black text-slate-900 dark:text-white">
+                            {taxaOcupacao}%
+                        </strong>
+
+                        <span className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                            Ocupação
+                        </span>
+
+                        <span className="text-[10px] text-slate-400">
+                            Atual
+                        </span>
+                    </div>
+                </div>
+
+                <div className="flex flex-col justify-center gap-4">
+                    {chartData.map((item) => {
+                        const percentagem =
+                            totalSecretarias > 0
+                                ? Math.round(
+                                      (item.value /
+                                          totalSecretarias) *
+                                          100,
+                                  )
+                                : 0;
+
+                        return (
+                            <div
+                                key={item.key}
+                                className="space-y-2"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span
+                                            className="h-2.5 w-2.5 rounded-full"
+                                            style={{
+                                                backgroundColor:
+                                                    COLORS[
+                                                        item.key
+                                                    ],
+                                            }}
+                                        />
+
+                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                            {item.name}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-bold text-slate-900 dark:text-white">
+                                            {item.value}
+                                        </span>
+
+                                        <span className="text-xs text-slate-400">
+                                            {percentagem}%
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                    <div
+                                        className="h-full rounded-full transition-all duration-700"
+                                        style={{
+                                            width: `${percentagem}%`,
+                                            backgroundColor:
+                                                COLORS[
+                                                    item.key
+                                                ],
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </section>
+    );
+}

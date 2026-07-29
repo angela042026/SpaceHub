@@ -29,9 +29,9 @@ export default function MapCanvas({
     secretariasFiltradasDoSetor,
     selectedSecretaria,
     pesquisa,
-    expandido,
     onSectorClick,
     onSecretariaClick,
+    expandido = false,
 }) {
     const viewportRef = useRef(null);
 

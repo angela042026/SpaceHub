@@ -55,10 +55,10 @@ function tempoRelativo(timestamp) {
 export default function RecentActivity({ eventos = [] }) {
     const [atualizando, setAtualizando] = useState(false);
 
+    const eventosVisiveis = eventos.slice(0, 5);
+
     useEffect(() => {
         const intervalo = setInterval(() => {
-            // Não faz sentido gastar pedidos a atualizar uma página que
-            // o utilizador nem está a ver (separador em background).
             if (document.hidden) {
                 return;
             }
@@ -76,7 +76,7 @@ export default function RecentActivity({ eventos = [] }) {
     }, []);
 
     return (
-        <section className="dashboard-card overflow-hidden">
+        <section className="dashboard-card h-full overflow-hidden">
             <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
                 <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
                     <Activity size={20} strokeWidth={1.9} />
@@ -88,7 +88,10 @@ export default function RecentActivity({ eventos = [] }) {
                             Atividade Recente
                         </h2>
 
-                        <LoadingBadge show={atualizando} label="A atualizar" />
+                        <LoadingBadge
+                            show={atualizando}
+                            label="A atualizar"
+                        />
                     </div>
 
                     <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -98,12 +101,20 @@ export default function RecentActivity({ eventos = [] }) {
             </div>
 
             <div className="p-5">
-                {eventos.length > 0 ? (
+                {eventosVisiveis.length > 0 ? (
                     <ul className="space-y-2.5">
-                        {eventos.map((evento) => {
-                            const config = TIPOS[evento.tipo] ?? TIPOS.criada;
-                            const utilizador = evento.utilizador ?? 'Utilizador removido';
-                            const secretaria = evento.secretaria ?? 'secretária removida';
+                        {eventosVisiveis.map((evento) => {
+                            const config =
+                                TIPOS[evento.tipo] ??
+                                TIPOS.criada;
+
+                            const utilizador =
+                                evento.utilizador ??
+                                'Utilizador removido';
+
+                            const secretaria =
+                                evento.secretaria ??
+                                'secretária removida';
 
                             return (
                                 <li
@@ -113,16 +124,24 @@ export default function RecentActivity({ eventos = [] }) {
                                     <div
                                         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.className}`}
                                     >
-                                        <config.icon size={15} strokeWidth={1.9} />
+                                        <config.icon
+                                            size={15}
+                                            strokeWidth={1.9}
+                                        />
                                     </div>
 
                                     <div className="min-w-0 flex-1">
                                         <p className="truncate text-sm text-slate-700 dark:text-slate-200">
-                                            {config.texto(utilizador, secretaria)}
+                                            {config.texto(
+                                                utilizador,
+                                                secretaria,
+                                            )}
                                         </p>
 
                                         <p className="mt-0.5 text-xs text-slate-400">
-                                            {tempoRelativo(evento.timestamp)}
+                                            {tempoRelativo(
+                                                evento.timestamp,
+                                            )}
                                         </p>
                                     </div>
                                 </li>
@@ -132,7 +151,10 @@ export default function RecentActivity({ eventos = [] }) {
                 ) : (
                     <div className="flex min-h-[160px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900/40">
                         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
-                            <Activity size={23} strokeWidth={1.8} />
+                            <Activity
+                                size={23}
+                                strokeWidth={1.8}
+                            />
                         </div>
 
                         <p className="mt-4 max-w-xs text-sm leading-6 text-slate-400">
