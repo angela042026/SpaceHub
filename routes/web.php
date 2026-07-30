@@ -21,6 +21,8 @@ use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\PedidoSuporteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservaController;
+use App\Http\Controllers\ReservaDisponibilidadeController;
+use App\Http\Controllers\ReservaHistoricoController;
 use App\Http\Controllers\SecretariaQrCodeController;
 use App\Http\Controllers\SetorMapaController;
 use Illuminate\Foundation\Application;
@@ -159,13 +161,13 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/reservas/dia-inteiro', [ReservaController::class, 'storeDiaInteiro'])
         ->name('reservas.storeDiaInteiro');
 
-    Route::get('/reservas/historico', [ReservaController::class, 'history'])
+    Route::get('/reservas/historico', ReservaHistoricoController::class)
         ->name('reservas.history');
 
-    Route::get('/reservas/disponibilidade', [ReservaController::class, 'availability'])
+    Route::get('/reservas/disponibilidade', [ReservaDisponibilidadeController::class, 'index'])
         ->name('reservas.availability');
 
-    Route::get('/reservas/lugares-por-setor', [ReservaController::class, 'lugaresPorSetor'])
+    Route::get('/reservas/lugares-por-setor', [ReservaDisponibilidadeController::class, 'lugaresPorSetor'])
         ->name('reservas.lugaresPorSetor');
 
     Route::patch(

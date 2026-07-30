@@ -2,20 +2,18 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ImageOff, Info, Pencil } from 'lucide-react';
-import { resolverImagemPorSetor } from '@/utils/imagemSetor';
+import PreferenciasPanel from '@/Components/Reservas/PreferenciasPanel';
+import {
+    PREFERENCIAS,
+    IMAGEM_POR_TIPO_SETOR,
+    IMAGEM_POR_NOME_SETOR,
+} from '@/Components/Reservas/reservaHelpers';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
 const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
-
-const PREFERENCIAS = [
-    { key: 'monitor', label: 'Monitor' },
-    { key: 'dock_usb', label: 'Dock USB' },
-    { key: 'junto_janela', label: 'Junto à janela' },
-    { key: 'ergonomica', label: 'Cadeira ergonómica' },
-];
 
 export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro }) {
     const { errors } = usePage().props;
@@ -28,8 +26,12 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
     const [preferencias, setPreferencias] = useState({
         monitor: false,
         dock_usb: false,
+        hdmi: false,
         junto_janela: false,
         ergonomica: false,
+        luz_natural: false,
+        zona_silenciosa: false,
+        proximo_copa: false,
     });
     const [setoresFiltrados, setSetoresFiltrados] = useState([]);
     const [lugares, setLugares] = useState([]);
@@ -37,7 +39,6 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
         secretariaId: reserva.secretaria_id,
         periodoId: reserva.periodo_id,
     });
-    const [observacoes, setObservacoes] = useState(reserva.observacoes ?? '');
     const [aGuardar, setAGuardar] = useState(false);
 
     // Filtra os tipos de espaço conforme o piso selecionado. Mantém o
@@ -56,6 +57,15 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
             return setorAindaValido ? atual : { ...atual, setor_id: '' };
         });
     }, [filtros.piso_id]);
+
+    const setorSelecionado = setoresFiltrados.find(
+        (setor) => setor.id == filtros.setor_id,
+    );
+
+    const imagemPorTipo =
+        IMAGEM_POR_NOME_SETOR[setorSelecionado?.nome] ??
+        IMAGEM_POR_TIPO_SETOR[setorSelecionado?.tipo] ??
+        null;
 
     // Consulta os lugares do setor escolhido, excluindo esta própria
     // reserva do cálculo de disponibilidade (para não aparecer bloqueada
@@ -112,7 +122,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
             data: filtros.data,
             periodo_id: selecao.periodoId,
             secretaria_id: selecao.secretariaId,
-            observacoes,
+            observacoes: reserva.observacoes ?? '',
         }, {
             onFinish: () => setAGuardar(false),
         });
@@ -220,28 +230,16 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                         </div>
                     </div>
 
-                    <div className="mt-5">
-                        <p className={labelClass}>Preferências</p>
-                        <div className="flex flex-wrap gap-x-6 gap-y-2">
-                            {PREFERENCIAS.map((preferencia) => (
-                                <label
-                                    key={preferencia.key}
-                                    className="flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-300"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={preferencias[preferencia.key]}
-                                        onChange={() => setPreferencias((atual) => ({
-                                            ...atual,
-                                            [preferencia.key]: !atual[preferencia.key],
-                                        }))}
-                                        className="h-4 w-4 rounded border-slate-300 text-teal-500 focus:ring-teal-500"
-                                    />
-                                    {preferencia.label}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
+                    <PreferenciasPanel
+                        preferenciasDisponiveis={PREFERENCIAS}
+                        preferencias={preferencias}
+                        onAlternarPreferencia={(chave) =>
+                            setPreferencias((atual) => ({
+                                ...atual,
+                                [chave]: !atual[chave],
+                            }))
+                        }
+                    />
 
                     <div className="mt-8">
                         {lugares.length === 0 ? (
@@ -319,6 +317,26 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                                         );
                                                     })}
                                                 </div>
+
+                                                {selecionada && selecao.periodoId && (
+                                                    <div className="mt-3 flex items-center gap-2">
+                                                        <button
+                                                            type="submit"
+                                                            disabled={aGuardar}
+                                                            className="flex-1 rounded-xl bg-teal-500 px-3 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+                                                        >
+                                                            {aGuardar ? 'A guardar...' : 'Guardar Alterações'}
+                                                        </button>
+
+                                                        <Link
+                                                            href={route('reservas.index')}
+                                                            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
+                                                        >
+                                                            <ArrowLeft size={16} strokeWidth={1.9} />
+                                                            Cancelar
+                                                        </Link>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     );
@@ -327,34 +345,6 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                         )}
                     </div>
 
-                    <div className="mt-8">
-                        <label htmlFor="observacoes" className={labelClass}>Observações</label>
-                        <textarea
-                            id="observacoes"
-                            rows={4}
-                            value={observacoes}
-                            onChange={(e) => setObservacoes(e.target.value)}
-                            className={`${fieldClass} h-auto py-2.5`}
-                        />
-                    </div>
-
-                    <div className="mt-8 flex items-center gap-3">
-                        <button
-                            type="submit"
-                            disabled={!selecao.secretariaId || !selecao.periodoId || aGuardar}
-                            className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            {aGuardar ? 'A guardar...' : 'Guardar Alterações'}
-                        </button>
-
-                        <Link
-                            href={route('reservas.index')}
-                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
-                        >
-                            <ArrowLeft size={16} strokeWidth={1.9} />
-                            Cancelar
-                        </Link>
-                    </div>
                 </form>
             </section>
         </DashboardLayout>

@@ -28,12 +28,36 @@ class SecretariaResource extends JsonResource
             'planta_y' => $this->planta_y,
             'angulo' => $this->angulo,
 
+            /*
+            |--------------------------------------------------------------------------
+            | Características da Secretária
+            |--------------------------------------------------------------------------
+            */
+
             'monitor' => (bool) $this->monitor,
+            'dois_monitores' => (bool) $this->dois_monitores,
             'dock_usb' => (bool) $this->dock_usb,
-            'junto_janela' => (bool) $this->junto_janela,
+            'hdmi' => (bool) $this->hdmi,
             'ergonomica' => (bool) $this->ergonomica,
+            'junto_janela' => (bool) $this->junto_janela,
+            'luz_natural' => (bool) $this->luz_natural,
+            'zona_silenciosa' => (bool) $this->zona_silenciosa,
+            'proximo_copa' => (bool) $this->proximo_copa,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Estado
+            |--------------------------------------------------------------------------
+            */
+
             'reservavel' => (bool) $this->reservavel,
             'ativo' => (bool) $this->ativo,
+
+            /*
+            |--------------------------------------------------------------------------
+            | Outros
+            |--------------------------------------------------------------------------
+            */
 
             'descricao' => $this->descricao,
             'imagem' => $this->imagem,

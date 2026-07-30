@@ -17,6 +17,7 @@ class UpdateSecretariaRequest extends FormRequest
         $secretaria = $this->route('secretaria');
 
         return [
+
             'setor_id' => [
                 'sometimes',
                 'required',
@@ -59,7 +60,18 @@ class UpdateSecretariaRequest extends FormRequest
                 'max:360',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Características da Secretária
+            |--------------------------------------------------------------------------
+            */
+
             'monitor' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            'dois_monitores' => [
                 'sometimes',
                 'boolean',
             ],
@@ -69,7 +81,7 @@ class UpdateSecretariaRequest extends FormRequest
                 'boolean',
             ],
 
-            'junto_janela' => [
+            'hdmi' => [
                 'sometimes',
                 'boolean',
             ],
@@ -78,6 +90,32 @@ class UpdateSecretariaRequest extends FormRequest
                 'sometimes',
                 'boolean',
             ],
+
+            'junto_janela' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            'luz_natural' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            'zona_silenciosa' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            'proximo_copa' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Estado
+            |--------------------------------------------------------------------------
+            */
 
             'reservavel' => [
                 'sometimes',

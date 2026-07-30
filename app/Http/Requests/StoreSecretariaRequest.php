@@ -15,6 +15,7 @@ class StoreSecretariaRequest extends FormRequest
     public function rules(): array
     {
         return [
+
             'setor_id' => [
                 'required',
                 'exists:setores,id',
@@ -49,7 +50,18 @@ class StoreSecretariaRequest extends FormRequest
                 'max:360',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Características da Secretária
+            |--------------------------------------------------------------------------
+            */
+
             'monitor' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            'dois_monitores' => [
                 'sometimes',
                 'boolean',
             ],
@@ -59,7 +71,7 @@ class StoreSecretariaRequest extends FormRequest
                 'boolean',
             ],
 
-            'junto_janela' => [
+            'hdmi' => [
                 'sometimes',
                 'boolean',
             ],
@@ -68,6 +80,32 @@ class StoreSecretariaRequest extends FormRequest
                 'sometimes',
                 'boolean',
             ],
+
+            'junto_janela' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            'luz_natural' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            'zona_silenciosa' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            'proximo_copa' => [
+                'sometimes',
+                'boolean',
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Estado
+            |--------------------------------------------------------------------------
+            */
 
             'reservavel' => [
                 'sometimes',

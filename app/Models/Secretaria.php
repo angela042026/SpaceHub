@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
 class Secretaria extends Model
@@ -17,12 +18,22 @@ class Secretaria extends Model
         'planta_x',
         'planta_y',
         'angulo',
-        'monitor',
-        'dock_usb',
-        'junto_janela',
-        'ergonomica',
+
+        // Estado
         'reservavel',
         'ativo',
+
+        // Características filtráveis
+        'monitor',
+        'dock_usb',
+        'hdmi',
+        'junto_janela',
+        'ergonomica',
+        'luz_natural',
+        'zona_silenciosa',
+        'proximo_copa',
+
+        // Outros
         'descricao',
         'imagem',
     ];
@@ -34,12 +45,18 @@ class Secretaria extends Model
             'planta_x' => 'integer',
             'planta_y' => 'integer',
             'angulo' => 'decimal:2',
-            'monitor' => 'boolean',
-            'dock_usb' => 'boolean',
-            'junto_janela' => 'boolean',
-            'ergonomica' => 'boolean',
+
             'reservavel' => 'boolean',
             'ativo' => 'boolean',
+
+            'monitor' => 'boolean',
+            'dock_usb' => 'boolean',
+            'hdmi' => 'boolean',
+            'junto_janela' => 'boolean',
+            'ergonomica' => 'boolean',
+            'luz_natural' => 'boolean',
+            'zona_silenciosa' => 'boolean',
+            'proximo_copa' => 'boolean',
         ];
     }
 
@@ -60,6 +77,14 @@ class Secretaria extends Model
     public function reservas(): HasMany
     {
         return $this->hasMany(Reserva::class);
+    }
+
+    public function caracteristicas(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Caracteristica::class,
+            'caracteristica_secretaria'
+        );
     }
 
     public function checkinUrl(): string
