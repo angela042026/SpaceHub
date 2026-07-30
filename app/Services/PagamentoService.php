@@ -27,14 +27,14 @@ class PagamentoService
         if ($setor === null) {
             throw ValidationException::withMessages([
                 'secretaria_id' =>
-                    'Não foi possível determinar o setor da reserva.',
+                'Não foi possível determinar o setor da reserva.',
             ]);
         }
 
         if ($periodo === null) {
             throw ValidationException::withMessages([
                 'periodo_id' =>
-                    'Não foi possível determinar o período da reserva.',
+                'Não foi possível determinar o período da reserva.',
             ]);
         }
 
@@ -114,7 +114,7 @@ class PagamentoService
         if ($pagamento->estado === 'pago') {
             throw ValidationException::withMessages([
                 'pagamento' =>
-                    'Não é possível cancelar esta reserva porque o pagamento já foi confirmado. O reembolso ainda não se encontra disponível.',
+                'Não é possível cancelar esta reserva porque o pagamento já foi confirmado. O reembolso ainda não se encontra disponível.',
             ]);
         }
 
@@ -123,7 +123,7 @@ class PagamentoService
          */
         throw ValidationException::withMessages([
             'pagamento' =>
-                'Não foi possível cancelar a reserva devido ao estado atual do pagamento.',
+            'Não foi possível cancelar a reserva devido ao estado atual do pagamento.',
         ]);
     }
 
@@ -169,7 +169,7 @@ class PagamentoService
         ) {
             throw ValidationException::withMessages([
                 'periodo_id' =>
-                    'As reservas semanais, mensais e anuais apenas podem ser efetuadas para o dia inteiro.',
+                'As reservas semanais, mensais e anuais apenas podem ser efetuadas para o dia inteiro.',
             ]);
         }
 
@@ -186,14 +186,14 @@ class PagamentoService
 
             default => throw ValidationException::withMessages([
                 'tipo_duracao' =>
-                    'O tipo de duração selecionado não é válido.',
+                'O tipo de duração selecionado não é válido.',
             ]),
         };
 
         if ($valor === null) {
             throw ValidationException::withMessages([
                 'secretaria_id' =>
-                    'O espaço selecionado ainda não possui um preço definido para esta duração.',
+                'O espaço selecionado ainda não possui um preço definido para esta duração.',
             ]);
         }
 
@@ -248,7 +248,7 @@ class PagamentoService
         if ($pagamento->estado !== 'pendente') {
             throw ValidationException::withMessages([
                 'pagamento' =>
-                    'Não é possível alterar o espaço, o período ou a duração porque o pagamento já não se encontra pendente.',
+                'Não é possível alterar o espaço, o período ou a duração porque o pagamento já não se encontra pendente.',
             ]);
         }
 
@@ -263,14 +263,14 @@ class PagamentoService
         if ($setor === null) {
             throw ValidationException::withMessages([
                 'secretaria_id' =>
-                    'Não foi possível determinar o setor da reserva.',
+                'Não foi possível determinar o setor da reserva.',
             ]);
         }
 
         if ($periodo === null) {
             throw ValidationException::withMessages([
                 'periodo_id' =>
-                    'Não foi possível determinar o período da reserva.',
+                'Não foi possível determinar o período da reserva.',
             ]);
         }
 
@@ -312,7 +312,7 @@ class PagamentoService
         ) {
             throw ValidationException::withMessages([
                 'metodo_pagamento' =>
-                    'O método de pagamento selecionado não é válido.',
+                'O método de pagamento selecionado não é válido.',
             ]);
         }
 
@@ -329,7 +329,7 @@ class PagamentoService
             if ($pagamentoBloqueado->estado !== 'pendente') {
                 throw ValidationException::withMessages([
                     'pagamento' =>
-                        'Este pagamento já não se encontra pendente.',
+                    'Este pagamento já não se encontra pendente.',
                 ]);
             }
 
@@ -342,9 +342,14 @@ class PagamentoService
             if ($reserva->cancelada_at !== null) {
                 throw ValidationException::withMessages([
                     'pagamento' =>
-                        'Não é possível pagar uma reserva cancelada.',
+                    'Não é possível pagar uma reserva cancelada.',
                 ]);
             }
+
+            $estadoConfirmada = EstadoReserva::where(
+                'codigo',
+                'confirmada'
+            )->firstOrFail();
 
             $pagamentoBloqueado->update([
                 'metodo_pagamento' => $metodoPagamento,
@@ -352,8 +357,12 @@ class PagamentoService
                 'data_pagamento' => now(),
             ]);
 
+            $reserva->update([
+                'estado_reserva_id' => $estadoConfirmada->id,
+            ]);
+
             return $pagamentoBloqueado->fresh([
-                'reserva',
+                'reserva.estadoReserva',
             ]);
         });
     }
