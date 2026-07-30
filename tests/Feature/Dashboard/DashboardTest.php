@@ -92,6 +92,54 @@ class DashboardTest extends TestCase
         );
     }
 
+    /**
+     * Cobre os dados enviados ao dashboard do Colaborador, não só o nome
+     * do componente — protege contra regressões nas props que
+     * Dashboard/Funcionario.jsx efetivamente usa.
+     */
+    public function test_colaborador_recebe_dados_do_dashboard_funcionario(): void
+    {
+        $user = $this->criarUsuarioComRole('Colaborador');
+        $this->criarSecretaria();
+
+        $response = $this->actingAs($user)->get('/dashboard');
+
+        $response->assertOk();
+        $response->assertInertia(function (Assert $page) {
+            $page->component('Dashboard/Funcionario')
+                ->has('pisos')
+                ->has('edificios')
+                ->has('reservaHojeUtilizador')
+                ->has('proximasReservas')
+                ->where('stats.totalSecretarias', 1)
+                ->etc();
+        });
+    }
+
+    /**
+     * Cobre os dados enviados ao dashboard do Utilizador comum, não só o
+     * nome do componente — protege contra regressões nas props que
+     * Dashboard/Utilizador.jsx efetivamente usa.
+     */
+    public function test_utilizador_comum_recebe_dados_do_dashboard_utilizador(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $this->criarSecretaria();
+
+        $response = $this->actingAs($user)->get('/dashboard');
+
+        $response->assertOk();
+        $response->assertInertia(function (Assert $page) {
+            $page->component('Dashboard/Utilizador')
+                ->has('pisos')
+                ->has('edificios')
+                ->has('reservaHojeUtilizador')
+                ->has('proximasReservas')
+                ->where('stats.totalSecretarias', 1)
+                ->etc();
+        });
+    }
+
     public function test_stats_basicos_aparecem_sem_reservas(): void
     {
         $user = $this->criarUsuarioComRole('Administrador');

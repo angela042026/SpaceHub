@@ -21,7 +21,7 @@ class ReservaExpiradaNotification extends Notification
         return [
             'tipo' => 'reserva_expirada',
             'titulo' => 'Reserva expirada',
-            'mensagem' => "A tua reserva para o dia {$this->reserva->data} expirou por falta de check-in.",
+            'mensagem' => "A tua reserva para o dia {$this->reserva->data->format('d/m/Y')} expirou por falta de check-in.",
             'reserva_id' => $this->reserva->id,
         ];
     }

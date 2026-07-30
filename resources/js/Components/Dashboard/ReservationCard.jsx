@@ -1,9 +1,6 @@
-import { router, usePage } from '@inertiajs/react';
-
+import { Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-
 import Modal from '@/Components/Modal';
-
 import {
 
     AlertTriangle,
@@ -141,18 +138,13 @@ export default function ReservationCard({ reserva }) {
 
                         Ainda não existe nenhuma reserva registada para o dia de hoje.
                     </p>
-                    <button
-
-                        type="button"
-
-                        className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-navy-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-navy-950 disabled:cursor-not-allowed disabled:opacity-50"
-
-                        disabled
+                    <Link
+                        href={route('reservas.create')}
+                        className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-navy-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-navy-950"
                     >
                         <CalendarCheck2 size={18} strokeWidth={1.9} />
-
                         Reservar Secretária
-                    </button>
+                    </Link>
                 </div>
             </section>
 

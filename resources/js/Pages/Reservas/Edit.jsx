@@ -99,6 +99,12 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
             });
     }, [filtros.data, filtros.setor_id, preferencias]);
 
+    const setorSelecionado = setores.find(
+        (setor) => setor.id == filtros.setor_id,
+    );
+
+    const imagemPorTipo = resolverImagemPorSetor(setorSelecionado);
+
     const escolher = (secretariaId, periodoId) => {
         setSelecao({ secretariaId, periodoId });
     };

@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import {
+    AlertTriangle,
     Camera as CameraIcon,
     CheckCircle2,
     CircleCheck,
@@ -17,6 +18,28 @@ import { useEffect, useRef, useState } from 'react';
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
 const READER_ID = 'qr-reader';
+
+/**
+ * Confirma que o QR Code lido aponta para a página de check-in do
+ * próprio site (mesma origem), e não para um URL arbitrário. Um QR
+ * Code físico pode ser substituído/adulterado por alguém com acesso
+ * ao espaço — sem esta validação, o browser (autenticado) seria
+ * redirecionado para onde o conteúdo do código apontasse.
+ */
+function ehLinkDeCheckinValido(texto) {
+    let url;
+
+    try {
+        url = new URL(texto, window.location.origin);
+    } catch {
+        return false;
+    }
+
+    return (
+        url.origin === window.location.origin
+        && url.pathname.startsWith('/checkin/scan/')
+    );
+}
 
 const steps = [
     {
@@ -56,6 +79,7 @@ export default function Camera() {
     const [scannerStarted, setScannerStarted] = useState(false);
     const [status, setStatus] = useState('idle');
     const [message, setMessage] = useState('');
+    const [qrInvalido, setQrInvalido] = useState(false);
 
     useEffect(() => {
         if (!scannerStarted || status === 'success') {
@@ -79,6 +103,12 @@ export default function Camera() {
 
         scanner.render(
             async (decodedText) => {
+                if (!ehLinkDeCheckinValido(decodedText)) {
+                    setQrInvalido(true);
+                    return;
+                }
+
+                setQrInvalido(false);
                 setStatus('success');
                 setMessage(
                     'QR Code lido com sucesso. Estamos a validar a sua reserva...',
@@ -117,6 +147,7 @@ export default function Camera() {
 
     const startScanner = () => {
         setMessage('');
+        setQrInvalido(false);
         setStatus('scanning');
         setScannerStarted(true);
     };
@@ -299,6 +330,22 @@ export default function Camera() {
                                             className="overflow-hidden rounded-[18px]"
                                         />
                                     </div>
+
+                                    {qrInvalido && (
+                                        <div className="mt-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+                                            <AlertTriangle
+                                                size={18}
+                                                className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400"
+                                            />
+
+                                            <p className="text-xs leading-5 text-amber-700 dark:text-amber-300">
+                                                Este código não é um QR Code de
+                                                check-in do SpaceHub. Certifique-se
+                                                de que está a ler o código afixado
+                                                na secretária correta.
+                                            </p>
+                                        </div>
+                                    )}
 
                                     <div className="mt-4 flex items-start gap-3 rounded-2xl bg-slate-50 p-4 dark:bg-slate-900/40">
                                         <ScanLine

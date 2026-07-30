@@ -2,7 +2,7 @@ import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import OfficeMap from '@/Components/Dashboard/OfficeMap';
+import OfficeMap from '@/Components/Dashboard/OfficeMap/OfficeMap';
 import ReservationCard from '@/Components/Dashboard/ReservationCard';
 import UpcomingReservations from '@/Components/Dashboard/UpcomingReservations';
 

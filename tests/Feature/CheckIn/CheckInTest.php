@@ -45,6 +45,52 @@ class CheckInTest extends TestCase
             ->where('status', 'pronta'));
     }
 
+    public function test_scan_de_reserva_com_checkin_ja_feito(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $reserva = $this->criarReservaHoje($user);
+        $reserva->update(['check_in_at' => now()]);
+
+        $this->travelTo(Carbon::today()->setTime(8, 15));
+
+        $response = $this->actingAs($user)
+            ->get(route('checkin.scan', $reserva->secretaria->qr_token));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('CheckIn/Scan')
+            ->where('status', 'ja_check_in'));
+    }
+
+    public function test_scan_sem_reserva_para_a_secretaria(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $secretaria = $this->criarSecretaria();
+
+        $response = $this->actingAs($user)
+            ->get(route('checkin.scan', $secretaria->qr_token));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('CheckIn/Scan')
+            ->where('status', 'sem_reserva'));
+    }
+
+    public function test_scan_de_secretaria_ocupada_por_outro_utilizador(): void
+    {
+        $dono = $this->criarUsuarioComRole('Utilizador');
+        $outro = $this->criarUsuarioComRole('Utilizador');
+        $reserva = $this->criarReservaHoje($dono);
+
+        $response = $this->actingAs($outro)
+            ->get(route('checkin.scan', $reserva->secretaria->qr_token));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('CheckIn/Scan')
+            ->where('status', 'ocupada_por_outro'));
+    }
+
     public function test_scan_com_token_inexistente_devolve_404(): void
     {
         $user = $this->criarUsuarioComRole('Utilizador');

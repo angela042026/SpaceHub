@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Avaliacao;
 use App\Models\Edificio;
 use App\Models\EstadoReserva;
 use App\Models\Piso;
@@ -45,6 +46,7 @@ class ReservaController extends Controller
                 'periodo',
                 'estadoReserva',
                 'pagamento',
+                'avaliacao',
             ]);
 
         // Filtrar por estado
