@@ -25,6 +25,9 @@ class PagamentoTest extends TestCase
     {
         parent::setUp();
 
+        $this->criarEstadoReserva('pendente');
+        $this->criarEstadoReserva('confirmada');
+
         $this->pagamentoService = app(PagamentoService::class);
     }
 

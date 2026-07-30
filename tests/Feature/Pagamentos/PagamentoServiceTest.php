@@ -25,9 +25,11 @@ class PagamentoServiceTest extends TestCase
     {
         parent::setUp();
 
+        $this->criarEstadoReserva('pendente');
+        $this->criarEstadoReserva('confirmada');
+
         $this->pagamentoService = app(PagamentoService::class);
     }
-
     /**
      * Cria uma reserva válida para os testes de pagamentos.
      */
@@ -275,15 +277,19 @@ class PagamentoServiceTest extends TestCase
         ]);
     }
 
-    public function test_confirma_pagamento_pendente_com_cartao(): void
+    public function test_confirma_pagamento_e_altera_reserva_para_confirmada(): void
     {
         $pagamento = $this->criarPagamentoPendente();
+
+        $reserva = $pagamento->reserva;
 
         $pagamentoConfirmado = $this->pagamentoService
             ->confirmarPagamento(
                 $pagamento,
                 'cartao'
             );
+
+        $reserva->refresh();
 
         $this->assertSame(
             'pago',
@@ -299,10 +305,20 @@ class PagamentoServiceTest extends TestCase
             $pagamentoConfirmado->data_pagamento
         );
 
+        $this->assertSame(
+            'confirmada',
+            $reserva->estadoReserva->codigo
+        );
+
         $this->assertDatabaseHas('pagamentos', [
             'id' => $pagamento->id,
             'estado' => 'pago',
             'metodo_pagamento' => 'cartao',
+        ]);
+
+        $this->assertDatabaseHas('reservas', [
+            'id' => $reserva->id,
+            'estado_reserva_id' => $reserva->estado_reserva_id,
         ]);
     }
 
