@@ -11,16 +11,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-       $this->call([
-    RoleSeeder::class,
-    PeriodoSeeder::class,
-    EstadoReservaSeeder::class,
-    SpaceHubEstruturaSeeder::class,
-    UserSeeder::class,
-    ReservaSeeder::class,
-    PagamentoSeeder::class,
-    FaqSeeder::class,
-    FaqSeeder::class,
-]);
-
-}}
+        $this->call([
+            RoleSeeder::class,
+            PeriodoSeeder::class,
+            EstadoReservaSeeder::class,
+            CaracteristicaSeeder::class,
+            SpaceHubEstruturaSeeder::class,
+            UserSeeder::class,
+            ReservaSeeder::class,
+            PagamentoSeeder::class,
+            FaqSeeder::class,
+        ]);
+    }
+}

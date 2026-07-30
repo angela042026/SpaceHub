@@ -1,12 +1,18 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, CalendarDays, CalendarPlus } from 'lucide-react';
+import LugarCard from '@/Components/Reservas/LugarCard';
+import PreferenciasPanel from '@/Components/Reservas/PreferenciasPanel';
 import {
-    ArrowLeft,
-    CalendarDays,
-    CalendarPlus,
-    ImageOff,
-} from 'lucide-react';
+    PREFERENCIAS,
+    DURACOES,
+    IMAGEM_POR_TIPO_SETOR,
+    IMAGEM_POR_NOME_SETOR,
+    formatarDataPortugues,
+    dataEhFimDeSemana,
+    calcularDataFim,
+} from '@/Components/Reservas/reservaHelpers';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -16,171 +22,6 @@ const readOnlyFieldClass =
 
 const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
-
-const PREFERENCIAS = [
-    { key: 'monitor', label: 'Monitor' },
-    { key: 'dois_monitores', label: 'Dois monitores' },
-    { key: 'dock_usb', label: 'Dock USB-C' },
-    { key: 'hdmi', label: 'HDMI' },
-    { key: 'ergonomica', label: 'Cadeira ergonómica' },
-    { key: 'junto_janela', label: 'Junto à janela' },
-    { key: 'luz_natural', label: 'Luz natural' },
-    { key: 'zona_silenciosa', label: 'Zona silenciosa' },
-    { key: 'proximo_copa', label: 'Próximo da copa' },
-];
-
-const DURACOES = {
-    diaria: {
-        nome: 'Diária',
-        diasUteis: 1,
-    },
-    semanal: {
-        nome: 'Semanal',
-        diasUteis: 5,
-    },
-    mensal: {
-        nome: 'Mensal',
-        diasUteis: 22,
-    },
-    anual: {
-        nome: 'Anual',
-        diasUteis: 264,
-    },
-};
-
-// Imagem por tipo de setor (fallback quando a secretária não tem foto
-// própria) — mesmas imagens já usadas no carrossel da landing page.
-const IMAGEM_POR_TIPO_SETOR = {
-    open_space: '/images/landing/espaco-trabalho.png',
-    escritorio: '/images/landing/escritorio-privado.png',
-    escritorio_executivo: '/images/landing/escritorio-privado.png',
-    sala_reunioes: '/images/landing/saladereuniao.png',
-    sala_criativa: '/images/landing/espaco-comum.png',
-    sala_espera: '/images/landing/rececao.png',
-    rececao: '/images/landing/rececao.png',
-    copa: '/images/landing/lounge.png',
-    lounge: '/images/landing/lounge.png',
-    phone_booth: '/images/landing/phone-booth.png',
-};
-
-// Setores com imagem própria (têm prioridade sobre a imagem do tipo).
-const IMAGEM_POR_NOME_SETOR = {
-    'Sala de Reuniões Redonda': '/images/landing/salamesaredonda.png',
-    'Sala Criativa': '/images/landing/salacriativa.png',
-    'Sala de Reuniões Média': '/images/landing/salaReunioes.png',
-};
-
-/**
- * Criar um objeto Date sem problemas de conversão de fuso horário.
- */
-const criarDataLocal = (data) => {
-    if (!data) {
-        return null;
-    }
-
-    const partes = data.split('-').map(Number);
-
-    if (partes.length !== 3) {
-        return null;
-    }
-
-    const [ano, mes, dia] = partes;
-
-    return new Date(ano, mes - 1, dia, 12, 0, 0);
-};
-
-/**
- * Converter um objeto Date para o formato YYYY-MM-DD.
- */
-const formatarDataInput = (data) => {
-    if (!(data instanceof Date) || Number.isNaN(data.getTime())) {
-        return '';
-    }
-
-    const ano = data.getFullYear();
-    const mes = String(data.getMonth() + 1).padStart(2, '0');
-    const dia = String(data.getDate()).padStart(2, '0');
-
-    return `${ano}-${mes}-${dia}`;
-};
-
-/**
- * Apresentar a data no formato português.
- */
-const formatarDataPortugues = (data) => {
-    const dataLocal = criarDataLocal(data);
-
-    if (!dataLocal) {
-        return '';
-    }
-
-    return new Intl.DateTimeFormat('pt-PT', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    }).format(dataLocal);
-};
-
-/**
- * Verificar se uma data corresponde a sábado ou domingo.
- */
-const dataEhFimDeSemana = (data) => {
-    const dataLocal = criarDataLocal(data);
-
-    if (!dataLocal) {
-        return false;
-    }
-
-    const diaSemana = dataLocal.getDay();
-
-    return diaSemana === 0 || diaSemana === 6;
-};
-
-/**
- * Calcular a data final contando apenas dias úteis.
- *
- * A data inicial conta como primeiro dia útil.
- */
-const calcularDataFim = (dataInicio, tipoDuracao) => {
-    if (!dataInicio) {
-        return '';
-    }
-
-    const dataAtual = criarDataLocal(dataInicio);
-
-    if (!dataAtual) {
-        return '';
-    }
-
-    const quantidadeDiasUteis =
-        DURACOES[tipoDuracao]?.diasUteis ?? 1;
-
-    if (quantidadeDiasUteis === 1) {
-        return formatarDataInput(dataAtual);
-    }
-
-    /*
-     * As reservas longas não devem começar ao fim de semana.
-     * O backend também valida esta regra.
-     */
-    if (dataEhFimDeSemana(dataInicio)) {
-        return '';
-    }
-
-    let diasContados = 1;
-
-    while (diasContados < quantidadeDiasUteis) {
-        dataAtual.setDate(dataAtual.getDate() + 1);
-
-        const diaSemana = dataAtual.getDay();
-
-        if (diaSemana !== 0 && diaSemana !== 6) {
-            diasContados += 1;
-        }
-    }
-
-    return formatarDataInput(dataAtual);
-};
 
 export default function Create({
     periodos,
@@ -198,7 +39,6 @@ export default function Create({
 
     const [preferencias, setPreferencias] = useState({
         monitor: false,
-        dois_monitores: false,
         dock_usb: false,
         hdmi: false,
         ergonomica: false,
@@ -755,44 +595,11 @@ export default function Create({
                             </div>
                         )}
 
-                    <div className="mt-5">
-                        <p className={labelClass}>
-                            Preferências
-                        </p>
-
-                        <div className="flex flex-wrap gap-x-6 gap-y-2">
-                            {PREFERENCIAS.map(
-                                (preferencia) => (
-                                    <label
-                                        key={
-                                            preferencia.key
-                                        }
-                                        className="flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-300"
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={
-                                                preferencias[
-                                                preferencia
-                                                    .key
-                                                ]
-                                            }
-                                            onChange={() =>
-                                                alternarPreferencia(
-                                                    preferencia.key,
-                                                )
-                                            }
-                                            className="h-4 w-4 rounded border-slate-300 text-teal-500 focus:ring-teal-500"
-                                        />
-
-                                        {
-                                            preferencia.label
-                                        }
-                                    </label>
-                                ),
-                            )}
-                        </div>
-                    </div>
+                    <PreferenciasPanel
+                        preferenciasDisponiveis={PREFERENCIAS}
+                        preferencias={preferencias}
+                        onAlternarPreferencia={alternarPreferencia}
+                    />
 
                     <div className="mt-8">
                         {!filtros.data ||
@@ -834,217 +641,26 @@ export default function Create({
 
                                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                                     {lugaresExibidos.map(
-                                        (secretaria) => {
-                                            const periodoEscolhido =
-                                                reservaLonga
-                                                    ? 'dia_inteiro'
-                                                    : periodosEscolhidos[
-                                                    secretaria
-                                                        .id
-                                                    ] ??
-                                                    null;
-
-                                            const semDisponibilidade =
-                                                periodosReserva.every(
-                                                    (
-                                                        periodo,
-                                                    ) =>
-                                                        !secretaria
-                                                            .periodos_disponiveis[
-                                                        periodo
-                                                            .id
-                                                        ],
-                                                );
-
-                                            const diaInteiroDisponivel =
-                                                periodosReserva.length >
-                                                1 &&
-                                                periodosReserva.every(
-                                                    (
-                                                        periodo,
-                                                    ) =>
-                                                        secretaria
-                                                            .periodos_disponiveis[
-                                                        periodo
-                                                            .id
-                                                        ],
-                                                );
-
-                                            const ehAlvo =
-                                                secretaria.id ===
-                                                secretariaAlvo;
-
-                                            const podeReservar =
-                                                reservaLonga
-                                                    ? diaInteiroDisponivel
-                                                    : Boolean(
-                                                        periodoEscolhido,
-                                                    );
-
-                                            return (
-                                                <div
-                                                    key={
-                                                        secretaria.id
-                                                    }
-                                                    id={`lugar-${secretaria.id}`}
-                                                    className={`overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-slate-900 ${ehAlvo
-                                                            ? 'border-teal-500 ring-4 ring-teal-500/20'
-                                                            : 'border-slate-200 dark:border-slate-800'
-                                                        }`}
-                                                >
-                                                    {secretaria.imagem || imagemPorTipo ? (
-                                                        <img
-                                                            src={
-                                                                secretaria.imagem || imagemPorTipo
-                                                            }
-                                                            alt={
-                                                                secretaria.codigo
-                                                            }
-                                                            className="h-40 w-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="flex h-40 w-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-slate-800">
-                                                            <ImageOff
-                                                                size={
-                                                                    28
-                                                                }
-                                                                strokeWidth={
-                                                                    1.6
-                                                                }
-                                                            />
-                                                        </div>
-                                                    )}
-
-                                                    <div className="p-4">
-                                                        <p className="font-bold text-slate-900 dark:text-white">
-                                                            {
-                                                                secretaria.codigo
-                                                            }
-                                                        </p>
-
-                                                        {secretaria.descricao && (
-                                                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                                                {
-                                                                    secretaria.descricao
-                                                                }
-                                                            </p>
-                                                        )}
-
-                                                        <div className="mt-4 flex gap-2">
-                                                            {!reservaLonga &&
-                                                                periodosReserva.map(
-                                                                    (
-                                                                        periodo,
-                                                                    ) => {
-                                                                        const disponivel =
-                                                                            secretaria
-                                                                                .periodos_disponiveis[
-                                                                            periodo
-                                                                                .id
-                                                                            ];
-
-                                                                        const selecionado =
-                                                                            periodoEscolhido ===
-                                                                            periodo.id;
-
-                                                                        return (
-                                                                            <button
-                                                                                key={
-                                                                                    periodo.id
-                                                                                }
-                                                                                type="button"
-                                                                                disabled={
-                                                                                    !disponivel
-                                                                                }
-                                                                                onClick={() =>
-                                                                                    escolherPeriodo(
-                                                                                        secretaria.id,
-                                                                                        periodo.id,
-                                                                                    )
-                                                                                }
-                                                                                className={`flex-1 rounded-xl border px-3 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${selecionado
-                                                                                        ? 'border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400'
-                                                                                        : 'border-slate-200 text-slate-600 hover:border-teal-500/50 dark:border-slate-700 dark:text-slate-300'
-                                                                                    }`}
-                                                                            >
-                                                                                {
-                                                                                    periodo.nome
-                                                                                }
-                                                                            </button>
-                                                                        );
-                                                                    },
-                                                                )}
-
-                                                            <button
-                                                                type="button"
-                                                                disabled={
-                                                                    !diaInteiroDisponivel
-                                                                }
-                                                                onClick={() =>
-                                                                    escolherPeriodo(
-                                                                        secretaria.id,
-                                                                        'dia_inteiro',
-                                                                    )
-                                                                }
-                                                                className={`flex-1 rounded-xl border px-3 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${periodoEscolhido ===
-                                                                        'dia_inteiro'
-                                                                        ? 'border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400'
-                                                                        : 'border-slate-200 text-slate-600 hover:border-teal-500/50 dark:border-slate-700 dark:text-slate-300'
-                                                                    }`}
-                                                            >
-                                                                Dia
-                                                                inteiro
-                                                            </button>
-                                                        </div>
-
-                                                        {!reservaLonga &&
-                                                            semDisponibilidade ? (
-                                                            <p className="mt-3 text-center text-xs text-slate-400">
-                                                                Sem
-                                                                disponibilidade
-                                                                nesta
-                                                                data.
-                                                            </p>
-                                                        ) : reservaLonga &&
-                                                            !diaInteiroDisponivel ? (
-                                                            <p className="mt-3 text-center text-xs text-slate-400">
-                                                                Dia
-                                                                inteiro
-                                                                indisponível
-                                                                na data
-                                                                inicial.
-                                                            </p>
-                                                        ) : (
-                                                            <button
-                                                                type="button"
-                                                                disabled={
-                                                                    !podeReservar ||
-                                                                    aReservar ===
-                                                                    secretaria.id
-                                                                }
-                                                                onClick={() =>
-                                                                    reservar(
-                                                                        secretaria,
-                                                                    )
-                                                                }
-                                                                className="mt-3 w-full rounded-xl bg-teal-500 px-3 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60"
-                                                            >
-                                                                {aReservar ===
-                                                                    secretaria.id
-                                                                    ? 'A reservar...'
-                                                                    : reservaLonga
-                                                                        ? `Reservar de ${formatarDataPortugues(
-                                                                            filtros.data,
-                                                                        )} a ${formatarDataPortugues(
-                                                                            dataFimCalculada,
-                                                                        )}`
-                                                                        : 'Reservar'}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            );
-                                        },
+                                        (secretaria) => (
+                                            <LugarCard
+                                                key={secretaria.id}
+                                                secretaria={secretaria}
+                                                periodosReserva={periodosReserva}
+                                                reservaLonga={reservaLonga}
+                                                periodoEscolhido={
+                                                    reservaLonga
+                                                        ? 'dia_inteiro'
+                                                        : periodosEscolhidos[secretaria.id] ?? null
+                                                }
+                                                onEscolherPeriodo={escolherPeriodo}
+                                                ehAlvo={secretaria.id === secretariaAlvo}
+                                                imagemPorTipo={imagemPorTipo}
+                                                aReservar={aReservar}
+                                                onReservar={reservar}
+                                                dataInicio={filtros.data}
+                                                dataFimCalculada={dataFimCalculada}
+                                            />
+                                        ),
                                     )}
                                 </div>
                             </div>

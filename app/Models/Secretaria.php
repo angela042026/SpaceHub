@@ -5,57 +5,59 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
 class Secretaria extends Model
 {
     protected $table = 'secretarias';
 
-protected $fillable = [
-    'setor_id',
-    'codigo',
-    'planta_x',
-    'planta_y',
-    'angulo',
-    // Características
-    'monitor',
-    'dois_monitores',
-    'dock_usb',
-    'hdmi',
-    'ergonomica',
-    'junto_janela',
-    'luz_natural',
-    'zona_silenciosa',
-    'proximo_copa',
-    // Estado
-    'reservavel',
-    'ativo',
-    // Outros
-    'descricao',
-    'imagem',
-];
+    protected $fillable = [
+        'setor_id',
+        'codigo',
+        'planta_x',
+        'planta_y',
+        'angulo',
+
+        // Estado
+        'reservavel',
+        'ativo',
+
+        // Características filtráveis
+        'monitor',
+        'dock_usb',
+        'hdmi',
+        'junto_janela',
+        'ergonomica',
+        'luz_natural',
+        'zona_silenciosa',
+        'proximo_copa',
+
+        // Outros
+        'descricao',
+        'imagem',
+    ];
 
     protected function casts(): array
     {
-    return [
-        'setor_id' => 'integer',
-        'planta_x' => 'integer',
-        'planta_y' => 'integer',
-        'angulo' => 'decimal:2',
+        return [
+            'setor_id' => 'integer',
+            'planta_x' => 'integer',
+            'planta_y' => 'integer',
+            'angulo' => 'decimal:2',
 
-        'monitor' => 'boolean',
-        'dois_monitores' => 'boolean',
-        'dock_usb' => 'boolean',
-        'hdmi' => 'boolean',
-        'ergonomica' => 'boolean',
-        'junto_janela' => 'boolean',
-        'luz_natural' => 'boolean',
-        'zona_silenciosa' => 'boolean',
-        'proximo_copa' => 'boolean',
-        
-        'reservavel' => 'boolean',
-        'ativo' => 'boolean',
-    ];
+            'reservavel' => 'boolean',
+            'ativo' => 'boolean',
+
+            'monitor' => 'boolean',
+            'dock_usb' => 'boolean',
+            'hdmi' => 'boolean',
+            'junto_janela' => 'boolean',
+            'ergonomica' => 'boolean',
+            'luz_natural' => 'boolean',
+            'zona_silenciosa' => 'boolean',
+            'proximo_copa' => 'boolean',
+        ];
     }
 
     protected static function booted(): void
@@ -75,6 +77,14 @@ protected $fillable = [
     public function reservas(): HasMany
     {
         return $this->hasMany(Reserva::class);
+    }
+
+    public function caracteristicas(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Caracteristica::class,
+            'caracteristica_secretaria'
+        );
     }
 
     public function checkinUrl(): string

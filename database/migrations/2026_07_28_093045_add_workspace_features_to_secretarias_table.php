@@ -6,12 +6,13 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::table('secretarias', function (Blueprint $table) {
 
-            $table->boolean('dois_monitores')->default(false)->after('monitor');
             $table->boolean('hdmi')->default(false)->after('dock_usb');
             $table->boolean('luz_natural')->default(false)->after('junto_janela');
             $table->boolean('zona_silenciosa')->default(false)->after('ergonomica');
@@ -20,13 +21,14 @@ return new class extends Migration
         });
     }
 
-
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('secretarias', function (Blueprint $table) {
 
             $table->dropColumn([
-                'dois_monitores',
                 'hdmi',
                 'luz_natural',
                 'zona_silenciosa',

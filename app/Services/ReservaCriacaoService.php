@@ -1,0 +1,303 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\EstadoReserva;
+use App\Models\Periodo;
+use App\Models\Reserva;
+use App\Notifications\ReservaCriadaNotification;
+use Carbon\Carbon;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+/**
+ * Regras de criação de reservas (meio dia e dia inteiro).
+ *
+ * Extraído do ReservaController: as verificações de conflito, o cálculo
+ * do intervalo em dias úteis e a criação reserva + pagamento eram
+ * duplicadas entre store() e storeDiaInteiro().
+ *
+ * As violações de regra são lançadas como ValidationException — o mesmo
+ * que o PagamentoService já faz — para o Inertia as apresentar nos
+ * campos do formulário.
+ */
+class ReservaCriacaoService
+{
+    /**
+     * Dias úteis por tipo de duração.
+     */
+    private const DIAS_UTEIS_POR_DURACAO = [
+        'diaria' => 1,
+        'semanal' => 5,
+        'mensal' => 22,
+        'anual' => 264,
+    ];
+
+    /**
+     * Descrição legível de cada duração, usada na mensagem de sucesso.
+     */
+    private const DESCRICAO_DURACAO = [
+        'diaria' => 'dia inteiro',
+        'semanal' => '5 dias úteis',
+        'mensal' => '22 dias úteis',
+        'anual' => '264 dias úteis',
+    ];
+
+    public function __construct(
+        private ReservaDisponibilidadeService $disponibilidade,
+        private PagamentoService $pagamentos,
+    ) {
+    }
+
+    /**
+     * Cria uma reserva de meio dia (Manhã ou Tarde).
+     *
+     * @param array{data:string,periodo_id:mixed,secretaria_id:mixed,observacoes?:?string} $dados
+     */
+    public function criarMeioDia(array $dados, int $userId): Reserva
+    {
+        $periodo = Periodo::findOrFail($dados['periodo_id']);
+
+        if ($periodo->nome === 'Dia inteiro') {
+            throw ValidationException::withMessages([
+                'periodo_id' =>
+                    'As reservas de dia inteiro devem ser efetuadas através da opção Dia inteiro.',
+            ]);
+        }
+
+        $dataInicio = Carbon::parse($dados['data'])->toDateString();
+        $dataFim = $this->calcularDataFim($dataInicio, 'diaria');
+
+        $this->garantirSemConflitos(
+            (int) $dados['secretaria_id'],
+            $userId,
+            (int) $periodo->id,
+            $dataInicio,
+            $dataFim,
+            'Esta secretária já se encontra reservada para a data e período selecionados.',
+            'Já possui uma reserva incompatível com este período na data selecionada.'
+        );
+
+        return $this->persistir([
+            'user_id' => $userId,
+            'secretaria_id' => $dados['secretaria_id'],
+            'periodo_id' => $periodo->id,
+            'estado_reserva_id' => $this->obterEstadoPendente()->id,
+            'data' => $dataInicio,
+            'data_fim' => $dataFim,
+            'tipo_duracao' => 'diaria',
+            'observacoes' => $dados['observacoes'] ?? null,
+        ]);
+    }
+
+    /**
+     * Cria uma reserva de dia inteiro, numa única linha com o período
+     * "Dia inteiro".
+     *
+     * Durações permitidas: diária (1 dia), semanal (5 dias úteis),
+     * mensal (22) e anual (264).
+     *
+     * @param array{data:string,secretaria_id:mixed,tipo_duracao:string,observacoes?:?string} $dados
+     */
+    public function criarDiaInteiro(array $dados, int $userId): Reserva
+    {
+        $tipoDuracao = $dados['tipo_duracao'];
+        $dataInicial = Carbon::parse($dados['data']);
+
+        /*
+         * As reservas de longa duração são calculadas em dias úteis,
+         * por isso não podem começar ao fim de semana.
+         */
+        if ($tipoDuracao !== 'diaria' && $dataInicial->isWeekend()) {
+            throw ValidationException::withMessages([
+                'data' =>
+                    'As reservas semanais, mensais e anuais devem começar num dia útil.',
+            ]);
+        }
+
+        $dataInicio = $dataInicial->toDateString();
+        $dataFim = $this->calcularDataFim($dataInicio, $tipoDuracao);
+
+        $periodoDiaInteiro = $this->obterPeriodoDiaInteiro();
+
+        $this->garantirSemConflitos(
+            (int) $dados['secretaria_id'],
+            $userId,
+            (int) $periodoDiaInteiro->id,
+            $dataInicio,
+            $dataFim,
+            'Esta secretária já possui uma reserva em pelo menos um dos dias selecionados.',
+            'Já possui outra reserva incompatível em pelo menos um dos dias selecionados.'
+        );
+
+        return $this->persistir([
+            'user_id' => $userId,
+            'secretaria_id' => $dados['secretaria_id'],
+            'periodo_id' => $periodoDiaInteiro->id,
+            'estado_reserva_id' => $this->obterEstadoPendente()->id,
+            'data' => $dataInicio,
+            'data_fim' => $dataFim,
+            'tipo_duracao' => $tipoDuracao,
+            'observacoes' => $dados['observacoes'] ?? null,
+        ]);
+    }
+
+    /**
+     * Descrição legível da duração, para a mensagem de sucesso.
+     */
+    public function descricaoDuracao(string $tipoDuracao): string
+    {
+        return self::DESCRICAO_DURACAO[$tipoDuracao] ?? 'dia inteiro';
+    }
+
+    /**
+     * Garante que nem a secretária nem o utilizador têm outra reserva
+     * ativa em conflito no intervalo pedido.
+     */
+    private function garantirSemConflitos(
+        int $secretariaId,
+        int $userId,
+        int $periodoId,
+        string $dataInicio,
+        string $dataFim,
+        string $mensagemSecretaria,
+        string $mensagemUtilizador
+    ): void {
+        $periodosConflito = $this->disponibilidade->periodosEmConflito($periodoId);
+
+        if ($this->disponibilidade->existeReservaAtivaNoIntervalo(
+            'secretaria_id',
+            $secretariaId,
+            $periodosConflito,
+            $dataInicio,
+            $dataFim
+        )) {
+            throw ValidationException::withMessages([
+                'secretaria_id' => $mensagemSecretaria,
+            ]);
+        }
+
+        if ($this->disponibilidade->existeReservaAtivaNoIntervalo(
+            'user_id',
+            $userId,
+            $periodosConflito,
+            $dataInicio,
+            $dataFim
+        )) {
+            throw ValidationException::withMessages([
+                'data' => $mensagemUtilizador,
+            ]);
+        }
+    }
+
+    /**
+     * Cria a reserva e o respetivo pagamento numa transação, e notifica
+     * o utilizador.
+     *
+     * Uma violação do índice único de reservas ativas (corrida entre
+     * pedidos em simultâneo) é traduzida numa mensagem amigável;
+     * qualquer outro erro de base de dados é relançado, para não
+     * mascarar problemas reais.
+     */
+    private function persistir(array $dadosReserva): Reserva
+    {
+        try {
+            return DB::transaction(function () use ($dadosReserva) {
+                $reserva = Reserva::create($dadosReserva);
+
+                $this->pagamentos->criarParaReserva($reserva);
+
+                $reserva->user->notify(
+                    new ReservaCriadaNotification(
+                        $reserva->load(['secretaria', 'periodo'])
+                    )
+                );
+
+                return $reserva;
+            });
+        } catch (QueryException $e) {
+            if (($e->errorInfo[1] ?? null) !== 1062) {
+                throw $e;
+            }
+
+            throw ValidationException::withMessages([
+                'secretaria_id' =>
+                    'Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.',
+            ]);
+        }
+    }
+
+    /**
+     * Período "Dia inteiro", com mensagens compreensíveis (em vez de
+     * 404) caso não exista ou esteja inativo.
+     */
+    private function obterPeriodoDiaInteiro(): Periodo
+    {
+        $periodo = Periodo::where('nome', 'Dia inteiro')->first();
+
+        if ($periodo === null) {
+            throw ValidationException::withMessages([
+                'tipo_duracao' =>
+                    'O período Dia inteiro não está configurado no sistema.',
+            ]);
+        }
+
+        if (! $periodo->ativo) {
+            throw ValidationException::withMessages([
+                'tipo_duracao' =>
+                    'O período Dia inteiro encontra-se inativo.',
+            ]);
+        }
+
+        return $periodo;
+    }
+
+    /**
+     * Estado "pendente", com mensagem compreensível (em vez de 404)
+     * caso não esteja configurado.
+     */
+    private function obterEstadoPendente(): EstadoReserva
+    {
+        $estado = EstadoReserva::where('codigo', 'pendente')->first();
+
+        if ($estado === null) {
+            throw ValidationException::withMessages([
+                'reserva' =>
+                    'O estado pendente não está configurado no sistema.',
+            ]);
+        }
+
+        return $estado;
+    }
+
+    /**
+     * Data final do intervalo, contando apenas dias úteis. A data
+     * inicial conta como primeiro dia útil.
+     */
+    private function calcularDataFim(
+        string $dataInicio,
+        string $tipoDuracao
+    ): string {
+        $quantidadeDiasUteis =
+            self::DIAS_UTEIS_POR_DURACAO[$tipoDuracao] ?? 1;
+
+        $dataFim = Carbon::parse($dataInicio);
+
+        if ($quantidadeDiasUteis === 1) {
+            return $dataFim->toDateString();
+        }
+
+        $diasContados = $dataFim->isWeekday() ? 1 : 0;
+
+        while ($diasContados < $quantidadeDiasUteis) {
+            $dataFim->addDay();
+
+            if ($dataFim->isWeekday()) {
+                $diasContados++;
+            }
+        }
+
+        return $dataFim->toDateString();
+    }
+}

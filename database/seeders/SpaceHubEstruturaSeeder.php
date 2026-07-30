@@ -344,7 +344,12 @@ class SpaceHubEstruturaSeeder extends Seeder
             34,
             xInicio: 10,
             yInicio: 15,
-            colunas: 8
+            colunas: 8,
+            monitor: true,
+            dockUsb: true,
+            luzNatural: true,
+            proximoCopa: true,
+            lugaresJuntoJanela: [1, 12, 18, 24, 25, 30, 31, 32, 33, 34]
         );
 
         $this->criarSecretarias(
@@ -354,7 +359,12 @@ class SpaceHubEstruturaSeeder extends Seeder
             14,
             xInicio: 10,
             yInicio: 55,
-            colunas: 7
+            colunas: 7,
+            monitor: true,
+            dockUsb: true,
+            luzNatural: true,
+            zonaSilenciosa: true,
+            lugaresJuntoJanela: [1, 14]
         );
 
         $this->criarSecretarias(
@@ -364,7 +374,8 @@ class SpaceHubEstruturaSeeder extends Seeder
             10,
             xInicio: 75,
             yInicio: 15,
-            colunas: 2
+            colunas: 2,
+            zonaSilenciosa: true
         );
 
         // =====================================================
@@ -378,7 +389,13 @@ class SpaceHubEstruturaSeeder extends Seeder
             5,
             xInicio: 10,
             yInicio: 15,
-            colunas: 5
+            colunas: 5,
+            monitor: true,
+            dockUsb: true,
+            hdmi: true,
+            luzNatural: true,
+            zonaSilenciosa: true,
+            juntoJanelaTodos: true
         );
 
         $this->criarSecretarias(
@@ -388,7 +405,8 @@ class SpaceHubEstruturaSeeder extends Seeder
             2,
             xInicio: 10,
             yInicio: 50,
-            colunas: 2
+            colunas: 2,
+            zonaSilenciosa: true
         );
 
         $this->criarSecretarias(
@@ -398,7 +416,8 @@ class SpaceHubEstruturaSeeder extends Seeder
             1,
             xInicio: 35,
             yInicio: 50,
-            colunas: 1
+            colunas: 1,
+            zonaSilenciosa: true
         );
 
         $this->criarSecretarias(
@@ -408,7 +427,8 @@ class SpaceHubEstruturaSeeder extends Seeder
             1,
             xInicio: 55,
             yInicio: 50,
-            colunas: 1
+            colunas: 1,
+            zonaSilenciosa: true
         );
 
         $this->criarSecretarias(
@@ -418,7 +438,8 @@ class SpaceHubEstruturaSeeder extends Seeder
             5,
             xInicio: 75,
             yInicio: 20,
-            colunas: 1
+            colunas: 1,
+            zonaSilenciosa: true
         );
 
         // =====================================================
@@ -432,7 +453,10 @@ class SpaceHubEstruturaSeeder extends Seeder
             7,
             xInicio: 10,
             yInicio: 15,
-            colunas: 4
+            colunas: 4,
+            luzNatural: true,
+            zonaSilenciosa: true,
+            juntoJanelaTodos: true
         );
 
         $this->criarSecretarias(
@@ -442,7 +466,8 @@ class SpaceHubEstruturaSeeder extends Seeder
             1,
             xInicio: 20,
             yInicio: 55,
-            colunas: 1
+            colunas: 1,
+            zonaSilenciosa: true
         );
 
         $this->criarSecretarias(
@@ -462,7 +487,8 @@ class SpaceHubEstruturaSeeder extends Seeder
             2,
             xInicio: 80,
             yInicio: 20,
-            colunas: 1
+            colunas: 1,
+            zonaSilenciosa: true
         );
     }
 
@@ -526,6 +552,16 @@ class SpaceHubEstruturaSeeder extends Seeder
         );
     }
 
+    /**
+     * Cria as secretárias de um setor.
+     *
+     * As características (monitor, hdmi, luz natural, etc.) são passadas
+     * explicitamente por cada chamada, em vez de inferidas de $setor->tipo,
+     * para corresponderem exatamente à tabela de características por
+     * piso/setor definida no documento do projeto — e para que um piso ou
+     * setor que não devesse ter uma característica não a receba por engano
+     * (ex.: Escritório Executivo não tem Monitor/Dock USB).
+     */
     private function criarSecretarias(
         Setor $setor,
         string $prefixo,
@@ -535,7 +571,15 @@ class SpaceHubEstruturaSeeder extends Seeder
         float $yInicio = 20,
         int $colunas = 6,
         float $xPasso = 8,
-        float $yPasso = 14
+        float $yPasso = 14,
+        bool $monitor = false,
+        bool $dockUsb = false,
+        bool $hdmi = false,
+        bool $luzNatural = false,
+        bool $zonaSilenciosa = false,
+        bool $proximoCopa = false,
+        bool $juntoJanelaTodos = false,
+        array $lugaresJuntoJanela = []
     ): void {
         for ($i = $inicio; $i <= $fim; $i++) {
             $indice = $i - $inicio;
@@ -566,28 +610,19 @@ class SpaceHubEstruturaSeeder extends Seeder
 
                     'angulo' => 0,
 
-                    'monitor' => in_array(
-                        $setor->tipo,
-                        [
-                            'open_space',
-                            'escritorio',
-                            'escritorio_executivo',
-                        ]
-                    ),
+                    'monitor' => $monitor,
+                    'dock_usb' => $dockUsb,
+                    'hdmi' => $hdmi,
 
-                    'dock_usb' => in_array(
-                        $setor->tipo,
-                        [
-                            'open_space',
-                            'escritorio',
-                            'escritorio_executivo',
-                        ]
-                    ),
-
-                    'junto_janela' => false,
+                    'junto_janela' => $juntoJanelaTodos
+                        || in_array($i, $lugaresJuntoJanela, true),
 
                     'ergonomica' =>
                     $setor->tipo !== 'phone_booth',
+
+                    'luz_natural' => $luzNatural,
+                    'zona_silenciosa' => $zonaSilenciosa,
+                    'proximo_copa' => $proximoCopa,
 
                     'reservavel' => true,
 
