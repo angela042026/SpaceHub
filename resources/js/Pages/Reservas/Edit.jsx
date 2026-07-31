@@ -3,11 +3,8 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ImageOff, Info, Pencil } from 'lucide-react';
 import PreferenciasPanel from '@/Components/Reservas/PreferenciasPanel';
-import {
-    PREFERENCIAS,
-    IMAGEM_POR_TIPO_SETOR,
-    IMAGEM_POR_NOME_SETOR,
-} from '@/Components/Reservas/reservaHelpers';
+import { PREFERENCIAS } from '@/Components/Reservas/reservaHelpers';
+import { resolverImagemPorSetor } from '@/utils/imagemSetor';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -62,10 +59,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
         (setor) => setor.id == filtros.setor_id,
     );
 
-    const imagemPorTipo =
-        IMAGEM_POR_NOME_SETOR[setorSelecionado?.nome] ??
-        IMAGEM_POR_TIPO_SETOR[setorSelecionado?.tipo] ??
-        null;
+    const imagemPorTipo = resolverImagemPorSetor(setorSelecionado);
 
     // Consulta os lugares do setor escolhido, excluindo esta própria
     // reserva do cálculo de disponibilidade (para não aparecer bloqueada
@@ -98,12 +92,6 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                 setLugares([]);
             });
     }, [filtros.data, filtros.setor_id, preferencias]);
-
-    const setorSelecionado = setores.find(
-        (setor) => setor.id == filtros.setor_id,
-    );
-
-    const imagemPorTipo = resolverImagemPorSetor(setorSelecionado);
 
     const escolher = (secretariaId, periodoId) => {
         setSelecao({ secretariaId, periodoId });

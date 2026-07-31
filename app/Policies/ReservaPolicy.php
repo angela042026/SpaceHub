@@ -76,6 +76,22 @@ class ReservaPolicy
         return false;
     }
 
+    /**
+     * Ações que só o dono da reserva pode fazer, mesmo sendo
+     * Administrador: editar e cancelar em "As Minhas Reservas", fazer
+     * check-in e avaliar.
+     *
+     * É deliberadamente mais restrita do que update() e cancelar(): ao
+     * contrário destas, não abre exceção ao Administrador. Um
+     * Administrador que precise de mexer na reserva de outra pessoa
+     * fá-lo pela área de administração, que passa por update(); nunca
+     * faz check-in nem escreve uma avaliação em nome de terceiros.
+     */
+    public function gerirPropria(User $user, Reserva $reserva): bool
+    {
+        return $reserva->user_id === $user->id;
+    }
+
     private function isAdministrador(User $user): bool
     {
         return $user->role?->nome === 'Administrador';

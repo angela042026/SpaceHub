@@ -7,12 +7,11 @@ import PreferenciasPanel from '@/Components/Reservas/PreferenciasPanel';
 import {
     PREFERENCIAS,
     DURACOES,
-    IMAGEM_POR_TIPO_SETOR,
-    IMAGEM_POR_NOME_SETOR,
     formatarDataPortugues,
     dataEhFimDeSemana,
     calcularDataFim,
 } from '@/Components/Reservas/reservaHelpers';
+import { resolverImagemPorSetor } from '@/utils/imagemSetor';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Avaliacao;
 use App\Models\Periodo;
 use App\Models\Piso;
 use App\Models\Reserva;
@@ -58,14 +59,56 @@ class ReservaDisponibilidadeService
     /**
      * Setores (tipos de espaço) reserváveis, com o piso carregado —
      * usados no fluxo Piso -> Categoria -> Lugar do formulário.
+     *
+     * Traz também a contagem e a média das avaliações aprovadas, que a
+     * página de nova reserva mostra em estrelas por baixo do espaço
+     * escolhido.
      */
     public function setoresReservaveis()
     {
         return Setor::where('reservavel', true)
             ->with('piso')
+            ->select('setores.*')
+            ->selectSub(
+                $this->avaliacoesAprovadasDoSetor()
+                    ->selectRaw('count(*)'),
+                'avaliacao_total'
+            )
+            ->selectSub(
+                $this->avaliacoesAprovadasDoSetor()
+                    ->selectRaw('avg(avaliacoes.nota)'),
+                'avaliacao_media'
+            )
             ->orderBy('piso_id')
             ->orderBy('nome')
             ->get();
+    }
+
+    /**
+     * Avaliações aprovadas do setor da linha exterior.
+     *
+     * As avaliações estão a três saltos do setor
+     * (setor -> secretária -> reserva -> avaliação), o que ultrapassa o
+     * alcance de um hasManyThrough. Fica uma subconsulta correlacionada,
+     * ligada ao setor de fora pelo whereColumn.
+     */
+    private function avaliacoesAprovadasDoSetor()
+    {
+        return Avaliacao::query()
+            ->join(
+                'reservas',
+                'avaliacoes.reserva_id',
+                '=',
+                'reservas.id'
+            )
+            ->join(
+                'secretarias',
+                'reservas.secretaria_id',
+                '=',
+                'secretarias.id'
+            )
+            ->whereColumn('secretarias.setor_id', 'setores.id')
+            ->where('avaliacoes.estado', 'aprovada');
     }
 
     /**

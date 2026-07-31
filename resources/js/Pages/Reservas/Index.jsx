@@ -4,6 +4,8 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     AlertTriangle,
     CalendarDays,
+    ChevronLeft,
+    ChevronRight,
     CreditCard,
     ImageOff,
     Pencil,
@@ -100,6 +102,15 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
         router.get(route('reservas.index'));
     };
 
+    // Paginação — o URL já traz os filtros aplicados (withQueryString).
+    const irParaPagina = (url) => {
+        if (!url) {
+            return;
+        }
+
+        router.get(url, {}, { preserveState: true, preserveScroll: true });
+    };
+
     return (
         <DashboardLayout>
             <Head title="Reservas" />
@@ -117,7 +128,7 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {reservas.length} reserva{reservas.length === 1 ? '' : 's'} encontrada{reservas.length === 1 ? '' : 's'}.
+                                {reservas.total} reserva{reservas.total === 1 ? '' : 's'} encontrada{reservas.total === 1 ? '' : 's'}.
                             </p>
                         </div>
                     </div>
@@ -217,7 +228,7 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                 </form>
 
                 <div className="p-6">
-                    {reservas.length === 0 ? (
+                    {reservas.data.length === 0 ? (
                         <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
                             <p className="text-sm text-slate-400">
                                 Ainda não existem reservas.
@@ -225,7 +236,7 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                            {reservas.map((reserva) => (
+                            {reservas.data.map((reserva) => (
                                 <div
                                     key={reserva.id}
                                     className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
@@ -325,6 +336,36 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    )}
+
+                    {reservas.last_page > 1 && (
+                        <div className="mt-5 flex items-center justify-between">
+                            <p className="text-xs text-slate-400">
+                                Página {reservas.current_page} de {reservas.last_page}
+                            </p>
+
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    disabled={!reservas.prev_page_url}
+                                    onClick={() => irParaPagina(reservas.prev_page_url)}
+                                    aria-label="Página anterior"
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
+                                >
+                                    <ChevronLeft size={16} strokeWidth={1.9} />
+                                </button>
+
+                                <button
+                                    type="button"
+                                    disabled={!reservas.next_page_url}
+                                    onClick={() => irParaPagina(reservas.next_page_url)}
+                                    aria-label="Página seguinte"
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
+                                >
+                                    <ChevronRight size={16} strokeWidth={1.9} />
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

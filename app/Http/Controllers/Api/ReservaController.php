@@ -14,8 +14,8 @@ use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Services\DashboardMetricsService;
+use App\Services\ReservaCriacaoService;
 use App\Notifications\ReservaCanceladaNotification;
-use App\Notifications\ReservaCriadaNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -66,9 +66,18 @@ class ReservaController extends Controller
 
     /**
      * Cria uma reserva para o utilizador autenticado.
+     *
+     * A criação é delegada no ReservaCriacaoService — o mesmo que o fluxo
+     * web usa — para que os dois caminhos apliquem exatamente as mesmas
+     * regras: transação, criação do pagamento pendente, preenchimento de
+     * data_fim/tipo_duracao e tratamento de reservas em simultâneo.
+     *
+     * As violações de regra chegam como ValidationException e o Laravel
+     * devolve-as em JSON com estado 422.
      */
     public function store(
-        StoreReservaRequest $request
+        StoreReservaRequest $request,
+        ReservaCriacaoService $criacao
     ): ReservaResource|JsonResponse {
         Gate::authorize('create', Reserva::class);
 
@@ -84,44 +93,22 @@ class ReservaController extends Controller
             ], 422);
         }
 
-        if (
-            $this->secretariaJaReservada(
-                $dados['secretaria_id'],
-                $dados['data'],
-                $dados['periodo_id']
+        $periodo = Periodo::query()
+            ->findOrFail($dados['periodo_id']);
+
+        /*
+         * O serviço trata o dia inteiro num método próprio, que ignora o
+         * periodo_id recebido e usa sempre o período "Dia inteiro". A API
+         * não expõe durações longas, por isso a duração é sempre diária.
+         */
+        $reserva = $periodo->nome === 'Dia inteiro'
+            ? $criacao->criarDiaInteiro(
+                $dados + ['tipo_duracao' => 'diaria'],
+                $userId
             )
-        ) {
-            return response()->json([
-                'message' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
-            ], 422);
-        }
-
-        if (
-            $this->utilizadorJaTemReserva(
-                $userId,
-                $dados['data'],
-                $dados['periodo_id']
-            )
-        ) {
-            return response()->json([
-                'message' => 'Já possui uma reserva incompatível com este período na data selecionada.',
-            ], 422);
-        }
-
-        $estadoPendente = $this->obterEstado('pendente');
-
-        $reserva = Reserva::create([
-            'user_id' => $userId,
-            'secretaria_id' => $dados['secretaria_id'],
-            'periodo_id' => $dados['periodo_id'],
-            'estado_reserva_id' => $estadoPendente->id,
-            'data' => $dados['data'],
-            'observacoes' => $dados['observacoes'] ?? null,
-        ]);
+            : $criacao->criarMeioDia($dados, $userId);
 
         $this->carregarRelacoes($reserva);
-
-        $reserva->user->notify(new ReservaCriadaNotification($reserva));
 
         broadcast(new MapaAtualizado());
         DashboardMetricsService::limparCacheDoDia();
