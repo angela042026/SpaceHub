@@ -140,9 +140,8 @@ class ReservaDisponibilidadeService
     ) {
         $periodosConflito = $this->periodosEmConflito((int) $periodoId);
 
-        $secretariasReservadas = Reserva::whereDate('data', $data)
+        $secretariasReservadas = $this->reservasQueOcupam($data)
             ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
             ->pluck('secretaria_id');
 
         return Secretaria::where('reservavel', true)
@@ -223,8 +222,7 @@ class ReservaDisponibilidadeService
 
     /**
      * Verifica se já existe reserva ativa de $coluna=$valor numa única
-     * $data, num dos períodos em conflito. Usado por reservas de meio dia
-     * (sem intervalo data/data_fim).
+     * $data, num dos períodos em conflito.
      */
     public function existeReservaAtivaNaData(
         string $coluna,
@@ -233,15 +231,44 @@ class ReservaDisponibilidadeService
         string $data,
         ?int $excluirReservaId = null
     ): bool {
-        return Reserva::where($coluna, $valor)
-            ->whereDate('data', $data)
+        return $this->reservasQueOcupam($data)
+            ->where($coluna, $valor)
             ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
             ->when(
                 $excluirReservaId !== null,
                 fn($query) => $query->where('id', '!=', $excluirReservaId)
             )
             ->exists();
+    }
+
+    /**
+     * Reservas que ocupam um lugar em $data.
+     *
+     * Uma reserva de vários dias é uma única linha, com data no primeiro
+     * dia e data_fim no último, por isso não basta procurar por
+     * whereDate('data', $data): isso deixava um lugar reservado à semana
+     * aparecer livre de terça a sexta. As reservas antigas não têm
+     * data_fim e valem apenas para o próprio dia.
+     *
+     * "Ocupar" é definido por cancelada_at ser NULL, que é exatamente o
+     * critério das colunas virtuais do índice único em reservas — assim a
+     * disponibilidade mostrada nunca contradiz o que a base de dados
+     * aceita gravar.
+     */
+    private function reservasQueOcupam(string $data)
+    {
+        return Reserva::query()
+            ->whereNull('cancelada_at')
+            ->whereDate('data', '<=', $data)
+            ->where(function ($query) use ($data) {
+                $query
+                    ->whereDate('data_fim', '>=', $data)
+                    ->orWhere(function ($queryAntiga) use ($data) {
+                        $queryAntiga
+                            ->whereNull('data_fim')
+                            ->whereDate('data', $data);
+                    });
+            });
     }
 
     /**
@@ -308,9 +335,8 @@ class ReservaDisponibilidadeService
         Collection $secretariaIds,
         ?int $excluirReservaId
     ) {
-        return Reserva::whereDate('data', $data)
+        return $this->reservasQueOcupam($data)
             ->whereIn('secretaria_id', $secretariaIds)
-            ->whereNull('cancelada_at')
             ->when(
                 $excluirReservaId !== null,
                 fn($query) => $query->where('id', '!=', $excluirReservaId)

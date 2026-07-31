@@ -26,8 +26,6 @@ class Setor extends Model
         'ativo',
         'planta_x',
         'planta_y',
-        'planta_largura',
-        'planta_altura',
     ];
 
     protected function casts(): array
@@ -47,8 +45,6 @@ class Setor extends Model
 
             'planta_x' => 'integer',
             'planta_y' => 'integer',
-            'planta_largura' => 'integer',
-            'planta_altura' => 'integer',
 
             /*
              * Colunas calculadas pelo ReservaDisponibilidadeService, só

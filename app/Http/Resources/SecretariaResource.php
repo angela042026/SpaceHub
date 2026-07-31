@@ -35,7 +35,6 @@ class SecretariaResource extends JsonResource
             */
 
             'monitor' => (bool) $this->monitor,
-            'dois_monitores' => (bool) $this->dois_monitores,
             'dock_usb' => (bool) $this->dock_usb,
             'hdmi' => (bool) $this->hdmi,
             'ergonomica' => (bool) $this->ergonomica,
