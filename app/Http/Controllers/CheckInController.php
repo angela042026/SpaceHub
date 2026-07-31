@@ -9,6 +9,7 @@ use App\Models\Secretaria;
 use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -67,9 +68,7 @@ class CheckInController extends Controller
      */
     public function confirm(Reserva $reserva): RedirectResponse
     {
-        if ($reserva->user_id !== auth()->id()) {
-            abort(403, 'Esta reserva não te pertence.');
-        }
+        Gate::authorize('gerirPropria', $reserva);
 
         $reserva->load(['periodo', 'estadoReserva']);
 

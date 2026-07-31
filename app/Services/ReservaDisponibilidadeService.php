@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Avaliacao;
 use App\Models\Periodo;
 use App\Models\Piso;
 use App\Models\Reserva;
@@ -58,14 +59,56 @@ class ReservaDisponibilidadeService
     /**
      * Setores (tipos de espaço) reserváveis, com o piso carregado —
      * usados no fluxo Piso -> Categoria -> Lugar do formulário.
+     *
+     * Traz também a contagem e a média das avaliações aprovadas, que a
+     * página de nova reserva mostra em estrelas por baixo do espaço
+     * escolhido.
      */
     public function setoresReservaveis()
     {
         return Setor::where('reservavel', true)
             ->with('piso')
+            ->select('setores.*')
+            ->selectSub(
+                $this->avaliacoesAprovadasDoSetor()
+                    ->selectRaw('count(*)'),
+                'avaliacao_total'
+            )
+            ->selectSub(
+                $this->avaliacoesAprovadasDoSetor()
+                    ->selectRaw('avg(avaliacoes.nota)'),
+                'avaliacao_media'
+            )
             ->orderBy('piso_id')
             ->orderBy('nome')
             ->get();
+    }
+
+    /**
+     * Avaliações aprovadas do setor da linha exterior.
+     *
+     * As avaliações estão a três saltos do setor
+     * (setor -> secretária -> reserva -> avaliação), o que ultrapassa o
+     * alcance de um hasManyThrough. Fica uma subconsulta correlacionada,
+     * ligada ao setor de fora pelo whereColumn.
+     */
+    private function avaliacoesAprovadasDoSetor()
+    {
+        return Avaliacao::query()
+            ->join(
+                'reservas',
+                'avaliacoes.reserva_id',
+                '=',
+                'reservas.id'
+            )
+            ->join(
+                'secretarias',
+                'reservas.secretaria_id',
+                '=',
+                'secretarias.id'
+            )
+            ->whereColumn('secretarias.setor_id', 'setores.id')
+            ->where('avaliacoes.estado', 'aprovada');
     }
 
     /**
@@ -97,9 +140,8 @@ class ReservaDisponibilidadeService
     ) {
         $periodosConflito = $this->periodosEmConflito((int) $periodoId);
 
-        $secretariasReservadas = Reserva::whereDate('data', $data)
+        $secretariasReservadas = $this->reservasQueOcupam($data)
             ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
             ->pluck('secretaria_id');
 
         return Secretaria::where('reservavel', true)
@@ -180,8 +222,7 @@ class ReservaDisponibilidadeService
 
     /**
      * Verifica se já existe reserva ativa de $coluna=$valor numa única
-     * $data, num dos períodos em conflito. Usado por reservas de meio dia
-     * (sem intervalo data/data_fim).
+     * $data, num dos períodos em conflito.
      */
     public function existeReservaAtivaNaData(
         string $coluna,
@@ -190,15 +231,44 @@ class ReservaDisponibilidadeService
         string $data,
         ?int $excluirReservaId = null
     ): bool {
-        return Reserva::where($coluna, $valor)
-            ->whereDate('data', $data)
+        return $this->reservasQueOcupam($data)
+            ->where($coluna, $valor)
             ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
             ->when(
                 $excluirReservaId !== null,
                 fn($query) => $query->where('id', '!=', $excluirReservaId)
             )
             ->exists();
+    }
+
+    /**
+     * Reservas que ocupam um lugar em $data.
+     *
+     * Uma reserva de vários dias é uma única linha, com data no primeiro
+     * dia e data_fim no último, por isso não basta procurar por
+     * whereDate('data', $data): isso deixava um lugar reservado à semana
+     * aparecer livre de terça a sexta. As reservas antigas não têm
+     * data_fim e valem apenas para o próprio dia.
+     *
+     * "Ocupar" é definido por cancelada_at ser NULL, que é exatamente o
+     * critério das colunas virtuais do índice único em reservas — assim a
+     * disponibilidade mostrada nunca contradiz o que a base de dados
+     * aceita gravar.
+     */
+    private function reservasQueOcupam(string $data)
+    {
+        return Reserva::query()
+            ->whereNull('cancelada_at')
+            ->whereDate('data', '<=', $data)
+            ->where(function ($query) use ($data) {
+                $query
+                    ->whereDate('data_fim', '>=', $data)
+                    ->orWhere(function ($queryAntiga) use ($data) {
+                        $queryAntiga
+                            ->whereNull('data_fim')
+                            ->whereDate('data', $data);
+                    });
+            });
     }
 
     /**
@@ -265,9 +335,8 @@ class ReservaDisponibilidadeService
         Collection $secretariaIds,
         ?int $excluirReservaId
     ) {
-        return Reserva::whereDate('data', $data)
+        return $this->reservasQueOcupam($data)
             ->whereIn('secretaria_id', $secretariaIds)
-            ->whereNull('cancelada_at')
             ->when(
                 $excluirReservaId !== null,
                 fn($query) => $query->where('id', '!=', $excluirReservaId)

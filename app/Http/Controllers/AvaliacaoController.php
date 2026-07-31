@@ -8,6 +8,7 @@ use App\Models\Avaliacao;
 use App\Models\Reserva;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -36,9 +37,7 @@ class AvaliacaoController extends Controller
      */
     public function store(StoreAvaliacaoRequest $request, Reserva $reserva): RedirectResponse
     {
-        if ($reserva->user_id !== Auth::id()) {
-            abort(403, 'Esta reserva não te pertence.');
-        }
+        Gate::authorize('gerirPropria', $reserva);
 
         if ($reserva->check_in_at === null) {
             return back()->withErrors([

@@ -14,15 +14,23 @@ use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Services\DashboardMetricsService;
+use App\Services\PagamentoService;
+use App\Services\ReservaCriacaoService;
+use App\Services\ReservaDisponibilidadeService;
 use App\Notifications\ReservaCanceladaNotification;
-use App\Notifications\ReservaCriadaNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class ReservaController extends Controller
 {
+    public function __construct(
+        private ReservaDisponibilidadeService $disponibilidade
+    ) {
+    }
+
     /**
      * Lista reservas.
      *
@@ -66,9 +74,18 @@ class ReservaController extends Controller
 
     /**
      * Cria uma reserva para o utilizador autenticado.
+     *
+     * A criação é delegada no ReservaCriacaoService — o mesmo que o fluxo
+     * web usa — para que os dois caminhos apliquem exatamente as mesmas
+     * regras: transação, criação do pagamento pendente, preenchimento de
+     * data_fim/tipo_duracao e tratamento de reservas em simultâneo.
+     *
+     * As violações de regra chegam como ValidationException e o Laravel
+     * devolve-as em JSON com estado 422.
      */
     public function store(
-        StoreReservaRequest $request
+        StoreReservaRequest $request,
+        ReservaCriacaoService $criacao
     ): ReservaResource|JsonResponse {
         Gate::authorize('create', Reserva::class);
 
@@ -84,44 +101,22 @@ class ReservaController extends Controller
             ], 422);
         }
 
-        if (
-            $this->secretariaJaReservada(
-                $dados['secretaria_id'],
-                $dados['data'],
-                $dados['periodo_id']
+        $periodo = Periodo::query()
+            ->findOrFail($dados['periodo_id']);
+
+        /*
+         * O serviço trata o dia inteiro num método próprio, que ignora o
+         * periodo_id recebido e usa sempre o período "Dia inteiro". A API
+         * não expõe durações longas, por isso a duração é sempre diária.
+         */
+        $reserva = $periodo->nome === 'Dia inteiro'
+            ? $criacao->criarDiaInteiro(
+                $dados + ['tipo_duracao' => 'diaria'],
+                $userId
             )
-        ) {
-            return response()->json([
-                'message' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
-            ], 422);
-        }
-
-        if (
-            $this->utilizadorJaTemReserva(
-                $userId,
-                $dados['data'],
-                $dados['periodo_id']
-            )
-        ) {
-            return response()->json([
-                'message' => 'Já possui uma reserva incompatível com este período na data selecionada.',
-            ], 422);
-        }
-
-        $estadoPendente = $this->obterEstado('pendente');
-
-        $reserva = Reserva::create([
-            'user_id' => $userId,
-            'secretaria_id' => $dados['secretaria_id'],
-            'periodo_id' => $dados['periodo_id'],
-            'estado_reserva_id' => $estadoPendente->id,
-            'data' => $dados['data'],
-            'observacoes' => $dados['observacoes'] ?? null,
-        ]);
+            : $criacao->criarMeioDia($dados, $userId);
 
         $this->carregarRelacoes($reserva);
-
-        $reserva->user->notify(new ReservaCriadaNotification($reserva));
 
         broadcast(new MapaAtualizado());
         DashboardMetricsService::limparCacheDoDia();
@@ -178,27 +173,28 @@ class ReservaController extends Controller
             ], 422);
         }
 
-        if (
-            $this->secretariaJaReservada(
-                $secretariaId,
-                $data,
-                $periodoId,
-                $reserva->id
-            )
-        ) {
+        $periodosConflito = $this->disponibilidade
+            ->periodosEmConflito((int) $periodoId);
+
+        if ($this->disponibilidade->existeReservaAtivaNaData(
+            'secretaria_id',
+            (int) $secretariaId,
+            $periodosConflito,
+            $data,
+            $reserva->id
+        )) {
             return response()->json([
                 'message' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
             ], 422);
         }
 
-        if (
-            $this->utilizadorJaTemReserva(
-                $reserva->user_id,
-                $data,
-                $periodoId,
-                $reserva->id
-            )
-        ) {
+        if ($this->disponibilidade->existeReservaAtivaNaData(
+            'user_id',
+            (int) $reserva->user_id,
+            $periodosConflito,
+            $data,
+            $reserva->id
+        )) {
             return response()->json([
                 'message' => 'Este utilizador já possui outra reserva incompatível com este período.',
             ], 422);
@@ -219,7 +215,8 @@ class ReservaController extends Controller
      */
     public function cancelar(
         Request $request,
-        Reserva $reserva
+        Reserva $reserva,
+        PagamentoService $pagamentoService
     ): ReservaResource|JsonResponse {
         Gate::authorize('cancelar', $reserva);
 
@@ -268,10 +265,38 @@ class ReservaController extends Controller
 
         $estadoCancelada = $this->obterEstado('cancelada');
 
-        $reserva->update([
-            'estado_reserva_id' => $estadoCancelada->id,
-            'cancelada_at' => now(),
-        ]);
+        /*
+         * O cancelamento do pagamento passa pelo PagamentoService, tal
+         * como no fluxo web: é ele que põe um pagamento pendente em
+         * cancelado e que recusa cancelar uma reserva já paga enquanto
+         * não houver reembolso. Sem isto a reserva era cancelada e o
+         * pagamento ficava pendente para sempre.
+         *
+         * A transação com lockForUpdate evita que dois pedidos em
+         * simultâneo cancelem a mesma reserva duas vezes.
+         */
+        DB::transaction(function () use (
+            $reserva,
+            $estadoCancelada,
+            $pagamentoService
+        ) {
+            $reservaBloqueada = Reserva::whereKey($reserva->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($reservaBloqueada->cancelada_at !== null) {
+                return;
+            }
+
+            $pagamentoService->cancelarParaReserva($reservaBloqueada);
+
+            $reservaBloqueada->update([
+                'estado_reserva_id' => $estadoCancelada->id,
+                'cancelada_at' => now(),
+            ]);
+        });
+
+        $reserva->refresh();
 
         $this->carregarRelacoes($reserva);
 
@@ -293,30 +318,12 @@ class ReservaController extends Controller
 
         $dados = $request->validated();
 
-        $periodosConflito = $this->periodosEmConflito(
-            (int) $dados['periodo_id']
+        return SecretariaResource::collection(
+            $this->disponibilidade->secretariasDisponiveis(
+                $dados['data'],
+                $dados['periodo_id']
+            )
         );
-
-        $secretariasReservadas = Reserva::query()
-            ->whereDate('data', $dados['data'])
-            ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
-            ->whereHas('estadoReserva', function ($query): void {
-                $query->whereNotIn('codigo', [
-                    'cancelada',
-                    'expirada',
-                ]);
-            })
-            ->pluck('secretaria_id');
-
-        $secretarias = Secretaria::query()
-            ->where('reservavel', true)
-            ->where('ativo', true)
-            ->whereNotIn('id', $secretariasReservadas)
-            ->orderBy('codigo')
-            ->get();
-
-        return SecretariaResource::collection($secretarias);
     }
 
     /**
@@ -332,116 +339,8 @@ class ReservaController extends Controller
         ]);
     }
 
-    /**
-     * Verifica se a secretária já possui uma reserva incompatível.
-     */
-    private function secretariaJaReservada(
-        int $secretariaId,
-        string $data,
-        int $periodoId,
-        ?int $ignorarReservaId = null
-    ): bool {
-        $periodosConflito = $this->periodosEmConflito($periodoId);
 
-        $query = Reserva::query()
-            ->where('secretaria_id', $secretariaId)
-            ->whereDate('data', $data)
-            ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
-            ->whereHas('estadoReserva', function ($query): void {
-                $query->whereNotIn('codigo', [
-                    'cancelada',
-                    'expirada',
-                ]);
-            });
 
-        if ($ignorarReservaId !== null) {
-            $query->whereKeyNot($ignorarReservaId);
-        }
-
-        return $query->exists();
-    }
-
-    /**
-     * Verifica se o utilizador já possui outra reserva incompatível.
-     */
-    private function utilizadorJaTemReserva(
-        int $userId,
-        string $data,
-        int $periodoId,
-        ?int $ignorarReservaId = null
-    ): bool {
-        $periodosConflito = $this->periodosEmConflito($periodoId);
-
-        $query = Reserva::query()
-            ->where('user_id', $userId)
-            ->whereDate('data', $data)
-            ->whereIn('periodo_id', $periodosConflito)
-            ->whereNull('cancelada_at')
-            ->whereHas('estadoReserva', function ($query): void {
-                $query->whereNotIn('codigo', [
-                    'cancelada',
-                    'expirada',
-                ]);
-            });
-
-        if ($ignorarReservaId !== null) {
-            $query->whereKeyNot($ignorarReservaId);
-        }
-
-        return $query->exists();
-    }
-
-    /**
-     * Devolve os IDs dos períodos incompatíveis
-     * com o período escolhido.
-     *
-     * Manhã:
-     * - Manhã
-     * - Dia inteiro
-     *
-     * Tarde:
-     * - Tarde
-     * - Dia inteiro
-     *
-     * Dia inteiro:
-     * - Manhã
-     * - Tarde
-     * - Dia inteiro
-     */
-    private function periodosEmConflito(int $periodoId): array
-    {
-        $periodoSelecionado = Periodo::query()
-            ->findOrFail($periodoId);
-
-        $nomesPeriodos = match ($periodoSelecionado->nome) {
-            'Manhã' => [
-                'Manhã',
-                'Dia inteiro',
-            ],
-
-            'Tarde' => [
-                'Tarde',
-                'Dia inteiro',
-            ],
-
-            'Dia inteiro' => [
-                'Manhã',
-                'Tarde',
-                'Dia inteiro',
-            ],
-
-            default => [
-                $periodoSelecionado->nome,
-            ],
-        };
-
-        return Periodo::query()
-            ->whereIn('nome', $nomesPeriodos)
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
-    }
 
     /**
      * Obtém um estado de reserva pelo código.

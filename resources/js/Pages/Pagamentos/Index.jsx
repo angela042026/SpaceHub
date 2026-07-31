@@ -7,29 +7,7 @@ import {
     CreditCard,
     Eye,
 } from 'lucide-react';
-
-const ESTADO_CLASSES = {
-    pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    pago: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-    recusado: 'bg-red-500/10 text-red-600 dark:text-red-400',
-    reembolsado: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-    cancelado: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
-};
-
-const ESTADO_LABELS = {
-    pendente: 'Pendente',
-    pago: 'Pago',
-    recusado: 'Recusado',
-    reembolsado: 'Reembolsado',
-    cancelado: 'Cancelado',
-};
-
-const METODO_LABELS = {
-    cartao: 'Cartão',
-    mbway: 'MB Way',
-    transferencia: 'Transferência',
-    paypal: 'PayPal',
-};
+import { ESTADO_PAGAMENTO, METODO_PAGAMENTO, badge, etiqueta } from '@/utils/estados';
 
 export default function Index({
     pagamentos,
@@ -166,7 +144,11 @@ export default function Index({
             key: 'metodo_pagamento',
             label: 'Método',
             render: (pagamento) =>
-                METODO_LABELS[pagamento.metodo_pagamento] ?? 'Por definir',
+                etiqueta(
+                    METODO_PAGAMENTO,
+                    pagamento.metodo_pagamento,
+                    'Por definir',
+                ),
         },
         {
             key: 'estado',
@@ -174,11 +156,10 @@ export default function Index({
             render: (pagamento) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                        ESTADO_CLASSES[pagamento.estado] ??
-                        'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                        badge(ESTADO_PAGAMENTO, pagamento.estado)
                     }`}
                 >
-                    {ESTADO_LABELS[pagamento.estado] ?? pagamento.estado}
+                    {etiqueta(ESTADO_PAGAMENTO, pagamento.estado)}
                 </span>
             ),
         },

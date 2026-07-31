@@ -3,11 +3,7 @@ import Modal from '@/Components/Modal';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, CheckCircle2, LifeBuoy } from 'lucide-react';
 import { useState } from 'react';
-
-const ESTADO_BADGE = {
-    Pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    Resolvido: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-};
+import { ESTADO_SUPORTE, badge } from '@/utils/estados';
 
 export default function Show({ pedido }) {
 
@@ -93,8 +89,7 @@ export default function Show({ pedido }) {
 
                             <span
                                 className={`mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                                    ESTADO_BADGE[pedido.estado] ??
-                                    'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                                    badge(ESTADO_SUPORTE, pedido.estado)
                                 }`}
                             >
                                 {pedido.estado}

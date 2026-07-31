@@ -112,6 +112,15 @@ class ReservaSeeder extends Seeder
                 'user_id' => $admin->id,
                 'estado_reserva_id' => $expirada->id,
                 'check_in_at' => null,
+
+                /*
+                 * O comando reservas:cancelar-expiradas grava sempre
+                 * cancelada_at junto com o estado. Sem isto, a reserva
+                 * semeada continuava a ocupar o lugar — o índice único
+                 * e as consultas de disponibilidade usam cancelada_at,
+                 * não o estado.
+                 */
+                'cancelada_at' => now(),
             ]
         );
 

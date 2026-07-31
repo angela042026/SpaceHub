@@ -25,76 +25,16 @@ import {
 
 } from 'lucide-react';
 
-const ESTADO_CLASSES = {
-
-    confirmada: {
-
-        badge: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-
-        dot: 'bg-teal-500',
-
-        label: 'Confirmada',
-
-    },
-
-    pendente: {
-
-        badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-
-        dot: 'bg-amber-500',
-
-        label: 'Pendente',
-
-    },
-
-    cancelada: {
-
-        badge: 'bg-red-500/10 text-red-600 dark:text-red-400',
-
-        dot: 'bg-red-500',
-
-        label: 'Cancelada',
-
-    },
-
-    expirada: {
-
-        badge: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
-
-        dot: 'bg-slate-400',
-
-        label: 'Expirada',
-
-    },
-
-    concluida: {
-
-        badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-
-        dot: 'bg-blue-500',
-
-        label: 'Concluída',
-
-    },
-
-};
+import { ESTADO_RESERVA, BADGE_NEUTRO } from '@/utils/estados';
 
 function getEstadoClasses(codigo) {
-
     return (
-
-        ESTADO_CLASSES[codigo] ?? {
-
-            badge: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
-
+        ESTADO_RESERVA[codigo] ?? {
+            badge: BADGE_NEUTRO,
             dot: 'bg-slate-400',
-
             label: 'Sem estado',
-
         }
-
     );
-
 }
 
 export default function ReservationCard({ reserva }) {

@@ -12,7 +12,6 @@ const labelClass =
 
 const AMENIDADES = [
     { key: 'monitor', label: 'Monitor' },
-    { key: 'dois_monitores', label: 'Dois monitores' },
     { key: 'dock_usb', label: 'Dock USB-C' },
     { key: 'hdmi', label: 'HDMI' },
     { key: 'ergonomica', label: 'Cadeira ergonómica' },
@@ -37,7 +36,6 @@ export default function Edit({ secretaria, pisos, setores }) {
         reservavel: secretaria.reservavel ?? true,
 
         monitor: secretaria.monitor ?? false,
-        dois_monitores: secretaria.dois_monitores ?? false,
         dock_usb: secretaria.dock_usb ?? false,
         hdmi: secretaria.hdmi ?? false,
         ergonomica: secretaria.ergonomica ?? false,

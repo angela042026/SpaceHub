@@ -12,7 +12,6 @@ const labelClass =
 
 const AMENIDADES = [
     { key: 'monitor', label: 'Monitor' },
-    { key: 'dois_monitores', label: 'Dois monitores' },
     { key: 'dock_usb', label: 'Dock USB-C' },
     { key: 'hdmi', label: 'HDMI' },
     { key: 'ergonomica', label: 'Cadeira ergonómica' },
@@ -33,7 +32,6 @@ export default function Create({ pisos, setores }) {
         reservavel: true,
 
         monitor: false,
-        dois_monitores: false,
         dock_usb: false,
         hdmi: false,
         ergonomica: false,

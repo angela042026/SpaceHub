@@ -71,10 +71,6 @@ class UpdateSecretariaRequest extends FormRequest
                 'boolean',
             ],
 
-            'dois_monitores' => [
-                'sometimes',
-                'boolean',
-            ],
 
             'dock_usb' => [
                 'sometimes',

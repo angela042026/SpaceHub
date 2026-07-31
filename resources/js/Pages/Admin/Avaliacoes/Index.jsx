@@ -11,18 +11,7 @@ import {
     ThumbsUp,
 } from 'lucide-react';
 import { useState } from 'react';
-
-const ESTADO_CLASSES = {
-    pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    aprovada: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-    rejeitada: 'bg-red-500/10 text-red-600 dark:text-red-400',
-};
-
-const ESTADO_LABEL = {
-    pendente: 'Pendente',
-    aprovada: 'Aprovada',
-    rejeitada: 'Rejeitada',
-};
+import { ESTADO_AVALIACAO, badge, etiqueta } from '@/utils/estados';
 
 export default function Index({ avaliacoes, filters }) {
     const [processingId, setProcessingId] = useState(null);
@@ -131,10 +120,10 @@ export default function Index({ avaliacoes, filters }) {
             render: (avaliacao) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                        ESTADO_CLASSES[avaliacao.estado] ?? 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                        badge(ESTADO_AVALIACAO, avaliacao.estado)
                     }`}
                 >
-                    {ESTADO_LABEL[avaliacao.estado] ?? avaliacao.estado}
+                    {etiqueta(ESTADO_AVALIACAO, avaliacao.estado)}
                 </span>
             ),
         },
@@ -216,7 +205,7 @@ export default function Index({ avaliacoes, filters }) {
                                         : 'border border-slate-200 text-slate-600 hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300'
                                 }`}
                             >
-                                {estado === 'todas' ? 'Todas' : ESTADO_LABEL[estado]}
+                                {estado === 'todas' ? 'Todas' : etiqueta(ESTADO_AVALIACAO, estado)}
                             </button>
                         ))}
                     </div>

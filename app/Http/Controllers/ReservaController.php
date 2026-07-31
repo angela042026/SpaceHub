@@ -16,6 +16,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
 /**
@@ -83,7 +84,14 @@ class ReservaController extends Controller
         }
 
         return Inertia::render('Reservas/Index', [
-            'reservas' => $query->orderBy('data', 'desc')->get(),
+            /*
+             * 9 por página: os cartões são apresentados numa grelha de
+             * três colunas, por isso enche três linhas certas.
+             * O withQueryString mantém os filtros ao mudar de página.
+             */
+            'reservas' => $query->orderBy('data', 'desc')
+                ->paginate(9)
+                ->withQueryString(),
 
             'setores' => Setor::where('reservavel', true)
                 ->orderBy('nome')
@@ -187,7 +195,7 @@ class ReservaController extends Controller
         Reserva $reserva,
         PagamentoService $pagamentoService
     ) {
-        $this->garantirReservaPropria($reserva);
+        Gate::authorize('gerirPropria', $reserva);
 
         if ($reserva->cancelada_at !== null) {
             return redirect()
@@ -236,7 +244,7 @@ class ReservaController extends Controller
      */
     public function edit(Reserva $reserva)
     {
-        $this->garantirReservaPropria($reserva);
+        Gate::authorize('gerirPropria', $reserva);
 
         if ($reserva->cancelada_at !== null) {
             return redirect()
@@ -275,7 +283,7 @@ class ReservaController extends Controller
         Reserva $reserva,
         PagamentoService $pagamentoService
     ) {
-        $this->garantirReservaPropria($reserva);
+        Gate::authorize('gerirPropria', $reserva);
 
         if ($reserva->cancelada_at !== null) {
             return redirect()
@@ -366,16 +374,6 @@ class ReservaController extends Controller
         return redirect()
             ->route('reservas.index')
             ->with('success', 'Reserva atualizada com sucesso.');
-    }
-
-    /**
-     * Impede que um utilizador veja ou altere reservas de outra pessoa.
-     */
-    private function garantirReservaPropria(Reserva $reserva): void
-    {
-        if ($reserva->user_id !== Auth::id()) {
-            abort(403, 'Esta reserva não te pertence.');
-        }
     }
 
     /**
