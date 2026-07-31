@@ -12,11 +12,7 @@ import {
     UserRound,
 } from 'lucide-react';
 import { useState } from 'react';
-
-const ESTADO_BADGE = {
-    true: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-    false: 'bg-red-500/10 text-red-600 dark:text-red-400',
-};
+import { ESTADO_UTILIZADOR, badge } from '@/utils/estados';
 
 export default function Index({ users, roles, filters }) {
     const [processingId, setProcessingId] = useState(null);
@@ -109,7 +105,7 @@ export default function Index({ users, roles, filters }) {
             label: 'Estado',
             render: (user) => (
                 <span
-                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${ESTADO_BADGE[String(user.ativo)]}`}
+                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${badge(ESTADO_UTILIZADOR, String(user.ativo))}`}
                 >
                     {user.ativo ? 'Ativo' : 'Inativo'}
                 </span>

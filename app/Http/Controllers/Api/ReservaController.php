@@ -14,11 +14,13 @@ use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Services\DashboardMetricsService;
+use App\Services\PagamentoService;
 use App\Services\ReservaCriacaoService;
 use App\Notifications\ReservaCanceladaNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class ReservaController extends Controller
@@ -206,7 +208,8 @@ class ReservaController extends Controller
      */
     public function cancelar(
         Request $request,
-        Reserva $reserva
+        Reserva $reserva,
+        PagamentoService $pagamentoService
     ): ReservaResource|JsonResponse {
         Gate::authorize('cancelar', $reserva);
 
@@ -255,10 +258,38 @@ class ReservaController extends Controller
 
         $estadoCancelada = $this->obterEstado('cancelada');
 
-        $reserva->update([
-            'estado_reserva_id' => $estadoCancelada->id,
-            'cancelada_at' => now(),
-        ]);
+        /*
+         * O cancelamento do pagamento passa pelo PagamentoService, tal
+         * como no fluxo web: é ele que põe um pagamento pendente em
+         * cancelado e que recusa cancelar uma reserva já paga enquanto
+         * não houver reembolso. Sem isto a reserva era cancelada e o
+         * pagamento ficava pendente para sempre.
+         *
+         * A transação com lockForUpdate evita que dois pedidos em
+         * simultâneo cancelem a mesma reserva duas vezes.
+         */
+        DB::transaction(function () use (
+            $reserva,
+            $estadoCancelada,
+            $pagamentoService
+        ) {
+            $reservaBloqueada = Reserva::whereKey($reserva->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($reservaBloqueada->cancelada_at !== null) {
+                return;
+            }
+
+            $pagamentoService->cancelarParaReserva($reservaBloqueada);
+
+            $reservaBloqueada->update([
+                'estado_reserva_id' => $estadoCancelada->id,
+                'cancelada_at' => now(),
+            ]);
+        });
+
+        $reserva->refresh();
 
         $this->carregarRelacoes($reserva);
 

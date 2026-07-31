@@ -13,13 +13,7 @@ import {
     Printer,
     UserRound,
 } from 'lucide-react';
-
-const METODO_LABELS = {
-    cartao: 'Cartão',
-    mbway: 'MB Way',
-    transferencia: 'Transferência bancária',
-    paypal: 'PayPal',
-};
+import { METODO_PAGAMENTO, etiqueta } from '@/utils/estados';
 
 export default function Comprovativo({ pagamento }) {
     const reserva = pagamento.reserva;
@@ -214,11 +208,11 @@ export default function Comprovativo({ pagamento }) {
                                 <Informacao
                                     Icone={CreditCard}
                                     titulo="Método de pagamento"
-                                    valor={
-                                        METODO_LABELS[
-                                        pagamento.metodo_pagamento
-                                        ] ?? 'Não indicado'
-                                    }
+                                    valor={etiqueta(
+                                        METODO_PAGAMENTO,
+                                        pagamento.metodo_pagamento,
+                                        'Não indicado',
+                                    )}
                                 />
 
                                 <Informacao

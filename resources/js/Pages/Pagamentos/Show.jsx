@@ -1,29 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, CheckCircle2, CreditCard } from 'lucide-react';
-
-const ESTADO_CLASSES = {
-    pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    pago: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-    recusado: 'bg-red-500/10 text-red-600 dark:text-red-400',
-    reembolsado: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-    cancelado: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
-};
-
-const ESTADO_LABELS = {
-    pendente: 'Pendente',
-    pago: 'Pago',
-    recusado: 'Recusado',
-    reembolsado: 'Reembolsado',
-    cancelado: 'Cancelado',
-};
-
-const METODO_LABELS = {
-    cartao: 'Cartão',
-    mbway: 'MB Way',
-    transferencia: 'Transferência bancária',
-    paypal: 'PayPal',
-};
+import { ESTADO_PAGAMENTO, METODO_PAGAMENTO, badge, etiqueta } from '@/utils/estados';
 
 export default function Show({ pagamento }) {
     const formatarValor = (valor) =>
@@ -124,8 +102,11 @@ export default function Show({ pagamento }) {
                             <p className="text-sm text-slate-500">Método</p>
 
                             <p className="font-medium text-slate-900 dark:text-slate-100">
-                                {METODO_LABELS[pagamento.metodo_pagamento] ??
-                                    'Por definir'}
+                                {etiqueta(
+                                    METODO_PAGAMENTO,
+                                    pagamento.metodo_pagamento,
+                                    'Por definir',
+                                )}
                             </p>
                         </div>
 
@@ -135,12 +116,12 @@ export default function Show({ pagamento }) {
                             </p>
 
                             <span
-                                className={`inline-flex rounded-full px-3 py-1 text-sm font-bold ${ESTADO_CLASSES[pagamento.estado] ??
-                                    ESTADO_CLASSES.cancelado
-                                    }`}
+                                className={`inline-flex rounded-full px-3 py-1 text-sm font-bold ${badge(
+                                    ESTADO_PAGAMENTO,
+                                    pagamento.estado,
+                                )}`}
                             >
-                                {ESTADO_LABELS[pagamento.estado] ??
-                                    pagamento.estado}
+                                {etiqueta(ESTADO_PAGAMENTO, pagamento.estado)}
                             </span>
                         </div>
 

@@ -12,14 +12,7 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
-
-const ESTADO_CLASSES = {
-    pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    confirmada: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-    cancelada: 'bg-red-500/10 text-red-600 dark:text-red-400',
-    expirada: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
-    concluida: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-};
+import { ESTADO_RESERVA, badge } from '@/utils/estados';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -128,8 +121,7 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
             render: (reserva) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                        ESTADO_CLASSES[reserva.estado_reserva?.codigo] ??
-                        'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                        badge(ESTADO_RESERVA, reserva.estado_reserva?.codigo)
                     }`}
                 >
                     {reserva.estado_reserva?.nome ?? '-'}

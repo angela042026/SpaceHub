@@ -2,11 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
 import { Head, Link } from '@inertiajs/react';
 import { Eye, LifeBuoy } from 'lucide-react';
-
-const ESTADO_BADGE = {
-    Pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    Resolvido: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-};
+import { ESTADO_SUPORTE, badge } from '@/utils/estados';
 
 export default function Index({ pedidos }) {
 
@@ -42,8 +38,7 @@ export default function Index({ pedidos }) {
             render: (pedido) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                        ESTADO_BADGE[pedido.estado] ??
-                        'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                        badge(ESTADO_SUPORTE, pedido.estado)
                     }`}
                 >
                     {pedido.estado}

@@ -17,15 +17,12 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
+import { ESTADO_RESERVA, badge } from '@/utils/estados';
 
-const ESTADO_CLASSES = {
-    pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    confirmada: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-    cancelada: 'bg-red-500/10 text-red-600 dark:text-red-400',
-    expirada: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
-    concluida: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-};
-
+/*
+ * Texto corrido, não um badge: entra a seguir a "Avaliação " numa frase.
+ * Por isso não vem do ESTADO_AVALIACAO, que tem etiquetas soltas.
+ */
 const AVALIACAO_ESTADO_LABEL = {
     pendente: 'enviada (a aguardar aprovação)',
     aprovada: 'aprovada',
@@ -266,10 +263,10 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                                             </div>
 
                                             <span
-                                                className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                                                    ESTADO_CLASSES[reserva.estado_reserva?.codigo] ??
-                                                    'bg-slate-500/10 text-slate-600 dark:text-slate-400'
-                                                }`}
+                                                className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ${badge(
+                                                    ESTADO_RESERVA,
+                                                    reserva.estado_reserva?.codigo,
+                                                )}`}
                                             >
                                                 {reserva.estado_reserva?.nome ?? '-'}
                                             </span>

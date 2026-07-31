@@ -2,12 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { CheckCircle2, Clock3, LifeBuoy } from 'lucide-react';
-
-const ESTADO_BADGE = {
-    Pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    'Em análise': 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-    Resolvido: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-};
+import { ESTADO_SUPORTE, badge } from '@/utils/estados';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -129,8 +124,7 @@ export default function Create({ meusPedidos = [] }) {
 
                                     <span
                                         className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${
-                                            ESTADO_BADGE[pedido.estado] ??
-                                            'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                                            badge(ESTADO_SUPORTE, pedido.estado)
                                         }`}
                                     >
                                         {pedido.estado === 'Resolvido' ? (

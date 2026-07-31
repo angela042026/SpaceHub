@@ -1,18 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, router } from '@inertiajs/react';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
-
-const ESTADO_CLASSES = {
-    pendente: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-    aprovada: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-    rejeitada: 'bg-red-500/10 text-red-600 dark:text-red-400',
-};
-
-const ESTADO_LABEL = {
-    pendente: 'Pendente',
-    aprovada: 'Aprovada',
-    rejeitada: 'Rejeitada',
-};
+import { ESTADO_AVALIACAO, badge, etiqueta } from '@/utils/estados';
 
 export default function Index({ avaliacoes }) {
     const irParaPagina = (url) => {
@@ -72,10 +61,10 @@ export default function Index({ avaliacoes }) {
 
                                         <span
                                             className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                                                ESTADO_CLASSES[avaliacao.estado] ?? 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                                                badge(ESTADO_AVALIACAO, avaliacao.estado)
                                             }`}
                                         >
-                                            {ESTADO_LABEL[avaliacao.estado] ?? avaliacao.estado}
+                                            {etiqueta(ESTADO_AVALIACAO, avaliacao.estado)}
                                         </span>
                                     </div>
 
