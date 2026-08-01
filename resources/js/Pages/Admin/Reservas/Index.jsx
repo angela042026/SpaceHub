@@ -1,11 +1,11 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
+import Pagination from '@/Components/Pagination';
+import { LoadingOverlay } from '@/Components/Loading';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     Armchair,
     CalendarDays,
-    ChevronLeft,
-    ChevronRight,
     Pencil,
     RotateCcw,
     Search,
@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { ESTADO_RESERVA, badge } from '@/utils/estados';
+import { resolverImagemSecretaria } from '@/utils/imagemSetor';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -20,6 +21,7 @@ const fieldClass =
 export default function Index({ reservas, estados, edificios, pisos, setores, filters }) {
 
     const [processingId, setProcessingId] = useState(null);
+    const [carregando, setCarregando] = useState(false);
 
     const { data, setData, get } = useForm({
         search: filters.search ?? '',
@@ -36,11 +38,16 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
         get(route('admin.reservas.index'), {
             preserveState: true,
             preserveScroll: true,
+            onStart: () => setCarregando(true),
+            onFinish: () => setCarregando(false),
         });
     };
 
     const limpar = () => {
-        router.get(route('admin.reservas.index'));
+        router.get(route('admin.reservas.index'), {}, {
+            onStart: () => setCarregando(true),
+            onFinish: () => setCarregando(false),
+        });
     };
 
     const cancelarReserva = (reserva) => {
@@ -54,14 +61,6 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
             preserveScroll: true,
             onFinish: () => setProcessingId(null),
         });
-    };
-
-    const irParaPagina = (url) => {
-        if (!url) {
-            return;
-        }
-
-        router.get(url, {}, { preserveState: true, preserveScroll: true });
     };
 
     const columns = [
@@ -92,9 +91,9 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
             label: 'Espaço',
             render: (reserva) => (
                 <div className="flex items-center gap-2.5">
-                    {reserva.secretaria?.imagem ? (
+                    {resolverImagemSecretaria(reserva.secretaria) ? (
                         <img
-                            src={reserva.secretaria.imagem}
+                            src={resolverImagemSecretaria(reserva.secretaria)}
                             alt={reserva.secretaria?.codigo ?? ''}
                             className="h-9 w-9 shrink-0 rounded-lg object-cover"
                         />
@@ -285,40 +284,21 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                     </div>
                 </form>
 
-                <div className="p-6">
+                <div className="relative p-6">
+                    <LoadingOverlay show={carregando} />
+
                     <Table
                         columns={columns}
                         data={reservas.data}
                         emptyMessage="Nenhuma reserva encontrada."
                     />
 
-                    {reservas.last_page > 1 && (
-                        <div className="mt-5 flex items-center justify-between">
-                            <p className="text-xs text-slate-400">
-                                Página {reservas.current_page} de {reservas.last_page}
-                            </p>
-
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    disabled={!reservas.prev_page_url}
-                                    onClick={() => irParaPagina(reservas.prev_page_url)}
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
-                                >
-                                    <ChevronLeft size={16} strokeWidth={1.9} />
-                                </button>
-
-                                <button
-                                    type="button"
-                                    disabled={!reservas.next_page_url}
-                                    onClick={() => irParaPagina(reservas.next_page_url)}
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
-                                >
-                                    <ChevronRight size={16} strokeWidth={1.9} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    <Pagination
+                        pagination={reservas}
+                        disabled={carregando}
+                        onStart={() => setCarregando(true)}
+                        onFinish={() => setCarregando(false)}
+                    />
                 </div>
             </section>
         </DashboardLayout>

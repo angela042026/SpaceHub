@@ -47,9 +47,18 @@ const RANKING_ICONS = [
     },
 ];
 
+/*
+ * Cores fixas (não reagem ao tema) usadas como stopColor do gradiente
+ * SVG das barras do Recharts. `navy` (#1e3a5f) foi substituído por
+ * `blue` porque, no modo escuro, o fundo do cartão é #173653
+ * (var(--color-card) em resources/css/app.css) — quase idêntico ao
+ * navy antigo, tornando as barras praticamente invisíveis. `blue`
+ * mantém contraste adequado tanto no cartão claro (#ffffff) como
+ * no escuro (#173653).
+ */
 const CHART_COLORS = {
     teal: '#14b8a6',
-    navy: '#1e3a5f',
+    blue: '#3b82f6',
     slate: '#64748b',
 };
 
@@ -598,7 +607,7 @@ export default function StatisticsPanel({
                         icon={UserRound}
                         items={estatisticas?.utilizadoresComMaisReservas}
                         chartData={utilizadoresChart}
-                        chartColor={CHART_COLORS.navy}
+                        chartColor={CHART_COLORS.blue}
                         gradientId="gradient-utilizadores"
                         getKey={(item) => item.user_id}
                         getTitle={(item) =>
@@ -618,7 +627,7 @@ export default function StatisticsPanel({
                         icon={CalendarDays}
                         items={estatisticas?.diasComMaiorOcupacao}
                         chartData={diasChart}
-                        chartColor={CHART_COLORS.navy}
+                        chartColor={CHART_COLORS.blue}
                         gradientId="gradient-dias"
                         getKey={(item) => item.data}
                         getTitle={(item) =>

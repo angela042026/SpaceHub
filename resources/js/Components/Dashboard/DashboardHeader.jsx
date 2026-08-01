@@ -232,11 +232,13 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [agora, setAgora] = useState(() => new Date());
     const [idsVistos, setIdsVistos] = useState(() => carregarIdsVistos());
-    const [notificacoesReaisEstado, setNotificacoesReaisEstado] = useState(notificacoesReais ?? []);
 
-    useEffect(() => {
-        setNotificacoesReaisEstado(notificacoesReais ?? []);
-    }, [notificacoesReais]);
+    // Ids de notificações reais marcadas como lidas otimisticamente no
+    // clique, antes da resposta do servidor. Ao contrário de duplicar a
+    // lista inteira em state (versão anterior), só guarda os ids — o
+    // conteúdo (título/mensagem) vem sempre diretamente da prop
+    // `notificacoesReais`, sem precisar de um useEffect para ressincronizar.
+    const [idsLidosOtimista, setIdsLidosOtimista] = useState(() => new Set());
 
     useEffect(() => {
         const intervalo = setInterval(() => setAgora(new Date()), 30000);
@@ -261,13 +263,13 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
 
     // Notificações reais (guardadas na base de dados, ex: resposta de suporte)
     // vêm primeiro — persistem entre sessões e não dependem do localStorage.
-    const notificacoesReaisMapeadas = notificacoesReaisEstado.map((notificacao) => ({
+    const notificacoesReaisMapeadas = (notificacoesReais ?? []).map((notificacao) => ({
         id: `real-${notificacao.id}`,
         realId: notificacao.id,
         icon: ICONE_POR_TIPO[notificacao.tipo] ?? Bell,
         titulo: notificacao.titulo,
         mensagem: notificacao.mensagem,
-        lida: notificacao.lida,
+        lida: notificacao.lida || idsLidosOtimista.has(notificacao.id),
     }));
 
     const notificacoes = [...notificacoesReaisMapeadas, ...notificacoesSinteticas];
@@ -299,9 +301,15 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
             }
 
             if (abrindo && notificacoesReaisMapeadas.some((notificacao) => !notificacao.lida)) {
-                setNotificacoesReaisEstado((atual) =>
-                    atual.map((notificacao) => ({ ...notificacao, lida: true })),
-                );
+                setIdsLidosOtimista((atual) => {
+                    const novo = new Set(atual);
+
+                    (notificacoesReais ?? []).forEach((notificacao) =>
+                        novo.add(notificacao.id),
+                    );
+
+                    return novo;
+                });
 
                 axios.post(route('notificacoes.marcarLidas'));
             }

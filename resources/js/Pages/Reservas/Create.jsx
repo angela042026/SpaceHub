@@ -1,7 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, CalendarDays, CalendarPlus } from 'lucide-react';
+import { ArrowLeft, CalendarDays, CalendarPlus, Star } from 'lucide-react';
 import LugarCard from '@/Components/Reservas/LugarCard';
 import PreferenciasPanel from '@/Components/Reservas/PreferenciasPanel';
 import {

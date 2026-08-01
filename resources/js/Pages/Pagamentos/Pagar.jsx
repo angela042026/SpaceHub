@@ -1,5 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { cloneElement, isValidElement, useId } from 'react';
+import { formatarDataCurta, formatarValorEuro } from '@/utils/formatacaoPagamento';
 import {
     ArrowLeft,
     Building2,
@@ -76,27 +78,6 @@ export default function Pagar({ pagamento }) {
         });
     };
 
-    const formatarValor = (valor) =>
-        new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'EUR',
-        }).format(Number(valor ?? 0));
-
-    const formatarData = (valor) => {
-        if (!valor) {
-            return '-';
-        }
-
-        const partes = String(valor).substring(0, 10).split('-');
-
-        if (partes.length !== 3) {
-            return '-';
-        }
-
-        const [ano, mes, dia] = partes;
-        return `${dia}/${mes}/${ano}`;
-    };
-
     const confirmarPagamento = (evento) => {
         evento.preventDefault();
 
@@ -161,7 +142,7 @@ export default function Pagar({ pagamento }) {
                                 <ResumoItem
                                     Icone={CalendarDays}
                                     titulo="Data"
-                                    valor={formatarData(reserva?.data)}
+                                    valor={formatarDataCurta(reserva?.data)}
                                 />
 
                                 <ResumoItem
@@ -201,7 +182,7 @@ export default function Pagar({ pagamento }) {
                                 </p>
 
                                 <p className="mt-2 text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-                                    {formatarValor(pagamento.valor)}
+                                    {formatarValorEuro(pagamento.valor)}
                                 </p>
                             </div>
 
@@ -537,7 +518,7 @@ export default function Pagar({ pagamento }) {
 
                                         <LinhaDados
                                             titulo="Valor"
-                                            valor={formatarValor(pagamento.valor)}
+                                            valor={formatarValorEuro(pagamento.valor)}
                                         />
                                     </div>
 
@@ -663,13 +644,22 @@ function ResumoItem({ Icone, titulo, valor }) {
 }
 
 function Campo({ label, erro, children }) {
+    const idGerado = useId();
+    const campo = isValidElement(children)
+        ? cloneElement(children, { id: children.props.id ?? idGerado })
+        : children;
+    const idCampo = isValidElement(campo) ? campo.props.id : undefined;
+
     return (
         <div>
-            <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+            <label
+                htmlFor={idCampo}
+                className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
+            >
                 {label}
             </label>
 
-            {children}
+            {campo}
 
             {erro && <MensagemErro>{erro}</MensagemErro>}
         </div>

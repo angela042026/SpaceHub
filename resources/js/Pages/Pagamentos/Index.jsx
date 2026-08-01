@@ -8,6 +8,7 @@ import {
     Eye,
 } from 'lucide-react';
 import { ESTADO_PAGAMENTO, METODO_PAGAMENTO, badge, etiqueta } from '@/utils/estados';
+import { formatarDataCurta, formatarValorEuro } from '@/utils/formatacaoPagamento';
 
 export default function Index({
     pagamentos,
@@ -42,33 +43,6 @@ export default function Index({
                 replace: true,
             },
         );
-    };
-
-    const formatarValor = (valor) =>
-        new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'EUR',
-        }).format(Number(valor ?? 0));
-
-    const formatarData = (data) => {
-        if (!data) {
-            return '-';
-        }
-
-        const dataSemHora = String(data).substring(0, 10);
-        const partes = dataSemHora.split('-');
-
-        if (partes.length !== 3) {
-            return '-';
-        }
-
-        const [ano, mes, dia] = partes;
-
-        if (!ano || !mes || !dia) {
-            return '-';
-        }
-
-        return `${dia}/${mes}/${ano}`;
     };
 
     const columns = [
@@ -112,7 +86,7 @@ export default function Index({
             key: 'data',
             label: 'Data da reserva',
             render: (pagamento) =>
-                formatarData(pagamento.reserva?.data),
+                formatarDataCurta(pagamento.reserva?.data),
         },
         {
             key: 'espaco',
@@ -136,7 +110,7 @@ export default function Index({
             label: 'Valor',
             render: (pagamento) => (
                 <span className="font-semibold text-slate-800 dark:text-slate-100">
-                    {formatarValor(pagamento.valor)}
+                    {formatarValorEuro(pagamento.valor)}
                 </span>
             ),
         },

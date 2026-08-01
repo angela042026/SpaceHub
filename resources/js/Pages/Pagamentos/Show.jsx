@@ -2,53 +2,9 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, CheckCircle2, CreditCard } from 'lucide-react';
 import { ESTADO_PAGAMENTO, METODO_PAGAMENTO, badge, etiqueta } from '@/utils/estados';
+import { formatarDataCurta, formatarDataHora, formatarValorEuro } from '@/utils/formatacaoPagamento';
 
 export default function Show({ pagamento }) {
-    const formatarValor = (valor) =>
-        new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'EUR',
-        }).format(Number(valor ?? 0));
-
-    const formatarData = (dataValor) => {
-        if (!dataValor) {
-            return '-';
-        }
-
-        const valor = String(dataValor);
-        const dataSemHora = valor.substring(0, 10);
-        const partes = dataSemHora.split('-');
-
-        if (partes.length !== 3) {
-            return '-';
-        }
-
-        const [ano, mes, dia] = partes;
-
-        if (!ano || !mes || !dia) {
-            return '-';
-        }
-
-        return `${dia}/${mes}/${ano}`;
-    };
-
-    const formatarDataHora = (dataValor) => {
-        if (!dataValor) {
-            return '-';
-        }
-
-        const dataObjeto = new Date(dataValor);
-
-        if (Number.isNaN(dataObjeto.getTime())) {
-            return formatarData(dataValor);
-        }
-
-        return new Intl.DateTimeFormat('pt-PT', {
-            dateStyle: 'short',
-            timeStyle: 'short',
-        }).format(dataObjeto);
-    };
-
     const pagamentoPendente = pagamento.estado === 'pendente';
 
     return (
@@ -94,7 +50,7 @@ export default function Show({ pagamento }) {
                             <p className="text-sm text-slate-500">Valor</p>
 
                             <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                                {formatarValor(pagamento.valor)}
+                                {formatarValorEuro(pagamento.valor)}
                             </p>
                         </div>
 
@@ -147,7 +103,7 @@ export default function Show({ pagamento }) {
                             </p>
 
                             <p className="font-medium text-slate-900 dark:text-slate-100">
-                                {formatarData(pagamento.reserva?.data)}
+                                {formatarDataCurta(pagamento.reserva?.data)}
                             </p>
                         </div>
 
@@ -158,7 +114,7 @@ export default function Show({ pagamento }) {
                                 </p>
 
                                 <p className="font-medium text-slate-900 dark:text-slate-100">
-                                    {formatarData(pagamento.reserva.data_fim)}
+                                    {formatarDataCurta(pagamento.reserva.data_fim)}
                                 </p>
                             </div>
                         )}

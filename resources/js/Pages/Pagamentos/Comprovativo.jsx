@@ -14,6 +14,7 @@ import {
     UserRound,
 } from 'lucide-react';
 import { METODO_PAGAMENTO, etiqueta } from '@/utils/estados';
+import { formatarDataCurta, formatarDataHora, formatarValorEuro } from '@/utils/formatacaoPagamento';
 
 export default function Comprovativo({ pagamento }) {
     const reserva = pagamento.reserva;
@@ -22,49 +23,6 @@ export default function Comprovativo({ pagamento }) {
     const setor = secretaria?.setor;
     const piso = setor?.piso;
     const edificio = piso?.edificio;
-
-    const formatarValor = (valor) =>
-        new Intl.NumberFormat('pt-PT', {
-            style: 'currency',
-            currency: 'EUR',
-        }).format(Number(valor ?? 0));
-
-    const formatarData = (valor) => {
-        if (!valor) {
-            return '-';
-        }
-
-        const partes = String(valor).substring(0, 10).split('-');
-
-        if (partes.length !== 3) {
-            return '-';
-        }
-
-        const [ano, mes, dia] = partes;
-
-        if (!ano || !mes || !dia) {
-            return '-';
-        }
-
-        return `${dia}/${mes}/${ano}`;
-    };
-
-    const formatarDataHora = (valor) => {
-        if (!valor) {
-            return '-';
-        }
-
-        const data = new Date(valor);
-
-        if (Number.isNaN(data.getTime())) {
-            return formatarData(valor);
-        }
-
-        return new Intl.DateTimeFormat('pt-PT', {
-            dateStyle: 'short',
-            timeStyle: 'short',
-        }).format(data);
-    };
 
     const imprimirComprovativo = () => {
         window.print();
@@ -187,7 +145,7 @@ export default function Comprovativo({ pagamento }) {
                             </p>
 
                             <p className="mt-2 text-4xl font-black tracking-tight text-slate-900 dark:text-white">
-                                {formatarValor(pagamento.valor)}
+                                {formatarValorEuro(pagamento.valor)}
                             </p>
                         </div>
                     </section>
@@ -285,7 +243,7 @@ export default function Comprovativo({ pagamento }) {
                             <ReservaItem
                                 Icone={CalendarDays}
                                 titulo="Data"
-                                valor={formatarData(reserva?.data)}
+                                valor={formatarDataCurta(reserva?.data)}
                             />
 
                             <ReservaItem
