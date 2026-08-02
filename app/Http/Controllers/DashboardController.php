@@ -27,6 +27,14 @@ class DashboardController extends Controller
 
     public function index(DashboardRequest $request): Response
     {
+        $user = $request->user();
+
+        // 1. Notificações dos últimos 30 dias (máx. 10)
+        $notificacoesBD = $user->notifications()
+            ->where('created_at', '>=', now()->subDays(30))
+            ->take(10)
+            ->get();
+
         $hoje = Carbon::today();
         $ontem = $hoje->copy()->subDay();
 
@@ -99,7 +107,7 @@ class DashboardController extends Controller
                 'periodo',
                 'estadoReserva',
             ])
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->whereDate('data', $hoje)
             ->whereIn(
                 'estado_reserva_id',
@@ -114,7 +122,7 @@ class DashboardController extends Controller
                 'periodo',
                 'estadoReserva',
             ])
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->whereDate('data', '>', $hoje)
             ->whereIn(
                 'estado_reserva_id',
@@ -126,6 +134,7 @@ class DashboardController extends Controller
             ->get();
 
         $dados = [
+            'notificacoesBD' => $notificacoesBD,
             'pisos' => $pisos,
             'edificios' => $edificios,
             'reservaHojeUtilizador' => $reservaHojeUtilizador,
@@ -142,7 +151,7 @@ class DashboardController extends Controller
             'atividadeRecente' => $atividadeRecente,
         ];
 
-        $role = $request->user()->role?->nome;
+        $role = $user->role?->nome;
 
         if (in_array($role, ['Administrador', 'Gestor'], true)) {
             return Inertia::render('Dashboard/Admin', $dados);

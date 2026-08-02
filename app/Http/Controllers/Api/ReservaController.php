@@ -19,6 +19,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
+use App\Models\Edificio;
 
 class ReservaController extends Controller
 {
@@ -28,6 +29,13 @@ class ReservaController extends Controller
      * O Administrador consulta todas.
      * Os restantes utilizadores consultam apenas as próprias.
      */
+    public function create()
+    {
+        return Inertia::render('Reservas/Create', [
+            'edificios' => Edificio::with('pisos.setores.secretarias')->get(),
+            'periodos' => Periodo::all(),
+        ]);
+    }
     public function index(Request $request): AnonymousResourceCollection
     {
         Gate::authorize('viewAny', Reserva::class);
@@ -39,7 +47,7 @@ class ReservaController extends Controller
             'estadoReserva',
         ]);
 
-        if (! $this->isAdministrador($request)) {
+        if (!$this->isAdministrador($request)) {
             $query->where('user_id', $request->user()->id);
         }
 
@@ -77,7 +85,7 @@ class ReservaController extends Controller
         $secretaria = Secretaria::query()
             ->findOrFail($dados['secretaria_id']);
 
-        if (! $secretaria->ativo || ! $secretaria->reservavel) {
+        if (!$secretaria->ativo || !$secretaria->reservavel) {
             return response()->json([
                 'message' => 'A secretária selecionada não está disponível para reservas.',
             ], 422);
@@ -170,7 +178,7 @@ class ReservaController extends Controller
         $secretaria = Secretaria::query()
             ->findOrFail($secretariaId);
 
-        if (! $secretaria->ativo || ! $secretaria->reservavel) {
+        if (!$secretaria->ativo || !$secretaria->reservavel) {
             return response()->json([
                 'message' => 'A secretária selecionada não está disponível para reservas.',
             ], 422);
@@ -255,8 +263,8 @@ class ReservaController extends Controller
          * ainda não tenha check-in e o estado permita o cancelamento.
          */
         if (
-            ! $this->isAdministrador($request)
-            && ! $reserva->data->isFuture()
+            !$this->isAdministrador($request)
+            && !$reserva->data->isFuture()
         ) {
             return response()->json([
                 'message' => 'Apenas reservas futuras podem ser canceladas.',
@@ -435,7 +443,7 @@ class ReservaController extends Controller
         return Periodo::query()
             ->whereIn('nome', $nomesPeriodos)
             ->pluck('id')
-            ->map(fn ($id) => (int) $id)
+            ->map(fn($id) => (int) $id)
             ->all();
     }
 

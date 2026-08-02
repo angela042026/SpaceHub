@@ -10,6 +10,7 @@ class Faq extends Model
         'categoria',
         'pergunta',
         'resposta',
+        'keywords',
         'ordem',
         'ativo',
     ];

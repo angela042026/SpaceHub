@@ -41,4 +41,8 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'pagamento' => [
+        'notificacoes_ativas' => env('NOTIFICACOES_PAGAMENTO_ATIVAS', false),
+    ],
+
 ];

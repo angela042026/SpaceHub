@@ -1,136 +1,78 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, ArrowLeft } from 'lucide-react';
 import { usePage } from '@inertiajs/react';
+import axios from 'axios';
 
 export default function ChatBot({ aoVoltar }) {
     const { auth } = usePage().props;
     const nomeDoUtilizador = auth?.user ? auth.user.name : 'Utilizador';
 
     const [input, setInput] = useState('');
+    const [carregando, setCarregando] = useState(false);
     const [mensagens, setMensagens] = useState([
         { id: 1, emissor: 'bot', texto: `Olá, ${nomeDoUtilizador}! 👋\nBem-vindo ao suporte do SpaceHub. Como posso ajudar hoje?`, opcoes: [] }
     ]);
-    const [mostrarBotoes, setMostrarBotoes] = useState(false);
-    const [triggerPendente, setTriggerPendente] = useState(null);
 
     const fimMensagensRef = useRef(null);
+    const inputRef = useRef(null); // 1. Ref criada aqui
 
     // Auto-scroll para a última mensagem
     useEffect(() => {
         fimMensagensRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [mensagens, mostrarBotoes]);
+    }, [mensagens, carregando]);
 
-    const lidarComEnvio = (e) => {
-        e.preventDefault();
-        if (!input.trim()) return;
+    const enviarMensagemParaBackend = async (textoMensagem) => {
+        if (!textoMensagem.trim() || carregando) return;
 
-        const pergunta = input;
-
-        const novaMensagemUser = { id: Date.now(), emissor: 'user', texto: pergunta };
+        const novaMensagemUser = { id: Date.now(), emissor: 'user', texto: textoMensagem };
         setMensagens(prev => [...prev, novaMensagemUser]);
         setInput('');
-        setMostrarBotoes(false);
+        setCarregando(true);
 
-        setTimeout(() => {
-            let frase = pergunta.toLowerCase().trim();
-            const procurar = ['á', 'à', 'ã', 'â', 'é', 'ê', 'í', 'ó', 'ô', 'õ', 'ú', 'ç'];
-            const substituir = ['a', 'a', 'a', 'a', 'e', 'e', 'i', 'o', 'o', 'o', 'u', 'c'];
-            procurar.forEach((letra, i) => {
-                frase = frase.replaceAll(letra, substituir[i]);
-            });
-
-            const temas = [
-                {
-                    id: 'saudacao',
-                    triggers: ['ola', 'oi', 'ajuda', 'bom dia', 'boa tarde', 'boa noite'],
-                    resposta: "Olá! 👋\nComo posso ajudar?"
-                },
-                {
-                    id: 'precos',
-                    triggers: ['preco', 'precos', 'valores', 'plano', 'planos', 'pagar', 'valor', 'custo', 'custos'],
-                    resposta: "Temos passes a partir de 8€ (meio-dia) e planos mensais a partir de 149€. Pode ver todos os detalhes na secção de Preços da página inicial! 💼"
-                },
-                {
-                    id: 'espaco',
-                    triggers: ['espaco', 'local', 'morada', 'onde', 'instalacoes', 'comunidade', 'cafe', 'internet', 'wifi'],
-                    resposta: "Temos salas de reunião modernas, internet ultra-rápida e café grátis à descrição, disponível no lobby! ☕"
-                },
-                {
-                    id: 'reservas',
-                    triggers: ['reserva', 'reservar', 'reservas', 'sala', 'salas', 'secretaria', 'secretarias'],
-                    resposta: "Para reservar uma sala de reunião ou secretária, basta aceder ao módulo correspondente no teu menu! 🗓️"
-                }
-            ];
-
-            let temasEncontrados = [];
-
-            temas.forEach(tema => {
-                const triggerUsada = tema.triggers.find(t => {
-                    const regex = new RegExp(`\\b${t}\\b`, 'i');
-                    return regex.test(frase);
-                });
-
-                if (triggerUsada) {
-                    const posicao = frase.indexOf(triggerUsada);
-                    temasEncontrados.push({ ...tema, triggerExata: triggerUsada, posicaoNaFrase: posicao });
+        try {
+            const resposta = await axios.post('/chat/enviar', {
+                mensagem: textoMensagem
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
                 }
             });
 
-            if (temasEncontrados.length === 0) {
-                setMensagens((prev) => [...prev, {
-                    id: Date.now(),
-                    emissor: 'bot',
-                    texto: "Desculpe, ainda sou um robô em treino no SpaceHub. Por enquanto, posso ajudar com assuntos como 'preços', 'espaços' ou 'reservas'!"
-                }]);
-                return;
-            }
+            const dadosBot = resposta.data;
 
-            temasEncontrados.sort((a, b) => a.posicaoNaFrase - b.posicaoNaFrase);
+            setMensagens(prev => [...prev, {
+                id: Date.now() + 1,
+                emissor: 'bot',
+                texto: typeof dadosBot === 'string' ? dadosBot : (dadosBot.texto || dadosBot.resposta),
+                opcoes: dadosBot.opcoes || []
+            }]);
 
-            const primeiroTema = temasEncontrados[0];
-            let respostaFinal = primeiroTema.resposta;
+        } catch (error) {
+            console.error('Erro ao comunicar com o BotService:', error);
+            setMensagens(prev => [...prev, {
+                id: Date.now() + 1,
+                emissor: 'bot',
+                texto: 'Ops! Ocorreu um erro ao ligar ao servidor do SpaceHub. Tenta novamente dentro de momentos. 🤖',
+                opcoes: []
+            }]);
+        } finally {
+            setCarregando(false);
 
-            if (temasEncontrados.length > 1) {
-                const segundoTema = temasEncontrados[1];
-                respostaFinal += `\n\n💡 Notei que também mencionou "${segundoTema.triggerExata}". Deseja obter mais informação sobre este assunto?`;
-
-                setTriggerPendente(segundoTema);
-                setMostrarBotoes(true);
-            } else {
-                setTriggerPendente(null);
-            }
-
-            setMensagens((prev) => [...prev, { id: Date.now(), emissor: 'bot', texto: respostaFinal }]);
-        }, 800);
+            // 2. Garante que o foco volta ao input assim que o estado 'carregando' passa a false
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 0);
+        }
     };
 
-    const lidarComEscolha = (querSaberMais) => {
-        const proximoTema = triggerPendente;
+    const lidarComEnvioForm = (e) => {
+        e.preventDefault();
+        enviarMensagemParaBackend(input);
+    };
 
-        setMostrarBotoes(false);
-        setTriggerPendente(null);
-
-        if (querSaberMais && proximoTema) {
-            setMensagens((prev) => [...prev, { id: Date.now(), emissor: 'user', texto: "Sim, quero saber mais." }]);
-
-            setTimeout(() => {
-                setMensagens((prev) => [...prev, {
-                    id: Date.now() + 1,
-                    emissor: 'bot',
-                    texto: `${proximoTema.resposta}`
-                }]);
-            }, 800);
-        } else {
-            setMensagens((prev) => [...prev, { id: Date.now(), emissor: 'user', texto: "Já tenho a informação que procurava." }]);
-
-            setTimeout(() => {
-                setMensagens((prev) => [...prev, {
-                    id: Date.now() + 1,
-                    emissor: 'bot',
-                    texto: "Excelente! Se precisar de mais ajuda, eu continuo deste lado. Bom trabalho no SpaceHub! 🚀"
-                }]);
-            }, 800);
-        }
+    const lidarComCliqueOpcao = (opcao) => {
+        const textoAEnviar = opcao.mensagem_simulada || opcao.label;
+        enviarMensagemParaBackend(textoAEnviar);
     };
 
     return (
@@ -170,55 +112,64 @@ export default function ChatBot({ aoVoltar }) {
             {/* Balões de Conversa */}
             <div className="relative z-10 flex-1 overflow-y-auto p-4 space-y-3 thin-scrollbar">
                 {mensagens.map((msg) => (
-                    <div
-                        key={msg.id}
-                        className={`flex items-start gap-2.5 max-w-[85%] ${msg.emissor === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
-                    >
-                        {/* Círculo do Avatar */}
-                        <div className={`flex h-7 w-7 shrink-0 select-none items-center justify-center rounded-full text-xs font-bold overflow-hidden
-                            ${msg.emissor === 'user' ? 'bg-teal-500 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}
+                    <div key={msg.id} className="space-y-2">
+                        <div
+                            className={`flex items-start gap-2.5 max-w-[85%] ${msg.emissor === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
                         >
-                            {msg.emissor === 'user' ? (
-                                auth?.user?.photo ? (
-                                    <img
-                                        src={auth.user.photo}
-                                        alt={nomeDoUtilizador}
-                                        className="h-full w-full object-cover"
-                                    />
+                            <div className={`flex h-7 w-7 shrink-0 select-none items-center justify-center rounded-full text-xs font-bold overflow-hidden
+                                ${msg.emissor === 'user' ? 'bg-teal-500 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}
+                            >
+                                {msg.emissor === 'user' ? (
+                                    auth?.user?.photo ? (
+                                        <img
+                                            src={auth.user.photo}
+                                            alt={nomeDoUtilizador}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <User size={14} className="text-white stroke-[2.5]" />
+                                    )
                                 ) : (
-                                    <User size={14} className="text-white stroke-[2.5]" />
-                                )
-                            ) : (
-                                <Bot size={14} />
-                            )}
+                                    <Bot size={14} />
+                                )}
+                            </div>
+
+                            <div className={`rounded-2xl px-3.5 py-2 text-sm shadow-sm leading-relaxed break-words whitespace-pre-line
+                                ${msg.emissor === 'user'
+                                    ? 'bg-teal-500 text-white rounded-tr-none'
+                                    : 'bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-100 dark:border-slate-800'}`}
+                            >
+                                {msg.texto}
+                            </div>
                         </div>
 
-                        {/* Balão de Texto */}
-                        <div className={`rounded-2xl px-3.5 py-2 text-sm shadow-sm leading-relaxed break-words whitespace-pre-line
-                            ${msg.emissor === 'user'
-                                ? 'bg-teal-500 text-white rounded-tr-none'
-                                : 'bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-100 dark:border-slate-800'}`}
-                        >
-                            {msg.texto}
-                        </div>
+                        {msg.emissor === 'bot' && msg.opcoes && msg.opcoes.length > 0 && (
+                            <div className="flex flex-wrap gap-2 pl-9">
+                                {msg.opcoes.map((opcao, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => lidarComCliqueOpcao(opcao)}
+                                        disabled={carregando}
+                                        className="text-xs font-medium bg-teal-50 text-teal-700 hover:bg-teal-100 border border-teal-200 dark:bg-teal-950/40 dark:text-teal-300 dark:border-teal-800/60 dark:hover:bg-teal-900/50 px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                                    >
+                                        💡 {opcao.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 ))}
 
-                {/* Opções de Botões Alternativos */}
-                {mostrarBotoes && (
-                    <div className="flex flex-col sm:flex-row gap-2 mt-2 pl-9 justify-start relative z-20">
-                        <button
-                            onClick={() => lidarComEscolha(false)}
-                            className="bg-slate-500 hover:bg-slate-600 text-white border-none px-3 py-1.5 rounded-full text-xs cursor-pointer shadow-sm active:scale-95 transition-all"
-                        >
-                            Já tenho a informação que procurava
-                        </button>
-                        <button
-                            onClick={() => lidarComEscolha(true)}
-                            className="bg-teal-500 hover:bg-teal-600 text-white border-none px-3 py-1.5 rounded-full text-xs cursor-pointer shadow-sm active:scale-95 transition-all"
-                        >
-                            Sim, quero saber mais
-                        </button>
+                {carregando && (
+                    <div className="flex items-center gap-2 max-w-[85%] mr-auto">
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300 text-xs">
+                            <Bot size={14} />
+                        </div>
+                        <div className="rounded-2xl rounded-tl-none bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 px-4 py-2.5 text-sm text-slate-400 flex items-center gap-1.5">
+                            <span className="h-2 w-2 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                            <span className="h-2 w-2 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                            <span className="h-2 w-2 rounded-full bg-teal-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                        </div>
                     </div>
                 )}
 
@@ -227,19 +178,21 @@ export default function ChatBot({ aoVoltar }) {
 
             {/* Input Form */}
             <form
-                onSubmit={lidarComEnvio}
+                onSubmit={lidarComEnvioForm}
                 className="relative z-10 border-t border-slate-100 bg-white p-3 dark:border-slate-800 dark:bg-slate-900 flex items-center gap-2"
             >
                 <input
+                    ref={inputRef} // 3. Ref ligada aqui
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Pergunte-me algo (ex: preço, espaço, reserva)..."
-                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-900"
+                    placeholder="Pergunte-me algo (ex: login, preço, reserva)..."
+                    disabled={carregando}
+                    className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm text-slate-800 placeholder-slate-400 focus:border-teal-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:bg-slate-900 disabled:opacity-50"
                 />
                 <button
                     type="submit"
-                    disabled={!input.trim()}
+                    disabled={!input.trim() || carregando}
                     aria-label="Enviar mensagem"
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500 text-white shadow-md shadow-teal-500/10 transition-all hover:bg-teal-600 disabled:opacity-40 disabled:hover:bg-teal-500 active:scale-95"
                 >

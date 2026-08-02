@@ -11,39 +11,28 @@ return new class extends Migration
      * O índice único original (secretaria_id, data, periodo_id)
      * também estava a ser utilizado pelo MySQL para suportar
      * a chave estrangeira de secretaria_id.
-     *
-     * Antes de remover esse índice único, criamos um índice normal
-     * para secretaria_id, mantendo a foreign key válida.
-     *
-     * As colunas virtuais apenas possuem valor quando a reserva
-     * está ativa, ou seja, quando cancelada_at é NULL.
      */
     public function up(): void
     {
-        /*
-         * Cria primeiro um índice normal para suportar
-         * a foreign key de secretaria_id.
-         */
+        // 1. Tratamento da FK e Remoção do Índice Único Antigo
         Schema::table('reservas', function (Blueprint $table) {
-            $table->index(
-                'secretaria_id',
-                'reservas_secretaria_id_index'
-            );
+            // Remove a FK temporariamente para o MySQL libertar o índice antigo
+            $table->dropForeign(['secretaria_id']);
+
+            // Remove o índice único original
+            $table->dropUnique('unique_reserva_secretaria_periodo');
+
+            // Voltar a criar a Foreign Key
+            $table->foreign('secretaria_id')
+                ->references('id')
+                ->on('secretarias')
+                ->onDelete('cascade');
+
+            // Cria um índice normal explicito para suporte à FK
+            $table->index('secretaria_id', 'reservas_secretaria_id_index');
         });
 
-        /*
-         * Agora o índice único antigo pode ser removido.
-         */
-        Schema::table('reservas', function (Blueprint $table) {
-            $table->dropUnique(
-                'unique_reserva_secretaria_periodo'
-            );
-        });
-
-        /*
-         * O MySQL aceita a função IF().
-         * O SQLite, utilizado nos testes, utiliza CASE WHEN.
-         */
+        // 2. Preparação das Colunas Virtuais de Acordo com o Driver
         $driver = DB::connection()->getDriverName();
 
         $expressaoSecretaria = $driver === 'sqlite'
@@ -54,13 +43,8 @@ return new class extends Migration
             ? 'CASE WHEN cancelada_at IS NULL THEN user_id ELSE NULL END'
             : 'IF(cancelada_at IS NULL, user_id, NULL)';
 
-        /*
-         * Colunas virtuais usadas apenas para reservas ativas.
-         */
-        Schema::table('reservas', function (Blueprint $table) use (
-            $expressaoSecretaria,
-            $expressaoUtilizador
-        ) {
+        // 3. Adicionar Colunas Virtuais e Novos Índices Únicos Parciais
+        Schema::table('reservas', function (Blueprint $table) use ($expressaoSecretaria, $expressaoUtilizador) {
             $table->unsignedBigInteger('secretaria_id_ativa')
                 ->nullable()
                 ->virtualAs($expressaoSecretaria);
@@ -68,27 +52,16 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id_ativo')
                 ->nullable()
                 ->virtualAs($expressaoUtilizador);
-        });
 
-        /*
-         * Impede reservas ativas duplicadas.
-         */
-        Schema::table('reservas', function (Blueprint $table) {
+            // Impede reservas ativas duplicadas por secretaria
             $table->unique(
-                [
-                    'secretaria_id_ativa',
-                    'data',
-                    'periodo_id',
-                ],
+                ['secretaria_id_ativa', 'data', 'periodo_id'],
                 'unique_reserva_secretaria_periodo_ativa'
             );
 
+            // Impede reservas ativas duplicadas pelo mesmo utilizador
             $table->unique(
-                [
-                    'user_id_ativo',
-                    'data',
-                    'periodo_id',
-                ],
+                ['user_id_ativo', 'data', 'periodo_id'],
                 'unique_reserva_utilizador_periodo_ativo'
             );
         });
@@ -96,50 +69,20 @@ return new class extends Migration
 
     public function down(): void
     {
-        /*
-         * Remove os novos índices únicos.
-         */
+        // 1. Remover Índices Únicos e Colunas Virtuais
         Schema::table('reservas', function (Blueprint $table) {
-            $table->dropUnique(
-                'unique_reserva_secretaria_periodo_ativa'
-            );
-
-            $table->dropUnique(
-                'unique_reserva_utilizador_periodo_ativo'
-            );
+            $table->dropUnique('unique_reserva_secretaria_periodo_ativa');
+            $table->dropUnique('unique_reserva_utilizador_periodo_ativo');
+            $table->dropColumn(['secretaria_id_ativa', 'user_id_ativo']);
         });
 
-        /*
-         * Remove as colunas virtuais.
-         */
+        // 2. Restaurar Estado Original do Índice Único e da FK
         Schema::table('reservas', function (Blueprint $table) {
-            $table->dropColumn([
-                'secretaria_id_ativa',
-                'user_id_ativo',
-            ]);
-        });
+            $table->dropIndex('reservas_secretaria_id_index');
 
-        /*
-         * Recria o índice único original.
-         */
-        Schema::table('reservas', function (Blueprint $table) {
             $table->unique(
-                [
-                    'secretaria_id',
-                    'data',
-                    'periodo_id',
-                ],
+                ['secretaria_id', 'data', 'periodo_id'],
                 'unique_reserva_secretaria_periodo'
-            );
-        });
-
-        /*
-         * O índice normal já não é necessário porque o índice
-         * único original voltou a suportar a foreign key.
-         */
-        Schema::table('reservas', function (Blueprint $table) {
-            $table->dropIndex(
-                'reservas_secretaria_id_index'
             );
         });
     }
