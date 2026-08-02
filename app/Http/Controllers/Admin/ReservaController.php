@@ -12,14 +12,23 @@ use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Models\Setor;
 use App\Notifications\ReservaCanceladaNotification;
+use App\Services\PagamentoService;
+use App\Services\ReservaDisponibilidadeService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ReservaController extends Controller
 {
+    public function __construct(
+        private ReservaDisponibilidadeService $disponibilidade
+    ) {
+    }
+
     /**
      * Lista todas as reservas da plataforma, com pesquisa e filtros.
      */
@@ -118,27 +127,35 @@ class ReservaController extends Controller
     }
 
     /**
-     * Atualiza uma reserva (qualquer utilizador), mantendo as mesmas
-     * validações de conflito usadas no fluxo normal do utilizador.
+     * Atualiza uma reserva (qualquer utilizador), reutilizando a mesma
+     * verificação de conflito e o mesmo recálculo de preço do fluxo web
+     * (ReservaDisponibilidadeService / PagamentoService) — antes disto
+     * eram implementados aqui à parte, com uma verificação de conflito
+     * mais simples e sem recalcular o valor do pagamento quando a
+     * secretária/período mudavam.
      */
-    public function update(UpdateReservaRequest $request, Reserva $reserva): RedirectResponse
-    {
+    public function update(
+        UpdateReservaRequest $request,
+        Reserva $reserva,
+        PagamentoService $pagamentoService
+    ): RedirectResponse {
         Gate::authorize('update', $reserva);
 
         $dados = $request->validated();
 
         $data = $dados['data'] ?? $reserva->data->format('Y-m-d');
-        $periodoId = $dados['periodo_id'] ?? $reserva->periodo_id;
-        $secretariaId = $dados['secretaria_id'] ?? $reserva->secretaria_id;
+        $periodoId = (int) ($dados['periodo_id'] ?? $reserva->periodo_id);
+        $secretariaId = (int) ($dados['secretaria_id'] ?? $reserva->secretaria_id);
 
-        $reservaExistente = Reserva::where('secretaria_id', $secretariaId)
-            ->whereDate('data', $data)
-            ->where('periodo_id', $periodoId)
-            ->whereNull('cancelada_at')
-            ->where('id', '!=', $reserva->id)
-            ->exists();
+        $periodosConflito = $this->disponibilidade->periodosEmConflito($periodoId);
 
-        if ($reservaExistente) {
+        if ($this->disponibilidade->existeReservaAtivaNaData(
+            'secretaria_id',
+            $secretariaId,
+            $periodosConflito,
+            $data,
+            $reserva->id
+        )) {
             return back()
                 ->withErrors([
                     'secretaria_id' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
@@ -146,14 +163,13 @@ class ReservaController extends Controller
                 ->withInput();
         }
 
-        $reservaUtilizador = Reserva::where('user_id', $reserva->user_id)
-            ->whereDate('data', $data)
-            ->where('periodo_id', $periodoId)
-            ->whereNull('cancelada_at')
-            ->where('id', '!=', $reserva->id)
-            ->exists();
-
-        if ($reservaUtilizador) {
+        if ($this->disponibilidade->existeReservaAtivaNaData(
+            'user_id',
+            (int) $reserva->user_id,
+            $periodosConflito,
+            $data,
+            $reserva->id
+        )) {
             return back()
                 ->withErrors([
                     'data' => 'Este utilizador já possui outra reserva para esta data e período.',
@@ -161,7 +177,38 @@ class ReservaController extends Controller
                 ->withInput();
         }
 
-        $reserva->update($dados);
+        $alterouDadosComPreco =
+            (int) $reserva->periodo_id !== $periodoId
+            || (int) $reserva->secretaria_id !== $secretariaId;
+
+        try {
+            DB::transaction(function () use (
+                $reserva,
+                $data,
+                $periodoId,
+                $secretariaId,
+                $dados,
+                $alterouDadosComPreco,
+                $pagamentoService
+            ) {
+                $reservaBloqueada = Reserva::whereKey($reserva->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $reservaBloqueada->update([
+                    'data' => $data,
+                    'periodo_id' => $periodoId,
+                    'secretaria_id' => $secretariaId,
+                    'observacoes' => $dados['observacoes'] ?? $reservaBloqueada->observacoes,
+                ]);
+
+                if ($alterouDadosComPreco) {
+                    $pagamentoService->atualizarValorParaReserva($reservaBloqueada);
+                }
+            });
+        } catch (QueryException $e) {
+            return $this->respostaConflitoReserva($e);
+        }
 
         return redirect()
             ->route('admin.reservas.index')
@@ -169,10 +216,15 @@ class ReservaController extends Controller
     }
 
     /**
-     * Cancela uma reserva de qualquer utilizador.
+     * Cancela uma reserva de qualquer utilizador, cancelando também o
+     * pagamento associado — antes disto só atualizava o estado da
+     * reserva, sem transação nem lock, deixando o pagamento "pago" numa
+     * reserva já cancelada.
      */
-    public function cancelar(Reserva $reserva): RedirectResponse
-    {
+    public function cancelar(
+        Reserva $reserva,
+        PagamentoService $pagamentoService
+    ): RedirectResponse {
         Gate::authorize('cancelar', $reserva);
 
         if ($reserva->cancelada_at !== null) {
@@ -181,17 +233,59 @@ class ReservaController extends Controller
                 ->with('error', 'Esta reserva já se encontra cancelada.');
         }
 
-        $estadoCancelada = EstadoReserva::where('codigo', 'cancelada')->firstOrFail();
+        $estadoCanceladaId = EstadoReserva::idPorCodigo('cancelada');
 
-        $reserva->update([
-            'estado_reserva_id' => $estadoCancelada->id,
-            'cancelada_at' => now(),
-        ]);
+        abort_if($estadoCanceladaId === null, 404);
 
-        $reserva->user->notify(new ReservaCanceladaNotification($reserva));
+        DB::transaction(function () use (
+            $reserva,
+            $estadoCanceladaId,
+            $pagamentoService
+        ) {
+            $reservaBloqueada = Reserva::whereKey($reserva->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($reservaBloqueada->cancelada_at !== null) {
+                return;
+            }
+
+            $pagamentoService->cancelarParaReserva($reservaBloqueada);
+
+            $reservaBloqueada->update([
+                'estado_reserva_id' => $estadoCanceladaId,
+                'cancelada_at' => now(),
+            ]);
+
+            $reservaBloqueada->user->notify(
+                new ReservaCanceladaNotification($reservaBloqueada)
+            );
+        });
 
         return redirect()
             ->route('admin.reservas.index')
-            ->with('success', 'Reserva cancelada com sucesso.');
+            ->with(
+                'success',
+                'Reserva e pagamento cancelados com sucesso.'
+            );
+    }
+
+    /**
+     * Traduz uma violação do índice único de reservas ativas (corrida
+     * entre pedidos em simultâneo) numa resposta amigável. Qualquer
+     * outro erro de base de dados é relançado, para não mascarar
+     * problemas reais.
+     */
+    private function respostaConflitoReserva(QueryException $e): RedirectResponse
+    {
+        if (($e->errorInfo[1] ?? null) !== 1062) {
+            throw $e;
+        }
+
+        return back()
+            ->withErrors([
+                'secretaria_id' => 'Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.',
+            ])
+            ->withInput();
     }
 }

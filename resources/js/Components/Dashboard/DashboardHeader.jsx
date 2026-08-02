@@ -401,7 +401,7 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
                 </button>
 
                 {notificationsOpen && (
-                    <div className="absolute right-0 top-16 z-50 w-80 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                    <div className="absolute right-0 top-16 z-50 w-[calc(100vw-2.5rem)] max-w-80 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-slate-700 dark:bg-slate-900">
                         <div className="flex items-center justify-between">
                             <h2 className="font-bold text-slate-900 dark:text-white">
                                 Notificações

@@ -27,13 +27,14 @@ export default function Show({ pagamento }) {
                         </div>
                     </div>
 
-                    <Link
-                        href={route('pagamentos.index')}
+                    <button
+                        type="button"
+                        onClick={() => window.history.back()}
                         className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500 hover:bg-teal-50 hover:text-teal-600 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-teal-500 dark:hover:bg-slate-800 dark:hover:text-teal-400 dark:focus-visible:ring-offset-slate-950"
                     >
                         <ArrowLeft size={18} />
                         Voltar
-                    </Link>
+                    </button>
                 </div>
 
                 <div className="grid gap-8 p-6 md:grid-cols-2">

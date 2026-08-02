@@ -1,6 +1,6 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import {
     ArrowLeft,
     Pencil,
@@ -224,13 +224,14 @@ export default function Edit({ user, roles }) {
                             {processing ? 'A guardar...' : 'Guardar alterações'}
                         </button>
 
-                        <Link
-                            href={route('admin.users.index')}
+                        <button
+                            type="button"
+                            onClick={() => window.history.back()}
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
                             <ArrowLeft size={16} strokeWidth={1.9} />
                             Cancelar
-                        </Link>
+                        </button>
                     </div>
                 </form>
             </section>

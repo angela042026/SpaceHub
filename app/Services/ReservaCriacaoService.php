@@ -83,7 +83,7 @@ class ReservaCriacaoService
             'user_id' => $userId,
             'secretaria_id' => $dados['secretaria_id'],
             'periodo_id' => $periodo->id,
-            'estado_reserva_id' => $this->obterEstadoPendente()->id,
+            'estado_reserva_id' => $this->obterEstadoPendenteId(),
             'data' => $dataInicio,
             'data_fim' => $dataFim,
             'tipo_duracao' => 'diaria',
@@ -135,7 +135,7 @@ class ReservaCriacaoService
             'user_id' => $userId,
             'secretaria_id' => $dados['secretaria_id'],
             'periodo_id' => $periodoDiaInteiro->id,
-            'estado_reserva_id' => $this->obterEstadoPendente()->id,
+            'estado_reserva_id' => $this->obterEstadoPendenteId(),
             'data' => $dataInicio,
             'data_fim' => $dataFim,
             'tipo_duracao' => $tipoDuracao,
@@ -254,21 +254,21 @@ class ReservaCriacaoService
     }
 
     /**
-     * Estado "pendente", com mensagem compreensível (em vez de 404)
+     * ID do estado "pendente", com mensagem compreensível (em vez de 404)
      * caso não esteja configurado.
      */
-    private function obterEstadoPendente(): EstadoReserva
+    private function obterEstadoPendenteId(): int
     {
-        $estado = EstadoReserva::where('codigo', 'pendente')->first();
+        $estadoId = EstadoReserva::idPorCodigo('pendente');
 
-        if ($estado === null) {
+        if ($estadoId === null) {
             throw ValidationException::withMessages([
                 'reserva' =>
                     'O estado pendente não está configurado no sistema.',
             ]);
         }
 
-        return $estado;
+        return $estadoId;
     }
 
     /**

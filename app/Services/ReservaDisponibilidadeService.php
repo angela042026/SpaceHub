@@ -259,16 +259,7 @@ class ReservaDisponibilidadeService
     {
         return Reserva::query()
             ->whereNull('cancelada_at')
-            ->whereDate('data', '<=', $data)
-            ->where(function ($query) use ($data) {
-                $query
-                    ->whereDate('data_fim', '>=', $data)
-                    ->orWhere(function ($queryAntiga) use ($data) {
-                        $queryAntiga
-                            ->whereNull('data_fim')
-                            ->whereDate('data', $data);
-                    });
-            });
+            ->noIntervalo($data);
     }
 
     /**

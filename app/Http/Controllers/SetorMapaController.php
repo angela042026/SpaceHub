@@ -7,6 +7,7 @@ use App\Models\Secretaria;
 use App\Models\Setor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -14,10 +15,15 @@ class SetorMapaController extends Controller
 {
     /**
      * Editor visual de posições das zonas/setores e das secretárias na planta de cada piso.
+     *
+     * Sem um Setor específico para autorizar contra, reutiliza a
+     * ability `create` do SetorPolicy — já restrita a Administrador
+     * (via before()) ou Gestor — em vez de reimplementar a mesma regra
+     * num helper próprio.
      */
     public function edit(): Response
     {
-        $this->autorizarAdmin();
+        Gate::authorize('create', Setor::class);
 
         $pisos = Piso::where('ativo', true)
             ->with(['setores' => fn ($query) => $query->where('ativo', true)
@@ -55,7 +61,7 @@ class SetorMapaController extends Controller
      */
     public function atualizarPosicao(Request $request, Setor $setor): JsonResponse
     {
-        $this->autorizarAdmin();
+        Gate::authorize('update', $setor);
 
         $dados = $request->validate([
             'planta_x' => ['required', 'integer', 'min:0', 'max:100'],
@@ -72,7 +78,7 @@ class SetorMapaController extends Controller
      */
     public function atualizarPosicaoSecretaria(Request $request, Secretaria $secretaria): JsonResponse
     {
-        $this->autorizarAdmin();
+        Gate::authorize('update', $secretaria);
 
         $dados = $request->validate([
             'planta_x' => ['required', 'integer', 'min:0', 'max:100'],
@@ -82,12 +88,5 @@ class SetorMapaController extends Controller
         $secretaria->update($dados);
 
         return response()->json(['ok' => true, 'secretaria' => $secretaria->only(['id', 'planta_x', 'planta_y'])]);
-    }
-
-    private function autorizarAdmin(): void
-    {
-        $roleName = optional(auth()->user()->role)->nome;
-
-        abort_unless(in_array($roleName, ['Administrador', 'Gestor'], true), 403);
     }
 }

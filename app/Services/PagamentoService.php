@@ -346,10 +346,9 @@ class PagamentoService
                 ]);
             }
 
-            $estadoConfirmada = EstadoReserva::where(
-                'codigo',
-                'confirmada'
-            )->firstOrFail();
+            $estadoConfirmadaId = EstadoReserva::idPorCodigo('confirmada');
+
+            abort_if($estadoConfirmadaId === null, 404);
 
             $pagamentoBloqueado->update([
                 'metodo_pagamento' => $metodoPagamento,
@@ -358,7 +357,7 @@ class PagamentoService
             ]);
 
             $reserva->update([
-                'estado_reserva_id' => $estadoConfirmada->id,
+                'estado_reserva_id' => $estadoConfirmadaId,
             ]);
 
             return $pagamentoBloqueado->fresh([

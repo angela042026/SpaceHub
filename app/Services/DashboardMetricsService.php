@@ -175,7 +175,7 @@ class DashboardMetricsService
         int $totalSecretarias
     ): array {
         $reservas = Reserva::query()
-            ->whereDate('data', $dia)
+            ->noIntervalo($dia)
             ->whereIn(
                 'estado_reserva_id',
                 $idsEstadosAtivos
@@ -183,13 +183,13 @@ class DashboardMetricsService
             ->count();
 
         $checkins = Reserva::query()
-            ->whereDate('data', $dia)
+            ->noIntervalo($dia)
             ->whereNotNull('check_in_at')
             ->count();
 
         $cancelamentos = $estadoCanceladaId
             ? Reserva::query()
-                ->whereDate('data', $dia)
+                ->noIntervalo($dia)
                 ->where(
                     'estado_reserva_id',
                     $estadoCanceladaId
@@ -199,7 +199,7 @@ class DashboardMetricsService
 
         $expiradas = $estadoExpiradaId
             ? Reserva::query()
-                ->whereDate('data', $dia)
+                ->noIntervalo($dia)
                 ->where(
                     'estado_reserva_id',
                     $estadoExpiradaId
@@ -208,7 +208,7 @@ class DashboardMetricsService
             : 0;
 
         $secretariasOcupadas = Reserva::query()
-            ->whereDate('data', $dia)
+            ->noIntervalo($dia)
             ->whereIn(
                 'estado_reserva_id',
                 $idsEstadosAtivos

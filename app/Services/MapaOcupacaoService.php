@@ -19,7 +19,7 @@ class MapaOcupacaoService
         $idsEstadosAtivos = EstadoReserva::idsAtivos();
 
         $reservasAtivasHoje = Reserva::query()
-            ->whereDate('data', $hoje)
+            ->noIntervalo($hoje)
             ->whereIn('estado_reserva_id', $idsEstadosAtivos)
             ->with('periodo')
             ->get()
@@ -43,7 +43,8 @@ class MapaOcupacaoService
             ->map(
                 fn (Piso $piso) => $this->mapearPiso(
                     $piso,
-                    $reservasAtivasHoje
+                    $reservasAtivasHoje,
+                    $hoje
                 )
             );
 
@@ -60,13 +61,15 @@ class MapaOcupacaoService
 
     private function mapearPiso(
         Piso $piso,
-        Collection $reservasAtivasHoje
+        Collection $reservasAtivasHoje,
+        Carbon $hoje
     ): array {
         $setores = $piso->setores
             ->values()
             ->map(
                 function ($setor, int $indice) use (
-                    $reservasAtivasHoje
+                    $reservasAtivasHoje,
+                    $hoje
                 ): array {
                     $totalSecretarias =
                         $setor->secretarias->count();
@@ -84,7 +87,8 @@ class MapaOcupacaoService
                                     $secretaria,
                                     $reservasAtivasHoje->get(
                                         $secretaria->id
-                                    )
+                                    ),
+                                    $hoje
                                 ),
                             ]
                         );
@@ -143,7 +147,8 @@ class MapaOcupacaoService
 
     private function statusDaSecretaria(
         Secretaria $secretaria,
-        ?Collection $reservasAtivas
+        ?Collection $reservasAtivas,
+        Carbon $hoje
     ): string {
         if (! $secretaria->ativo || ! $secretaria->reservavel) {
             return 'indisponivel';
@@ -155,18 +160,28 @@ class MapaOcupacaoService
 
         $agora = now();
 
+        /*
+         * A janela horária de hoje usa sempre $hoje, nunca
+         * $reserva->data: numa reserva de vários dias já em curso,
+         * $reserva->data é o primeiro dia (pode ter sido há vários
+         * dias) — usar essa data aqui calcularia um período já no
+         * passado, e a secretária apareceria sempre livre a partir
+         * do segundo dia da reserva.
+         */
+        $diaFormatado = $hoje->format('Y-m-d');
+
         // Considera qualquer reserva de hoje cujo período ainda não tenha
         // terminado — não só as que já estão dentro da janela horária ativa.
         // Sem isto, uma reserva para mais tarde hoje (ex: reservou a Tarde
         // e ainda é de manhã) era ignorada e a secretária aparecia livre.
         $reserva = $reservasAtivas
-            ->filter(function (Reserva $reserva) use ($agora): bool {
+            ->filter(function (Reserva $reserva) use ($agora, $diaFormatado): bool {
                 if (! $reserva->periodo) {
                     return false;
                 }
 
                 $fim = Carbon::parse(
-                    $reserva->data->format('Y-m-d')
+                    $diaFormatado
                     .' '
                     .$reserva->periodo->hora_fim->format('H:i')
                 );
@@ -181,13 +196,13 @@ class MapaOcupacaoService
         }
 
         $inicioPeriodo = Carbon::parse(
-            $reserva->data->format('Y-m-d')
+            $diaFormatado
             .' '
             .$reserva->periodo->hora_inicio->format('H:i')
         );
 
         $fimPeriodo = Carbon::parse(
-            $reserva->data->format('Y-m-d')
+            $diaFormatado
             .' '
             .$reserva->periodo->hora_fim->format('H:i')
         );

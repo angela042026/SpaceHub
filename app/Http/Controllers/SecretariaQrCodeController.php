@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Piso;
 use App\Models\Secretaria;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -12,10 +13,15 @@ class SecretariaQrCodeController extends Controller
 {
     /**
      * Listagem administrativa de QR Codes por secretária, agrupada por piso.
+     *
+     * Sem uma Secretaria específica para autorizar contra, reutiliza a
+     * ability `create` do SecretariaPolicy — já restrita a Administrador
+     * (via before()) ou Gestor — em vez de reimplementar a mesma regra
+     * num helper próprio.
      */
     public function index()
     {
-        $this->autorizarAdmin();
+        Gate::authorize('create', Secretaria::class);
 
         $pisos = Piso::where('ativo', true)
             ->with(['setores.secretarias' => function ($query) {
@@ -40,21 +46,12 @@ class SecretariaQrCodeController extends Controller
     /**
      * Gera a imagem SVG do QR Code de uma secretária, apontando para a página de check-in.
      */
-    public function show(int $secretaria): Response
+    public function show(Secretaria $secretaria): Response
     {
-        $this->autorizarAdmin();
-
-        $secretaria = Secretaria::findOrFail($secretaria);
+        Gate::authorize('update', $secretaria);
 
         $svg = QrCode::format('svg')->size(300)->margin(1)->generate($secretaria->checkinUrl());
 
         return response($svg, 200)->header('Content-Type', 'image/svg+xml');
-    }
-
-    private function autorizarAdmin(): void
-    {
-        $roleName = optional(auth()->user()->role)->nome;
-
-        abort_unless(in_array($roleName, ['Administrador', 'Gestor'], true), 403);
     }
 }

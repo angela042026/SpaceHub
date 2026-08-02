@@ -18,6 +18,7 @@ use App\Services\PagamentoService;
 use App\Services\ReservaCriacaoService;
 use App\Services\ReservaDisponibilidadeService;
 use App\Notifications\ReservaCanceladaNotification;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -126,10 +127,17 @@ class ReservaController extends Controller
 
     /**
      * Atualiza uma reserva.
+     *
+     * Quando a secretária ou o período mudam, o valor do pagamento é
+     * recalculado (PagamentoService::atualizarValorParaReserva) — antes
+     * disto só o fluxo web fazia esse recálculo, e `pagamentos.valor`
+     * podia ficar dessincronizado do preço real de quem editava a
+     * reserva pela API.
      */
     public function update(
         UpdateReservaRequest $request,
-        Reserva $reserva
+        Reserva $reserva,
+        PagamentoService $pagamentoService
     ): ReservaResource|JsonResponse {
         Gate::authorize('update', $reserva);
 
@@ -155,14 +163,14 @@ class ReservaController extends Controller
 
         $dados = $request->validated();
 
-        $secretariaId = $dados['secretaria_id']
-            ?? $reserva->secretaria_id;
+        $secretariaId = (int) ($dados['secretaria_id']
+            ?? $reserva->secretaria_id);
 
         $data = $dados['data']
             ?? $reserva->data->format('Y-m-d');
 
-        $periodoId = $dados['periodo_id']
-            ?? $reserva->periodo_id;
+        $periodoId = (int) ($dados['periodo_id']
+            ?? $reserva->periodo_id);
 
         $secretaria = Secretaria::query()
             ->findOrFail($secretariaId);
@@ -174,11 +182,11 @@ class ReservaController extends Controller
         }
 
         $periodosConflito = $this->disponibilidade
-            ->periodosEmConflito((int) $periodoId);
+            ->periodosEmConflito($periodoId);
 
         if ($this->disponibilidade->existeReservaAtivaNaData(
             'secretaria_id',
-            (int) $secretariaId,
+            $secretariaId,
             $periodosConflito,
             $data,
             $reserva->id
@@ -200,7 +208,46 @@ class ReservaController extends Controller
             ], 422);
         }
 
-        $reserva->update($dados);
+        $alterouDadosComPreco =
+            (int) $reserva->periodo_id !== $periodoId
+            || (int) $reserva->secretaria_id !== $secretariaId;
+
+        try {
+            DB::transaction(function () use (
+                $reserva,
+                $dados,
+                $data,
+                $periodoId,
+                $secretariaId,
+                $alterouDadosComPreco,
+                $pagamentoService
+            ) {
+                $reservaBloqueada = Reserva::whereKey($reserva->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $reservaBloqueada->update([
+                    'data' => $data,
+                    'periodo_id' => $periodoId,
+                    'secretaria_id' => $secretariaId,
+                    'observacoes' => $dados['observacoes'] ?? $reservaBloqueada->observacoes,
+                ]);
+
+                if ($alterouDadosComPreco) {
+                    $pagamentoService->atualizarValorParaReserva($reservaBloqueada);
+                }
+            });
+        } catch (QueryException $e) {
+            if (($e->errorInfo[1] ?? null) !== 1062) {
+                throw $e;
+            }
+
+            return response()->json([
+                'message' => 'Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.',
+            ], 422);
+        }
+
+        $reserva->refresh();
 
         $this->carregarRelacoes($reserva);
 
