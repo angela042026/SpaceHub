@@ -1,9 +1,9 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
+import Pagination from '@/Components/Pagination';
+import { LoadingOverlay } from '@/Components/Loading';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
-    ChevronLeft,
-    ChevronRight,
     MapPinned,
     Pencil,
     Plus,
@@ -15,6 +15,7 @@ import { useState } from 'react';
 
 export default function Index({ setores, pisos, filters }) {
     const [processingId, setProcessingId] = useState(null);
+    const [carregando, setCarregando] = useState(false);
 
     const { data, setData, get } = useForm({
         search: filters.search ?? '',
@@ -28,11 +29,16 @@ export default function Index({ setores, pisos, filters }) {
         get(route('admin.setores.index'), {
             preserveState: true,
             preserveScroll: true,
+            onStart: () => setCarregando(true),
+            onFinish: () => setCarregando(false),
         });
     };
 
     const limpar = () => {
-        router.get(route('admin.setores.index'));
+        router.get(route('admin.setores.index'), {}, {
+            onStart: () => setCarregando(true),
+            onFinish: () => setCarregando(false),
+        });
     };
 
     const alternarAtivo = (setor) => {
@@ -54,14 +60,6 @@ export default function Index({ setores, pisos, filters }) {
                 onFinish: () => setProcessingId(null),
             },
         );
-    };
-
-    const irParaPagina = (url) => {
-        if (!url) {
-            return;
-        }
-
-        router.get(url, {}, { preserveState: true, preserveScroll: true });
     };
 
     const columns = [
@@ -236,40 +234,21 @@ export default function Index({ setores, pisos, filters }) {
                     </div>
                 </form>
 
-                <div className="p-6">
+                <div className="relative p-6">
+                    <LoadingOverlay show={carregando} />
+
                     <Table
                         columns={columns}
                         data={setores.data}
                         emptyMessage="Nenhum setor encontrado."
                     />
 
-                    {setores.meta.last_page > 1 && (
-                        <div className="mt-5 flex items-center justify-between">
-                            <p className="text-xs text-slate-400">
-                                Página {setores.meta.current_page} de {setores.meta.last_page}
-                            </p>
-
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    disabled={!setores.links.prev}
-                                    onClick={() => irParaPagina(setores.links.prev)}
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
-                                >
-                                    <ChevronLeft size={16} strokeWidth={1.9} />
-                                </button>
-
-                                <button
-                                    type="button"
-                                    disabled={!setores.links.next}
-                                    onClick={() => irParaPagina(setores.links.next)}
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
-                                >
-                                    <ChevronRight size={16} strokeWidth={1.9} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    <Pagination
+                        pagination={setores}
+                        disabled={carregando}
+                        onStart={() => setCarregando(true)}
+                        onFinish={() => setCarregando(false)}
+                    />
                 </div>
             </section>
         </DashboardLayout>

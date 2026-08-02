@@ -2,6 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { CalendarCheck2, ImageOff, Layers3, MapPinned, Search } from 'lucide-react';
+import { resolverImagemSecretaria } from '@/utils/imagemSetor';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -173,14 +174,17 @@ export default function Availability({ periodos, pisos, setores, secretariasDisp
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                            {secretariasDisponiveis.map((secretaria) => (
+                            {secretariasDisponiveis.map((secretaria) => {
+                                const imagem = resolverImagemSecretaria(secretaria);
+
+                                return (
                                 <div
                                     key={secretaria.id}
                                     className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
                                 >
-                                    {secretaria.imagem ? (
+                                    {imagem ? (
                                         <img
-                                            src={secretaria.imagem}
+                                            src={imagem}
                                             alt={secretaria.codigo}
                                             className="h-40 w-full object-cover"
                                         />
@@ -225,7 +229,8 @@ export default function Availability({ periodos, pisos, setores, secretariasDisp
                                         </Link>
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

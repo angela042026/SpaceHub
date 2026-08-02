@@ -31,12 +31,13 @@ class CancelarReservasExpiradas extends Command
      */
     public function handle(): int
     {
-        // Obtém os estados "Pendente" e "Expirada"
-        $estadoPendente = EstadoReserva::where('codigo', 'pendente')->first();
-        $estadoExpirada = EstadoReserva::where('codigo', 'expirada')->first();
+        // Obtém os estados "Pendente" e "Expirada" (cacheados — ver
+        // EstadoReserva::idPorCodigo())
+        $estadoPendenteId = EstadoReserva::idPorCodigo('pendente');
+        $estadoExpiradaId = EstadoReserva::idPorCodigo('expirada');
 
         // Verifica se os estados existem na base de dados
-        if (! $estadoPendente || ! $estadoExpirada) {
+        if (! $estadoPendenteId || ! $estadoExpiradaId) {
             $this->error('Estados de reserva "pendente" ou "expirada" não encontrados. Corre o EstadoReservaSeeder.');
 
             return self::FAILURE;
@@ -44,7 +45,7 @@ class CancelarReservasExpiradas extends Command
 
         // Procura todas as reservas pendentes, sem check-in e ainda não canceladas
         $candidatas = Reserva::with(['periodo', 'user'])
-            ->where('estado_reserva_id', $estadoPendente->id)
+            ->where('estado_reserva_id', $estadoPendenteId)
             ->whereNull('check_in_at')
             ->whereNull('cancelada_at')
             ->whereDate('data', '<=', Carbon::today())
@@ -79,7 +80,7 @@ class CancelarReservasExpiradas extends Command
         // e regista a data/hora do cancelamento automático
         Reserva::whereIn('id', $candidatas->pluck('id'))
             ->update([
-                'estado_reserva_id' => $estadoExpirada->id,
+                'estado_reserva_id' => $estadoExpiradaId,
                 'cancelada_at' => now(),
             ]);
 

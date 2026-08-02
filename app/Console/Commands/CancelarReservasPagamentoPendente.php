@@ -38,9 +38,9 @@ class CancelarReservasPagamentoPendente extends Command
      */
     public function handle(): int
     {
-        $estadoCancelada = EstadoReserva::where('codigo', 'cancelada')->first();
+        $estadoCanceladaId = EstadoReserva::idPorCodigo('cancelada');
 
-        if (! $estadoCancelada) {
+        if (! $estadoCanceladaId) {
             $this->error('Estado de reserva "cancelada" não encontrado. Corre o EstadoReservaSeeder.');
 
             return self::FAILURE;
@@ -70,7 +70,7 @@ class CancelarReservasPagamentoPendente extends Command
 
         foreach ($candidatas as $reserva) {
             try {
-                DB::transaction(function () use ($reserva, $estadoCancelada, $limite, &$canceladas) {
+                DB::transaction(function () use ($reserva, $estadoCanceladaId, $limite, &$canceladas) {
                     $reservaBloqueada = Reserva::whereKey($reserva->id)
                         ->lockForUpdate()
                         ->firstOrFail();
@@ -97,7 +97,7 @@ class CancelarReservasPagamentoPendente extends Command
                     $this->pagamentoService->cancelarParaReserva($reservaBloqueada);
 
                     $reservaBloqueada->update([
-                        'estado_reserva_id' => $estadoCancelada->id,
+                        'estado_reserva_id' => $estadoCanceladaId,
                         'cancelada_at' => now(),
                     ]);
 

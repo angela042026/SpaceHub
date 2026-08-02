@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -69,5 +70,33 @@ class Reserva extends Model
     public function avaliacao(): HasOne
     {
         return $this->hasOne(Avaliacao::class);
+    }
+
+    /**
+     * Reservas cujo intervalo [data, data_fim] cobre $dia — inclui
+     * reservas de vários dias já em curso, não só as que começam em
+     * $dia.
+     *
+     * Não filtra por cancelada_at nem por estado: é só o teste de
+     * intervalo, para poder ser combinado com filtros diferentes
+     * consoante quem chama (disponibilidade, métricas do dashboard,
+     * mapa de ocupação).
+     *
+     * As reservas antigas sem data_fim preenchido só contam para o
+     * próprio dia da reserva.
+     */
+    public function scopeNoIntervalo(Builder $query, $dia): Builder
+    {
+        return $query
+            ->whereDate('data', '<=', $dia)
+            ->where(function (Builder $query) use ($dia) {
+                $query
+                    ->whereDate('data_fim', '>=', $dia)
+                    ->orWhere(function (Builder $query) use ($dia) {
+                        $query
+                            ->whereNull('data_fim')
+                            ->whereDate('data', $dia);
+                    });
+            });
     }
 }

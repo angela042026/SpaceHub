@@ -1,7 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, CalendarDays, CalendarPlus } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, CalendarDays, CalendarPlus, RotateCcw, Star } from 'lucide-react';
 import LugarCard from '@/Components/Reservas/LugarCard';
 import PreferenciasPanel from '@/Components/Reservas/PreferenciasPanel';
 import {
@@ -51,6 +51,8 @@ export default function Create({
         useState([]);
 
     const [lugares, setLugares] = useState([]);
+    const [erroConsultaLugares, setErroConsultaLugares] = useState(false);
+    const [tentativaConsulta, setTentativaConsulta] = useState(0);
 
     const [periodosEscolhidos, setPeriodosEscolhidos] =
         useState({});
@@ -160,10 +162,13 @@ export default function Create({
             inicioEmFimDeSemana
         ) {
             setLugares([]);
+            setErroConsultaLugares(false);
             return;
         }
 
         const controlador = new AbortController();
+
+        setErroConsultaLugares(false);
 
         fetch(
             route('reservas.lugaresPorSetor', {
@@ -197,6 +202,7 @@ export default function Create({
 
                 console.error(error);
                 setLugares([]);
+                setErroConsultaLugares(true);
             });
 
         return () => {
@@ -207,6 +213,7 @@ export default function Create({
         filtros.setor_id,
         preferencias,
         inicioEmFimDeSemana,
+        tentativaConsulta,
     ]);
 
     const alternarPreferencia = (chave) => {
@@ -640,6 +647,24 @@ export default function Create({
                                 disponíveis para esta
                                 duração.
                             </p>
+                        ) : erroConsultaLugares ? (
+                            <div className="flex flex-col items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
+                                <div className="flex items-start gap-2">
+                                    <AlertTriangle size={18} strokeWidth={1.9} className="mt-0.5 shrink-0" />
+                                    <span>
+                                        Não foi possível consultar a disponibilidade dos lugares. Verifica a tua ligação e tenta novamente.
+                                    </span>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setTentativaConsulta((atual) => atual + 1)}
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-400/30 dark:text-red-300 dark:hover:bg-red-400/10"
+                                >
+                                    <RotateCcw size={14} strokeWidth={2} />
+                                    Tentar novamente
+                                </button>
+                            </div>
                         ) : lugares.length === 0 ? (
                             <p className="text-sm text-slate-500 dark:text-slate-400">
                                 Não existem lugares

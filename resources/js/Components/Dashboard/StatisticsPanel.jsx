@@ -1,5 +1,5 @@
 import { router } from '@inertiajs/react';
-import { useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 
 import { LoadingOverlay } from '@/Components/Loading';
 
@@ -18,16 +18,9 @@ import {
     UserRound,
 } from 'lucide-react';
 
-import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Cell,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
-} from 'recharts';
+// Isolado num ficheiro próprio para o recharts só ser descarregado
+// quando o gráfico é mesmo renderizado, não no bundle inicial da página.
+const PremiumChart = lazy(() => import('./PremiumChart'));
 
 const RANKING_ICONS = [
     {
@@ -47,9 +40,18 @@ const RANKING_ICONS = [
     },
 ];
 
+/*
+ * Cores fixas (não reagem ao tema) usadas como stopColor do gradiente
+ * SVG das barras do Recharts. `navy` (#1e3a5f) foi substituído por
+ * `blue` porque, no modo escuro, o fundo do cartão é #173653
+ * (var(--color-card) em resources/css/app.css) — quase idêntico ao
+ * navy antigo, tornando as barras praticamente invisíveis. `blue`
+ * mantém contraste adequado tanto no cartão claro (#ffffff) como
+ * no escuro (#173653).
+ */
 const CHART_COLORS = {
     teal: '#14b8a6',
-    navy: '#1e3a5f',
+    blue: '#3b82f6',
     slate: '#64748b',
 };
 
@@ -85,118 +87,6 @@ function EmptyState({ text }) {
             <p className="mt-4 max-w-xs text-sm leading-6 text-slate-400">
                 {text}
             </p>
-        </div>
-    );
-}
-
-function CustomTooltip({ active, payload, label }) {
-    if (!active || !payload?.length) {
-        return null;
-    }
-
-    return (
-        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-xl dark:border-slate-700 dark:bg-slate-900">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                {label}
-            </p>
-
-            <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
-                {payload[0]?.value ?? 0} reservas
-            </p>
-        </div>
-    );
-}
-
-function PremiumChart({
-    data,
-    color,
-    gradientId,
-}) {
-    if (!data?.length) {
-        return null;
-    }
-
-    return (
-        <div className="h-52 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                    data={data}
-                    layout="vertical"
-                    margin={{
-                        top: 6,
-                        right: 14,
-                        bottom: 6,
-                        left: 4,
-                    }}
-                >
-                    <defs>
-                        <linearGradient
-                            id={gradientId}
-                            x1="0"
-                            y1="0"
-                            x2="1"
-                            y2="0"
-                        >
-                            <stop
-                                offset="0%"
-                                stopColor={color}
-                                stopOpacity={0.55}
-                            />
-                            <stop
-                                offset="100%"
-                                stopColor={color}
-                                stopOpacity={1}
-                            />
-                        </linearGradient>
-                    </defs>
-
-                    <CartesianGrid
-                        horizontal={false}
-                        strokeDasharray="4 4"
-                        stroke="rgba(148, 163, 184, 0.12)"
-                    />
-
-                    <XAxis
-                        type="number"
-                        hide
-                    />
-
-                    <YAxis
-                        type="category"
-                        dataKey="name"
-                        width={92}
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                            fontSize: 11,
-                            fill: '#94a3b8',
-                        }}
-                        tickFormatter={(value) => {
-                            const texto = String(value ?? '');
-
-                            if (texto.length > 13) {
-                                return `${texto.slice(0, 12)}…`;
-                            }
-
-                            return texto;
-                        }}
-                    />
-
-                    <Tooltip
-                        cursor={{
-                            fill: 'rgba(148, 163, 184, 0.08)',
-                        }}
-                        content={<CustomTooltip />}
-                    />
-
-                    <Bar
-                        dataKey="total"
-                        radius={[0, 10, 10, 0]}
-                        fill={`url(#${gradientId})`}
-                        maxBarSize={18}
-                    />
-                </BarChart>
-            </ResponsiveContainer>
         </div>
     );
 }
@@ -315,11 +205,17 @@ function RankingSection({
             <div className="p-5">
                 {items?.length > 0 ? (
                     <>
-                        <PremiumChart
-                            data={chartData}
-                            color={chartColor}
-                            gradientId={gradientId}
-                        />
+                        <Suspense
+                            fallback={
+                                <div className="h-52 w-full animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
+                            }
+                        >
+                            <PremiumChart
+                                data={chartData}
+                                color={chartColor}
+                                gradientId={gradientId}
+                            />
+                        </Suspense>
 
                         <div className="mt-4 space-y-2.5">
                             {items.map((item, index) => (
@@ -367,29 +263,41 @@ export default function StatisticsPanel({
         );
     }
 
-    const secretariasMaisChart =
-        estatisticas?.secretariasMaisUtilizadas?.map((item) => ({
-            name: item.secretaria?.codigo ?? '—',
-            total: item.total,
-        })) ?? [];
+    const secretariasMaisChart = useMemo(
+        () =>
+            estatisticas?.secretariasMaisUtilizadas?.map((item) => ({
+                name: item.secretaria?.codigo ?? '—',
+                total: item.total,
+            })) ?? [],
+        [estatisticas?.secretariasMaisUtilizadas],
+    );
 
-    const secretariasMenosChart =
-        estatisticas?.secretariasMenosUtilizadas?.map((item) => ({
-            name: item.codigo ?? '—',
-            total: item.reservas_count,
-        })) ?? [];
+    const secretariasMenosChart = useMemo(
+        () =>
+            estatisticas?.secretariasMenosUtilizadas?.map((item) => ({
+                name: item.codigo ?? '—',
+                total: item.reservas_count,
+            })) ?? [],
+        [estatisticas?.secretariasMenosUtilizadas],
+    );
 
-    const utilizadoresChart =
-        estatisticas?.utilizadoresComMaisReservas?.map((item) => ({
-            name: item.user?.name ?? '—',
-            total: item.total,
-        })) ?? [];
+    const utilizadoresChart = useMemo(
+        () =>
+            estatisticas?.utilizadoresComMaisReservas?.map((item) => ({
+                name: item.user?.name ?? '—',
+                total: item.total,
+            })) ?? [],
+        [estatisticas?.utilizadoresComMaisReservas],
+    );
 
-    const diasChart =
-        estatisticas?.diasComMaiorOcupacao?.map((item) => ({
-            name: formatarData(item.data),
-            total: item.total,
-        })) ?? [];
+    const diasChart = useMemo(
+        () =>
+            estatisticas?.diasComMaiorOcupacao?.map((item) => ({
+                name: formatarData(item.data),
+                total: item.total,
+            })) ?? [],
+        [estatisticas?.diasComMaiorOcupacao],
+    );
 
     const pisoMaisUtilizado =
         estatisticas?.pisoMaisUtilizado;
@@ -598,7 +506,7 @@ export default function StatisticsPanel({
                         icon={UserRound}
                         items={estatisticas?.utilizadoresComMaisReservas}
                         chartData={utilizadoresChart}
-                        chartColor={CHART_COLORS.navy}
+                        chartColor={CHART_COLORS.blue}
                         gradientId="gradient-utilizadores"
                         getKey={(item) => item.user_id}
                         getTitle={(item) =>
@@ -618,7 +526,7 @@ export default function StatisticsPanel({
                         icon={CalendarDays}
                         items={estatisticas?.diasComMaiorOcupacao}
                         chartData={diasChart}
-                        chartColor={CHART_COLORS.navy}
+                        chartColor={CHART_COLORS.blue}
                         gradientId="gradient-dias"
                         getKey={(item) => item.data}
                         getTitle={(item) =>

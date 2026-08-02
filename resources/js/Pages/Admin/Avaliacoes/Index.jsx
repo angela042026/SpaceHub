@@ -1,9 +1,9 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
+import Pagination from '@/Components/Pagination';
+import { LoadingOverlay } from '@/Components/Loading';
 import { Head, router } from '@inertiajs/react';
 import {
-    ChevronLeft,
-    ChevronRight,
     RotateCcw,
     Search,
     Star,
@@ -16,6 +16,7 @@ import { ESTADO_AVALIACAO, badge, etiqueta } from '@/utils/estados';
 export default function Index({ avaliacoes, filters }) {
     const [processingId, setProcessingId] = useState(null);
     const [searchValue, setSearchValue] = useState(filters.search ?? '');
+    const [carregando, setCarregando] = useState(false);
 
     const estadoAtivo = filters.estado ?? 'pendente';
 
@@ -23,6 +24,8 @@ export default function Index({ avaliacoes, filters }) {
         router.get(route('admin.avaliacoes.index'), { estado, search: searchValue }, {
             preserveState: true,
             preserveScroll: true,
+            onStart: () => setCarregando(true),
+            onFinish: () => setCarregando(false),
         });
     };
 
@@ -32,6 +35,8 @@ export default function Index({ avaliacoes, filters }) {
         router.get(route('admin.avaliacoes.index'), { estado: estadoAtivo, search: searchValue }, {
             preserveState: true,
             preserveScroll: true,
+            onStart: () => setCarregando(true),
+            onFinish: () => setCarregando(false),
         });
     };
 
@@ -54,14 +59,6 @@ export default function Index({ avaliacoes, filters }) {
                 onFinish: () => setProcessingId(null),
             },
         );
-    };
-
-    const irParaPagina = (url) => {
-        if (!url) {
-            return;
-        }
-
-        router.get(url, {}, { preserveState: true, preserveScroll: true });
     };
 
     const columns = [
@@ -227,40 +224,21 @@ export default function Index({ avaliacoes, filters }) {
                     </form>
                 </div>
 
-                <div className="p-6">
+                <div className="relative p-6">
+                    <LoadingOverlay show={carregando} />
+
                     <Table
                         columns={columns}
                         data={avaliacoes.data}
                         emptyMessage="Nenhuma avaliação encontrada."
                     />
 
-                    {avaliacoes.meta.last_page > 1 && (
-                        <div className="mt-5 flex items-center justify-between">
-                            <p className="text-xs text-slate-400">
-                                Página {avaliacoes.meta.current_page} de {avaliacoes.meta.last_page}
-                            </p>
-
-                            <div className="flex gap-2">
-                                <button
-                                    type="button"
-                                    disabled={!avaliacoes.links.prev}
-                                    onClick={() => irParaPagina(avaliacoes.links.prev)}
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
-                                >
-                                    <ChevronLeft size={16} strokeWidth={1.9} />
-                                </button>
-
-                                <button
-                                    type="button"
-                                    disabled={!avaliacoes.links.next}
-                                    onClick={() => irParaPagina(avaliacoes.links.next)}
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
-                                >
-                                    <ChevronRight size={16} strokeWidth={1.9} />
-                                </button>
-                            </div>
-                        </div>
-                    )}
+                    <Pagination
+                        pagination={avaliacoes}
+                        disabled={carregando}
+                        onStart={() => setCarregando(true)}
+                        onFinish={() => setCarregando(false)}
+                    />
                 </div>
             </section>
         </DashboardLayout>

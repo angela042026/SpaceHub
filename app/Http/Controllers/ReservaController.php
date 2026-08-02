@@ -203,12 +203,13 @@ class ReservaController extends Controller
                 ->with('error', 'Esta reserva já se encontra cancelada.');
         }
 
-        $estadoCancelada = EstadoReserva::where('codigo', 'cancelada')
-            ->firstOrFail();
+        $estadoCanceladaId = EstadoReserva::idPorCodigo('cancelada');
+
+        abort_if($estadoCanceladaId === null, 404);
 
         DB::transaction(function () use (
             $reserva,
-            $estadoCancelada,
+            $estadoCanceladaId,
             $pagamentoService
         ) {
             $reservaBloqueada = Reserva::whereKey($reserva->id)
@@ -222,7 +223,7 @@ class ReservaController extends Controller
             $pagamentoService->cancelarParaReserva($reservaBloqueada);
 
             $reservaBloqueada->update([
-                'estado_reserva_id' => $estadoCancelada->id,
+                'estado_reserva_id' => $estadoCanceladaId,
                 'cancelada_at' => now(),
             ]);
 

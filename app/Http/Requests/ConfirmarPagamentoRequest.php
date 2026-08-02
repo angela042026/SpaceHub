@@ -28,6 +28,7 @@ class ConfirmarPagamentoRequest extends FormRequest
                     'cartao',
                     'mbway',
                     'transferencia',
+                    'paypal',
                 ]),
             ],
         ];
