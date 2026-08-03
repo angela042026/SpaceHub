@@ -9,6 +9,7 @@ use App\Notifications\ReservaExpiradaNotification;
 use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class CancelarReservasExpiradas extends Command
 {
@@ -76,25 +77,56 @@ class CancelarReservasExpiradas extends Command
             return self::SUCCESS;
         }
 
-        // Atualiza todas as reservas encontradas para o estado "Expirada"
-        // e regista a data/hora do cancelamento automático
-        Reserva::whereIn('id', $candidatas->pluck('id'))
-            ->update([
-                'estado_reserva_id' => $estadoExpiradaId,
-                'cancelada_at' => now(),
-            ]);
+        $expiradas = 0;
 
-        // Avisa cada utilizador de que a sua reserva expirou
+        // Cada candidata é processada na sua própria transação com
+        // lockForUpdate() + reconfirmação depois do lock — o mesmo
+        // padrão já usado em CancelarReservasPagamentoPendente. Sem
+        // isto, duas execuções sobrepostas do comando podiam marcar a
+        // mesma reserva como expirada e notificar o utilizador duas
+        // vezes.
         foreach ($candidatas as $reserva) {
-            $reserva->user?->notify(new ReservaExpiradaNotification($reserva));
+            try {
+                DB::transaction(function () use (
+                    $reserva,
+                    $estadoExpiradaId,
+                    &$expiradas
+                ) {
+                    $reservaBloqueada = Reserva::whereKey($reserva->id)
+                        ->lockForUpdate()
+                        ->firstOrFail();
+
+                    if (
+                        $reservaBloqueada->cancelada_at !== null
+                        || $reservaBloqueada->check_in_at !== null
+                    ) {
+                        return;
+                    }
+
+                    $reservaBloqueada->update([
+                        'estado_reserva_id' => $estadoExpiradaId,
+                        'cancelada_at' => now(),
+                    ]);
+
+                    $reserva->user?->notify(
+                        new ReservaExpiradaNotification($reserva)
+                    );
+
+                    $expiradas++;
+                });
+            } catch (\Throwable $e) {
+                $this->error("Falha ao expirar reserva #{$reserva->id}: {$e->getMessage()}");
+            }
         }
 
-        // Atualiza o mapa em tempo real para todos os utilizadores
-        broadcast(new MapaAtualizado());
-        DashboardMetricsService::limparCacheDoDia();
+        if ($expiradas > 0) {
+            // Atualiza o mapa em tempo real para todos os utilizadores
+            broadcast(new MapaAtualizado());
+            DashboardMetricsService::limparCacheDoDia();
+        }
 
         // Apresenta no terminal o número de reservas expiradas
-        $this->info("{$candidatas->count()} reserva(s) marcada(s) como expirada(s).");
+        $this->info("{$expiradas} reserva(s) marcada(s) como expirada(s).");
 
         return self::SUCCESS;
     }

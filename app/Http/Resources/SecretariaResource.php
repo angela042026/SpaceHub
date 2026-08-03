@@ -60,6 +60,7 @@ class SecretariaResource extends JsonResource
 
             'descricao' => $this->descricao,
             'imagem' => $this->imagem,
+            'imagem_url' => $this->imagem_url,
 
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),

@@ -23,6 +23,7 @@ class EdificioResource extends JsonResource
             'telefone' => $this->telefone,
             'email' => $this->email,
             'imagem' => $this->imagem,
+            'imagem_url' => $this->imagem_url,
             'hora_abertura' => $this->hora_abertura,
             'hora_fecho' => $this->hora_fecho,
             'ativo' => (bool) $this->ativo,

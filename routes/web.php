@@ -1,6 +1,5 @@
 <?php
 
-use App\Events\EnviarMensagem;
 use App\Http\Controllers\Admin\AvaliacaoController as AdminAvaliacaoController;
 use App\Http\Controllers\Admin\EdificioController as AdminEdificioController;
 use App\Http\Controllers\Admin\PisoController as AdminPisoController;
@@ -12,7 +11,6 @@ use App\Http\Controllers\Admin\StatisticsController as AdminStatisticsController
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\Auth\GoogleAuthController;
-use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
@@ -213,9 +211,6 @@ Route::middleware(['auth', 'active'])->group(function () {
             ->name('support.update');
     });
 
-    Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
-        ->name('chat.enviar');
-
     // ==========================
     // Notificações
     // ==========================
@@ -364,14 +359,3 @@ Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
     });
 
 require __DIR__ . '/auth.php';
-
-/*
-|--------------------------------------------------------------------------
-| Rotas do Sistema de Chat e WebSockets
-|--------------------------------------------------------------------------
-*/
-
-// Envio de mensagens seguro (lê o utilizador da sessão e aciona o Bot)
-Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
-    ->name('chat.enviar')
-    ->middleware('auth'); // Garante que só utilizadores autenticados usam o chat real

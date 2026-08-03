@@ -115,7 +115,9 @@ class StoreSecretariaRequest extends FormRequest
 
             'imagem' => [
                 'nullable',
-                'string',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
                 'max:2048',
             ],
 

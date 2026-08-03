@@ -278,7 +278,7 @@ class ReservaController extends Controller
      */
     private function respostaConflitoReserva(QueryException $e): RedirectResponse
     {
-        if (($e->errorInfo[1] ?? null) !== 1062) {
+        if (! $this->disponibilidade->ehConflitoDeReservaAtiva($e)) {
             throw $e;
         }
 

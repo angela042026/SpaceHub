@@ -127,7 +127,9 @@ class UpdateSecretariaRequest extends FormRequest
             'imagem' => [
                 'sometimes',
                 'nullable',
-                'string',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
                 'max:2048',
             ],
 

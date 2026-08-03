@@ -65,8 +65,10 @@ class StoreEdificioRequest extends FormRequest
 
             'imagem' => [
                 'nullable',
-                'string',
-                'max:255',
+                'file',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
             ],
 
             'hora_abertura' => [

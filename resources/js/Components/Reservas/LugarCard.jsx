@@ -42,9 +42,9 @@ export default function LugarCard({
                 : 'border-slate-200 dark:border-slate-800'
                 }`}
         >
-            {secretaria.imagem || imagemPorTipo ? (
+            {secretaria.imagem_url || imagemPorTipo ? (
                 <img
-                    src={secretaria.imagem || imagemPorTipo}
+                    src={secretaria.imagem_url || imagemPorTipo}
                     alt={secretaria.codigo}
                     className="h-40 w-full object-cover"
                 />

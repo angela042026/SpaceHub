@@ -84,6 +84,16 @@ class ProfileController extends Controller
 
         Auth::logout();
 
+        // Liberta o e-mail e o google_id (ambos unique) antes do soft
+        // delete, para que a pessoa consiga registar-se ou entrar de
+        // novo com o mesmo e-mail/conta Google no futuro. O nome
+        // mantém-se, pois continua a ser mostrado no histórico de
+        // reservas de outros utilizadores/admin.
+        $user->update([
+            'email' => "deleted_{$user->id}_" . now()->timestamp . '@deleted.local',
+            'google_id' => null,
+        ]);
+
         $user->delete();
 
         $request->session()->invalidate();

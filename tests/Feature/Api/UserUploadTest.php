@@ -144,6 +144,47 @@ class UserUploadTest extends TestCase
         );
     }
 
+    public function test_php_file_disguised_as_photo_is_rejected(): void
+    {
+        // UploadedFile::fake() deriva sempre o MIME reportado a partir
+        // da extensão do nome do ficheiro, nunca do conteúdo real —
+        // por isso não serve para testar deteção de spoofing. Aqui
+        // construímos um UploadedFile real (modo "test") sobre um
+        // ficheiro com conteúdo PHP genuíno, para confirmar que a regra
+        // "image"/"mimes" do Laravel deteta o conteúdo real via
+        // guessExtension() e não confia na extensão .jpg nem no
+        // Content-Type que o cliente declarou.
+        $caminho = tempnam(sys_get_temp_dir(), 'spoof');
+        file_put_contents($caminho, '<?php echo "spoofed"; ?>');
+
+        $ficheiro = new UploadedFile($caminho, 'fotografia.jpg', 'image/jpeg', null, true);
+
+        $response = $this->post('/api/users', [
+            'name' => 'Utilizador com ficheiro disfarçado',
+            'email' => 'spoofed@spacehub.test',
+            'password' => 'password123',
+            'role_id' => $this->utilizadorRole->id,
+            'fotografia' => $ficheiro,
+        ], [
+            'Accept' => 'application/json',
+        ]);
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('fotografia');
+
+        $this->assertDatabaseMissing('users', [
+            'email' => 'spoofed@spacehub.test',
+        ]);
+
+        $this->assertCount(
+            0,
+            Storage::disk('public')->files(
+                'utilizadores/fotografias'
+            )
+        );
+    }
+
     public function test_updating_photo_replaces_and_deletes_previous_file(): void
     {
         $fotografiaAntiga = UploadedFile::fake()

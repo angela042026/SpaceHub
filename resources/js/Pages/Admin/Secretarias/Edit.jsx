@@ -2,7 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
 import { Head, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Pencil } from 'lucide-react';
+import { ArrowLeft, ImagePlus, Pencil } from 'lucide-react';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -28,6 +28,7 @@ export default function Edit({ secretaria, pisos, setores }) {
     const [setoresFiltrados, setSetoresFiltrados] = useState(
         setorAtual ? setores.filter((setor) => setor.piso_id === setorAtual.piso_id) : [],
     );
+    const [preview, setPreview] = useState(null);
 
     const { data, setData, put, processing, errors } = useForm({
         setor_id: secretaria.setor_id ?? '',
@@ -45,8 +46,15 @@ export default function Edit({ secretaria, pisos, setores }) {
         proximo_copa: secretaria.proximo_copa ?? false,
 
         descricao: secretaria.descricao ?? '',
-        imagem: secretaria.imagem ?? '',
+        imagem: null,
     });
+
+    const handleImagem = (event) => {
+        const file = event.target.files?.[0] ?? null;
+
+        setData('imagem', file);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    };
 
     // Filtra os setores conforme o piso selecionado
     useEffect(() => {
@@ -68,7 +76,7 @@ export default function Edit({ secretaria, pisos, setores }) {
 
     const submit = (event) => {
         event.preventDefault();
-        put(route('admin.secretarias.update', secretaria.id));
+        put(route('admin.secretarias.update', secretaria.id), { forceFormData: true });
     };
 
     return (
@@ -171,9 +179,21 @@ export default function Edit({ secretaria, pisos, setores }) {
                         </div>
 
                         <div className="sm:col-span-2">
-                            <label htmlFor="imagem" className={labelClass}>URL da imagem</label>
-                            <input id="imagem" type="text" value={data.imagem} onChange={(e) => setData('imagem', e.target.value)} placeholder="https://..." className={fieldClass} />
+                            <label htmlFor="imagem" className={labelClass}>Imagem</label>
+                            <label htmlFor="imagem" className="flex h-11 w-full cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 px-3 text-sm text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700">
+                                <ImagePlus size={16} strokeWidth={1.9} />
+                                {data.imagem ? data.imagem.name : 'Trocar ficheiro'}
+                            </label>
+                            <input id="imagem" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleImagem} className="hidden" />
                             <InputError message={errors.imagem} className="mt-2" />
+
+                            {(preview || secretaria.imagem_url) && (
+                                <img
+                                    src={preview ?? secretaria.imagem_url}
+                                    alt={`Imagem da ${secretaria.codigo}`}
+                                    className="mt-3 h-32 w-full rounded-xl object-cover"
+                                />
+                            )}
                         </div>
 
                         <div className="sm:col-span-2">

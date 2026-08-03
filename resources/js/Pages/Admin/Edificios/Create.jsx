@@ -1,7 +1,8 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Building2 } from 'lucide-react';
+import { ArrowLeft, Building2, ImagePlus } from 'lucide-react';
+import { useState } from 'react';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -10,6 +11,8 @@ const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
 export default function Create() {
+    const [preview, setPreview] = useState(null);
+
     const { data, setData, post, processing, errors } = useForm({
         nome: '',
         codigo: '',
@@ -19,15 +22,22 @@ export default function Create() {
         pais: '',
         telefone: '',
         email: '',
-        imagem: '',
+        imagem: null,
         hora_abertura: '',
         hora_fecho: '',
         descricao: '',
     });
 
+    const handleImagem = (event) => {
+        const file = event.target.files?.[0] ?? null;
+
+        setData('imagem', file);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    };
+
     const submit = (event) => {
         event.preventDefault();
-        post(route('admin.edificios.store'));
+        post(route('admin.edificios.store'), { forceFormData: true });
     };
 
     return (
@@ -114,9 +124,21 @@ export default function Create() {
                         </div>
 
                         <div className="sm:col-span-2">
-                            <label htmlFor="imagem" className={labelClass}>URL da imagem</label>
-                            <input id="imagem" type="text" value={data.imagem} onChange={(e) => setData('imagem', e.target.value)} className={fieldClass} />
+                            <label htmlFor="imagem" className={labelClass}>Imagem</label>
+                            <label htmlFor="imagem" className="flex h-11 w-full cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 px-3 text-sm text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700">
+                                <ImagePlus size={16} strokeWidth={1.9} />
+                                {data.imagem ? data.imagem.name : 'Escolher ficheiro'}
+                            </label>
+                            <input id="imagem" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleImagem} className="hidden" />
                             <InputError message={errors.imagem} className="mt-2" />
+
+                            {preview && (
+                                <img
+                                    src={preview}
+                                    alt="Pré-visualização"
+                                    className="mt-3 h-32 w-full rounded-xl object-cover"
+                                />
+                            )}
                         </div>
 
                         <div className="sm:col-span-2">
