@@ -25,6 +25,7 @@ class User extends Authenticatable
         'role_id',
         'ativo',
         'fotografia',
+        'email_verified_at',
     ];
 
     protected $appends = [

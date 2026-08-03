@@ -1,6 +1,6 @@
 <?php
 
-it('returns a successful response', function () {
+it('shows the landing page', function () {
     $response = $this->get('/');
 
     $response->assertStatus(200);

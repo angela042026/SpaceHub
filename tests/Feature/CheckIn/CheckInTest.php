@@ -129,6 +129,51 @@ class CheckInTest extends TestCase
         $this->assertNull($reserva->fresh()->check_in_at);
     }
 
+    public function test_confirm_antes_da_janela_abrir_devolve_erro(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+
+        // Período começa às 08:00, tolerância default de 30 min abre a
+        // janela às 07:30 — às 07:00 ainda não pode fazer check-in.
+        $reserva = $this->criarReservaHoje($user);
+
+        $this->travelTo(Carbon::today()->setTime(7, 0));
+
+        $response = $this->actingAs($user)
+            ->post(route('checkin.confirm', $reserva->id));
+
+        $response->assertSessionHasErrors('reserva');
+        $this->assertNull($reserva->fresh()->check_in_at);
+    }
+
+    public function test_confirm_de_reserva_com_checkin_ja_feito_e_rejeitado(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $reserva = $this->criarReservaHoje($user);
+        $this->criarEstadoReserva('confirmada');
+
+        $this->travelTo(Carbon::today()->setTime(8, 15));
+
+        // Primeiro check-in, bem sucedido.
+        $this->actingAs($user)->post(route('checkin.confirm', $reserva->id));
+
+        $primeiroCheckIn = $reserva->fresh()->check_in_at;
+        $this->assertNotNull($primeiroCheckIn);
+
+        // Reutilizar o QR/link para tentar fazer check-in outra vez —
+        // seja porque a pessoa voltou a apontar a câmara, seja porque
+        // carregou de novo no botão do dashboard — não deve alterar
+        // nada nem reenviar a confirmação.
+        $response = $this->actingAs($user)
+            ->post(route('checkin.confirm', $reserva->id));
+
+        $response->assertSessionHasErrors('reserva');
+
+        $reserva->refresh();
+        $this->assertTrue($primeiroCheckIn->equalTo($reserva->check_in_at));
+        $this->assertSame('confirmada', $reserva->estadoReserva->codigo);
+    }
+
     public function test_confirm_bem_sucedido_marca_check_in(): void
     {
         $user = $this->criarUsuarioComRole('Utilizador');
