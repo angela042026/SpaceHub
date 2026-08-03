@@ -12,8 +12,10 @@ use App\Models\Setor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class SecretariaController extends Controller
 {
@@ -87,7 +89,23 @@ class SecretariaController extends Controller
     {
         Gate::authorize('create', Secretaria::class);
 
-        Secretaria::create($request->validated());
+        $dados = $request->validated();
+        $imagemGuardada = null;
+
+        if ($request->hasFile('imagem')) {
+            $imagemGuardada = $request->file('imagem')->store('secretarias/imagens', 'public');
+            $dados['imagem'] = $imagemGuardada;
+        }
+
+        try {
+            Secretaria::create($dados);
+        } catch (Throwable $exception) {
+            if ($imagemGuardada !== null) {
+                Storage::disk('public')->delete($imagemGuardada);
+            }
+
+            throw $exception;
+        }
 
         return redirect()
             ->route('admin.secretarias.index')
@@ -111,7 +129,28 @@ class SecretariaController extends Controller
     {
         Gate::authorize('update', $secretaria);
 
-        $secretaria->update($request->validated());
+        $dados = $request->validated();
+        $imagemAntiga = $secretaria->imagem;
+        $novaImagem = null;
+
+        if ($request->hasFile('imagem')) {
+            $novaImagem = $request->file('imagem')->store('secretarias/imagens', 'public');
+            $dados['imagem'] = $novaImagem;
+        }
+
+        try {
+            $secretaria->update($dados);
+        } catch (Throwable $exception) {
+            if ($novaImagem !== null) {
+                Storage::disk('public')->delete($novaImagem);
+            }
+
+            throw $exception;
+        }
+
+        if ($novaImagem !== null && $imagemAntiga !== null && $imagemAntiga !== $novaImagem) {
+            Storage::disk('public')->delete($imagemAntiga);
+        }
 
         return redirect()
             ->route('admin.secretarias.index')

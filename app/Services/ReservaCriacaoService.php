@@ -195,10 +195,12 @@ class ReservaCriacaoService
      * Cria a reserva e o respetivo pagamento numa transação, e notifica
      * o utilizador.
      *
-     * Uma violação do índice único de reservas ativas (corrida entre
+     * Uma violação dos índices únicos de reservas ativas (corrida entre
      * pedidos em simultâneo) é traduzida numa mensagem amigável;
      * qualquer outro erro de base de dados é relançado, para não
-     * mascarar problemas reais.
+     * mascarar problemas reais — por exemplo, uma eventual colisão na
+     * referência do pagamento (extremamente improvável, mas não
+     * impossível) não deve ser apresentada como "lugar já reservado".
      */
     private function persistir(array $dadosReserva): Reserva
     {
@@ -217,7 +219,7 @@ class ReservaCriacaoService
                 return $reserva;
             });
         } catch (QueryException $e) {
-            if (($e->errorInfo[1] ?? null) !== 1062) {
+            if (! $this->disponibilidade->ehConflitoDeReservaAtiva($e)) {
                 throw $e;
             }
 

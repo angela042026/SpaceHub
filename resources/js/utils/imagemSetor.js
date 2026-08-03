@@ -36,5 +36,5 @@ export function resolverImagemPorSetor(setor) {
  * senão cai para a imagem do setor a que pertence.
  */
 export function resolverImagemSecretaria(secretaria) {
-    return secretaria?.imagem ?? resolverImagemPorSetor(secretaria?.setor);
+    return secretaria?.imagem_url ?? resolverImagemPorSetor(secretaria?.setor);
 }

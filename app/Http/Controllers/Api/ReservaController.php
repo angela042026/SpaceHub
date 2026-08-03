@@ -238,7 +238,7 @@ class ReservaController extends Controller
                 }
             });
         } catch (QueryException $e) {
-            if (($e->errorInfo[1] ?? null) !== 1062) {
+            if (! $this->disponibilidade->ehConflitoDeReservaAtiva($e)) {
                 throw $e;
             }
 

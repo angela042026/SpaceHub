@@ -2,7 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Armchair, ArrowLeft } from 'lucide-react';
+import { Armchair, ArrowLeft, ImagePlus } from 'lucide-react';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -24,6 +24,7 @@ const AMENIDADES = [
 export default function Create({ pisos, setores }) {
     const [pisoId, setPisoId] = useState('');
     const [setoresFiltrados, setSetoresFiltrados] = useState([]);
+    const [preview, setPreview] = useState(null);
 
     const { data, setData, post, processing, errors } = useForm({
         setor_id: '',
@@ -41,8 +42,15 @@ export default function Create({ pisos, setores }) {
         proximo_copa: false,
 
         descricao: '',
-        imagem: '',
+        imagem: null,
     });
+
+    const handleImagem = (event) => {
+        const file = event.target.files?.[0] ?? null;
+
+        setData('imagem', file);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    };
 
     // Filtra os setores conforme o piso selecionado
     useEffect(() => {
@@ -61,7 +69,7 @@ export default function Create({ pisos, setores }) {
 
     const submit = (event) => {
         event.preventDefault();
-        post(route('admin.secretarias.store'));
+        post(route('admin.secretarias.store'), { forceFormData: true });
     };
 
     return (
@@ -164,9 +172,21 @@ export default function Create({ pisos, setores }) {
                         </div>
 
                         <div className="sm:col-span-2">
-                            <label htmlFor="imagem" className={labelClass}>URL da imagem</label>
-                            <input id="imagem" type="text" value={data.imagem} onChange={(e) => setData('imagem', e.target.value)} placeholder="https://..." className={fieldClass} />
+                            <label htmlFor="imagem" className={labelClass}>Imagem</label>
+                            <label htmlFor="imagem" className="flex h-11 w-full cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 px-3 text-sm text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700">
+                                <ImagePlus size={16} strokeWidth={1.9} />
+                                {data.imagem ? data.imagem.name : 'Escolher ficheiro'}
+                            </label>
+                            <input id="imagem" type="file" accept="image/png,image/jpeg,image/webp" onChange={handleImagem} className="hidden" />
                             <InputError message={errors.imagem} className="mt-2" />
+
+                            {preview && (
+                                <img
+                                    src={preview}
+                                    alt="Pré-visualização"
+                                    className="mt-3 h-32 w-full rounded-xl object-cover"
+                                />
+                            )}
                         </div>
 
                         <div className="sm:col-span-2">

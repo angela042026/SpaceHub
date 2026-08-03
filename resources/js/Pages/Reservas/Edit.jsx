@@ -250,9 +250,9 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                             }`}
                                         >
                                             <div className="relative">
-                                                {secretaria.imagem || imagemPorTipo ? (
+                                                {secretaria.imagem_url || imagemPorTipo ? (
                                                     <img
-                                                        src={secretaria.imagem || imagemPorTipo}
+                                                        src={secretaria.imagem_url || imagemPorTipo}
                                                         alt={secretaria.codigo}
                                                         className="h-40 w-full object-cover"
                                                     />

@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Edificio extends Model
 {
+    protected $appends = [
+        'imagem_url',
+    ];
+
     protected $fillable = [
         'nome',
         'codigo',
@@ -33,5 +38,17 @@ class Edificio extends Model
     public function pisos(): HasMany
     {
         return $this->hasMany(Piso::class);
+    }
+
+    /**
+     * URL pública da imagem do edifício, gerada a partir do caminho
+     * relativo guardado em `imagem` (storage/app/public/...). Mesmo
+     * padrão de User::fotografiaUrl().
+     */
+    protected function imagemUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->imagem ? asset('storage/' . $this->imagem) : null,
+        );
     }
 }

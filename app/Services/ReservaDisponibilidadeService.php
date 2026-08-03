@@ -8,6 +8,7 @@ use App\Models\Piso;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Models\Setor;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -239,6 +240,30 @@ class ReservaDisponibilidadeService
                 fn($query) => $query->where('id', '!=', $excluirReservaId)
             )
             ->exists();
+    }
+
+    /**
+     * Verifica se uma QueryException é mesmo uma violação dos índices
+     * únicos de reservas ativas (unique_reserva_secretaria_periodo_ativa
+     * / unique_reserva_utilizador_periodo_ativo) — usado por todos os
+     * pontos que criam ou atualizam reservas (web, API, Admin) para
+     * traduzir só esse conflito específico numa mensagem amigável,
+     * sem mascarar outros erros de base de dados como se fossem
+     * sempre "lugar já reservado".
+     *
+     * O código de erro 1062 é específico do MySQL — o SQLite (usado
+     * nos testes) nunca o produz, por isso a verificação é feita pelo
+     * conteúdo da mensagem: o MySQL nomeia a constraint, o SQLite só
+     * lista as colunas envolvidas.
+     */
+    public function ehConflitoDeReservaAtiva(QueryException $e): bool
+    {
+        $mensagem = $e->getMessage();
+
+        return str_contains($mensagem, 'unique_reserva_secretaria_periodo_ativa')
+            || str_contains($mensagem, 'unique_reserva_utilizador_periodo_ativo')
+            || str_contains($mensagem, 'secretaria_id_ativa')
+            || str_contains($mensagem, 'user_id_ativo');
     }
 
     /**

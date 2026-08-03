@@ -153,6 +153,48 @@ class PisoUploadTest extends TestCase
         );
     }
 
+    public function test_php_file_disguised_as_image_is_rejected(): void
+    {
+        $codigo = 'PS' . Str::upper(Str::random(6));
+
+        // UploadedFile::fake() deriva sempre o MIME reportado a partir
+        // da extensão do nome do ficheiro, nunca do conteúdo real —
+        // por isso não serve para testar deteção de spoofing. Aqui
+        // construímos um UploadedFile real (modo "test") sobre um
+        // ficheiro com conteúdo PHP genuíno, para confirmar que a regra
+        // "image"/"mimes" do Laravel deteta o conteúdo real via
+        // guessExtension() e não confia na extensão .jpg nem no
+        // Content-Type que o cliente declarou.
+        $caminho = tempnam(sys_get_temp_dir(), 'spoof');
+        file_put_contents($caminho, '<?php echo "spoofed"; ?>');
+
+        $ficheiro = new UploadedFile($caminho, 'planta.jpg', 'image/jpeg', null, true);
+
+        $response = $this->post('/api/pisos', [
+            'edificio_id' => $this->edificio->id,
+            'nome' => 'Piso com ficheiro disfarçado',
+            'codigo' => $codigo,
+            'numero' => 105,
+            'planta' => $ficheiro,
+        ], [
+            'Accept' => 'application/json',
+        ]);
+
+        $response
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('planta');
+
+        $this->assertDatabaseMissing('pisos', [
+            'edificio_id' => $this->edificio->id,
+            'codigo' => $codigo,
+        ]);
+
+        $this->assertCount(
+            0,
+            Storage::disk('public')->files('pisos/plantas')
+        );
+    }
+
     public function test_updating_floor_plan_replaces_previous_file(): void
     {
         $plantaAntiga = UploadedFile::fake()

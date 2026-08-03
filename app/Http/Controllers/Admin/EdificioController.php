@@ -10,8 +10,10 @@ use App\Models\Edificio;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class EdificioController extends Controller
 {
@@ -82,7 +84,23 @@ class EdificioController extends Controller
     {
         Gate::authorize('create', Edificio::class);
 
-        Edificio::create($request->validated());
+        $dados = $request->validated();
+        $imagemGuardada = null;
+
+        if ($request->hasFile('imagem')) {
+            $imagemGuardada = $request->file('imagem')->store('edificios/imagens', 'public');
+            $dados['imagem'] = $imagemGuardada;
+        }
+
+        try {
+            Edificio::create($dados);
+        } catch (Throwable $exception) {
+            if ($imagemGuardada !== null) {
+                Storage::disk('public')->delete($imagemGuardada);
+            }
+
+            throw $exception;
+        }
 
         return redirect()
             ->route('admin.edificios.index')
@@ -102,7 +120,28 @@ class EdificioController extends Controller
     {
         Gate::authorize('update', $edificio);
 
-        $edificio->update($request->validated());
+        $dados = $request->validated();
+        $imagemAntiga = $edificio->imagem;
+        $novaImagem = null;
+
+        if ($request->hasFile('imagem')) {
+            $novaImagem = $request->file('imagem')->store('edificios/imagens', 'public');
+            $dados['imagem'] = $novaImagem;
+        }
+
+        try {
+            $edificio->update($dados);
+        } catch (Throwable $exception) {
+            if ($novaImagem !== null) {
+                Storage::disk('public')->delete($novaImagem);
+            }
+
+            throw $exception;
+        }
+
+        if ($novaImagem !== null && $imagemAntiga !== null && $imagemAntiga !== $novaImagem) {
+            Storage::disk('public')->delete($imagemAntiga);
+        }
 
         return redirect()
             ->route('admin.edificios.index')
