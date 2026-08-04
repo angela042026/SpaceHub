@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
@@ -13,6 +13,7 @@ export default function MapaEditor({ pisos }) {
     const [secretariaAtiva, setSecretariaAtiva] = useState(null);
     const [aGuardar, setAGuardar] = useState(false);
     const [guardadoId, setGuardadoId] = useState(null);
+    const [erroGuardar, setErroGuardar] = useState(null);
 
     const piso = useMemo(
         () => dadosPisos?.find((p) => p.codigo === pisoSelecionado) ?? dadosPisos?.[0],
@@ -51,6 +52,7 @@ export default function MapaEditor({ pisos }) {
         const yClamped = Math.min(Math.max(y, 0), 100);
 
         setAGuardar(true);
+        setErroGuardar(null);
 
         try {
             if (secretariaAtiva) {
@@ -107,6 +109,11 @@ export default function MapaEditor({ pisos }) {
             }
 
             setTimeout(() => setGuardadoId(null), 1200);
+        } catch (error) {
+            setErroGuardar(
+                error.response?.data?.message ??
+                    'Não foi possível guardar a posição. Tenta novamente.',
+            );
         } finally {
             setAGuardar(false);
         }
@@ -132,6 +139,13 @@ export default function MapaEditor({ pisos }) {
                         Seleciona uma zona/sala na lista e clica na planta para a posicionar — igual às legendas numeradas das plantas oficiais. A posição é guardada automaticamente.
                     </p>
                 </div>
+
+                {erroGuardar && (
+                    <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
+                        <AlertTriangle size={19} strokeWidth={1.9} className="mt-0.5 shrink-0" />
+                        <p className="text-sm font-medium">{erroGuardar}</p>
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-[320px_1fr]">
                     <div className="dashboard-card p-5">

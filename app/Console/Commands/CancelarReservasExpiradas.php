@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Notifications\ReservaExpiradaNotification;
 use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
@@ -107,6 +108,8 @@ class CancelarReservasExpiradas extends Command
                         'estado_reserva_id' => $estadoExpiradaId,
                         'cancelada_at' => now(),
                     ]);
+
+                    ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
 
                     $reserva->user?->notify(
                         new ReservaExpiradaNotification($reserva)

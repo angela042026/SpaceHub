@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Notifications\ReservaCriadaNotification;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
@@ -88,7 +89,7 @@ class ReservaCriacaoService
             'data_fim' => $dataFim,
             'tipo_duracao' => 'diaria',
             'observacoes' => $dados['observacoes'] ?? null,
-        ]);
+        ], $periodo->nome);
     }
 
     /**
@@ -140,7 +141,7 @@ class ReservaCriacaoService
             'data_fim' => $dataFim,
             'tipo_duracao' => $tipoDuracao,
             'observacoes' => $dados['observacoes'] ?? null,
-        ]);
+        ], $periodoDiaInteiro->nome);
     }
 
     /**
@@ -207,14 +208,39 @@ class ReservaCriacaoService
      * mascarar problemas reais — por exemplo, uma eventual colisão na
      * referência do pagamento (extremamente improvável, mas não
      * impossível) não deve ser apresentada como "lugar já reservado".
+     *
+     * As linhas de reserva_dias (uma por dia+slot ocupado) são
+     * inseridas na mesma transação: é essa constraint, não a de
+     * reservas, que apanha colisões entre reservas com datas de início
+     * diferentes mas intervalos sobrepostos (ver
+     * 2026_08_04_010000_create_reserva_dias_table).
      */
-    private function persistir(array $dadosReserva): Reserva
+    private function persistir(array $dadosReserva, string $nomePeriodo): Reserva
     {
         try {
-            $reserva = DB::transaction(function () use ($dadosReserva) {
+            $reserva = DB::transaction(function () use ($dadosReserva, $nomePeriodo) {
                 $reserva = Reserva::create($dadosReserva);
 
                 $this->pagamentos->criarParaReserva($reserva);
+
+                $diasOcupados = $this->disponibilidade->gerarDiasOcupados(
+                    $dadosReserva['data'],
+                    $dadosReserva['data_fim'],
+                    $nomePeriodo
+                );
+
+                ReservaDia::insert(array_map(
+                    fn (array $dia) => [
+                        'reserva_id' => $reserva->id,
+                        'secretaria_id' => $reserva->secretaria_id,
+                        'user_id' => $reserva->user_id,
+                        'dia' => $dia['dia'],
+                        'slot' => $dia['slot'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                    $diasOcupados
+                ));
 
                 return $reserva;
             });

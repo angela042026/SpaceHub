@@ -18,6 +18,7 @@ import {
 import { useState } from 'react';
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
 import { ESTADO_RESERVA, badge } from '@/utils/estados';
+import { podeCancelarReserva } from '@/Components/Reservas/reservaHelpers';
 
 /*
  * Texto corrido, não um badge: entra a seguir a "Avaliação " numa frase.
@@ -37,16 +38,31 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
     // Cancelar reserva
     const [reservaParaCancelar, setReservaParaCancelar] = useState(null);
     const [aCancelar, setACancelar] = useState(false);
+    const [erroCancelamento, setErroCancelamento] = useState(null);
+
+    // Limpa o erro de uma tentativa anterior ao abrir o modal para OUTRA
+    // reserva — sem isto, o erro de "pagamento já pago" de uma reserva
+    // ficava colado ao abrir o modal de outra, antes de sequer tentar.
+    const abrirCancelamento = (reserva) => {
+        setErroCancelamento(null);
+        setReservaParaCancelar(reserva);
+    };
 
     const cancelarReserva = () => {
         setACancelar(true);
+        setErroCancelamento(null);
 
         router.patch(route('reservas.cancelar', reservaParaCancelar.id), {}, {
             preserveScroll: true,
-            onFinish: () => {
-                setACancelar(false);
-                setReservaParaCancelar(null);
-            },
+            // Só fecha o modal quando o cancelamento é mesmo aceite —
+            // se o backend recusar (ex.: pagamento já pago, sem
+            // reembolso disponível), o modal fica aberto a mostrar
+            // porquê, em vez de fechar como se nada tivesse acontecido.
+            onSuccess: () => setReservaParaCancelar(null),
+            onError: (erros) => setErroCancelamento(
+                erros.pagamento ?? 'Não foi possível cancelar a reserva.',
+            ),
+            onFinish: () => setACancelar(false),
         });
     };
 
@@ -286,14 +302,16 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                                                     Editar
                                                 </Link>
 
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setReservaParaCancelar(reserva)}
-                                                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
-                                                >
-                                                    <XCircle size={16} strokeWidth={1.9} />
-                                                    Cancelar
-                                                </button>
+                                                {podeCancelarReserva(reserva) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => abrirCancelamento(reserva)}
+                                                        className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
+                                                    >
+                                                        <XCircle size={16} strokeWidth={1.9} />
+                                                        Cancelar
+                                                    </button>
+                                                )}
 
                                                 {reserva.pagamento?.estado === 'pendente' && (
                                                     <Link
@@ -312,6 +330,15 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                                                     </div>
                                                 )}
                                             </div>
+                                        ) : podeCancelarReserva(reserva) ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => abrirCancelamento(reserva)}
+                                                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
+                                            >
+                                                <XCircle size={16} strokeWidth={1.9} />
+                                                Cancelar
+                                            </button>
                                         ) : reserva.check_in_at && !reserva.avaliacao ? (
                                             <button
                                                 type="button"
@@ -385,6 +412,12 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                             </p>
                         </div>
                     </div>
+
+                    {erroCancelamento && (
+                        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
+                            {erroCancelamento}
+                        </div>
+                    )}
 
                     <div className="mt-6 flex justify-end gap-3">
                         <button

@@ -166,3 +166,24 @@ export const calcularDataFim = (dataInicio, tipoDuracao) => {
 
     return formatarDataInput(dataAtual);
 };
+
+/*
+ * Estados a partir dos quais uma reserva já não pode ser cancelada.
+ * Único sítio a definir isto — ReservationCard.jsx e Reservas/Index.jsx
+ * usavam critérios diferentes (um permitia cancelar em mais estados do
+ * que o outro), o que fazia o mesmo botão aparecer ativo num ecrã e
+ * desativado noutro para a mesma reserva.
+ *
+ * O backend (ReservaController::cancelar()) só recusa reservas já
+ * canceladas — este critério do frontend é mais conservador de
+ * propósito (esconde o botão depois do check-in e nos estados
+ * terminais), mas tem de ser sempre o mesmo em todo o lado.
+ */
+export const ESTADOS_SEM_CANCELAMENTO = ['cancelada', 'expirada', 'concluida'];
+
+export function podeCancelarReserva(reserva) {
+    return (
+        !reserva?.check_in_at &&
+        !ESTADOS_SEM_CANCELAMENTO.includes(reserva?.estado_reserva?.codigo)
+    );
+}

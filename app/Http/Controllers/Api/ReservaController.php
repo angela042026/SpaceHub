@@ -12,6 +12,7 @@ use App\Http\Resources\SecretariaResource;
 use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Models\Secretaria;
 use App\Services\DashboardMetricsService;
 use App\Services\PagamentoService;
@@ -341,6 +342,8 @@ class ReservaController extends Controller
                 'estado_reserva_id' => $estadoCancelada->id,
                 'cancelada_at' => now(),
             ]);
+
+            ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
         });
 
         $reserva->refresh();

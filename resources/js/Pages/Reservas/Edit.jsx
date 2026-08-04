@@ -53,13 +53,25 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
             const setorAindaValido = filtrados.some((setor) => setor.id == atual.setor_id);
             return setorAindaValido ? atual : { ...atual, setor_id: '' };
         });
-    }, [filtros.piso_id]);
+    }, [filtros.piso_id, setores]);
 
     const setorSelecionado = setoresFiltrados.find(
         (setor) => setor.id == filtros.setor_id,
     );
 
     const imagemPorTipo = resolverImagemPorSetor(setorSelecionado);
+
+    // "Dia inteiro" não é mais um período disponível igual a
+    // Manhã/Tarde — é calculado como "os dois estão livres ao mesmo
+    // tempo", igual ao que Create.jsx/LugarCard.jsx já fazem. Sem isto,
+    // uma reserva originalmente feita como Dia inteiro ficava sem
+    // forma de voltar a ser Dia inteiro ao editar.
+    const periodosMeioDia = periodos.filter(
+        (periodo) => periodo.nome !== 'Dia inteiro',
+    );
+    const periodoDiaInteiro = periodos.find(
+        (periodo) => periodo.nome === 'Dia inteiro',
+    );
 
     // Consulta os lugares do setor escolhido, excluindo esta própria
     // reserva do cálculo de disponibilidade (para não aparecer bloqueada
@@ -281,7 +293,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                                 )}
 
                                                 <div className="mt-4 flex gap-2">
-                                                    {periodos.map((periodo) => {
+                                                    {periodosMeioDia.map((periodo) => {
                                                         const ehSlotOriginal = ehAtual
                                                             && filtros.data === reserva.data
                                                             && periodo.id === reserva.periodo_id;
@@ -304,6 +316,33 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                                             </button>
                                                         );
                                                     })}
+
+                                                    {periodoDiaInteiro && (() => {
+                                                        const ehSlotOriginalDiaInteiro = ehAtual
+                                                            && filtros.data === reserva.data
+                                                            && periodoDiaInteiro.id === reserva.periodo_id;
+                                                        const ambosOsMeiosDiasDisponiveis = periodosMeioDia.every(
+                                                            (periodo) => secretaria.periodos_disponiveis[periodo.id],
+                                                        );
+                                                        const disponivel = ehSlotOriginalDiaInteiro || ambosOsMeiosDiasDisponiveis;
+                                                        const escolhido = selecionada && selecao.periodoId === periodoDiaInteiro.id;
+
+                                                        return (
+                                                            <button
+                                                                key={periodoDiaInteiro.id}
+                                                                type="button"
+                                                                disabled={!disponivel}
+                                                                onClick={() => escolher(secretaria.id, periodoDiaInteiro.id)}
+                                                                className={`flex-1 rounded-xl border px-3 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
+                                                                    escolhido
+                                                                        ? 'border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400'
+                                                                        : 'border-slate-200 text-slate-600 hover:border-teal-500/50 dark:border-slate-700 dark:text-slate-300'
+                                                                }`}
+                                                            >
+                                                                {periodoDiaInteiro.nome}
+                                                            </button>
+                                                        );
+                                                    })()}
                                                 </div>
 
                                                 {selecionada && selecao.periodoId && (

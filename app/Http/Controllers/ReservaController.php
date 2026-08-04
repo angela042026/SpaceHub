@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Avaliacao;
 use App\Models\Edificio;
 use App\Models\EstadoReserva;
+use App\Models\Periodo;
 use App\Models\Piso;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Models\Setor;
 use App\Notifications\ReservaCanceladaNotification;
 use App\Services\PagamentoService;
@@ -227,6 +229,8 @@ class ReservaController extends Controller
                 'cancelada_at' => now(),
             ]);
 
+            ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
+
             $reservaBloqueada->user?->notify(
                 new ReservaCanceladaNotification($reservaBloqueada)
             );
@@ -269,7 +273,7 @@ class ReservaController extends Controller
 
         return Inertia::render('Reservas/Edit', [
             'reserva' => $reservaData,
-            'periodos' => $this->disponibilidade->periodosReservaAtivos(),
+            'periodos' => $this->disponibilidade->periodosAtivos(),
             'pisos' => $this->disponibilidade->pisosAtivosParaReserva(),
             'setores' => $this->disponibilidade->setoresReservaveis(),
             'parDiaInteiro' => $parDiaInteiro?->periodo?->nome,
@@ -361,6 +365,36 @@ class ReservaController extends Controller
                     'observacoes' =>
                     $dadosValidados['observacoes'] ?? null,
                 ]);
+
+                // Este update() não mexe em data_fim, só em data — por
+                // isso o intervalo ocupado em reserva_dias é sempre
+                // regenerado a partir da data nova até à data_fim que já
+                // lá estava (ver o mesmo padrão em
+                // Admin\ReservaController::update()).
+                ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
+
+                $periodoAtualizado = Periodo::findOrFail(
+                    $dadosValidados['periodo_id']
+                );
+
+                $diasOcupados = $this->disponibilidade->gerarDiasOcupados(
+                    $reservaBloqueada->data->format('Y-m-d'),
+                    ($reservaBloqueada->data_fim ?? $reservaBloqueada->data)->format('Y-m-d'),
+                    $periodoAtualizado->nome
+                );
+
+                ReservaDia::insert(array_map(
+                    fn (array $dia) => [
+                        'reserva_id' => $reservaBloqueada->id,
+                        'secretaria_id' => $reservaBloqueada->secretaria_id,
+                        'user_id' => $reservaBloqueada->user_id,
+                        'dia' => $dia['dia'],
+                        'slot' => $dia['slot'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                    $diasOcupados
+                ));
 
                 if ($alterouDadosComPreco) {
                     $pagamentoService->atualizarValorParaReserva(
