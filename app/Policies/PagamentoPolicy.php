@@ -12,7 +12,7 @@ class PagamentoPolicy
      */
     public function before(User $user, string $ability): bool|null
     {
-        if ($user->role?->nome === 'Administrador') {
+        if ($user->isAdministrador()) {
             return true;
         }
 

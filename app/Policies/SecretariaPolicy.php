@@ -13,7 +13,7 @@ class SecretariaPolicy
             return false;
         }
 
-        if ($user->role?->nome === 'Administrador') {
+        if ($user->isAdministrador()) {
             return true;
         }
 
@@ -32,25 +32,20 @@ class SecretariaPolicy
 
     public function create(User $user): bool
     {
-        return $this->isGestor($user);
+        return $user->isGestor();
     }
 
     public function update(
         User $user,
         Secretaria $secretaria
     ): bool {
-        return $this->isGestor($user);
+        return $user->isGestor();
     }
 
     public function toggleAtivo(
         User $user,
         Secretaria $secretaria
     ): bool {
-        return $this->isGestor($user);
-    }
-
-    private function isGestor(User $user): bool
-    {
-        return $user->role?->nome === 'Gestor';
+        return $user->isGestor();
     }
 }

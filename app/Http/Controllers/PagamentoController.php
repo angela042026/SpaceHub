@@ -41,7 +41,7 @@ class PagamentoController extends Controller
          * O administrador vê todos os pagamentos.
          * Os restantes utilizadores veem apenas os próprios.
          */
-        if ($user->role?->nome !== 'Administrador') {
+        if (! $user->isAdministrador()) {
             $query->whereHas('reserva', function ($query) use ($user): void {
                 $query->where('user_id', $user->id);
             });
@@ -74,7 +74,7 @@ class PagamentoController extends Controller
                 'metodo_pagamento',
             ]),
 
-            'isAdmin' => $user->role?->nome === 'Administrador',
+            'isAdmin' => $user->isAdministrador(),
         ]);
     }
 

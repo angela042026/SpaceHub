@@ -6,8 +6,10 @@ use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Models\User;
+use App\Notifications\ReservaCriadaNotification;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Feature\Concerns\CriaEstruturaEspacial;
 use Tests\TestCase;
@@ -84,6 +86,39 @@ class ReservaTest extends TestCase
             'data_fim' => $dataReserva . ' 00:00:00',
             'tipo_duracao' => 'diaria',
         ]);
+    }
+
+    /**
+     * A notificação de reserva criada é despachada depois da transação
+     * fechar (ver ReservaCriacaoService::persistir()) — confirma que o
+     * refactor não deixou de a enviar.
+     */
+    public function test_criar_reserva_notifica_o_utilizador(): void
+    {
+        Notification::fake();
+
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $secretaria = $this->criarSecretaria();
+        $periodo = $this->criarPeriodo();
+
+        $this->criarEstadoReserva('pendente');
+
+        $dataReserva = Carbon::tomorrow()->format('Y-m-d');
+
+        $this->actingAs($user)->post(
+            route('reservas.store'),
+            [
+                'data' => $dataReserva,
+                'periodo_id' => $periodo->id,
+                'secretaria_id' => $secretaria->id,
+                'tipo_duracao' => 'diaria',
+            ]
+        );
+
+        Notification::assertSentTo(
+            $user,
+            ReservaCriadaNotification::class
+        );
     }
 
     /**

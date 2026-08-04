@@ -195,6 +195,12 @@ class ReservaCriacaoService
      * Cria a reserva e o respetivo pagamento numa transação, e notifica
      * o utilizador.
      *
+     * A notificação corre depois da transação fechar, de propósito: se
+     * corresse lá dentro e falhasse, a exceção subiria e o Laravel
+     * reverteria a reserva e o pagamento já válidos só por causa de um
+     * problema no envio da notificação — perder o aviso é aceitável,
+     * perder a reserva não.
+     *
      * Uma violação dos índices únicos de reservas ativas (corrida entre
      * pedidos em simultâneo) é traduzida numa mensagem amigável;
      * qualquer outro erro de base de dados é relançado, para não
@@ -205,16 +211,10 @@ class ReservaCriacaoService
     private function persistir(array $dadosReserva): Reserva
     {
         try {
-            return DB::transaction(function () use ($dadosReserva) {
+            $reserva = DB::transaction(function () use ($dadosReserva) {
                 $reserva = Reserva::create($dadosReserva);
 
                 $this->pagamentos->criarParaReserva($reserva);
-
-                $reserva->user->notify(
-                    new ReservaCriadaNotification(
-                        $reserva->load(['secretaria', 'periodo'])
-                    )
-                );
 
                 return $reserva;
             });
@@ -228,6 +228,14 @@ class ReservaCriacaoService
                     'Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.',
             ]);
         }
+
+        $reserva->user?->notify(
+            new ReservaCriadaNotification(
+                $reserva->load(['secretaria', 'periodo'])
+            )
+        );
+
+        return $reserva;
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoleName;
 use App\Http\Requests\DashboardRequest;
 use App\Models\Reserva;
 use App\Services\DashboardMetricsService;
@@ -193,22 +194,16 @@ class DashboardController extends Controller
             $reservasPorPiso,
         ];
 
-        $role = $request->user()->role?->nome;
+        $user = $request->user();
 
-        if (
-            in_array(
-                $role,
-                ['Administrador', 'Gestor'],
-                true,
-            )
-        ) {
+        if ($user->isAdministrador() || $user->isGestor()) {
             return Inertia::render(
                 'Dashboard/Admin',
                 $dados,
             );
         }
 
-        if ($role === 'Colaborador') {
+        if ($user->hasRole(RoleName::Colaborador)) {
             return Inertia::render(
                 'Dashboard/Funcionario',
                 $dados,

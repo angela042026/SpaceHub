@@ -13,7 +13,7 @@ class AvaliacaoPolicy
             return false;
         }
 
-        if ($user->role?->nome === 'Administrador') {
+        if ($user->isAdministrador()) {
             return true;
         }
 
@@ -22,16 +22,11 @@ class AvaliacaoPolicy
 
     public function viewAny(User $user): bool
     {
-        return $this->isGestor($user);
+        return $user->isGestor();
     }
 
     public function moderar(User $user, Avaliacao $avaliacao): bool
     {
-        return $this->isGestor($user);
-    }
-
-    private function isGestor(User $user): bool
-    {
-        return $user->role?->nome === 'Gestor';
+        return $user->isGestor();
     }
 }

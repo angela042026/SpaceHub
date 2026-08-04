@@ -257,7 +257,7 @@ class ReservaController extends Controller
                 'cancelada_at' => now(),
             ]);
 
-            $reservaBloqueada->user->notify(
+            $reservaBloqueada->user?->notify(
                 new ReservaCanceladaNotification($reservaBloqueada)
             );
         });

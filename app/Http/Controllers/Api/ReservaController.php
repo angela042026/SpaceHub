@@ -347,7 +347,7 @@ class ReservaController extends Controller
 
         $this->carregarRelacoes($reserva);
 
-        $reserva->user->notify(new ReservaCanceladaNotification($reserva));
+        $reserva->user?->notify(new ReservaCanceladaNotification($reserva));
 
         broadcast(new MapaAtualizado());
         DashboardMetricsService::limparCacheDoDia();
@@ -404,6 +404,6 @@ class ReservaController extends Controller
      */
     private function isAdministrador(Request $request): bool
     {
-        return $request->user()->role?->nome === 'Administrador';
+        return $request->user()->isAdministrador();
     }
 }
