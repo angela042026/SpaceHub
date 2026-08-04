@@ -36,7 +36,7 @@ class ReservaPolicy
      */
     public function view(User $user, Reserva $reserva): bool
     {
-        return $this->isAdministrador($user)
+        return $user->isAdministrador()
             || $reserva->user_id === $user->id;
     }
 
@@ -54,7 +54,7 @@ class ReservaPolicy
      */
     public function update(User $user, Reserva $reserva): bool
     {
-        return $this->isAdministrador($user)
+        return $user->isAdministrador()
             || $reserva->user_id === $user->id;
     }
 
@@ -64,7 +64,7 @@ class ReservaPolicy
      */
     public function cancelar(User $user, Reserva $reserva): bool
     {
-        return $this->isAdministrador($user)
+        return $user->isAdministrador()
             || $reserva->user_id === $user->id;
     }
 
@@ -90,10 +90,5 @@ class ReservaPolicy
     public function gerirPropria(User $user, Reserva $reserva): bool
     {
         return $reserva->user_id === $user->id;
-    }
-
-    private function isAdministrador(User $user): bool
-    {
-        return $user->role?->nome === 'Administrador';
     }
 }

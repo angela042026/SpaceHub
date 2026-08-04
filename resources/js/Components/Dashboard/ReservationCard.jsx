@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 
 import { ESTADO_RESERVA, BADGE_NEUTRO } from '@/utils/estados';
+import { podeCancelarReserva } from '@/Components/Reservas/reservaHelpers';
 
 function getEstadoClasses(codigo) {
     return (
@@ -98,11 +99,7 @@ export default function ReservationCard({ reserva }) {
 
     const estado = getEstadoClasses(estadoCodigo);
 
-    const podeCancelar =
-
-        !jaFezCheckIn &&
-
-        !['cancelada', 'expirada', 'concluida'].includes(estadoCodigo);
+    const podeCancelar = podeCancelarReserva(reserva);
 
     function fazerCheckIn() {
 

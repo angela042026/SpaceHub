@@ -11,7 +11,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $this->isAdministrador($user);
+        return $user->isAdministrador();
     }
 
     /**
@@ -20,7 +20,7 @@ class UserPolicy
      */
     public function view(User $user, User $targetUser): bool
     {
-        return $this->isAdministrador($user);
+        return $user->isAdministrador();
     }
 
     /**
@@ -28,7 +28,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $this->isAdministrador($user);
+        return $user->isAdministrador();
     }
 
     /**
@@ -37,7 +37,7 @@ class UserPolicy
      */
     public function update(User $user, User $targetUser): bool
     {
-        return $this->isAdministrador($user);
+        return $user->isAdministrador();
     }
 
     /**
@@ -46,7 +46,7 @@ class UserPolicy
      */
     public function toggleAtivo(User $user, User $targetUser): bool
     {
-        return $this->isAdministrador($user)
+        return $user->isAdministrador()
             && ! $user->is($targetUser);
     }
 
@@ -56,10 +56,5 @@ class UserPolicy
     public function delete(User $user, User $targetUser): bool
     {
         return false;
-    }
-
-    private function isAdministrador(User $user): bool
-    {
-        return $user->role?->nome === 'Administrador';
     }
 }

@@ -47,6 +47,18 @@ class ReservaDisponibilidadeService
     }
 
     /**
+     * Todos os períodos ativos, incluindo Dia inteiro — usado onde o
+     * frontend precisa de saber o id do período "Dia inteiro" (ex.:
+     * Reservas/Edit.jsx, para permitir voltar a escolhê-lo).
+     */
+    public function periodosAtivos()
+    {
+        return Periodo::where('ativo', true)
+            ->orderBy('hora_inicio')
+            ->get();
+    }
+
+    /**
      * Pisos ativos disponíveis para reserva (exclui a garagem).
      */
     public function pisosAtivosParaReserva()
@@ -263,7 +275,66 @@ class ReservaDisponibilidadeService
         return str_contains($mensagem, 'unique_reserva_secretaria_periodo_ativa')
             || str_contains($mensagem, 'unique_reserva_utilizador_periodo_ativo')
             || str_contains($mensagem, 'secretaria_id_ativa')
-            || str_contains($mensagem, 'user_id_ativo');
+            || str_contains($mensagem, 'user_id_ativo')
+            || str_contains($mensagem, 'unique_reserva_dia_secretaria_slot')
+            || str_contains($mensagem, 'unique_reserva_dia_utilizador_slot')
+            // SQLite não nomeia a constraint na mensagem de erro, só
+            // lista as colunas envolvidas como "tabela.coluna" — ao
+            // contrário de "reservas", "reserva_dias" não tem sufixo
+            // "_ativa"/"_ativo" nas suas colunas, por isso precisa do
+            // próprio par tabela.coluna como sinal.
+            || str_contains($mensagem, 'reserva_dias.secretaria_id')
+            || str_contains($mensagem, 'reserva_dias.user_id');
+    }
+
+    /**
+     * Slots atómicos (manhã/tarde) que um período ocupa por dia — "Dia
+     * inteiro" ocupa os dois, os restantes só o seu próprio. Mesmo
+     * critério usado no backfill da migration de reserva_dias — mantido
+     * separado de propósito, para essa migration nunca depender de
+     * código da aplicação que pode mudar no futuro.
+     */
+    public function slotsDoPeriodo(string $nomePeriodo): array
+    {
+        return match ($nomePeriodo) {
+            'Manhã' => ['manha'],
+            'Tarde' => ['tarde'],
+            'Dia inteiro' => ['manha', 'tarde'],
+            default => ['manha', 'tarde'],
+        };
+    }
+
+    /**
+     * Uma linha ['dia' => ..., 'slot' => ...] por cada dia do calendário
+     * entre $dataInicio e $dataFim (inclusive), para cada slot ocupado
+     * pelo período — usado para popular reserva_dias. Inclui fins de
+     * semana dentro do intervalo, de propósito: a disponibilidade
+     * mostrada ao utilizador já os trata como ocupados (ver
+     * reservasQueOcupam()), e esta tabela não pode discordar disso.
+     */
+    public function gerarDiasOcupados(
+        string $dataInicio,
+        string $dataFim,
+        string $nomePeriodo
+    ): array {
+        $slots = $this->slotsDoPeriodo($nomePeriodo);
+
+        $linhas = [];
+        $dia = \Carbon\Carbon::parse($dataInicio);
+        $fim = \Carbon\Carbon::parse($dataFim);
+
+        while ($dia->lte($fim)) {
+            foreach ($slots as $slot) {
+                $linhas[] = [
+                    'dia' => $dia->toDateString(),
+                    'slot' => $slot,
+                ];
+            }
+
+            $dia->addDay();
+        }
+
+        return $linhas;
     }
 
     /**

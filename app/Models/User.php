@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\RoleName;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -73,5 +74,25 @@ class User extends Authenticatable
     public function reservas(): HasMany
     {
         return $this->hasMany(Reserva::class);
+    }
+
+    /**
+     * Único sítio que compara o nome do papel guardado na BD com o
+     * enum — Policies e Middleware passam a chamar isto (ou os atalhos
+     * abaixo) em vez de repetir `$user->role?->nome === 'Administrador'`.
+     */
+    public function hasRole(RoleName $role): bool
+    {
+        return $this->role?->nome === $role->value;
+    }
+
+    public function isAdministrador(): bool
+    {
+        return $this->hasRole(RoleName::Administrador);
+    }
+
+    public function isGestor(): bool
+    {
+        return $this->hasRole(RoleName::Gestor);
     }
 }

@@ -13,7 +13,7 @@ class SetorPolicy
             return false;
         }
 
-        if ($user->role?->nome === 'Administrador') {
+        if ($user->isAdministrador()) {
             return true;
         }
 
@@ -32,21 +32,16 @@ class SetorPolicy
 
     public function create(User $user): bool
     {
-        return $this->isGestor($user);
+        return $user->isGestor();
     }
 
     public function update(User $user, Setor $setor): bool
     {
-        return $this->isGestor($user);
+        return $user->isGestor();
     }
 
     public function toggleAtivo(User $user, Setor $setor): bool
     {
-        return $this->isGestor($user);
-    }
-
-    private function isGestor(User $user): bool
-    {
-        return $user->role?->nome === 'Gestor';
+        return $user->isGestor();
     }
 }

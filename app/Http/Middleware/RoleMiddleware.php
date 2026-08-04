@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\RoleName;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,6 +11,12 @@ class RoleMiddleware
 {
     /**
      * Handle an incoming request.
+     *
+     * Os nomes de role vêm da definição da rota (ex.: `role:Administrador,Gestor`)
+     * como strings — RoleName::from() converte-os e recusa a app arrancar
+     * se algum deles não corresponder a um caso válido do enum, em vez
+     * de silenciosamente nunca autorizar ninguém por causa de um erro
+     * de escrita na rota.
      */
     public function handle(
         Request $request,
@@ -30,10 +37,15 @@ class RoleMiddleware
             ], 403);
         }
 
-        if (
-            ! $user->role ||
-            ! in_array($user->role->nome, $roles, true)
-        ) {
+        $rolesPermitidas = array_map(
+            fn (string $role) => RoleName::from($role),
+            $roles
+        );
+
+        $temPermissao = collect($rolesPermitidas)
+            ->contains(fn (RoleName $role) => $user->hasRole($role));
+
+        if (! $temPermissao) {
             return response()->json([
                 'message' => 'Não tem permissão para aceder a este recurso.',
             ], 403);

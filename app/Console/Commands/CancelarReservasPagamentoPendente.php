@@ -6,6 +6,7 @@ use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Pagamento;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Notifications\PagamentoExpiradoNotification;
 use App\Services\DashboardMetricsService;
 use App\Services\PagamentoService;
@@ -100,6 +101,8 @@ class CancelarReservasPagamentoPendente extends Command
                         'estado_reserva_id' => $estadoCanceladaId,
                         'cancelada_at' => now(),
                     ]);
+
+                    ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
 
                     $reserva->user?->notify(
                         new PagamentoExpiradoNotification($reserva)

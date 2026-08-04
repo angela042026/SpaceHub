@@ -9,6 +9,7 @@ use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Piso;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Models\Secretaria;
 use App\Models\Setor;
 use App\Notifications\ReservaCanceladaNotification;
@@ -202,6 +203,35 @@ class ReservaController extends Controller
                     'observacoes' => $dados['observacoes'] ?? $reservaBloqueada->observacoes,
                 ]);
 
+                // Este update() não mexe em data_fim, só em data — por
+                // isso o intervalo ocupado em reserva_dias é sempre
+                // regenerado a partir da data nova até à data_fim que já
+                // lá estava. Sem isto, as linhas antigas (secretária/dia
+                // anteriores) ficavam paradas e as novas nunca ficavam
+                // protegidas pela constraint.
+                ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
+
+                $periodoAtualizado = Periodo::findOrFail($periodoId);
+
+                $diasOcupados = $this->disponibilidade->gerarDiasOcupados(
+                    $reservaBloqueada->data->format('Y-m-d'),
+                    ($reservaBloqueada->data_fim ?? $reservaBloqueada->data)->format('Y-m-d'),
+                    $periodoAtualizado->nome
+                );
+
+                ReservaDia::insert(array_map(
+                    fn (array $dia) => [
+                        'reserva_id' => $reservaBloqueada->id,
+                        'secretaria_id' => $reservaBloqueada->secretaria_id,
+                        'user_id' => $reservaBloqueada->user_id,
+                        'dia' => $dia['dia'],
+                        'slot' => $dia['slot'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                    $diasOcupados
+                ));
+
                 if ($alterouDadosComPreco) {
                     $pagamentoService->atualizarValorParaReserva($reservaBloqueada);
                 }
@@ -257,7 +287,9 @@ class ReservaController extends Controller
                 'cancelada_at' => now(),
             ]);
 
-            $reservaBloqueada->user->notify(
+            ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
+
+            $reservaBloqueada->user?->notify(
                 new ReservaCanceladaNotification($reservaBloqueada)
             );
         });

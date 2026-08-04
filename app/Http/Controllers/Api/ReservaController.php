@@ -12,6 +12,7 @@ use App\Http\Resources\SecretariaResource;
 use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Models\Secretaria;
 use App\Services\DashboardMetricsService;
 use App\Services\PagamentoService;
@@ -341,13 +342,15 @@ class ReservaController extends Controller
                 'estado_reserva_id' => $estadoCancelada->id,
                 'cancelada_at' => now(),
             ]);
+
+            ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
         });
 
         $reserva->refresh();
 
         $this->carregarRelacoes($reserva);
 
-        $reserva->user->notify(new ReservaCanceladaNotification($reserva));
+        $reserva->user?->notify(new ReservaCanceladaNotification($reserva));
 
         broadcast(new MapaAtualizado());
         DashboardMetricsService::limparCacheDoDia();
@@ -404,6 +407,6 @@ class ReservaController extends Controller
      */
     private function isAdministrador(Request $request): bool
     {
-        return $request->user()->role?->nome === 'Administrador';
+        return $request->user()->isAdministrador();
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Notifications\ReservaCriadaNotification;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
@@ -88,7 +89,7 @@ class ReservaCriacaoService
             'data_fim' => $dataFim,
             'tipo_duracao' => 'diaria',
             'observacoes' => $dados['observacoes'] ?? null,
-        ]);
+        ], $periodo->nome);
     }
 
     /**
@@ -140,7 +141,7 @@ class ReservaCriacaoService
             'data_fim' => $dataFim,
             'tipo_duracao' => $tipoDuracao,
             'observacoes' => $dados['observacoes'] ?? null,
-        ]);
+        ], $periodoDiaInteiro->nome);
     }
 
     /**
@@ -195,26 +196,51 @@ class ReservaCriacaoService
      * Cria a reserva e o respetivo pagamento numa transação, e notifica
      * o utilizador.
      *
+     * A notificação corre depois da transação fechar, de propósito: se
+     * corresse lá dentro e falhasse, a exceção subiria e o Laravel
+     * reverteria a reserva e o pagamento já válidos só por causa de um
+     * problema no envio da notificação — perder o aviso é aceitável,
+     * perder a reserva não.
+     *
      * Uma violação dos índices únicos de reservas ativas (corrida entre
      * pedidos em simultâneo) é traduzida numa mensagem amigável;
      * qualquer outro erro de base de dados é relançado, para não
      * mascarar problemas reais — por exemplo, uma eventual colisão na
      * referência do pagamento (extremamente improvável, mas não
      * impossível) não deve ser apresentada como "lugar já reservado".
+     *
+     * As linhas de reserva_dias (uma por dia+slot ocupado) são
+     * inseridas na mesma transação: é essa constraint, não a de
+     * reservas, que apanha colisões entre reservas com datas de início
+     * diferentes mas intervalos sobrepostos (ver
+     * 2026_08_04_010000_create_reserva_dias_table).
      */
-    private function persistir(array $dadosReserva): Reserva
+    private function persistir(array $dadosReserva, string $nomePeriodo): Reserva
     {
         try {
-            return DB::transaction(function () use ($dadosReserva) {
+            $reserva = DB::transaction(function () use ($dadosReserva, $nomePeriodo) {
                 $reserva = Reserva::create($dadosReserva);
 
                 $this->pagamentos->criarParaReserva($reserva);
 
-                $reserva->user->notify(
-                    new ReservaCriadaNotification(
-                        $reserva->load(['secretaria', 'periodo'])
-                    )
+                $diasOcupados = $this->disponibilidade->gerarDiasOcupados(
+                    $dadosReserva['data'],
+                    $dadosReserva['data_fim'],
+                    $nomePeriodo
                 );
+
+                ReservaDia::insert(array_map(
+                    fn (array $dia) => [
+                        'reserva_id' => $reserva->id,
+                        'secretaria_id' => $reserva->secretaria_id,
+                        'user_id' => $reserva->user_id,
+                        'dia' => $dia['dia'],
+                        'slot' => $dia['slot'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                    $diasOcupados
+                ));
 
                 return $reserva;
             });
@@ -228,6 +254,14 @@ class ReservaCriacaoService
                     'Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.',
             ]);
         }
+
+        $reserva->user?->notify(
+            new ReservaCriadaNotification(
+                $reserva->load(['secretaria', 'periodo'])
+            )
+        );
+
+        return $reserva;
     }
 
     /**

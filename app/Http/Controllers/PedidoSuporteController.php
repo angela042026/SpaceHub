@@ -52,7 +52,7 @@ class PedidoSuporteController extends Controller
         ]);
 
         // Avisa o utilizador que o pedido foi respondido
-        $pedido->user->notify(new SuporteRespondidoNotification($pedido));
+        $pedido->user?->notify(new SuporteRespondidoNotification($pedido));
 
         return redirect()
             ->route('support.index')
