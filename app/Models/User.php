@@ -59,10 +59,21 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * "fotografia" guarda ou um caminho relativo do disco "public" (upload
+     * feito pelo próprio utilizador) ou já uma URL completa (ex.: avatar
+     * de demonstração gerado externamente) — devolve como está nesse
+     * segundo caso, em vez de a tratar sempre como caminho local.
+     */
     protected function fotografiaUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->fotografia ? asset('storage/' . $this->fotografia) : null,
+            get: fn () => match (true) {
+                blank($this->fotografia) => null,
+                str_starts_with($this->fotografia, 'http://'),
+                str_starts_with($this->fotografia, 'https://') => $this->fotografia,
+                default => asset('storage/' . $this->fotografia),
+            },
         );
     }
 

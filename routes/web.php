@@ -70,6 +70,14 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'active'])
     ->name('dashboard');
 
+Route::middleware(['auth', 'verified', 'active'])->group(function () {
+    Route::get('/dashboard/tendencia-ocupacao', [DashboardController::class, 'tendenciaOcupacao'])
+        ->name('dashboard.tendenciaOcupacao');
+
+    Route::get('/dashboard/reservas-por-piso', [DashboardController::class, 'reservasPorPiso'])
+        ->name('dashboard.reservasPorPiso');
+});
+
 Route::middleware(['auth', 'active'])->group(function () {
     // ==========================
     // Perfil do Utilizador

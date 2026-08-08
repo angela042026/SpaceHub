@@ -11,15 +11,13 @@ import { PieChart as PieChartIcon } from 'lucide-react';
 const COLORS = {
     livre: '#14b8a6',
     reservada: '#3b82f6',
-    ocupada: '#ef4444',
-    indisponivel: '#94a3b8',
+    ocupada: '#f43f5e',
 };
 
 const LABELS = {
     livre: 'Livres',
     reservada: 'Reservadas',
     ocupada: 'Ocupadas',
-    indisponivel: 'Manutenção',
 };
 
 function DonutTooltip({ active, payload }) {
@@ -42,10 +40,7 @@ function DonutTooltip({ active, payload }) {
     );
 }
 
-export default function OccupancyDonutChart({
-    data,
-    taxaOcupacao = 0,
-}) {
+export default function OccupancyDonutChart({ data }) {
     const chartData = [
         {
             key: 'livre',
@@ -62,52 +57,59 @@ export default function OccupancyDonutChart({
             name: LABELS.ocupada,
             value: Number(data?.ocupada ?? 0),
         },
-        {
-            key: 'indisponivel',
-            name: LABELS.indisponivel,
-            value: Number(data?.indisponivel ?? 0),
-        },
-    ].filter((item) => item.value > 0);
+    ];
 
     const totalSecretarias = chartData.reduce(
         (total, item) => total + item.value,
         0,
     );
 
+    /*
+     * A percentagem central tem de vir sempre dos mesmos 3 números que a
+     * legenda mostra — nunca de uma métrica calculada à parte (ex:
+     * stats.taxaOcupacao, que usa uma janela horária diferente), senão o
+     * donut e a legenda podem divergir (ex: mostrar 46% ao centro com
+     * 19 de 83 na legenda, que são 23%).
+     */
+    const emUtilizacao =
+        Number(data?.reservada ?? 0) +
+        Number(data?.ocupada ?? 0);
+
+    const taxaOcupacao =
+        totalSecretarias > 0
+            ? Math.round(
+                  (emUtilizacao / totalSecretarias) * 100,
+              )
+            : 0;
+
     return (
-        <section className="dashboard-card overflow-hidden">
-            <header className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500">
-                        <PieChartIcon
-                            size={20}
-                            strokeWidth={1.9}
-                        />
-                    </div>
-
-                    <div>
-                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                            Ocupação Atual
-                        </h3>
-
-                        <p className="mt-0.5 text-xs text-slate-400">
-                            Estado das secretárias
-                        </p>
-                    </div>
+        <section className="dashboard-card flex h-full flex-col overflow-hidden">
+            <header className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500">
+                    <PieChartIcon
+                        size={20}
+                        strokeWidth={1.9}
+                    />
                 </div>
 
-                <div className="text-right">
-                    <strong className="block text-lg font-bold text-slate-900 dark:text-white">
-                        {totalSecretarias}
-                    </strong>
+                <div>
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                            Ocupação atual
+                        </h3>
 
-                    <span className="text-[11px] text-slate-400">
-                        Secretárias
-                    </span>
+                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                            Todos os pisos
+                        </span>
+                    </div>
+
+                    <p className="mt-0.5 text-xs text-slate-400">
+                        {totalSecretarias} secretárias
+                    </p>
                 </div>
             </header>
 
-            <div className="grid gap-5 p-5 sm:grid-cols-[190px_1fr] xl:grid-cols-1 2xl:grid-cols-[190px_1fr]">
+            <div className="flex-1 grid content-center gap-5 p-5 sm:grid-cols-[190px_1fr] xl:grid-cols-1 2xl:grid-cols-[190px_1fr]">
                 <div className="relative h-[190px]">
                     <ResponsiveContainer
                         width="100%"
@@ -170,47 +172,32 @@ export default function OccupancyDonutChart({
                         return (
                             <div
                                 key={item.key}
-                                className="space-y-2"
+                                className="flex items-center justify-between"
                             >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <span
-                                            className="h-2.5 w-2.5 rounded-full"
-                                            style={{
-                                                backgroundColor:
-                                                    COLORS[
-                                                        item.key
-                                                    ],
-                                            }}
-                                        />
-
-                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                                            {item.name}
-                                        </span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-bold text-slate-900 dark:text-white">
-                                            {item.value}
-                                        </span>
-
-                                        <span className="text-xs text-slate-400">
-                                            {percentagem}%
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                                    <div
-                                        className="h-full rounded-full transition-all duration-700"
+                                <div className="flex items-center gap-2">
+                                    <span
+                                        className="h-2.5 w-2.5 rounded-full"
                                         style={{
-                                            width: `${percentagem}%`,
                                             backgroundColor:
                                                 COLORS[
                                                     item.key
                                                 ],
                                         }}
                                     />
+
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                        {item.name}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm font-bold text-slate-900 dark:text-white">
+                                        {item.value}
+                                    </span>
+
+                                    <span className="text-xs text-slate-400">
+                                        · {percentagem}%
+                                    </span>
                                 </div>
                             </div>
                         );

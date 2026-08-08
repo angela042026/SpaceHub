@@ -1,10 +1,9 @@
+import { Link } from '@inertiajs/react';
 import {
+    ArrowRight,
     Armchair,
     CalendarDays,
     ChevronRight,
-    Clock3,
-    Layers3,
-    MapPinned,
 } from 'lucide-react';
 
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
@@ -27,27 +26,22 @@ function getEstadoReserva(reserva) {
         pendente: {
             label: 'Pendente',
             badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-            dot: 'bg-amber-500',
         },
         confirmada: {
             label: 'Confirmada',
             badge: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-            dot: 'bg-teal-500',
         },
         cancelada: {
             label: 'Cancelada',
             badge: 'bg-red-500/10 text-red-600 dark:text-red-400',
-            dot: 'bg-red-500',
         },
         expirada: {
             label: 'Expirada',
             badge: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
-            dot: 'bg-slate-400',
         },
         concluida: {
             label: 'Concluída',
             badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-            dot: 'bg-blue-500',
         },
     };
 
@@ -55,14 +49,15 @@ function getEstadoReserva(reserva) {
         estados[codigo] ?? {
             label: reserva.estado_reserva?.nome ?? 'Sem estado',
             badge: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
-            dot: 'bg-slate-400',
         }
     );
 }
 
 export default function UpcomingReservations({ reservas = [] }) {
+    const reservasVisiveis = reservas.slice(0, 4);
+
     return (
-        <section className="dashboard-card h-full overflow-hidden">
+        <section className="dashboard-card flex h-full flex-col overflow-hidden">
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
                 <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
@@ -71,24 +66,20 @@ export default function UpcomingReservations({ reservas = [] }) {
 
                     <div>
                         <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Próximas Reservas
+                            Próximas reservas
                         </h2>
 
                         <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                            Reservas futuras já confirmadas.
+                            Reservas futuras confirmadas
                         </p>
                     </div>
                 </div>
-
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                    {reservas.length}
-                </span>
             </div>
 
-            <div className="p-6">
+            <div className="flex flex-1 flex-col p-5 pb-6">
                 {reservas.length > 0 ? (
-                    <div className="space-y-3">
-                        {reservas.map((reserva) => {
+                    <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {reservasVisiveis.map((reserva) => {
                             const estado = getEstadoReserva(reserva);
                             const imagem =
                                 resolverImagemSecretaria(
@@ -96,128 +87,83 @@ export default function UpcomingReservations({ reservas = [] }) {
                                 );
 
                             return (
-                                <article
-                                    key={reserva.id}
-                                    className="group rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-500/20 hover:bg-white hover:shadow-lg dark:border-slate-800 dark:bg-slate-900/40 dark:hover:bg-slate-900"
-                                >
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex min-w-0 items-start gap-3">
-                                            <div className="flex h-14 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-navy-900 text-white shadow-sm">
-                                                {imagem ? (
-                                                    <img
-                                                        src={imagem}
-                                                        alt={
-                                                            reserva
-                                                                .secretaria
-                                                                ?.codigo ??
-                                                            'Espaço reservado'
-                                                        }
-                                                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                                                    />
-                                                ) : (
-                                                    <Armchair
-                                                        size={23}
-                                                        strokeWidth={
-                                                            1.9
-                                                        }
-                                                    />
+                                <li key={reserva.id}>
+                                    <Link
+                                        href={route(
+                                            'reservas.index',
+                                        )}
+                                        className="flex items-center gap-3 py-3"
+                                    >
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-navy-900 text-white">
+                                            {imagem ? (
+                                                <img
+                                                    src={imagem}
+                                                    alt={
+                                                        reserva
+                                                            .secretaria
+                                                            ?.codigo ??
+                                                        'Espaço reservado'
+                                                    }
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <Armchair
+                                                    size={19}
+                                                    strokeWidth={
+                                                        1.9
+                                                    }
+                                                />
+                                            )}
+                                        </div>
+
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="truncate text-sm font-bold text-slate-900 dark:text-white">
+                                                    {reserva.secretaria?.codigo ??
+                                                        'Secretária removida'}
+                                                </h3>
+
+                                                <span
+                                                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${estado.badge}`}
+                                                >
+                                                    {estado.label}
+                                                </span>
+                                            </div>
+
+                                            <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                                                {reserva.secretaria?.setor?.piso?.nome ??
+                                                    '-'}{' '}
+                                                ·{' '}
+                                                {reserva.secretaria?.setor?.nome ??
+                                                    '-'}
+                                            </p>
+                                        </div>
+
+                                        <div className="shrink-0 text-right">
+                                            <p className="text-sm font-bold text-slate-900 dark:text-white">
+                                                {formatarData(
+                                                    reserva.data,
                                                 )}
-                                            </div>
+                                            </p>
 
-                                            <div className="min-w-0">
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <h3 className="truncate text-sm font-bold text-slate-900 dark:text-white">
-                                                        {reserva.secretaria?.codigo ??
-                                                            'Secretária removida'}
-                                                    </h3>
-
-                                                    <span
-                                                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${estado.badge}`}
-                                                    >
-                                                        <span
-                                                            className={`h-1.5 w-1.5 rounded-full ${estado.dot}`}
-                                                        />
-
-                                                        {estado.label}
-                                                    </span>
-                                                </div>
-
-                                                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500 dark:text-slate-400">
-                                                    <span className="flex items-center gap-1.5">
-                                                        <Layers3
-                                                            size={14}
-                                                            strokeWidth={1.9}
-                                                            className="text-teal-500"
-                                                        />
-
-                                                        {reserva.secretaria?.setor?.piso?.nome ??
-                                                            '-'}
-                                                    </span>
-
-                                                    <span className="flex items-center gap-1.5">
-                                                        <MapPinned
-                                                            size={14}
-                                                            strokeWidth={1.9}
-                                                            className="text-teal-500"
-                                                        />
-
-                                                        {reserva.secretaria?.setor?.nome ??
-                                                            '-'}
-                                                    </span>
-                                                </div>
-                                            </div>
+                                            <p className="text-xs text-slate-400">
+                                                {reserva.periodo?.nome ??
+                                                    '-'}
+                                            </p>
                                         </div>
 
                                         <ChevronRight
-                                            size={19}
+                                            size={18}
                                             strokeWidth={1.9}
-                                            className="mt-1 shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-teal-500"
+                                            className="shrink-0 text-slate-300"
                                         />
-                                    </div>
-
-                                    <div className="mt-4 grid grid-cols-2 gap-3">
-                                        <div className="rounded-xl bg-white px-3 py-2.5 dark:bg-slate-900">
-                                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                                Data
-                                            </p>
-
-                                            <div className="mt-1 flex items-center gap-2">
-                                                <CalendarDays
-                                                    size={15}
-                                                    strokeWidth={1.9}
-                                                    className="text-teal-500"
-                                                />
-
-                                                <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                                    {formatarData(reserva.data)}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="rounded-xl bg-white px-3 py-2.5 dark:bg-slate-900">
-                                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                                Período
-                                            </p>
-
-                                            <div className="mt-1 flex items-center gap-2">
-                                                <Clock3
-                                                    size={15}
-                                                    strokeWidth={1.9}
-                                                    className="text-teal-500"
-                                                />
-
-                                                <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                                    {reserva.periodo?.nome ?? '-'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </article>
+                                    </Link>
+                                </li>
                             );
                         })}
-                    </div>
+                    </ul>
                 ) : (
-                    <div className="flex min-h-[280px] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
+                    <div className="flex min-h-[220px] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
                         <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-teal-500/10 text-teal-500">
                             <CalendarDays size={30} strokeWidth={1.8} />
                         </div>
@@ -230,6 +176,16 @@ export default function UpcomingReservations({ reservas = [] }) {
                             Ainda não tens reservas agendadas para os próximos dias.
                         </p>
                     </div>
+                )}
+
+                {reservas.length > 0 && (
+                    <Link
+                        href={route('reservas.index')}
+                        className="mt-auto flex items-center justify-center gap-2 rounded-xl border border-teal-500 bg-white py-2.5 text-sm font-bold text-teal-600 transition hover:bg-teal-500 hover:text-white dark:border-teal-400 dark:bg-slate-900 dark:text-teal-400"
+                    >
+                        Ver todas as reservas
+                        <ArrowRight size={15} strokeWidth={1.9} />
+                    </Link>
                 )}
             </div>
         </section>

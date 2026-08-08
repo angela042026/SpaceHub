@@ -35,6 +35,8 @@ export default function OfficeMap({
     selectedEdificio,
     setSelectedEdificio,
     mostrarTudo = false,
+    showOverview = false,
+    overviewData,
 }) {
     const sectionRef = useRef(null);
     const dragStartRef = useRef(null);
@@ -446,6 +448,10 @@ export default function OfficeMap({
                         setSelectedSecretaria(null)
                     }
                     onReserve={reservarSecretaria}
+                    showOverview={showOverview}
+                    overview={
+                        overviewData?.[pisoAtual?.codigo]
+                    }
                 />
             </div>
         </section>

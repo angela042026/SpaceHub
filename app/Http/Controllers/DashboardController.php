@@ -9,7 +9,8 @@ use App\Services\DashboardMetricsService;
 use App\Services\EstatisticasService;
 use App\Services\MapaOcupacaoService;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -46,6 +47,10 @@ class DashboardController extends Controller
             $this->dashboardMetricsService
             ->obterAtividadeRecente();
 
+        $tendenciaOcupacao =
+            $this->dashboardMetricsService
+            ->obterTendenciaOcupacaoComparativa($hoje);
+
         [
             'pisos' => $pisos,
             'edificios' => $edificios,
@@ -60,68 +65,16 @@ class DashboardController extends Controller
         | Reservas por piso
         |--------------------------------------------------------------------------
         |
-        | Este conjunto de dados será utilizado pelo gráfico horizontal
-        | apresentado ao lado do mapa no dashboard administrativo.
-        |
+        | Este conjunto de dados será utilizado pelo gráfico de barras
+        | apresentado ao lado do mapa no dashboard administrativo. Janela
+        | fixa de 30 dias por omissão, independente do filtro "periodo"
+        | de estatísticas — ver DashboardMetricsService para os detalhes
+        | (só conta "confirmada", exclui canceladas/expiradas).
         */
 
-        $reservasPorPiso = Reserva::query()
-            ->join(
-                'secretarias',
-                'reservas.secretaria_id',
-                '=',
-                'secretarias.id',
-            )
-            ->join(
-                'setores',
-                'secretarias.setor_id',
-                '=',
-                'setores.id',
-            )
-            ->join(
-                'pisos',
-                'setores.piso_id',
-                '=',
-                'pisos.id',
-            )
-            ->when(
-                $dataInicio,
-                function (Builder $query) use (
-                    $dataInicio,
-                    $hoje,
-                ) {
-                    $query
-                        ->whereDate(
-                            'reservas.data',
-                            '>=',
-                            $dataInicio,
-                        )
-                        ->whereDate(
-                            'reservas.data',
-                            '<=',
-                            $hoje,
-                        );
-                },
-            )
-            ->whereNull('reservas.cancelada_at')
-            ->select([
-                'pisos.id',
-                'pisos.nome',
-            ])
-            ->selectRaw(
-                'COUNT(reservas.id) as total',
-            )
-            ->groupBy(
-                'pisos.id',
-                'pisos.nome',
-            )
-            ->orderByDesc('total')
-            ->get()
-            ->map(fn ($piso) => [
-                'id' => $piso->id,
-                'nome' => $piso->nome,
-                'total' => (int) $piso->total,
-            ]);
+        $reservasPorPiso =
+            $this->dashboardMetricsService
+            ->obterReservasPorPisoComparativo($hoje);
 
         /*
         |--------------------------------------------------------------------------
@@ -192,6 +145,9 @@ class DashboardController extends Controller
 
             'reservasPorPiso' =>
             $reservasPorPiso,
+
+            'tendenciaOcupacao' =>
+            $tendenciaOcupacao,
         ];
 
         $user = $request->user();
@@ -213,6 +169,46 @@ class DashboardController extends Controller
         return Inertia::render(
             'Dashboard/Utilizador',
             $dados,
+        );
+    }
+
+    /**
+     * Dados do gráfico "Evolução da Ocupação" para um período e piso
+     * escolhidos na interface — chamado via fetch() quando o
+     * administrador muda o toggle 7/30/90 dias ou o filtro de piso, sem
+     * recarregar o dashboard inteiro.
+     */
+    public function tendenciaOcupacao(Request $request): JsonResponse
+    {
+        $dados = $request->validate([
+            'dias' => ['sometimes', 'integer', 'in:7,30,90'],
+            'piso_id' => ['sometimes', 'nullable', 'integer', 'exists:pisos,id'],
+        ]);
+
+        return response()->json(
+            $this->dashboardMetricsService->obterTendenciaOcupacaoComparativa(
+                Carbon::today(),
+                (int) ($dados['dias'] ?? 7),
+                isset($dados['piso_id']) ? (int) $dados['piso_id'] : null
+            )
+        );
+    }
+
+    /**
+     * Dados do gráfico "Reservas por piso" para um período escolhido na
+     * interface.
+     */
+    public function reservasPorPiso(Request $request): JsonResponse
+    {
+        $dados = $request->validate([
+            'dias' => ['sometimes', 'integer', 'in:7,30,90'],
+        ]);
+
+        return response()->json(
+            $this->dashboardMetricsService->obterReservasPorPisoComparativo(
+                Carbon::today(),
+                (int) ($dados['dias'] ?? 30)
+            )
         );
     }
 }

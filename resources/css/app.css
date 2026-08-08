@@ -36,14 +36,14 @@
         --color-card-to: #f8fafc;
         --color-card-soft: #f1f5f9;
 
-        --color-border: #e2e8f0;
+        --color-border: #e3eaf2;
         --color-text-secondary: #475569;
 
-        --radius-card: 1rem;
+        --radius-card: 1.125rem;
         --radius-pill: 9999px;
 
         --shadow-card:
-            0 2px 8px rgb(0 0 0 / 0.05);
+            0 8px 24px rgb(15 23 42 / 0.05);
 
         --shadow-card-hover:
             0 10px 25px -5px rgb(0 0 0 / 0.1),
