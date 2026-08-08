@@ -83,6 +83,20 @@ class MapaOcupacaoService
                                 'codigo' => $secretaria->codigo,
                                 'planta_x' => $secretaria->planta_x,
                                 'planta_y' => $secretaria->planta_y,
+                                'descricao' => $secretaria->descricao,
+                                'imagem_url' => $secretaria->imagem_url,
+                                'reservavel' => $secretaria->reservavel,
+                                'monitor' => $secretaria->monitor,
+                                'dock_usb' => $secretaria->dock_usb,
+                                'hdmi' => $secretaria->hdmi,
+                                'junto_janela' => $secretaria->junto_janela,
+                                'ergonomica' => $secretaria->ergonomica,
+                                'luz_natural' => $secretaria->luz_natural,
+                                'zona_silenciosa' => $secretaria->zona_silenciosa,
+                                'proximo_copa' => $secretaria->proximo_copa,
+                                'disponibilidade' => $this->disponibilidadeDaSecretaria(
+                                    $reservasAtivasHoje->get($secretaria->id)
+                                ),
                                 'status' => $this->statusDaSecretaria(
                                     $secretaria,
                                     $reservasAtivasHoje->get(
@@ -113,6 +127,7 @@ class MapaOcupacaoService
                         'numero' => $indice + 1,
                         'nome' => $setor->nome,
                         'codigo' => $setor->codigo,
+                        'tipo' => $setor->tipo,
                         'planta_x' => $setor->planta_x,
                         'planta_y' => $setor->planta_y,
                         'reservavel' => $setor->reservavel,
@@ -226,6 +241,27 @@ class MapaOcupacaoService
         }
 
         return 'reservada';
+    }
+
+    private function disponibilidadeDaSecretaria(
+        ?Collection $reservasAtivas
+    ): array {
+        if (! $reservasAtivas || $reservasAtivas->isEmpty()) {
+            return [];
+        }
+
+        return $reservasAtivas
+            ->filter(fn (Reserva $reserva) => $reserva->periodo !== null)
+            ->sortBy(fn (Reserva $reserva) => $reserva->periodo->hora_inicio)
+            ->map(fn (Reserva $reserva) => [
+                'inicio' => $reserva->periodo->hora_inicio->format('H:i'),
+                'fim' => $reserva->periodo->hora_fim->format('H:i'),
+                'estado' => $reserva->check_in_at !== null
+                    ? 'ocupada'
+                    : 'reservada',
+            ])
+            ->values()
+            ->all();
     }
 
     private function estadoDoSetor(

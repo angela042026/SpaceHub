@@ -27,15 +27,19 @@ export default function Admin({
     atividadeRecente,
     pisos,
     edificios,
+    reservaHojeUtilizador,
     proximasReservas,
     reservasPorPiso,
 }) {
+    const pisoDaReserva =
+        reservaHojeUtilizador?.secretaria?.setor?.piso;
+
     const [selectedFloor, setSelectedFloor] = useState(
-        pisos?.[0]?.codigo ?? '',
+        pisoDaReserva?.codigo ?? pisos?.[0]?.codigo ?? '',
     );
 
     const [selectedEdificio, setSelectedEdificio] = useState(
-        edificios?.[0]?.id ?? '',
+        pisoDaReserva?.edificio_id ?? edificios?.[0]?.id ?? '',
     );
 
     const ocupacaoAtual = useMemo(() => {
@@ -144,27 +148,36 @@ export default function Admin({
                     />
                 </section>
 
-                {/* Mapa e gráficos laterais */}
+                {/* Mapa interativo */}
+                <section className="mt-6 min-w-0">
+                    <OfficeMap
+                        selectedFloor={selectedFloor}
+                        setSelectedFloor={setSelectedFloor}
+                        selectedEdificio={selectedEdificio}
+                        setSelectedEdificio={
+                            setSelectedEdificio
+                        }
+                        edificios={edificios}
+                        pisos={pisos}
+                    />
+                </section>
+
+                {/* Gráficos imediatamente abaixo do mapa */}
                 <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
                     <div className="min-w-0 xl:col-span-8">
-                        <OfficeMap
-                            selectedFloor={selectedFloor}
-                            setSelectedFloor={
-                                setSelectedFloor
-                            }
-                            selectedEdificio={
-                                selectedEdificio
-                            }
-                            setSelectedEdificio={
-                                setSelectedEdificio
-                            }
-                            edificios={edificios}
-                            pisos={pisos}
-                            variant="dashboard"
-                        />
+                        <OccupancyTrendChart />
                     </div>
 
-                    <aside className="grid content-start gap-6 sm:grid-cols-2 xl:col-span-4 xl:grid-cols-1">
+                    <div className="xl:col-span-4">
+                        <ReservationsByFloorChart
+                            data={reservasPorPiso ?? []}
+                        />
+                    </div>
+                </section>
+
+                {/* Resumos complementares */}
+                <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
+                    <div className="xl:col-span-4">
                         <OccupancyDonutChart
                             data={ocupacaoAtual}
                             taxaOcupacao={
@@ -172,20 +185,9 @@ export default function Admin({
                                 0
                             }
                         />
-
-                        <ReservationsByFloorChart
-                            data={reservasPorPiso ?? []}
-                        />
-                    </aside>
-                </section>
-
-                {/* Evolução da ocupação e resumo estatístico */}
-                <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
-                    <div className="min-w-0 xl:col-span-8">
-                        <OccupancyTrendChart />
                     </div>
 
-                    <div className="xl:col-span-4">
+                    <div className="xl:col-span-8">
                         <StatisticsSummary
                             estatisticas={estatisticas}
                         />

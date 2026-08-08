@@ -1,77 +1,71 @@
-import { useEffect, useMemo, useState } from 'react';
 import { router } from '@inertiajs/react';
 import {
-    Armchair,
-    Building2,
-    Layers3,
-    MapPinned,
-} from 'lucide-react';
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
-import { LoadingBadge } from '@/Components/Loading';
-
+import DeskDetailPanel from './DeskDetailPanel';
 import MapCanvas from './MapCanvas';
 import MapToolbar from './MapToolbar';
-import SectorList from './SectorList';
-import SelectedSectorCard from './SelectedSectorCard';
 
 import {
-    normalizarEstadoFiltro,
-    normalizarTexto,
-    correspondeFiltro,
     correspondePesquisa,
+    estadoNormalizado,
+    limitarZoom,
+    ZOOM_STEP,
 } from './mapUtils';
 
+function hojeLocal() {
+    const agora = new Date();
+
+    return [
+        agora.getFullYear(),
+        String(agora.getMonth() + 1).padStart(2, '0'),
+        String(agora.getDate()).padStart(2, '0'),
+    ].join('-');
+}
+
 export default function OfficeMap({
-    pisos,
+    pisos = [],
+    edificios = [],
     selectedFloor,
     setSelectedFloor,
-    edificios,
     selectedEdificio,
     setSelectedEdificio,
-    variant = 'full',
+    mostrarTudo = false,
 }) {
-    const isDashboard = variant === 'dashboard';
-
-    const [selectedSector, setSelectedSector] =
-        useState(null);
-
-    const [selectedSecretaria, setSelectedSecretaria] =
-        useState(null);
-
-    const [atualizando, setAtualizando] =
-        useState(false);
+    const sectionRef = useRef(null);
+    const dragStartRef = useRef(null);
 
     const [pesquisa, setPesquisa] = useState('');
-
-    const [filtroEstado, setFiltroEstado] =
-        useState('todos');
-
-    const larguraClass = isDashboard
-        ? 'w-full'
-        : 'mx-auto w-full max-w-5xl';
+    const [filtro, setFiltro] = useState('todos');
+    const [filtrosAbertos, setFiltrosAbertos] =
+        useState(false);
+    const [selectedSecretaria, setSelectedSecretaria] =
+        useState(null);
+    const [selectedSetorId, setSelectedSetorId] =
+        useState(null);
+    const [zoom, setZoom] = useState(1);
+    const [rotacao, setRotacao] = useState(0);
+    const [position, setPosition] = useState({
+        x: 0,
+        y: 0,
+    });
+    const [isDragging, setIsDragging] = useState(false);
 
     const pisosDoEdificio = useMemo(
         () =>
-            (pisos ?? []).filter((piso) => {
-                const pertenceAoEdificio =
-                    !selectedEdificio ||
-                    String(piso.edificio_id) ===
-                        String(selectedEdificio);
-
-                const pisoVisivel =
-                    isDashboard ||
-                    Number(piso.numero) !== -1;
-
-                return (
-                    pertenceAoEdificio &&
-                    pisoVisivel
-                );
-            }),
-        [
-            pisos,
-            selectedEdificio,
-            isDashboard,
-        ],
+            pisos.filter(
+                (piso) =>
+                    (mostrarTudo ||
+                        Number(piso.numero) >= 0) &&
+                    (!selectedEdificio ||
+                        String(piso.edificio_id) ===
+                            String(selectedEdificio)),
+            ),
+        [pisos, selectedEdificio, mostrarTudo],
     );
 
     const pisoAtual = useMemo(
@@ -81,243 +75,195 @@ export default function OfficeMap({
                     String(piso.codigo) ===
                     String(selectedFloor),
             ) ?? pisosDoEdificio[0],
-        [
-            pisosDoEdificio,
-            selectedFloor,
-        ],
+        [pisosDoEdificio, selectedFloor],
     );
 
-    useEffect(() => {
-        if (pisosDoEdificio.length === 0) {
-            return;
-        }
-
-        const aindaValido =
-            pisosDoEdificio.some(
-                (piso) =>
-                    String(piso.codigo) ===
-                    String(selectedFloor),
-            );
-
-        if (!aindaValido) {
-            setSelectedFloor?.(
-                pisosDoEdificio[0].codigo,
-            );
-        }
-    }, [
-        pisosDoEdificio,
-        selectedFloor,
-        setSelectedFloor,
-    ]);
-
-    const setores = useMemo(
-        () => pisoAtual?.setores ?? [],
+    const secretarias = useMemo(
+        () =>
+            (pisoAtual?.setores ?? []).flatMap(
+                (setor) =>
+                    (setor.secretarias ?? []).map(
+                        (secretaria) => ({
+                            ...secretaria,
+                            setor,
+                        }),
+                    ),
+            ),
         [pisoAtual],
     );
 
-    const setoresComPosicao = useMemo(
+    const setoresInterativos = useMemo(
         () =>
-            setores.filter((setor) => {
-                const hasX =
-                    setor.planta_x !== null &&
-                    setor.planta_x !== undefined;
-
-                const hasY =
-                    setor.planta_y !== null &&
-                    setor.planta_y !== undefined;
-
-                return hasX && hasY;
-            }),
-        [setores],
-    );
-
-    const todasSecretarias = useMemo(
-        () =>
-            setores.flatMap((setor) =>
-                (setor.secretarias ?? []).map(
-                    (secretaria) => ({
-                        ...secretaria,
-                        setor,
-                    }),
-                ),
-            ),
-        [setores],
-    );
-
-    const contadores = useMemo(() => {
-        return todasSecretarias.reduce(
-            (totais, secretaria) => {
-                totais.todos += 1;
-
-                const estado =
-                    normalizarEstadoFiltro(
-                        secretaria.status,
+            (pisoAtual?.setores ?? [])
+                .map((setor) => {
+                    const coordenadas = (
+                        setor.secretarias ?? []
+                    ).filter(
+                        (secretaria) =>
+                            secretaria.planta_x !== null &&
+                            secretaria.planta_y !== null,
                     );
 
-                if (estado === 'livre') {
-                    totais.livre += 1;
-                }
+                    const temPosicaoPropria =
+                        setor.planta_x !== null &&
+                        setor.planta_x !== undefined &&
+                        setor.planta_y !== null &&
+                        setor.planta_y !== undefined;
 
-                if (estado === 'reservada') {
-                    totais.reservada += 1;
-                }
+                    // Setor sem secretárias posicionadas (ex: Copa,
+                    // Sanitário) só entra no mapa completo, e só se tiver
+                    // a sua própria posição guardada — sem secretárias não
+                    // há como calcular um centro automaticamente.
+                    if (
+                        coordenadas.length === 0 &&
+                        !(mostrarTudo && temPosicaoPropria)
+                    ) {
+                        return null;
+                    }
 
-                if (estado === 'ocupada') {
-                    totais.ocupada += 1;
-                }
+                    const temPosicaoConfigurada =
+                        (pisoAtual?.codigo !== 'P0' &&
+                            temPosicaoPropria) ||
+                        (mostrarTudo &&
+                            coordenadas.length === 0 &&
+                            temPosicaoPropria);
+                    const usarPrimeiraSecretariaComoAncora =
+                        coordenadas.length > 0 &&
+                        pisoAtual?.codigo === 'P1' &&
+                        ['E', 'SRG'].includes(setor.codigo);
+                    const centroXCalculado =
+                        usarPrimeiraSecretariaComoAncora
+                            ? Number(
+                                  coordenadas[0].planta_x,
+                              )
+                            : coordenadas.reduce(
+                                  (total, secretaria) =>
+                                      total +
+                                      Number(
+                                          secretaria.planta_x,
+                                      ),
+                                  0,
+                              ) / coordenadas.length;
+                    const centroYCalculado =
+                        usarPrimeiraSecretariaComoAncora
+                            ? Number(
+                                  coordenadas[0].planta_y,
+                              ) - 5
+                            : Math.min(
+                                  ...coordenadas.map(
+                                      (secretaria) =>
+                                          Number(
+                                              secretaria.planta_y,
+                                          ),
+                                  ),
+                              ) - 5;
+                    const recuoEtiquetaX =
+                        !temPosicaoConfigurada &&
+                        setor.tipo === 'phone_booth'
+                            ? 5
+                            : 0;
 
-                if (estado === 'indisponivel') {
-                    totais.indisponivel += 1;
-                }
+                    // Piso 2 precisa de um deslocamento menor do que os
+                    // outros pisos com posição própria guardada.
+                    const deslocamentoY =
+                        pisoAtual?.codigo === 'P2' ? 3 : 5;
 
-                return totais;
-            },
-            {
-                todos: 0,
-                livre: 0,
-                reservada: 0,
-                ocupada: 0,
-                indisponivel: 0,
-            },
-        );
-    }, [todasSecretarias]);
+                    return {
+                        ...setor,
+                        centroX: Math.max(
+                            5,
+                            Math.min(
+                                95,
+                                (temPosicaoConfigurada
+                                    ? Number(
+                                          setor.planta_x,
+                                      )
+                                    : centroXCalculado) -
+                                    recuoEtiquetaX,
+                            ),
+                        ),
+                        centroY: Math.max(
+                            5,
+                            Math.min(
+                                95,
+                                temPosicaoConfigurada
+                                    ? Number(
+                                          setor.planta_y,
+                                      ) - deslocamentoY
+                                    : centroYCalculado,
+                            ),
+                        ),
+                    };
+                })
+                .filter(Boolean),
+        [pisoAtual, mostrarTudo],
+    );
 
-    const secretariasFiltradasDoSetor =
-        useMemo(() => {
-            if (!selectedSector) {
-                return [];
-            }
+    const setorSelecionado = useMemo(
+        () =>
+            setoresInterativos.find(
+                (setor) =>
+                    String(setor.id) ===
+                    String(selectedSetorId),
+            ) ?? null,
+        [setoresInterativos, selectedSetorId],
+    );
 
-            return (
-                selectedSector.secretarias ?? []
-            ).filter(
-                (secretaria) =>
+    const secretariasFiltradas = useMemo(
+        () =>
+            secretarias.filter((secretaria) => {
+                const correspondeAoTexto =
                     correspondePesquisa(
                         secretaria,
                         pesquisa,
-                    ) &&
-                    correspondeFiltro(
-                        secretaria,
-                        filtroEstado,
-                    ),
-            );
-        }, [
-            selectedSector,
-            pesquisa,
-            filtroEstado,
-        ]);
+                    );
 
-    const setoresVisiveis = useMemo(() => {
-        if (
-            !pesquisa.trim() &&
-            filtroEstado === 'todos'
-        ) {
-            return setoresComPosicao;
+                const correspondeAoEstado =
+                    filtro === 'todos' ||
+                    estadoNormalizado(
+                        secretaria.status,
+                    ) === filtro;
+
+                return (
+                    correspondeAoTexto &&
+                    correspondeAoEstado &&
+                    secretaria.planta_x !== null &&
+                    secretaria.planta_y !== null
+                );
+            }),
+        [secretarias, pesquisa, filtro],
+    );
+
+    const secretariasVisiveis = useMemo(() => {
+        if (!selectedSetorId) {
+            return [];
         }
 
-        return setoresComPosicao.filter(
-            (setor) =>
-                (setor.secretarias ?? []).some(
-                    (secretaria) =>
-                        correspondePesquisa(
-                            secretaria,
-                            pesquisa,
-                        ) &&
-                        correspondeFiltro(
-                            secretaria,
-                            filtroEstado,
-                        ),
-                ),
+        return secretariasFiltradas.filter(
+            (secretaria) =>
+                String(secretaria.setor?.id) ===
+                String(selectedSetorId),
         );
-    }, [
-        setoresComPosicao,
-        pesquisa,
-        filtroEstado,
-    ]);
-
-    const totalResultadosPesquisa =
-        useMemo(() => {
-            return todasSecretarias.filter(
-                (secretaria) =>
-                    correspondePesquisa(
-                        secretaria,
-                        pesquisa,
-                    ) &&
-                    correspondeFiltro(
-                        secretaria,
-                        filtroEstado,
-                    ),
-            ).length;
-        }, [
-            todasSecretarias,
-            pesquisa,
-            filtroEstado,
-        ]);
-
-    const totalSecretarias =
-        pisoAtual?.totalSecretarias ??
-        contadores.todos;
-
-    const totalLivres = contadores.livre;
-
-    const filtrosAtivos =
-        pesquisa.trim() !== '' ||
-        filtroEstado !== 'todos';
-
-    useEffect(() => {
-        setSelectedSector(null);
-        setSelectedSecretaria(null);
-        setPesquisa('');
-        setFiltroEstado('todos');
-    }, [
-        selectedFloor,
-        selectedEdificio,
-    ]);
+    }, [secretariasFiltradas, selectedSetorId]);
 
     useEffect(() => {
         if (!pisoAtual) {
             return;
         }
 
-        const codigoPiso =
-            String(pisoAtual.codigo);
-
         if (
             String(selectedFloor ?? '') !==
-            codigoPiso
+            String(pisoAtual.codigo)
         ) {
-            setSelectedFloor?.(codigoPiso);
+            setSelectedFloor?.(pisoAtual.codigo);
         }
-    }, [
-        pisoAtual?.codigo,
-        selectedFloor,
-        setSelectedFloor,
-    ]);
+    }, [pisoAtual, selectedFloor, setSelectedFloor]);
 
     useEffect(() => {
-        if (!window.Echo) {
-            return undefined;
-        }
-
-        const canal =
-            window.Echo.channel('office-map');
-
-        canal.listen('MapaAtualizado', () => {
-            setAtualizando(true);
-
-            router.reload({
-                only: ['pisos', 'stats'],
-                onFinish: () =>
-                    setAtualizando(false),
-            });
-        });
-
-        return () => {
-            window.Echo.leaveChannel(
-                'office-map',
-            );
-        };
-    }, []);
+        setSelectedSecretaria(null);
+        setSelectedSetorId(null);
+        reporMapa();
+    }, [pisoAtual?.id]);
 
     useEffect(() => {
         const termo = pesquisa.trim();
@@ -326,314 +272,182 @@ export default function OfficeMap({
             return;
         }
 
-        const correspondencias =
-            todasSecretarias.filter(
-                (secretaria) =>
-                    correspondePesquisa(
-                        secretaria,
-                        termo,
-                    ) &&
-                    correspondeFiltro(
-                        secretaria,
-                        filtroEstado,
-                    ),
-            );
+        const primeiraSecretaria =
+            secretariasFiltradas[0] ?? null;
 
-        if (correspondencias.length === 0) {
-            setSelectedSecretaria(null);
-            return;
-        }
-
-        const pesquisaNormalizada =
-            normalizarTexto(termo);
-
-        const correspondenciaExata =
-            correspondencias.find(
-                (secretaria) =>
-                    normalizarTexto(
-                        secretaria.codigo,
-                    ) ===
-                        pesquisaNormalizada ||
-                    normalizarTexto(
-                        secretaria.numero,
-                    ) ===
-                        pesquisaNormalizada,
-            ) ?? correspondencias[0];
-
-        setSelectedSector(
-            correspondenciaExata.setor,
+        setSelectedSetorId(
+            primeiraSecretaria?.setor?.id ?? null,
         );
+        setSelectedSecretaria(primeiraSecretaria);
+    }, [pesquisa, secretariasFiltradas]);
 
-        setSelectedSecretaria(
-            correspondenciaExata,
-        );
-    }, [
-        pesquisa,
-        filtroEstado,
-        todasSecretarias,
-    ]);
+    function selecionarSetor(setor) {
+        const mesmoSetor =
+            String(selectedSetorId) === String(setor.id);
 
-    function handleSectorClick(setor) {
-        setSelectedSector((setorAtual) =>
-            setorAtual?.id === setor.id
-                ? null
-                : setor,
-        );
-
+        setSelectedSetorId(mesmoSetor ? null : setor.id);
         setSelectedSecretaria(null);
     }
 
-    function handleSecretariaClick(secretaria) {
+    function reporMapa() {
+        setZoom(1);
+        setRotacao(0);
+        setPosition({ x: 0, y: 0 });
+    }
+
+    function alterarZoom(valor) {
+        setZoom((atual) =>
+            limitarZoom(atual + valor),
+        );
+    }
+
+    function handleWheel(event) {
+        event.preventDefault();
+
+        alterarZoom(
+            event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP,
+        );
+    }
+
+    function handlePointerDown(event) {
         if (
-            !pisoAtual ||
-            !selectedSector
+            event.button !== 0 ||
+            event.target.closest(
+                'button, input, select, [data-map-control="true"]',
+            )
         ) {
             return;
         }
 
-        setSelectedSecretaria(secretaria);
+        dragStartRef.current = {
+            mouseX: event.clientX,
+            mouseY: event.clientY,
+            positionX: position.x,
+            positionY: position.y,
+        };
 
-        const hoje = new Date()
-            .toISOString()
-            .slice(0, 10);
-
-        router.get(
-            route('reservas.create'),
-            {
-                data: hoje,
-                piso_id: pisoAtual.id,
-                setor_id: selectedSector.id,
-                secretaria_id: secretaria.id,
-            },
+        setIsDragging(true);
+        event.currentTarget.setPointerCapture?.(
+            event.pointerId,
         );
     }
 
-    function limparFiltros() {
-        setPesquisa('');
-        setFiltroEstado('todos');
-        setSelectedSecretaria(null);
+    function handlePointerMove(event) {
+        if (!isDragging || !dragStartRef.current) {
+            return;
+        }
+
+        setPosition({
+            x:
+                dragStartRef.current.positionX +
+                event.clientX -
+                dragStartRef.current.mouseX,
+            y:
+                dragStartRef.current.positionY +
+                event.clientY -
+                dragStartRef.current.mouseY,
+        });
     }
 
-    function fecharSetorSelecionado() {
-        setSelectedSector(null);
-        setSelectedSecretaria(null);
+    function terminarArrasto(event) {
+        setIsDragging(false);
+        dragStartRef.current = null;
+        event.currentTarget.releasePointerCapture?.(
+            event.pointerId,
+        );
+    }
+
+    function reservarSecretaria(secretaria) {
+        if (!secretaria?.setor || !pisoAtual) {
+            return;
+        }
+
+        router.get(route('reservas.create'), {
+            data: hojeLocal(),
+            piso_id: pisoAtual.id,
+            setor_id: secretaria.setor.id,
+            secretaria_id: secretaria.id,
+        });
+    }
+
+    async function alternarEcraInteiro() {
+        if (!document.fullscreenElement) {
+            await sectionRef.current?.requestFullscreen?.();
+            return;
+        }
+
+        await document.exitFullscreen?.();
     }
 
     if (!pisoAtual) {
-        return (
-            <section
-                className={`dashboard-card p-5 ${larguraClass}`}
-            >
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500">
-                        <MapPinned
-                            size={21}
-                            strokeWidth={1.9}
-                        />
-                    </div>
-
-                    <div>
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                            Mapa do Escritório
-                        </h2>
-
-                        <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                            Ainda não existem pisos
-                            registados.
-                        </p>
-                    </div>
-                </div>
-            </section>
-        );
+        return null;
     }
 
     return (
         <section
-            className={`dashboard-card overflow-hidden ${larguraClass}`}
+            ref={sectionRef}
+            className="dashboard-card p-4 sm:p-5"
         >
-            <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800">
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500">
-                        <MapPinned
-                            size={21}
-                            strokeWidth={1.9}
-                        />
-                    </div>
-
-                    <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                Mapa do Escritório
-                            </h2>
-
-                            <LoadingBadge
-                                show={atualizando}
-                                label="A atualizar"
-                            />
-                        </div>
-
-                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-500 dark:text-slate-400">
-                            <span className="flex items-center gap-1">
-                                <Building2
-                                    size={13}
-                                    strokeWidth={1.9}
-                                />
-
-                                {pisoAtual.edificio_nome ??
-                                    'SpaceHub'}
-                            </span>
-
-                            <span className="text-slate-300 dark:text-slate-700">
-                                •
-                            </span>
-
-                            <span className="flex items-center gap-1">
-                                <Layers3
-                                    size={13}
-                                    strokeWidth={1.9}
-                                />
-
-                                {pisoAtual.nome}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <MapToolbar
                 edificios={edificios}
                 selectedEdificio={selectedEdificio}
-                setSelectedEdificio={
-                    setSelectedEdificio
-                }
-                pisosDoEdificio={
-                    pisosDoEdificio
-                }
+                setSelectedEdificio={setSelectedEdificio}
+                pisos={pisosDoEdificio}
                 selectedFloor={selectedFloor}
-                setSelectedFloor={
-                    setSelectedFloor
-                }
+                setSelectedFloor={setSelectedFloor}
                 pesquisa={pesquisa}
                 setPesquisa={setPesquisa}
-                filtroEstado={filtroEstado}
-                setFiltroEstado={
-                    setFiltroEstado
-                }
-                contadores={contadores}
-                filtrosAtivos={filtrosAtivos}
-                setoresVisiveis={
-                    setoresVisiveis
-                }
-                totalResultadosPesquisa={
-                    totalResultadosPesquisa
-                }
-                onClearFilters={limparFiltros}
-                isDashboard={isDashboard}
+                filtro={filtro}
+                setFiltro={setFiltro}
+                filtrosAbertos={filtrosAbertos}
+                setFiltrosAbertos={setFiltrosAbertos}
+                rotacao={rotacao}
+                setRotacao={setRotacao}
+                zoom={zoom}
+                onZoom={alterarZoom}
+                onReset={reporMapa}
+                onFullscreen={alternarEcraInteiro}
             />
 
-            {!isDashboard && (
-                <div className="grid grid-cols-2 gap-2 px-4 pt-3 sm:grid-cols-3">
-                    <div className="rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                            Secretárias
-                        </p>
+            <div className="mt-3 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]">
+                <MapCanvas
+                    pisoAtual={pisoAtual}
+                    setoresInterativos={
+                        setoresInterativos
+                    }
+                    secretariasVisiveis={
+                        secretariasVisiveis
+                    }
+                    selectedSetorId={selectedSetorId}
+                    selectedSecretaria={
+                        selectedSecretaria
+                    }
+                    setorSelecionado={setorSelecionado}
+                    zoom={zoom}
+                    rotacao={rotacao}
+                    position={position}
+                    isDragging={isDragging}
+                    onWheel={handleWheel}
+                    onPointerDown={handlePointerDown}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={terminarArrasto}
+                    onPointerCancel={terminarArrasto}
+                    onSelecionarSetor={selecionarSetor}
+                    onSelecionarSecretaria={
+                        setSelectedSecretaria
+                    }
+                />
 
-                        <div className="mt-0.5 flex items-center gap-2">
-                            <Armchair
-                                size={15}
-                                strokeWidth={1.9}
-                                className="text-teal-500"
-                            />
-
-                            <strong className="text-lg text-slate-900 dark:text-white">
-                                {totalSecretarias}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div className="rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                            Livres
-                        </p>
-
-                        <div className="mt-0.5 flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full bg-status-livre" />
-
-                            <strong className="text-lg text-slate-900 dark:text-white">
-                                {totalLivres}
-                            </strong>
-                        </div>
-                    </div>
-
-                    <div className="col-span-2 rounded-xl bg-slate-50 px-3 py-2.5 dark:bg-slate-800/60 sm:col-span-1">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                            Setores
-                        </p>
-
-                        <strong className="mt-0.5 block text-lg text-slate-900 dark:text-white">
-                            {setores.length}
-                        </strong>
-                    </div>
-                </div>
-            )}
-
-            <MapCanvas
-                pisoAtual={pisoAtual}
-                setoresVisiveis={
-                    setoresVisiveis
-                }
-                selectedSector={
-                    selectedSector
-                }
-                secretariasFiltradasDoSetor={
-                    secretariasFiltradasDoSetor
-                }
-                selectedSecretaria={
-                    selectedSecretaria
-                }
-                pesquisa={pesquisa}
-                expandido={isDashboard}
-                onSectorClick={
-                    handleSectorClick
-                }
-                onSecretariaClick={
-                    handleSecretariaClick
-                }
-            />
-
-            {!isDashboard && (
-                <>
-                    <SelectedSectorCard
-                        selectedSector={
-                            selectedSector
-                        }
-                        selectedSecretaria={
-                            selectedSecretaria
-                        }
-                        onClose={
-                            fecharSetorSelecionado
-                        }
-                    />
-
-                    <SectorList
-                        setoresVisiveis={
-                            setoresVisiveis
-                        }
-                        totalSetores={
-                            setores.length
-                        }
-                        selectedSector={
-                            selectedSector
-                        }
-                        onSectorClick={
-                            handleSectorClick
-                        }
-                        onClearFilters={
-                            limparFiltros
-                        }
-                    />
-                </>
-            )}
+                <DeskDetailPanel
+                    secretaria={selectedSecretaria}
+                    setor={setorSelecionado}
+                    piso={pisoAtual}
+                    onClose={() =>
+                        setSelectedSecretaria(null)
+                    }
+                    onReserve={reservarSecretaria}
+                />
+            </div>
         </section>
     );
 }

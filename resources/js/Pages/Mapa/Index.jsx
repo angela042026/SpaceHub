@@ -13,7 +13,7 @@ export default function Index({ pisos, edificios }) {
 
             <DashboardLayout>
                 <OfficeMap
-                    expandido
+                    mostrarTudo
                     selectedFloor={selectedFloor}
                     setSelectedFloor={setSelectedFloor}
                     selectedEdificio={selectedEdificio}

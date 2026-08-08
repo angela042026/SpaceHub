@@ -7,6 +7,8 @@ import {
     MapPinned,
 } from 'lucide-react';
 
+import { resolverImagemSecretaria } from '@/utils/imagemSetor';
+
 function formatarData(data) {
     if (!data) {
         return '-';
@@ -88,6 +90,10 @@ export default function UpcomingReservations({ reservas = [] }) {
                     <div className="space-y-3">
                         {reservas.map((reserva) => {
                             const estado = getEstadoReserva(reserva);
+                            const imagem =
+                                resolverImagemSecretaria(
+                                    reserva.secretaria,
+                                );
 
                             return (
                                 <article
@@ -96,8 +102,26 @@ export default function UpcomingReservations({ reservas = [] }) {
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex min-w-0 items-start gap-3">
-                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-navy-900 text-white shadow-sm">
-                                                <Armchair size={21} strokeWidth={1.9} />
+                                            <div className="flex h-14 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-navy-900 text-white shadow-sm">
+                                                {imagem ? (
+                                                    <img
+                                                        src={imagem}
+                                                        alt={
+                                                            reserva
+                                                                .secretaria
+                                                                ?.codigo ??
+                                                            'Espaço reservado'
+                                                        }
+                                                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                                                    />
+                                                ) : (
+                                                    <Armchair
+                                                        size={23}
+                                                        strokeWidth={
+                                                            1.9
+                                                        }
+                                                    />
+                                                )}
                                             </div>
 
                                             <div className="min-w-0">
