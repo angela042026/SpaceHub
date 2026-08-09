@@ -25,30 +25,30 @@ function getEstadoReserva(reserva) {
     const estados = {
         pendente: {
             label: 'Pendente',
-            badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+            badge: 'bg-amber-500/10 text-amber-600 dark:bg-[#f5a524]/10 dark:text-[#f5a524]',
         },
         confirmada: {
             label: 'Confirmada',
-            badge: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
+            badge: 'bg-teal-500/10 text-teal-600 dark:bg-[#18c3b3]/10 dark:text-[#18c3b3]',
         },
         cancelada: {
             label: 'Cancelada',
-            badge: 'bg-red-500/10 text-red-600 dark:text-red-400',
+            badge: 'bg-red-500/10 text-red-600 dark:bg-[#ff4d6d]/10 dark:text-[#ff4d6d]',
         },
         expirada: {
             label: 'Expirada',
-            badge: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
+            badge: 'bg-slate-500/10 text-slate-600 dark:bg-[#8fa7bd]/10 dark:text-[#8fa7bd]',
         },
         concluida: {
             label: 'Concluída',
-            badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+            badge: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400',
         },
     };
 
     return (
         estados[codigo] ?? {
             label: reserva.estado_reserva?.nome ?? 'Sem estado',
-            badge: 'bg-slate-500/10 text-slate-600 dark:text-slate-400',
+            badge: 'bg-slate-500/10 text-slate-600 dark:bg-[#8fa7bd]/10 dark:text-[#8fa7bd]',
         }
     );
 }
@@ -58,18 +58,18 @@ export default function UpcomingReservations({ reservas = [] }) {
 
     return (
         <section className="dashboard-card flex h-full flex-col overflow-hidden">
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-[#2a5069]">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
                         <CalendarDays size={22} strokeWidth={1.9} />
                     </div>
 
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-[#f8fafc]">
                             Próximas reservas
                         </h2>
 
-                        <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                        <p className="mt-0.5 text-sm text-slate-500 dark:text-[#8fa7bd]">
                             Reservas futuras confirmadas
                         </p>
                     </div>
@@ -78,7 +78,7 @@ export default function UpcomingReservations({ reservas = [] }) {
 
             <div className="flex flex-1 flex-col p-5 pb-6">
                 {reservas.length > 0 ? (
-                    <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <ul className="divide-y divide-slate-100 dark:divide-[#2a5069]/60">
                         {reservasVisiveis.map((reserva) => {
                             const estado = getEstadoReserva(reserva);
                             const imagem =
@@ -118,7 +118,7 @@ export default function UpcomingReservations({ reservas = [] }) {
 
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="truncate text-sm font-bold text-slate-900 dark:text-white">
+                                                <h3 className="truncate text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
                                                     {reserva.secretaria?.codigo ??
                                                         'Secretária removida'}
                                                 </h3>
@@ -130,7 +130,7 @@ export default function UpcomingReservations({ reservas = [] }) {
                                                 </span>
                                             </div>
 
-                                            <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                                            <p className="truncate text-xs text-slate-500 dark:text-[#8fa7bd]">
                                                 {reserva.secretaria?.setor?.piso?.nome ??
                                                     '-'}{' '}
                                                 ·{' '}
@@ -140,13 +140,13 @@ export default function UpcomingReservations({ reservas = [] }) {
                                         </div>
 
                                         <div className="shrink-0 text-right">
-                                            <p className="text-sm font-bold text-slate-900 dark:text-white">
+                                            <p className="text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
                                                 {formatarData(
                                                     reserva.data,
                                                 )}
                                             </p>
 
-                                            <p className="text-xs text-slate-400">
+                                            <p className="text-xs text-slate-400 dark:text-[#8fa7bd]">
                                                 {reserva.periodo?.nome ??
                                                     '-'}
                                             </p>
@@ -155,7 +155,7 @@ export default function UpcomingReservations({ reservas = [] }) {
                                         <ChevronRight
                                             size={18}
                                             strokeWidth={1.9}
-                                            className="shrink-0 text-slate-300"
+                                            className="shrink-0 text-slate-300 dark:text-[#8fa7bd]"
                                         />
                                     </Link>
                                 </li>
@@ -163,16 +163,16 @@ export default function UpcomingReservations({ reservas = [] }) {
                         })}
                     </ul>
                 ) : (
-                    <div className="flex min-h-[220px] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-teal-500/10 text-teal-500">
+                    <div className="flex min-h-[220px] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center dark:border-[#2a5069] dark:bg-[#101f34]/40">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-teal-500/10 text-teal-500 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
                             <CalendarDays size={30} strokeWidth={1.8} />
                         </div>
 
-                        <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-white">
+                        <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-[#f8fafc]">
                             Sem reservas futuras
                         </h3>
 
-                        <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">
+                        <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500 dark:text-[#8fa7bd]">
                             Ainda não tens reservas agendadas para os próximos dias.
                         </p>
                     </div>
@@ -181,7 +181,7 @@ export default function UpcomingReservations({ reservas = [] }) {
                 {reservas.length > 0 && (
                     <Link
                         href={route('reservas.index')}
-                        className="mt-auto flex items-center justify-center gap-2 rounded-xl border border-teal-500 bg-white py-2.5 text-sm font-bold text-teal-600 transition hover:bg-teal-500 hover:text-white dark:border-teal-400 dark:bg-slate-900 dark:text-teal-400"
+                        className="mt-auto flex items-center justify-center gap-2 rounded-xl border border-teal-500 bg-white py-2.5 text-sm font-bold text-teal-600 transition hover:bg-gradient-to-r hover:from-teal-50 hover:to-teal-100 hover:text-teal-700 dark:border-[#36566f] dark:bg-transparent dark:text-[#d7e3ed] dark:hover:border-[#18c3b3] dark:hover:bg-none dark:hover:bg-[#18c3b3]/[0.06] dark:hover:text-[#18c3b3]"
                     >
                         Ver todas as reservas
                         <ArrowRight size={15} strokeWidth={1.9} />

@@ -454,6 +454,7 @@ function CardDecoration({
 
 export default function StatCard({
     title,
+    subtitulo,
     value,
     icon: Icon,
     changePercent,
@@ -524,12 +525,12 @@ export default function StatCard({
     // troca. Quando não existe uma meta definida (ex: taxa de ocupação),
     // nenhuma das direções é claramente boa ou má — usa-se âmbar.
     let changeColor =
-        'text-slate-400';
+        'text-slate-400 dark:text-[#8fa7bd]';
 
     if (semMeta) {
         if (isPositive || isNegative) {
             changeColor =
-                'text-amber-500';
+                'text-amber-500 dark:text-[#f5a524]';
         }
     } else {
         const tendenciaBoa =
@@ -544,10 +545,10 @@ export default function StatCard({
 
         if (tendenciaMa) {
             changeColor =
-                'text-rose-500';
+                'text-rose-500 dark:text-[#ff4d6d]';
         } else if (tendenciaBoa) {
             changeColor =
-                'text-emerald-500';
+                'text-emerald-500 dark:text-[#22c983]';
         }
     }
 
@@ -586,9 +587,9 @@ export default function StatCard({
                 hover:border-slate-300/80
                 hover:shadow-[0_16px_45px_rgba(15,23,42,0.09)]
 
-                dark:border-slate-700/80
-                dark:bg-slate-900
-                dark:hover:border-slate-600
+                dark:border-[#2a5069]
+                dark:bg-[#163a56]
+                dark:hover:border-[#36566f]
 
                 sm:px-6
             "
@@ -670,12 +671,18 @@ export default function StatCard({
                                 uppercase
                                 tracking-[0.045em]
                                 text-slate-600
-                                dark:text-slate-300
+                                dark:text-[#b5c5d5]
                             "
                         >
                             {title}
                         </p>
                     </div>
+
+                    {subtitulo && (
+                        <p className="mt-0.5 truncate text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa7bd]">
+                            {subtitulo}
+                        </p>
+                    )}
 
                     {/* Valor */}
                     <h3
@@ -687,7 +694,7 @@ export default function StatCard({
                             leading-none
                             tracking-[-0.04em]
                             text-slate-950
-                            dark:text-white
+                            dark:text-[#f8fafc]
                             sm:text-[36px]
                         "
                     >
@@ -704,7 +711,7 @@ export default function StatCard({
                             h-px
                             w-full
                             bg-slate-100
-                            dark:bg-slate-800
+                            dark:bg-[#2a5069]
                         "
                     />
 
@@ -729,7 +736,7 @@ export default function StatCard({
                                 <CheckCircle2
                                     size={16}
                                     strokeWidth={2.4}
-                                    className="shrink-0 text-emerald-500"
+                                    className="shrink-0 text-emerald-500 dark:text-[#22c983]"
                                 />
 
                                 <span
@@ -774,7 +781,7 @@ export default function StatCard({
                                     text-[12px]
                                     font-semibold
                                     text-slate-500
-                                    dark:text-slate-400
+                                    dark:text-[#8fa7bd]
                                 "
                             >
                                 {textoTendencia}
@@ -832,7 +839,7 @@ export default function StatCard({
                                         <Minus
                                             size={14}
                                             strokeWidth={2.4}
-                                            className="shrink-0 text-slate-400"
+                                            className="shrink-0 text-slate-400 dark:text-[#8fa7bd]"
                                         />
                                     )}
 

@@ -96,14 +96,14 @@ export default function RecentActivity({ eventos = [] }) {
 
     return (
         <section className="dashboard-card flex h-full flex-col overflow-hidden">
-            <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+            <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-[#2a5069]">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
                     <Activity size={20} strokeWidth={1.9} />
                 </div>
 
                 <div>
                     <div className="flex items-center gap-2">
-                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-[#f8fafc]">
                             Atividade recente
                         </h2>
 
@@ -113,7 +113,7 @@ export default function RecentActivity({ eventos = [] }) {
                         />
                     </div>
 
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                    <p className="text-sm text-slate-500 dark:text-[#8fa7bd]">
                         Últimas ações no sistema.
                     </p>
                 </div>
@@ -121,7 +121,7 @@ export default function RecentActivity({ eventos = [] }) {
 
             <div className="flex flex-1 flex-col p-5 pb-6">
                 {eventosVisiveis.length > 0 ? (
-                    <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <ul className="divide-y divide-slate-100 dark:divide-[#2a5069]/60">
                         {eventosVisiveis.map((evento) => {
                             const config =
                                 TIPOS[evento.tipo] ??
@@ -159,7 +159,7 @@ export default function RecentActivity({ eventos = [] }) {
                                         )}
 
                                         <span
-                                            className={`absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white dark:border-slate-900 ${config.dot}`}
+                                            className={`absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white dark:border-[#163a56] ${config.dot}`}
                                         >
                                             <config.icon
                                                 size={9}
@@ -169,14 +169,20 @@ export default function RecentActivity({ eventos = [] }) {
                                         </span>
                                     </div>
 
-                                    <p className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-200">
+                                    <p
+                                        className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-[#d7e3ed]"
+                                        title={config.texto(
+                                            utilizador,
+                                            secretaria,
+                                        )}
+                                    >
                                         {config.texto(
                                             utilizador,
                                             secretaria,
                                         )}
                                     </p>
 
-                                    <span className="shrink-0 text-xs text-slate-400">
+                                    <span className="shrink-0 text-xs text-slate-400 dark:text-[#8fa7bd]">
                                         {tempoRelativo(
                                             evento.timestamp,
                                         )}
@@ -186,15 +192,15 @@ export default function RecentActivity({ eventos = [] }) {
                         })}
                     </ul>
                 ) : (
-                    <div className="flex min-h-[160px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900/40">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
+                    <div className="flex min-h-[160px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-8 text-center dark:border-[#2a5069] dark:bg-[#101f34]/40">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-[#183f5d] dark:text-[#8fa7bd]">
                             <Activity
                                 size={23}
                                 strokeWidth={1.8}
                             />
                         </div>
 
-                        <p className="mt-4 max-w-xs text-sm leading-6 text-slate-400">
+                        <p className="mt-4 max-w-xs text-sm leading-6 text-slate-400 dark:text-[#8fa7bd]">
                             Ainda não existe atividade registada.
                         </p>
                     </div>
@@ -203,7 +209,7 @@ export default function RecentActivity({ eventos = [] }) {
                 {eventosVisiveis.length > 0 && (
                     <Link
                         href={route('reservas.history')}
-                        className="mt-auto flex items-center justify-center gap-2 rounded-xl border border-teal-500 bg-white py-2.5 text-sm font-bold text-teal-600 transition hover:bg-teal-500 hover:text-white dark:border-teal-400 dark:bg-slate-900 dark:text-teal-400"
+                        className="mt-auto flex items-center justify-center gap-2 rounded-xl border border-teal-500 bg-white py-2.5 text-sm font-bold text-teal-600 transition hover:bg-gradient-to-r hover:from-teal-50 hover:to-teal-100 hover:text-teal-700 dark:border-[#36566f] dark:bg-transparent dark:text-[#d7e3ed] dark:hover:border-[#18c3b3] dark:hover:bg-none dark:hover:bg-[#18c3b3]/[0.06] dark:hover:text-[#18c3b3]"
                     >
                         Ver histórico completo
                         <ArrowRight size={15} strokeWidth={1.9} />

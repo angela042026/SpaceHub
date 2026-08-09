@@ -28,7 +28,7 @@ export default function MapCanvas({
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerCancel}
-                className={`relative h-[430px] overflow-hidden rounded-2xl bg-white shadow-[0_14px_35px_rgba(15,23,42,0.10)] select-none touch-none sm:h-[520px] xl:h-[555px] ${
+                className={`relative h-[430px] overflow-hidden rounded-2xl bg-white shadow-[0_14px_35px_rgba(15,23,42,0.10)] select-none touch-none dark:border dark:border-[#2a5069] dark:bg-[#101f34] sm:h-[520px] xl:h-[555px] ${
                     isDragging
                         ? 'cursor-grabbing'
                         : 'cursor-grab'
@@ -81,7 +81,7 @@ export default function MapCanvas({
 
                 <div
                     data-map-control="true"
-                    className="absolute bottom-3 left-3 rounded-lg border border-white/60 bg-white/90 px-3 py-2 text-[11px] font-semibold text-slate-500 shadow-sm backdrop-blur xl:hidden"
+                    className="absolute bottom-3 left-3 rounded-lg border border-white/60 bg-white/90 px-3 py-2 text-[11px] font-semibold text-slate-500 shadow-sm backdrop-blur dark:border-[#2a5069]/60 dark:bg-[#101f34]/90 dark:text-[#b5c5d5] xl:hidden"
                 >
                     {setorSelecionado
                         ? `${setorSelecionado.nome}: escolha uma secretária`

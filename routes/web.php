@@ -76,6 +76,9 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
 
     Route::get('/dashboard/reservas-por-piso', [DashboardController::class, 'reservasPorPiso'])
         ->name('dashboard.reservasPorPiso');
+
+    Route::get('/dashboard/destaques', [DashboardController::class, 'destaques'])
+        ->name('dashboard.destaques');
 });
 
 Route::middleware(['auth', 'active'])->group(function () {

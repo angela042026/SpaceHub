@@ -69,20 +69,20 @@ export default function DeskDetailPanel({
                 </svg>
 
                 <div className="relative z-10 flex flex-col items-center">
-                    <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-teal-500/10 text-teal-600">
+                    <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-teal-500/10 text-teal-600 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
                         <Armchair size={34} />
                         <Sparkles
                             size={18}
                             strokeWidth={2}
-                            className="absolute -right-1 -top-1 text-teal-400"
+                            className="absolute -right-1 -top-1 text-teal-400 dark:text-[#18c3b3]"
                         />
                     </div>
-                    <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-white">
+                    <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-[#f8fafc]">
                         {setor
                             ? 'Escolha uma secretária'
                             : 'Selecione um setor'}
                     </h3>
-                    <p className="mt-2 max-w-[220px] text-xs leading-relaxed text-slate-500">
+                    <p className="mt-2 max-w-[220px] text-xs leading-relaxed text-slate-500 dark:text-[#b5c5d5]">
                         {setor
                             ? `As secretárias de ${setor.nome} estão visíveis no mapa.`
                             : 'Clique no nome de um setor no mapa para visualizar apenas as secretárias desse setor.'}
@@ -119,7 +119,7 @@ export default function DeskDetailPanel({
                 </button>
             </div>
 
-            <div className="mt-4 flex gap-3 border-b border-slate-200 pb-4 dark:border-slate-700">
+            <div className="mt-4 flex gap-3 border-b border-slate-200 pb-4 dark:border-[#2a5069]">
                 <div className="h-24 w-28 shrink-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800">
                     {imagem ? (
                         <img
@@ -150,7 +150,7 @@ export default function DeskDetailPanel({
                             />
                             {estado.label}
                         </span>
-                        <p className="mt-1.5 text-[10px] text-slate-400">
+                        <p className="mt-1.5 text-[10px] text-slate-400 dark:text-[#8fa7bd]">
                             {estadoNormal === 'livre'
                                 ? 'Disponível agora'
                                 : 'Estado neste momento'}
@@ -159,8 +159,8 @@ export default function DeskDetailPanel({
                 </div>
             </div>
 
-            <div className="border-b border-slate-200 py-4 dark:border-slate-700">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="border-b border-slate-200 py-4 dark:border-[#2a5069]">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8fa7bd]">
                     Comodidades
                 </p>
 
@@ -176,14 +176,14 @@ export default function DeskDetailPanel({
                                     <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                                         <Icon size={15} />
                                     </div>
-                                    <p className="mt-1 truncate text-[8px] font-medium text-slate-500">
+                                    <p className="mt-1 truncate text-[8px] font-medium text-slate-500 dark:text-[#8fa7bd]">
                                         {label}
                                     </p>
                                 </div>
                             ),
                         )
                     ) : (
-                        <p className="col-span-5 text-xs text-slate-400">
+                        <p className="col-span-5 text-xs text-slate-400 dark:text-[#8fa7bd]">
                             Sem comodidades registadas.
                         </p>
                     )}
@@ -199,7 +199,7 @@ export default function DeskDetailPanel({
                     type="button"
                     onClick={() => onReserve(secretaria)}
                     disabled={estadoNormal === 'indisponivel'}
-                    className="h-11 w-full rounded-xl bg-teal-600 text-sm font-bold text-white shadow-lg shadow-teal-500/20 transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                    className="h-11 w-full rounded-xl bg-teal-600 text-sm font-bold text-white shadow-lg shadow-teal-500/20 transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none dark:disabled:bg-[#2a5069] dark:disabled:text-[#8fa7bd]"
                 >
                     {estadoNormal === 'livre'
                         ? 'Reservar agora'
@@ -212,18 +212,18 @@ export default function DeskDetailPanel({
 
 function AvailabilityTimeline({ periodos }) {
     return (
-        <div className="border-b border-slate-200 py-4 dark:border-slate-700">
+        <div className="border-b border-slate-200 py-4 dark:border-[#2a5069]">
             <div className="flex items-center justify-between">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8fa7bd]">
                     Disponibilidade · hoje
                 </p>
                 <CalendarDays
                     size={13}
-                    className="text-slate-400"
+                    className="text-slate-400 dark:text-[#8fa7bd]"
                 />
             </div>
 
-            <div className="mt-3 flex justify-between text-[8px] font-semibold text-slate-400">
+            <div className="mt-3 flex justify-between text-[8px] font-semibold text-slate-400 dark:text-[#8fa7bd]">
                 <span>00h</span>
                 <span>06h</span>
                 <span>12h</span>
@@ -261,7 +261,7 @@ function AvailabilityTimeline({ periodos }) {
                 })}
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[8px] font-semibold text-slate-500">
+            <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[8px] font-semibold text-slate-500 dark:text-[#8fa7bd]">
                 {Object.entries(ESTADO_VISUAL).map(
                     ([chave, item]) => (
                         <span
@@ -280,74 +280,36 @@ function AvailabilityTimeline({ periodos }) {
     );
 }
 
+// Mesmo degradê usado nos gráficos do dashboard (Reservas por piso,
+// Estado atual, Destaques do período), para manter a linguagem visual
+// consistente em todo o lado.
 const OVERVIEW_CORES = {
-    livre: { dot: 'bg-teal-500', bar: 'bg-teal-500', texto: 'text-teal-500' },
-    reservada: { dot: 'bg-blue-500', bar: 'bg-blue-500', texto: 'text-blue-500' },
-    ocupada: { dot: 'bg-rose-500', bar: 'bg-rose-500', texto: 'text-rose-500' },
+    livre: { dot: 'bg-teal-500' },
+    reservada: { dot: 'bg-blue-500' },
+    ocupada: { dot: 'bg-rose-500' },
 };
 
-function OcupacaoRing({ linhas, percentual }) {
-    const raio = 30;
-    const circunferencia = 2 * Math.PI * raio;
+const GRADIENTES_BARRA_CSS = {
+    livre: 'linear-gradient(to right, #2dd4bf, #0d9488)',
+    reservada: 'linear-gradient(to right, #60a5fa, #2563eb)',
+    ocupada: 'linear-gradient(to right, #fb7185, #e11d48)',
+};
 
-    let acumulado = 0;
+const CORES_TEXTO = {
+    livre: 'text-teal-500',
+    reservada: 'text-blue-500',
+    ocupada: 'text-rose-500',
+};
 
+function OcupacaoRing() {
     return (
-        <div className="relative flex h-20 w-20 shrink-0 items-center justify-center">
-            <svg
-                viewBox="0 0 72 72"
-                className="h-20 w-20 -rotate-90"
-            >
-                <circle
-                    cx="36"
-                    cy="36"
-                    r={raio}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="8"
-                    className="text-slate-100 dark:text-slate-800"
-                />
+        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-teal-500/10 text-teal-600">
+            <Armchair size={22} strokeWidth={1.8} />
 
-                {linhas.map((linha) => {
-                    const pct = percentual(linha.valor);
-                    const comprimento =
-                        (pct / 100) * circunferencia;
-                    const offset =
-                        -((acumulado / 100) * circunferencia);
-
-                    acumulado += pct;
-
-                    if (pct <= 0) {
-                        return null;
-                    }
-
-                    return (
-                        <circle
-                            key={linha.chave}
-                            cx="36"
-                            cy="36"
-                            r={raio}
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="8"
-                            strokeLinecap="round"
-                            strokeDasharray={`${comprimento} ${
-                                circunferencia - comprimento
-                            }`}
-                            strokeDashoffset={offset}
-                            className={
-                                OVERVIEW_CORES[linha.chave]
-                                    .texto
-                            }
-                        />
-                    );
-                })}
-            </svg>
-
-            <Armchair
-                size={22}
-                strokeWidth={1.8}
-                className="absolute text-slate-400"
+            <Sparkles
+                size={13}
+                strokeWidth={2}
+                className="absolute -right-1 -top-1 text-teal-400"
             />
         </div>
     );
@@ -379,49 +341,46 @@ function FloorOverview({ floorName, overview }) {
         <aside className="dashboard-card flex h-full flex-col justify-between overflow-hidden p-5">
             <div>
                 <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-[#f8fafc]">
                         Visão geral
                     </h2>
-                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 dark:bg-[#183f5d] dark:text-[#b5c5d5]">
                         {floorName ?? 'Piso'}
                     </span>
                 </div>
 
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-sm text-slate-500 dark:text-[#b5c5d5]">
                     {total} secretárias
                 </p>
             </div>
 
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start justify-between gap-4">
                 <div>
-                    <p className="text-4xl font-extrabold text-teal-500">
+                    <p className="text-4xl font-extrabold text-teal-500 dark:text-[#18c3b3]">
                         {percentualOcupacao}%
                     </p>
-                    <p className="mt-1 text-sm font-bold text-slate-700 dark:text-slate-200">
+                    <p className="mt-1 text-sm font-bold text-slate-700 dark:text-[#d7e3ed]">
                         Ocupação atual
                     </p>
-                    <p className="mt-0.5 text-xs text-slate-400">
+                    <p className="mt-0.5 text-xs text-slate-400 dark:text-[#8fa7bd]">
                         {emUtilizacao} reservadas ou ocupadas
                     </p>
                 </div>
 
-                <OcupacaoRing
-                    linhas={linhas}
-                    percentual={percentual}
-                />
+                <OcupacaoRing />
             </div>
 
             <div>
-                <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-[#101f34]">
                     {linhas.map((linha) => (
                         <span
                             key={linha.chave}
-                            className={
-                                OVERVIEW_CORES[linha.chave]
-                                    .bar
-                            }
                             style={{
                                 width: `${percentual(linha.valor)}%`,
+                                background:
+                                    GRADIENTES_BARRA_CSS[
+                                        linha.chave
+                                    ],
                             }}
                         />
                     ))}
@@ -433,7 +392,7 @@ function FloorOverview({ floorName, overview }) {
                         .map((linha) => (
                             <span
                                 key={linha.chave}
-                                className={`text-sm font-bold ${OVERVIEW_CORES[linha.chave].texto}`}
+                                className={`text-sm font-bold ${CORES_TEXTO[linha.chave]}`}
                             >
                                 {percentual(linha.valor)}%
                             </span>
@@ -441,7 +400,7 @@ function FloorOverview({ floorName, overview }) {
                 </div>
             </div>
 
-            <div className="divide-y divide-slate-100 border-t border-slate-100 dark:divide-slate-800 dark:border-slate-800">
+            <div className="divide-y divide-slate-100 border-t border-slate-100 dark:divide-[#2a5069]/60 dark:border-[#2a5069]/60">
                 {linhas.map((linha) => (
                     <div
                         key={linha.chave}
@@ -451,26 +410,26 @@ function FloorOverview({ floorName, overview }) {
                             className={`h-2 w-2 shrink-0 rounded-full ${OVERVIEW_CORES[linha.chave].dot}`}
                         />
 
-                        <span className="flex-1 text-slate-500 dark:text-slate-400">
+                        <span className="flex-1 text-slate-500 dark:text-[#b5c5d5]">
                             {linha.label}
                         </span>
 
-                        <span className="font-bold text-slate-900 dark:text-white">
+                        <span className="font-bold text-slate-900 dark:text-[#f8fafc]">
                             {linha.valor}
                         </span>
 
-                        <span className="w-10 shrink-0 text-right text-xs font-semibold text-slate-400">
+                        <span className="w-10 shrink-0 text-right text-xs font-semibold text-slate-400 dark:text-[#8fa7bd]">
                             {percentual(linha.valor)}%
                         </span>
                     </div>
                 ))}
             </div>
 
-            <div className="mt-6 flex items-center gap-3 rounded-2xl border border-teal-100 bg-teal-50/40 p-4 dark:border-teal-400/20 dark:bg-teal-400/5">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-500/10 text-teal-500">
+            <div className="mt-6 flex items-center gap-3 rounded-2xl border border-teal-100 bg-teal-50/40 p-4 dark:border-[#18c3b3]/25 dark:bg-[#183f5d]">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-500/10 text-teal-500 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
                     <MapPin size={16} strokeWidth={1.8} />
                 </div>
-                <p className="text-xs leading-relaxed text-slate-500">
+                <p className="text-xs leading-relaxed text-slate-500 dark:text-[#d7e3ed]">
                     Selecione um setor no mapa para ver os detalhes.
                 </p>
             </div>

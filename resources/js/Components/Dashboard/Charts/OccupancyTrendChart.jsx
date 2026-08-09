@@ -40,22 +40,22 @@ function CustomTooltip({ active, payload, label }) {
     const diferenca = Math.round((atual - anterior) * 10) / 10;
 
     return (
-        <div className="rounded-xl border border-slate-200 bg-white px-3.5 py-3 shadow-xl dark:border-slate-700 dark:bg-slate-900">
-            <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+        <div className="rounded-xl border border-slate-200 bg-white px-3.5 py-3 shadow-xl dark:border-[#2a5069] dark:bg-[#101f34]">
+            <p className="text-xs font-bold text-slate-700 dark:text-[#f8fafc]">
                 {label}
             </p>
 
             <div className="mt-2 space-y-1 text-xs">
                 <div className="flex items-center justify-between gap-6">
-                    <span className="text-slate-500">Atual</span>
-                    <span className="font-bold text-teal-600 dark:text-teal-400">
+                    <span className="text-slate-500 dark:text-[#b5c5d5]">Atual</span>
+                    <span className="font-bold text-teal-600 dark:text-[#18c3b3]">
                         {atual}%
                     </span>
                 </div>
 
                 <div className="flex items-center justify-between gap-6">
-                    <span className="text-slate-500">Anterior</span>
-                    <span className="font-bold text-slate-500 dark:text-slate-400">
+                    <span className="text-slate-500 dark:text-[#b5c5d5]">Anterior</span>
+                    <span className="font-bold text-slate-500 dark:text-[#8fa7bd]">
                         {anterior}%
                     </span>
                 </div>
@@ -78,10 +78,10 @@ function CustomTooltip({ active, payload, label }) {
 function BlocoEstatistica({ label, valor }) {
     return (
         <div>
-            <p className="text-xl font-extrabold text-slate-900 dark:text-white">
+            <p className="text-xl font-extrabold text-slate-900 dark:text-[#f8fafc]">
                 {valor}
             </p>
-            <p className="text-xs font-medium text-slate-400">
+            <p className="text-xs font-medium text-slate-400 dark:text-[#8fa7bd]">
                 {label}
             </p>
         </div>
@@ -140,9 +140,9 @@ export default function OccupancyTrendChart({
 
     return (
         <section className="dashboard-card h-full overflow-hidden">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-[#2a5069]">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
                         <TrendingUp
                             size={19}
                             strokeWidth={1.9}
@@ -150,18 +150,18 @@ export default function OccupancyTrendChart({
                     </div>
 
                     <div>
-                        <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                        <h2 className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
                             Evolução da Ocupação
                         </h2>
 
-                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8fa7bd]">
                             Últimos {dias} dias
                         </p>
                     </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-900">
+                    <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-[#2a5069] dark:bg-[#101f34]">
                         {OPCOES_DIAS.map((opcao) => (
                             <button
                                 key={opcao.valor}
@@ -171,8 +171,8 @@ export default function OccupancyTrendChart({
                                 }
                                 className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
                                     dias === opcao.valor
-                                        ? 'bg-teal-500 text-white'
-                                        : 'text-slate-500 hover:text-teal-600 dark:text-slate-400'
+                                        ? 'bg-teal-500 text-white dark:bg-[#18c3b3]'
+                                        : 'text-slate-500 hover:text-teal-600 dark:text-[#afc0d0] dark:hover:text-[#18c3b3]'
                                 }`}
                             >
                                 {opcao.label}
@@ -188,7 +188,7 @@ export default function OccupancyTrendChart({
                                     evento.target.value,
                                 )
                             }
-                            className="h-9 rounded-xl border border-slate-200 bg-white py-0 pl-3 pr-8 text-xs font-bold text-slate-600 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+                            className="h-9 rounded-xl border border-slate-200 bg-white py-0 pl-3 pr-8 text-xs font-bold text-slate-600 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#b5c5d5]"
                         >
                             <option value="">
                                 Todos os pisos
@@ -291,7 +291,7 @@ export default function OccupancyTrendChart({
                         <CartesianGrid
                             strokeDasharray="4 4"
                             vertical={false}
-                            stroke="#e2e8f0"
+                            stroke="var(--chart-grid)"
                             opacity={0.7}
                         />
 
@@ -305,7 +305,7 @@ export default function OccupancyTrendChart({
                                     : 0
                             }
                             tick={{
-                                fill: '#94a3b8',
+                                fill: 'var(--chart-axis)',
                                 fontSize: 11,
                             }}
                             dy={8}
@@ -316,7 +316,7 @@ export default function OccupancyTrendChart({
                             axisLine={false}
                             tickLine={false}
                             tick={{
-                                fill: '#94a3b8',
+                                fill: 'var(--chart-axis)',
                                 fontSize: 11,
                             }}
                             tickFormatter={(value) =>
@@ -326,7 +326,7 @@ export default function OccupancyTrendChart({
 
                         <ReferenceLine
                             y={dados.media}
-                            stroke="#64748b"
+                            stroke="var(--chart-axis)"
                             strokeWidth={1.5}
                             strokeDasharray="4 4"
                             label={(props) => {
@@ -343,8 +343,8 @@ export default function OccupancyTrendChart({
                                             width={largura}
                                             height={16}
                                             rx={4}
-                                            fill="#ffffff"
-                                            stroke="#cbd5e1"
+                                            fill="var(--tooltip-bg)"
+                                            stroke="var(--tooltip-border)"
                                             strokeWidth={1}
                                         />
 
@@ -358,7 +358,7 @@ export default function OccupancyTrendChart({
                                             textAnchor="middle"
                                             fontSize={10}
                                             fontWeight={700}
-                                            fill="#475569"
+                                            fill="var(--tooltip-text)"
                                         >
                                             {texto}
                                         </text>
@@ -370,7 +370,7 @@ export default function OccupancyTrendChart({
                         <Tooltip
                             content={<CustomTooltip />}
                             cursor={{
-                                stroke: '#14b8a6',
+                                stroke: 'var(--color-turquoise-strong)',
                                 strokeDasharray: '4 4',
                             }}
                         />
@@ -387,7 +387,7 @@ export default function OccupancyTrendChart({
                             type="monotone"
                             dataKey="anterior"
                             name="Semana anterior"
-                            stroke="#94a3b8"
+                            stroke="var(--chart-axis)"
                             strokeWidth={2}
                             strokeDasharray="5 5"
                             dot={false}
@@ -398,27 +398,27 @@ export default function OccupancyTrendChart({
                             type="monotone"
                             dataKey="atual"
                             name="Semana atual"
-                            stroke="#14b8a6"
+                            stroke="var(--color-turquoise-strong)"
                             strokeWidth={3}
                             dot={{
                                 r: 3,
                                 strokeWidth: 0,
-                                fill: '#14b8a6',
+                                fill: 'var(--color-turquoise-strong)',
                             }}
                             activeDot={{
                                 r: 6,
                                 strokeWidth: 2,
-                                fill: '#ffffff',
-                                stroke: '#14b8a6',
+                                fill: 'var(--tooltip-bg)',
+                                stroke: 'var(--color-turquoise-strong)',
                             }}
                         />
                     </ComposedChart>
                 </ResponsiveContainer>
             </div>
 
-            <div className="flex items-center justify-center gap-5 border-t border-slate-100 px-5 py-3 text-xs font-semibold text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <div className="flex items-center justify-center gap-5 border-t border-slate-100 px-5 py-3 text-xs font-semibold text-slate-500 dark:border-[#2a5069] dark:text-[#8fa7bd]">
                 <span className="flex items-center gap-1.5">
-                    <span className="h-0.5 w-4 rounded-full bg-teal-500" />
+                    <span className="h-0.5 w-4 rounded-full bg-teal-500 dark:bg-[#18c3b3]" />
                     Semana atual
                 </span>
 
@@ -434,7 +434,7 @@ export default function OccupancyTrendChart({
                             y1="1"
                             x2="20"
                             y2="1"
-                            stroke="#94a3b8"
+                            stroke="var(--chart-axis)"
                             strokeWidth="2"
                             strokeDasharray="4 3"
                         />

@@ -105,6 +105,25 @@ class DemoOcupacaoSeeder extends Seeder
                 $secretarias
             );
         }
+
+        /*
+         * Uma secretária só aparece "ocupada" no dashboard se o período
+         * estiver mesmo a decorrer agora E a reserva tiver check-in feito
+         * (ver MapaOcupacaoService::estadoSecretaria()). Como
+         * escolherDesfecho() só atribui "confirmada_checkin" quando o
+         * seeder corre dentro da janela de tolerância à volta do início
+         * de um período, correr o seeder fora dessa janela deixava
+         * "Ocupadas" preso a zero até o fim dos tempos, independentemente
+         * da hora a que o dashboard fosse depois visto. Garante aqui um
+         * mínimo de check-ins ativos para os períodos que estão mesmo a
+         * decorrer neste momento.
+         */
+        $this->garantirMinimoOcupadasHoje(
+            $periodos,
+            $criacao,
+            $utilizadores,
+            $secretarias
+        );
     }
 
     /**
@@ -242,6 +261,128 @@ class DemoOcupacaoSeeder extends Seeder
 
                 $this->cancelar($reserva, $pagamentos, $estadoExpiradaId, $hoje);
                 $expiradas++;
+            }
+        }
+    }
+
+    /**
+     * Garante um mínimo de secretárias com check-in ativo neste preciso
+     * momento, para o card "Estado atual" nunca ficar preso a
+     * "Ocupadas: 0" só porque o seeder correu fora da janela de
+     * tolerância à volta do início de um período.
+     *
+     * Só atua nos períodos (manhã/tarde) que estão mesmo a decorrer
+     * agora — fora disso não haveria nada legitimamente "ocupado".
+     * Primeiro reaproveita reservas de hoje sem check-in nesses
+     * períodos; só cria reservas novas se não houver candidatas
+     * suficientes.
+     */
+    private function garantirMinimoOcupadasHoje(
+        array $periodos,
+        ReservaCriacaoService $criacao,
+        $utilizadores,
+        $secretarias,
+        int $minimo = 3
+    ): void {
+        $hoje = Carbon::today();
+
+        $slotsAtivos = collect(self::SLOTS)->filter(
+            function ($horarios, $slot) use ($hoje) {
+                [$horaInicio, $horaFim] = $horarios;
+
+                $inicio = $hoje->copy()->setTimeFromTimeString($horaInicio);
+                $fim = $hoje->copy()->setTimeFromTimeString($horaFim);
+
+                return now()->between($inicio, $fim);
+            }
+        );
+
+        if ($slotsAtivos->isEmpty()) {
+            return;
+        }
+
+        $periodoIdsAtivos = $slotsAtivos->keys()
+            ->map(fn ($slot) => $periodos[$slot]->id)
+            ->all();
+
+        $slotPorPeriodoId = collect($periodos)->mapWithKeys(
+            fn ($periodo, $slot) => [$periodo->id => $slot]
+        );
+
+        $candidatas = Reserva::query()
+            ->whereDate('data', $hoje)
+            ->whereNull('cancelada_at')
+            ->whereNull('check_in_at')
+            ->whereIn('periodo_id', $periodoIdsAtivos)
+            ->whereHas(
+                'user',
+                fn ($query) => $query->where(
+                    'email',
+                    'like',
+                    'colaborador.demo%@spacehub.pt'
+                )
+            )
+            ->get()
+            ->shuffle();
+
+        $ocupadas = 0;
+
+        foreach ($candidatas as $reserva) {
+            if ($ocupadas >= $minimo) {
+                break;
+            }
+
+            $slot = $slotPorPeriodoId[$reserva->periodo_id] ?? null;
+
+            if ($slot === null) {
+                continue;
+            }
+
+            $this->confirmar($reserva, true, $hoje, $slot);
+            $ocupadas++;
+        }
+
+        if ($ocupadas >= $minimo) {
+            return;
+        }
+
+        $secretariasEmbaralhadas = $secretarias->shuffle()->values();
+
+        foreach ($utilizadores->shuffle() as $utilizador) {
+            if ($ocupadas >= $minimo) {
+                break;
+            }
+
+            foreach ($slotsAtivos as $slot => $horarios) {
+                if ($ocupadas >= $minimo) {
+                    break;
+                }
+
+                $secretaria = $secretariasEmbaralhadas->first(
+                    fn ($candidata) => ! $this->slotOcupado(
+                        $candidata->id,
+                        $utilizador->id,
+                        $hoje,
+                        $slot
+                    )
+                );
+
+                if (! $secretaria) {
+                    continue;
+                }
+
+                try {
+                    $reserva = $criacao->criarMeioDia([
+                        'data' => $hoje->toDateString(),
+                        'periodo_id' => $periodos[$slot]->id,
+                        'secretaria_id' => $secretaria->id,
+                    ], $utilizador->id);
+                } catch (ValidationException) {
+                    continue;
+                }
+
+                $this->confirmar($reserva, true, $hoje, $slot);
+                $ocupadas++;
             }
         }
     }

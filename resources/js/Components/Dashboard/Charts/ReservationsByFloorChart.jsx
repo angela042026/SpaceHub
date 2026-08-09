@@ -22,22 +22,22 @@ function CustomTooltip({ active, payload, label }) {
             : null;
 
     return (
-        <div className="rounded-xl border border-slate-200 bg-white px-3.5 py-3 shadow-xl dark:border-slate-700 dark:bg-slate-900">
-            <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+        <div className="rounded-xl border border-slate-200 bg-white px-3.5 py-3 shadow-xl dark:border-[#2a5069] dark:bg-[#101f34]">
+            <p className="text-xs font-bold text-slate-700 dark:text-[#f8fafc]">
                 {label}
             </p>
 
             <div className="mt-2 space-y-1 text-xs">
                 <div className="flex items-center justify-between gap-6">
-                    <span className="text-slate-500">Atual</span>
-                    <span className="font-bold text-teal-600 dark:text-teal-400">
+                    <span className="text-slate-500 dark:text-[#b5c5d5]">Atual</span>
+                    <span className="font-bold text-teal-600 dark:text-[#18c3b3]">
                         {atual}
                     </span>
                 </div>
 
                 <div className="flex items-center justify-between gap-6">
-                    <span className="text-slate-500">Anterior</span>
-                    <span className="font-bold text-blue-500">
+                    <span className="text-slate-500 dark:text-[#b5c5d5]">Anterior</span>
+                    <span className="font-bold text-blue-500 dark:text-blue-400">
                         {anterior}
                     </span>
                 </div>
@@ -68,9 +68,9 @@ export default function ReservationsByFloorChart({
 
     return (
         <section className="dashboard-card flex h-full flex-col overflow-hidden">
-            <header className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+            <header className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-[#2a5069]">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/10 text-teal-500 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
                         <Building2
                             size={20}
                             strokeWidth={1.9}
@@ -78,30 +78,30 @@ export default function ReservationsByFloorChart({
                     </div>
 
                     <div>
-                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
                             Reservas por piso
                         </h3>
 
-                        <p className="mt-0.5 text-xs text-slate-400">
+                        <p className="mt-0.5 text-xs text-slate-400 dark:text-[#8fa7bd]">
                             Últimos 30 dias
                         </p>
                     </div>
                 </div>
 
                 <div className="text-right">
-                    <p className="text-lg font-extrabold text-slate-900 dark:text-white">
+                    <p className="text-lg font-extrabold text-slate-900 dark:text-[#f8fafc]">
                         {total}
                     </p>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8fa7bd]">
                         Reservas
                     </p>
                 </div>
             </header>
 
             <div className="flex flex-1 flex-col justify-between p-5">
-                <div className="flex items-center justify-center gap-5 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                <div className="flex items-center justify-center gap-5 text-xs font-semibold text-slate-500 dark:text-[#8fa7bd]">
                     <span className="flex items-center gap-1.5">
-                        <span className="h-2.5 w-2.5 rounded-full bg-teal-500" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-teal-500 dark:bg-[#18c3b3]" />
                         Período atual
                     </span>
 
@@ -165,7 +165,7 @@ export default function ReservationsByFloorChart({
                                 <CartesianGrid
                                     vertical={false}
                                     strokeDasharray="4 4"
-                                    stroke="rgba(148, 163, 184, 0.15)"
+                                    stroke="var(--chart-grid)"
                                 />
 
                                 <XAxis
@@ -174,7 +174,7 @@ export default function ReservationsByFloorChart({
                                     tickLine={false}
                                     tick={{
                                         fontSize: 11,
-                                        fill: '#64748b',
+                                        fill: 'var(--chart-axis)',
                                     }}
                                 />
 
@@ -183,7 +183,7 @@ export default function ReservationsByFloorChart({
                                     tickLine={false}
                                     tick={{
                                         fontSize: 11,
-                                        fill: '#94a3b8',
+                                        fill: 'var(--chart-axis)',
                                     }}
                                     allowDecimals={false}
                                 />
@@ -206,7 +206,7 @@ export default function ReservationsByFloorChart({
                                         position="top"
                                         fontSize={11}
                                         fontWeight={700}
-                                        fill="#0f172a"
+                                        fill="var(--color-text-primary)"
                                     />
                                 </Bar>
 
@@ -221,20 +221,20 @@ export default function ReservationsByFloorChart({
                                         position="top"
                                         fontSize={11}
                                         fontWeight={700}
-                                        fill="#64748b"
+                                        fill="var(--color-text-secondary)"
                                     />
                                 </Bar>
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 ) : (
-                    <div className="flex h-[220px] items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-400 dark:border-slate-700">
+                    <div className="flex h-[220px] items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-400 dark:border-[#2a5069] dark:text-[#8fa7bd]">
                         Ainda não existem dados por piso.
                     </div>
                 )}
 
                 {pisoDestaque && (
-                    <div className="flex items-center gap-2 rounded-xl bg-teal-500/10 px-3.5 py-2.5 text-xs font-semibold text-teal-700 dark:text-teal-400">
+                    <div className="flex items-center gap-2 rounded-xl bg-teal-500/10 px-3.5 py-2.5 text-xs font-semibold text-teal-700 dark:bg-[#18c3b3]/10 dark:text-[#18c3b3]">
                         <Info size={14} strokeWidth={2} />
                         {pisoDestaque.nome} concentra{' '}
                         {pisoDestaque.percentual}% das reservas

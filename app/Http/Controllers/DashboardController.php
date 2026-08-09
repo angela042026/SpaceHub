@@ -31,17 +31,19 @@ class DashboardController extends Controller
             'geral',
         );
 
-        $dataInicio =
-            $this->estatisticasService
-            ->obterDataInicio($periodo);
-
         $stats =
             $this->dashboardMetricsService
             ->obterStats($hoje);
 
+        // "Destaques do período" tem o seu próprio toggle (30
+        // dias/90 dias/Ano), independente do filtro "periodo" acima
+        // (que não está ligado a nenhum controlo na interface) — o
+        // valor inicial deve bater certo com o botão ativo por omissão.
         $estatisticas =
             $this->estatisticasService
-            ->obterEstatisticas($dataInicio);
+            ->obterEstatisticas(
+                $this->estatisticasService->obterDataInicio('30dias')
+            );
 
         $atividadeRecente =
             $this->dashboardMetricsService
@@ -208,6 +210,24 @@ class DashboardController extends Controller
             $this->dashboardMetricsService->obterReservasPorPisoComparativo(
                 Carbon::today(),
                 (int) ($dados['dias'] ?? 30)
+            )
+        );
+    }
+
+    /**
+     * Dados do card "Destaques do período" para o período escolhido no
+     * toggle (30 dias/90 dias/Ano), chamado via fetch() sem recarregar
+     * o dashboard inteiro.
+     */
+    public function destaques(Request $request): JsonResponse
+    {
+        $dados = $request->validate([
+            'periodo' => ['sometimes', 'in:30dias,90dias,ano'],
+        ]);
+
+        return response()->json(
+            $this->estatisticasService->obterEstatisticas(
+                $this->estatisticasService->obterDataInicio($dados['periodo'] ?? '30dias')
             )
         );
     }

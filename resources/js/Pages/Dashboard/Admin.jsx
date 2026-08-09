@@ -141,6 +141,23 @@ export default function Admin({
         [pisos],
     );
 
+    const pisosComSecretarias = useMemo(
+        () =>
+            (pisos ?? [])
+                .filter((piso) =>
+                    (piso.setores ?? []).some(
+                        (setor) =>
+                            (setor.secretarias ?? [])
+                                .length > 0,
+                    ),
+                )
+                .map((piso) => ({
+                    codigo: piso.codigo,
+                    nome: piso.nome,
+                })),
+        [pisos],
+    );
+
     const percentualCheckins =
         stats?.reservasHoje?.value > 0
             ? Math.round(
@@ -204,7 +221,8 @@ export default function Admin({
                     />
 
                     <StatCard
-                        title="Taxa de Ocupação"
+                        title="Ocupação Atual"
+                        subtitulo="Todos os pisos"
                         value={`${
                             stats?.taxaOcupacao?.value ?? 0
                         }%`}
@@ -302,9 +320,9 @@ export default function Admin({
                 <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
                     <div className="xl:col-span-4">
                         <OccupancyDonutChart
-                            data={
-                                ocupacaoAtual
-                            }
+                            data={ocupacaoAtual}
+                            porPiso={overviewByFloor}
+                            pisos={pisosComSecretarias}
                         />
                     </div>
 
