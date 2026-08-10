@@ -117,13 +117,13 @@ export default function ChatWidget() {
                         ? 'Fechar chat de suporte'
                         : 'Abrir chat de suporte'
                 }
-                className={`flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg transition-all duration-250 active:scale-95 ${
+                className={`flex h-[52px] w-[52px] items-center justify-center rounded-full text-white shadow-lg transition-all duration-250 active:scale-95 ${
                     isOpen
                         ? 'bg-rose-500 shadow-rose-500/30 hover:bg-rose-600'
                         : 'bg-teal-500 shadow-teal-500/30 hover:bg-teal-600'
                 }`}
             >
-                {isOpen ? <X size={24} /> : <HelpCircle size={26} />}
+                {isOpen ? <X size={22} /> : <HelpCircle size={24} />}
             </button>
         </div>
     );

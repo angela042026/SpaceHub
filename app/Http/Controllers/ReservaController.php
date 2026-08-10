@@ -114,6 +114,10 @@ class ReservaController extends Controller
                 'piso',
                 'edificio',
             ]),
+
+            'secretariasFavoritas' => Auth::user()
+                ->secretariasFavoritas()
+                ->pluck('secretarias.id'),
         ]);
     }
 

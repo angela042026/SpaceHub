@@ -35,15 +35,32 @@
         --color-card: #ffffff;
         --color-card-to: #f8fafc;
         --color-card-soft: #f1f5f9;
+        --color-card-inner: #f8fafc;
 
-        --color-border: #e2e8f0;
+        --color-border: #e3eaf2;
+        --color-border-subtle: rgba(100, 116, 139, 0.14);
+
+        --color-text-primary: #0f172a;
         --color-text-secondary: #475569;
+        --color-text-muted: #64748b;
 
-        --radius-card: 1rem;
+        --color-turquoise-strong: #14b8a6;
+
+        /* Cores usadas diretamente em atributos SVG (stroke/fill) dos
+           gráficos recharts — não dá para usar classes dark: do
+           Tailwind aí, por isso ficam em variáveis CSS. */
+        --chart-grid: rgba(148, 163, 184, 0.35);
+        --chart-axis: #94a3b8;
+        --tooltip-bg: #ffffff;
+        --tooltip-border: #e2e8f0;
+        --tooltip-text: #0f172a;
+
+        --radius-card: 1.125rem;
         --radius-pill: 9999px;
 
         --shadow-card:
-            0 2px 8px rgb(0 0 0 / 0.05);
+            0 8px 24px rgb(15 42 67 / 0.055),
+            inset 0 1px 0 rgb(255 255 255 / 0.8);
 
         --shadow-card-hover:
             0 10px 25px -5px rgb(0 0 0 / 0.1),
@@ -60,22 +77,32 @@
         --color-navy-800: #1d4266;
 
         /*
-         * Sidebar e conteúdo usam praticamente
-         * a mesma família de azul-marinho.
+         * Hierarquia de superfícies em tons de azul-marinho (nunca
+         * preto puro): página < sidebar < card < card-inner, para dar
+         * profundidade sem parecer outro tema.
          */
-        --color-sidebar: #102944;
-        --color-surface: #102944;
+        --color-surface: #0d2b45;
+        --color-sidebar: #0a2740;
 
-        /*
-         * Cards ligeiramente mais claros,
-         * criando contraste sem parecer outro tema.
-         */
-        --color-card: #173653;
-        --color-card-to: #14314c;
-        --color-card-soft: #1b3b58;
+        --color-card: #163a56;
+        --color-card-to: #163a56;
+        --color-card-soft: #183f5d;
+        --color-card-inner: #101f34;
 
-        --color-border: #3b5f7d;
-        --color-text-secondary: #a9bdd0;
+        --color-border: #2a5069;
+        --color-border-subtle: rgba(148, 163, 184, 0.18);
+
+        --color-text-primary: #f8fafc;
+        --color-text-secondary: #b5c5d5;
+        --color-text-muted: #8fa7bd;
+
+        --color-turquoise-strong: #18c3b3;
+
+        --chart-grid: rgba(148, 163, 184, 0.12);
+        --chart-axis: #8fa7bd;
+        --tooltip-bg: #101f34;
+        --tooltip-border: #2a5069;
+        --tooltip-text: #f8fafc;
 
         --shadow-card:
             0 8px 22px rgb(4 18 33 / 0.22),
@@ -131,6 +158,31 @@
             var(--color-surface);
     }
 
+    /*
+     * Profundidade muito subtil no fundo das páginas de dashboard —
+     * dois glows radiais quase impercetíveis (turquesa/azul), só em
+     * modo claro. Modo escuro não é tocado.
+     */
+    .spacehub-page-bg {
+        background-color: var(--color-surface);
+    }
+
+    html:not(.dark) .spacehub-page-bg {
+        background-image:
+            radial-gradient(
+                640px 420px at 100% 0%,
+                rgb(20 184 166 / 0.045),
+                transparent 60%
+            ),
+            radial-gradient(
+                580px 460px at 58% 42%,
+                rgb(79 143 234 / 0.035),
+                transparent 55%
+            );
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
     /* =====================================================
        SIDEBAR
        ===================================================== */
@@ -155,27 +207,14 @@
             6px 0 18px rgb(4 18 33 / 0.16);
     }
 
-    .dark .spacehub-sidebar::after {
-        content: "";
-
-        position: absolute;
-        top: 0;
-        right: -1px;
-
-        width: 1px;
-        height: 100%;
-
-        background:
-            linear-gradient(
-                180deg,
-                transparent 0%,
-                rgb(94 234 212 / 0.7) 16%,
-                rgb(20 184 166 / 0.4) 50%,
-                rgb(94 234 212 / 0.5) 84%,
-                transparent 100%
-            );
-
-        pointer-events: none;
+    /*
+     * Em modo escuro a sidebar já é visivelmente mais escura que o
+     * fundo da página — a separação turquesa brilhante do modo claro
+     * fica "neon" demais aqui, por isso troca-se por uma linha
+     * discreta cinza-azulada.
+     */
+    .dark .spacehub-sidebar {
+        border-right: 1px solid rgba(148, 163, 184, 0.12);
     }
 
     /* =====================================================
@@ -196,11 +235,45 @@
     }
 
     .dark .dashboard-card {
-        border-color: #3b5f7d;
+        border-color: var(--color-border);
 
         box-shadow:
             0 10px 26px rgb(4 18 33 / 0.2),
             inset 0 1px 0 rgb(255 255 255 / 0.025);
+    }
+
+    /*
+     * Modificador opt-in para cards clicáveis (chips, tiles, itens de
+     * lista) — nunca aplicado ao .dashboard-card base, para não elevar
+     * painéis estáticos (ex: Visão geral, KPIs) que não reagem a clique.
+     */
+    .dashboard-card-hover {
+        transition:
+            transform 200ms ease,
+            box-shadow 200ms ease,
+            border-color 200ms ease;
+    }
+
+    .dashboard-card-hover:hover {
+        transform: translateY(-2px);
+        border-color: rgb(20 184 166 / 0.35);
+
+        box-shadow:
+            0 12px 28px rgb(15 42 67 / 0.09),
+            inset 0 1px 0 rgb(255 255 255 / 0.8);
+    }
+
+    .dark .dashboard-card-hover:hover {
+        border-color: rgb(24 195 179 / 0.4);
+        box-shadow: var(--shadow-card-hover);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dashboard-card-hover,
+        .dashboard-card-hover:hover {
+            transition: none;
+            transform: none;
+        }
     }
 
     .stat-card {
@@ -221,6 +294,21 @@
         border: 1px solid var(--color-border);
         border-radius: 0.875rem;
         background-color: var(--color-card-soft);
+    }
+
+    /*
+     * Cards internos (ex: os 4 mini-cards de "Destaques do período")
+     * — um nível mais escuro que o card principal em modo escuro, para
+     * criar profundidade sem sair da família azul-marinho.
+     */
+    .dashboard-card-inner {
+        border: 1px solid var(--color-border);
+        border-radius: 1rem;
+        background-color: var(--color-card-inner);
+    }
+
+    .dark .dashboard-card-inner {
+        border-color: var(--color-border-subtle);
     }
 
     /* =====================================================
@@ -395,13 +483,13 @@
     }
 
     .dark .form-input-brand {
-        background-color: #143451;
+        background-color: var(--color-card-inner);
         border-color: var(--color-border);
-        color: #f8fafc;
+        color: var(--color-text-primary);
     }
 
     .dark .form-input-brand::placeholder {
-        color: #8ea4ba;
+        color: var(--color-text-muted);
     }
 
     .dark .form-input-brand:focus {
@@ -412,8 +500,8 @@
     }
 
     .dark select.form-input-brand option {
-        background-color: #143451;
-        color: #f8fafc;
+        background-color: var(--color-card-inner);
+        color: var(--color-text-primary);
     }
 }
 
@@ -423,8 +511,13 @@
 
 .spacehub-scroll {
     scrollbar-width: thin;
-    scrollbar-color: var(--accent) transparent;
+    scrollbar-color: transparent transparent;
     padding-right: 6px;
+}
+
+.spacehub-scroll:hover,
+.spacehub-scroll:focus-within {
+    scrollbar-color: var(--accent) transparent;
 }
 
 .spacehub-scroll::-webkit-scrollbar {
@@ -436,14 +529,18 @@
 }
 
 .spacehub-scroll::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+}
+
+.spacehub-scroll:hover::-webkit-scrollbar-thumb,
+.spacehub-scroll:focus-within::-webkit-scrollbar-thumb {
     background:
         linear-gradient(
             180deg,
             var(--accent),
             var(--accent-dark)
         );
-
-    border-radius: 999px;
 }
 
 .spacehub-scroll::-webkit-scrollbar-thumb:hover {

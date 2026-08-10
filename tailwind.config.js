@@ -62,10 +62,30 @@ export default {
                     '0%': { transform: 'translateX(0)' },
                     '100%': { transform: 'translateX(-33.333%)' },
                 },
+
+                'desk-pop': {
+                    '0%': {
+                        transform:
+                            'translate(-50%, -50%) scale(0.7)',
+                        opacity: '0.7',
+                    },
+                    '60%': {
+                        transform:
+                            'translate(-50%, -50%) scale(1.22)',
+                        opacity: '1',
+                    },
+                    '100%': {
+                        transform:
+                            'translate(-50%, -50%) scale(1.15)',
+                        opacity: '1',
+                    },
+                },
             },
 
             animation: {
                 marquee: 'marquee 32s linear infinite',
+                'desk-pop':
+                    'desk-pop 220ms ease-out forwards',
             },
         },
     },

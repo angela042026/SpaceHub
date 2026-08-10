@@ -21,6 +21,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\ReservaDisponibilidadeController;
 use App\Http\Controllers\ReservaHistoricoController;
+use App\Http\Controllers\SecretariaFavoritaController;
 use App\Http\Controllers\SecretariaQrCodeController;
 use App\Http\Controllers\SetorMapaController;
 use Illuminate\Foundation\Application;
@@ -69,6 +70,17 @@ Route::middleware('guest')->group(function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'active'])
     ->name('dashboard');
+
+Route::middleware(['auth', 'verified', 'active'])->group(function () {
+    Route::get('/dashboard/tendencia-ocupacao', [DashboardController::class, 'tendenciaOcupacao'])
+        ->name('dashboard.tendenciaOcupacao');
+
+    Route::get('/dashboard/reservas-por-piso', [DashboardController::class, 'reservasPorPiso'])
+        ->name('dashboard.reservasPorPiso');
+
+    Route::get('/dashboard/destaques', [DashboardController::class, 'destaques'])
+        ->name('dashboard.destaques');
+});
 
 Route::middleware(['auth', 'active'])->group(function () {
     // ==========================
@@ -178,6 +190,9 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::put('/reservas/{reserva}', [ReservaController::class, 'update'])
         ->name('reservas.update');
+
+    Route::post('/secretarias/{secretaria}/favorita', [SecretariaFavoritaController::class, 'toggle'])
+        ->name('secretarias.favorita.toggle');
 
     Route::get('/minhas-avaliacoes', [AvaliacaoController::class, 'index'])
         ->name('avaliacoes.index');

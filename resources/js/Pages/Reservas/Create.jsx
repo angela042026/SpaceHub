@@ -259,7 +259,10 @@ export default function Create({
                     tipo_duracao: tipoDuracao,
                 },
                 {
-                    preserveScroll: true,
+                    preserveScroll: (page) =>
+                        Object.keys(
+                            page.props.errors ?? {},
+                        ).length === 0,
                     onFinish: () =>
                         setAReservar(null),
                 },
@@ -277,7 +280,10 @@ export default function Create({
                 tipo_duracao: tipoDuracao,
             },
             {
-                preserveScroll: true,
+                preserveScroll: (page) =>
+                    Object.keys(
+                        page.props.errors ?? {},
+                    ).length === 0,
                 onFinish: () =>
                     setAReservar(null),
             },
