@@ -53,8 +53,87 @@ function getEstadoReserva(reserva) {
     );
 }
 
-export default function UpcomingReservations({ reservas = [] }) {
-    const reservasVisiveis = reservas.slice(0, 4);
+export default function UpcomingReservations({ reservas = [], compact = false, className = '' }) {
+    const limite = compact ? 2 : 4;
+    const reservasVisiveis = reservas.slice(0, limite);
+
+    if (compact) {
+        return (
+            <section className={`dashboard-card flex flex-col overflow-hidden p-4 ${className}`}>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
+                        Próximas reservas
+                    </h2>
+
+                    {reservas.length > 0 && (
+                        <Link
+                            href={route('reservas.index')}
+                            className="text-xs font-bold text-teal-600 hover:text-teal-700 dark:text-[#18c3b3] dark:hover:text-[#15a999]"
+                        >
+                            Ver todas
+                        </Link>
+                    )}
+                </div>
+
+                {reservas.length > 0 ? (
+                    <ul className="mt-2 divide-y divide-slate-100 dark:divide-[#2a5069]/60">
+                        {reservasVisiveis.map((reserva) => {
+                            const estado = getEstadoReserva(reserva);
+
+                            return (
+                                <li key={reserva.id}>
+                                    <Link
+                                        href={route('reservas.index')}
+                                        className="flex items-center gap-2.5 py-2.5"
+                                    >
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-navy-900 text-white">
+                                            <Armchair size={15} strokeWidth={1.9} />
+                                        </div>
+
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-1.5">
+                                                <h3 className="truncate text-xs font-bold text-slate-900 dark:text-[#f8fafc]">
+                                                    {reserva.secretaria?.codigo ?? 'Secretária removida'}
+                                                </h3>
+                                                <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${estado.badge}`}>
+                                                    {estado.label}
+                                                </span>
+                                            </div>
+                                            <p className="truncate text-[11px] text-slate-500 dark:text-[#8fa7bd]">
+                                                {formatarData(reserva.data)} · {reserva.periodo?.nome ?? '-'}
+                                            </p>
+                                        </div>
+                                    </Link>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                ) : (
+                    <div className="mt-2 flex min-h-[150px] flex-1 flex-col items-center justify-center gap-3 rounded-xl bg-slate-50/60 px-4 py-4 text-center dark:bg-[#101f34]/40">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-500/10 text-teal-600 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
+                            <CalendarDays size={17} strokeWidth={1.9} />
+                        </span>
+
+                        <div>
+                            <h3 className="text-xs font-bold text-slate-800 dark:text-[#f8fafc]">
+                                Não tem reservas agendadas.
+                            </h3>
+                            <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 dark:text-[#8fa7bd]">
+                                Que tal planear a sua semana?
+                            </p>
+                        </div>
+
+                        <Link
+                            href={route('reservas.availability')}
+                            className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-teal-500/30 bg-white px-3.5 text-[11px] font-bold text-teal-700 transition hover:bg-teal-500/10 dark:border-[#18c3b3]/30 dark:bg-transparent dark:text-[#18c3b3]"
+                        >
+                            Planear semana
+                        </Link>
+                    </div>
+                )}
+            </section>
+        );
+    }
 
     return (
         <section className="dashboard-card flex h-full flex-col overflow-hidden">

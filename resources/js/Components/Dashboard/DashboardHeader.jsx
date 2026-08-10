@@ -158,7 +158,38 @@ function construirNotificacoesColaborador(stats) {
     return [];
 }
 
-function construirNotificacoesUtilizador(reservaHojeUtilizador, proximasReservas, agora) {
+// Mesma janela [início, início + tolerância] usada pelo ReservationCard
+// para decidir se o botão de check-in está ativo — sem isto, a
+// notificação podia dizer "check-in disponível" numa reserva ainda
+// pendente de pagamento ou já fora do prazo.
+function dentroDaJanelaCheckin(reserva, toleranciaMinutos, agora) {
+    const horaInicio = reserva?.periodo?.hora_inicio;
+
+    if (!reserva?.data || !horaInicio || !toleranciaMinutos) {
+        return false;
+    }
+
+    const inicio = new Date(
+        `${reserva.data}T${horaInicio.slice(0, 5)}:00`,
+    );
+
+    if (Number.isNaN(inicio.getTime())) {
+        return false;
+    }
+
+    const limite = new Date(
+        inicio.getTime() + toleranciaMinutos * 60000,
+    );
+
+    return agora >= inicio && agora < limite;
+}
+
+function construirNotificacoesUtilizador(
+    reservaHojeUtilizador,
+    proximasReservas,
+    agora,
+    toleranciaCheckinMinutos,
+) {
     if (reservaHojeUtilizador) {
         const codigo = reservaHojeUtilizador.secretaria?.codigo ?? 'a tua secretária';
         const notificacoes = [];
@@ -198,7 +229,15 @@ function construirNotificacoesUtilizador(reservaHojeUtilizador, proximasReservas
                 titulo: 'Check-in confirmado',
                 mensagem: `Já fizeste check-in na secretária ${codigo} para hoje.`,
             });
-        } else {
+        } else if (
+            reservaHojeUtilizador.estado_reserva?.codigo ===
+                'confirmada' &&
+            dentroDaJanelaCheckin(
+                reservaHojeUtilizador,
+                toleranciaCheckinMinutos,
+                agora,
+            )
+        ) {
             notificacoes.push({
                 id: `checkin-disponivel-${reservaHojeUtilizador.id}`,
                 icon: CalendarCheck2,
@@ -226,7 +265,14 @@ function construirNotificacoesUtilizador(reservaHojeUtilizador, proximasReservas
 }
 
 export default function DashboardHeader({ onOpenNav = () => {} }) {
-    const { auth, reservaHojeUtilizador, proximasReservas, stats, notificacoesReais } = usePage().props;
+    const {
+        auth,
+        reservaHojeUtilizador,
+        proximasReservas,
+        stats,
+        notificacoesReais,
+        toleranciaCheckinMinutos,
+    } = usePage().props;
     const { theme, toggleTheme } = useTheme();
 
     const [notificationsOpen, setNotificationsOpen] = useState(false);
@@ -251,14 +297,48 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
     const saudacao = saudacaoPorHora(agora);
     const papel = user?.role?.nome;
 
+    // Mesma lógica de "resto" que o DashboardController usa para
+    // decidir qual página renderizar (Admin/Funcionario vs
+    // Utilizador) — comparar só com "papel === 'Utilizador'" falhava
+    // sempre que o nome da role não batesse certo character a
+    // character, mesmo sendo a mesma pessoa a ver o dashboard do
+    // Utilizador.jsx.
+    const ehDashboardUtilizador = ![
+        'Administrador',
+        'Gestor',
+        'Colaborador',
+    ].includes(papel);
+
+    // Só o dashboard do "Utilizador" tem cartão de reserva de hoje —
+    // nas outras roles mantém-se a frase genérica de sempre.
+    let subtituloHeader = 'Bem-vindo ao seu Dashboard.';
+
+    if (ehDashboardUtilizador) {
+        if (!reservaHojeUtilizador) {
+            subtituloHeader =
+                'Encontre o espaço certo para cada momento.';
+        } else if (reservaHojeUtilizador.check_in_at) {
+            subtituloHeader =
+                'A sua secretária está pronta. Bom trabalho!';
+        } else {
+            subtituloHeader =
+                'A sua secretária está pronta. Faça o check-in quando chegar.';
+        }
+    }
+
     let notificacoesSinteticas = [];
 
-    if (papel === 'Utilizador') {
-        notificacoesSinteticas = construirNotificacoesUtilizador(reservaHojeUtilizador, proximasReservas, agora);
-    } else if (papel === 'Administrador' || papel === 'Gestor') {
+    if (papel === 'Administrador' || papel === 'Gestor') {
         notificacoesSinteticas = construirNotificacoesAdmin(stats);
     } else if (papel === 'Colaborador') {
         notificacoesSinteticas = construirNotificacoesColaborador(stats);
+    } else if (ehDashboardUtilizador) {
+        notificacoesSinteticas = construirNotificacoesUtilizador(
+            reservaHojeUtilizador,
+            proximasReservas,
+            agora,
+            toleranciaCheckinMinutos,
+        );
     }
 
     // Notificações reais (guardadas na base de dados, ex: resposta de suporte)
@@ -336,7 +416,7 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
                     </h1>
 
                     <p className="mt-2 text-base text-slate-500 dark:text-[#b5c5d5]">
-                        Bem-vindo ao seu Dashboard.
+                        {subtituloHeader}
                     </p>
                 </div>
             </div>

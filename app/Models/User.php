@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -85,6 +86,20 @@ class User extends Authenticatable
     public function reservas(): HasMany
     {
         return $this->hasMany(Reserva::class);
+    }
+
+    /**
+     * Secretárias marcadas com estrela pelo utilizador — usado para
+     * mostrar a secretária favorita real (escolhida manualmente) em vez
+     * de depender só da mais reservada no mês. Ver
+     * DashboardController::obterAtividadePessoal().
+     */
+    public function secretariasFavoritas(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Secretaria::class,
+            'secretaria_favoritas'
+        )->withTimestamps();
     }
 
     /**

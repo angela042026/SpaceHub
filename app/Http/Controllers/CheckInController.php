@@ -72,25 +72,26 @@ class CheckInController extends Controller
 
         $reserva->load(['periodo', 'estadoReserva']);
 
+        if (! in_array($reserva->estadoReserva?->codigo, EstadoReserva::codigosAtivos(), true)) {
+            return back()->withErrors(['reserva' => 'Esta reserva já não está ativa.']);
+        }
+
         $status = $this->statusDaReserva($reserva);
 
         if ($status === 'ja_check_in') {
             return back()->withErrors(['reserva' => 'Já fizeste check-in nesta reserva.']);
         }
 
+        if ($status === 'pendente_pagamento') {
+            return back()->withErrors(['reserva' => 'Esta reserva está pendente de pagamento. Conclui o pagamento para poderes fazer o check-in.']);
+        }
+
         if ($status === 'fora_da_janela') {
             return back()->withErrors(['reserva' => 'Fora da janela horária permitida para check-in.']);
         }
 
-        if (! in_array($reserva->estadoReserva?->codigo, EstadoReserva::codigosAtivos(), true)) {
-            return back()->withErrors(['reserva' => 'Esta reserva já não está ativa.']);
-        }
-
-        $idEstadoConfirmada = EstadoReserva::idPorCodigo('confirmada');
-
         $reserva->update([
             'check_in_at' => now(),
-            'estado_reserva_id' => $idEstadoConfirmada ?? $reserva->estado_reserva_id,
         ]);
 
         broadcast(new MapaAtualizado());
@@ -100,13 +101,17 @@ class CheckInController extends Controller
     }
 
     /**
-     * Calcula o estado do fluxo de check-in para uma reserva: já feito, fora da janela
-     * horária, ou pronta a confirmar.
+     * Calcula o estado do fluxo de check-in para uma reserva: já feito, pendente de
+     * pagamento, fora da janela horária, ou pronta a confirmar.
      */
     private function statusDaReserva(Reserva $reserva): string
     {
         if ($reserva->check_in_at !== null) {
             return 'ja_check_in';
+        }
+
+        if ($reserva->estadoReserva?->codigo === 'pendente') {
+            return 'pendente_pagamento';
         }
 
         if (! $reserva->periodo) {

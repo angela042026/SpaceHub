@@ -185,16 +185,16 @@ class MapaOcupacaoService
          */
         $diaFormatado = $hoje->format('Y-m-d');
 
+        $reservasComPeriodo = $reservasAtivas->filter(
+            fn (Reserva $reserva) => $reserva->periodo !== null
+        );
+
         // Considera qualquer reserva de hoje cujo período ainda não tenha
         // terminado — não só as que já estão dentro da janela horária ativa.
         // Sem isto, uma reserva para mais tarde hoje (ex: reservou a Tarde
         // e ainda é de manhã) era ignorada e a secretária aparecia livre.
-        $reserva = $reservasAtivas
-            ->filter(function (Reserva $reserva) use ($agora, $diaFormatado): bool {
-                if (! $reserva->periodo) {
-                    return false;
-                }
-
+        $reservasAindaRelevantes = $reservasComPeriodo->filter(
+            function (Reserva $reserva) use ($agora, $diaFormatado): bool {
                 $fim = Carbon::parse(
                     $diaFormatado
                     .' '
@@ -202,45 +202,61 @@ class MapaOcupacaoService
                 );
 
                 return $agora->lessThan($fim);
-            })
-            ->sortBy(fn (Reserva $reserva) => $reserva->periodo->hora_inicio)
-            ->first();
+            }
+        );
 
-        if (! $reserva || ! $reserva->periodo) {
+        if ($reservasAindaRelevantes->isEmpty()) {
             return 'livre';
         }
 
-        $inicioPeriodo = Carbon::parse(
-            $diaFormatado
-            .' '
-            .$reserva->periodo->hora_inicio->format('H:i')
+        // Procura a reserva cujo próprio período contém "agora" — em vez
+        // de escolher só a que começa mais cedo, para nunca divergir do
+        // segmento que disponibilidadeDaSecretaria() (e a timeline no
+        // frontend) já usam para decidir o estado "agora" desta mesma
+        // secretária.
+        $reservaAtual = $reservasAindaRelevantes->first(
+            function (Reserva $reserva) use ($agora, $diaFormatado): bool {
+                $inicio = Carbon::parse(
+                    $diaFormatado
+                    .' '
+                    .$reserva->periodo->hora_inicio->format('H:i')
+                );
+
+                $fim = Carbon::parse(
+                    $diaFormatado
+                    .' '
+                    .$reserva->periodo->hora_fim->format('H:i')
+                );
+
+                return $agora->greaterThanOrEqualTo($inicio)
+                    && $agora->lessThan($fim);
+            }
         );
 
-        $fimPeriodo = Carbon::parse(
-            $diaFormatado
-            .' '
-            .$reserva->periodo->hora_fim->format('H:i')
-        );
-
-        if (
-            $agora->between($inicioPeriodo, $fimPeriodo)
-            && $reserva->check_in_at !== null
-        ) {
-            return 'ocupada';
+        if ($reservaAtual) {
+            return $reservaAtual->check_in_at !== null
+                ? 'ocupada'
+                : 'reservada';
         }
 
         $tolerancia = config('reservas.tolerancia_checkin_minutos');
 
-        if (
-            $agora->between(
-                $inicioPeriodo->copy()->subMinutes($tolerancia),
-                $inicioPeriodo->copy()->addMinutes($tolerancia)
-            )
-        ) {
-            return 'expira';
-        }
+        $prestesAComecar = $reservasAindaRelevantes->contains(
+            function (Reserva $reserva) use ($agora, $diaFormatado, $tolerancia): bool {
+                $inicio = Carbon::parse(
+                    $diaFormatado
+                    .' '
+                    .$reserva->periodo->hora_inicio->format('H:i')
+                );
 
-        return 'reservada';
+                return $agora->between(
+                    $inicio->copy()->subMinutes($tolerancia),
+                    $inicio->copy()->addMinutes($tolerancia)
+                );
+            }
+        );
+
+        return $prestesAComecar ? 'expira' : 'reservada';
     }
 
     private function disponibilidadeDaSecretaria(

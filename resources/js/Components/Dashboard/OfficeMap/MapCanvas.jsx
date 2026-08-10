@@ -1,4 +1,5 @@
 import DeskMarker from './DeskMarker';
+import MapLegend from './MapLegend';
 import SectorMarker from './SectorMarker';
 
 export default function MapCanvas({
@@ -19,16 +20,28 @@ export default function MapCanvas({
     onPointerCancel,
     onSelecionarSetor,
     onSelecionarSecretaria,
+    tamanho = 'padrao',
+    mostrarLegenda = false,
 }) {
+    const alturas = {
+        padrao: 'h-[460px] sm:h-[550px] xl:h-[585px]',
+        grande: 'h-[500px] sm:h-[610px] xl:h-[690px]',
+        compacto: 'h-[420px] sm:h-[470px] xl:h-[520px]',
+    };
+
     return (
-        <div className="min-w-0">
+        <div
+            className={`min-w-0 rounded-[20px] bg-[#edf3f8] p-2.5 shadow-[inset_0_1px_3px_rgba(15,42,67,0.06)] dark:bg-[#0c1f33] dark:p-0 ${
+                alturas[tamanho] ?? alturas.padrao
+            }`}
+        >
             <div
                 onWheel={onWheel}
                 onPointerDown={onPointerDown}
                 onPointerMove={onPointerMove}
                 onPointerUp={onPointerUp}
                 onPointerCancel={onPointerCancel}
-                className={`relative h-[430px] overflow-hidden rounded-2xl bg-white shadow-[0_14px_35px_rgba(15,23,42,0.10)] select-none touch-none dark:border dark:border-[#2a5069] dark:bg-[#101f34] sm:h-[520px] xl:h-[555px] ${
+                className={`relative h-full overflow-hidden rounded-2xl border border-white bg-white shadow-[0_14px_35px_rgba(15,23,42,0.10)] select-none touch-none dark:border-[#2a5069] dark:bg-[#101f34] ${
                     isDragging
                         ? 'cursor-grabbing'
                         : 'cursor-grab'
@@ -74,6 +87,7 @@ export default function MapCanvas({
                                 onSelect={
                                     onSelecionarSecretaria
                                 }
+                                pisoNome={pisoAtual?.nome}
                             />
                         ),
                     )}
@@ -87,6 +101,12 @@ export default function MapCanvas({
                         ? `${setorSelecionado.nome}: escolha uma secretária`
                         : 'Clique num setor para ver as secretárias'}
                 </div>
+
+                {mostrarLegenda && (
+                    <div className="pointer-events-none absolute inset-0 hidden xl:block">
+                        <MapLegend />
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\RoleName;
 use App\Http\Requests\DashboardRequest;
 use App\Models\Reserva;
+use App\Models\User;
 use App\Services\DashboardMetricsService;
 use App\Services\EstatisticasService;
 use App\Services\MapaOcupacaoService;
@@ -138,6 +139,11 @@ class DashboardController extends Controller
             'proximasReservas' =>
             $proximasReservas,
 
+            'toleranciaCheckinMinutos' => (int) config(
+                'reservas.tolerancia_checkin_minutos',
+                30
+            ),
+
             'periodo' => $periodo,
             'stats' => $stats,
             'estatisticas' => $estatisticas,
@@ -170,8 +176,100 @@ class DashboardController extends Controller
 
         return Inertia::render(
             'Dashboard/Utilizador',
-            $dados,
+            $dados + [
+                'atividadePessoal' => $this->obterAtividadePessoal(
+                    $user,
+                    $hoje,
+                    $idsEstadosAtivos,
+                ),
+            ],
         );
+    }
+
+    /**
+     * Faixa "A sua atividade" do dashboard do utilizador — só dados
+     * reais do próprio mês do utilizador autenticado, nunca inventados.
+     * Exclusivo desta vista; não entra no payload do Admin/Colaborador.
+     */
+    private function obterAtividadePessoal(
+        User $user,
+        Carbon $hoje,
+        array $idsEstadosAtivos,
+    ): array {
+        $inicioMes = $hoje->copy()->startOfMonth();
+
+        $reservasMes = Reserva::query()
+            ->with('secretaria.setor.piso')
+            ->where('user_id', $user->id)
+            ->whereBetween('data', [
+                $inicioMes->toDateString(),
+                $hoje->toDateString(),
+            ])
+            ->whereIn('estado_reserva_id', $idsEstadosAtivos)
+            ->get();
+
+        // A estrela marcada manualmente em "Minhas Reservas" tem sempre
+        // prioridade sobre o cálculo automático (mais reservada no mês)
+        // — só cai para o cálculo quando o utilizador não marcou nenhuma.
+        $secretariaFavoritaManual = $user->secretariasFavoritas()
+            ->with('setor.piso')
+            ->orderByDesc('secretaria_favoritas.created_at')
+            ->first();
+
+        if ($secretariaFavoritaManual) {
+            $secretariaFavorita = $secretariaFavoritaManual;
+        } else {
+            $secretariaFavoritaId = $reservasMes
+                ->groupBy('secretaria_id')
+                ->map->count()
+                ->sortDesc()
+                ->keys()
+                ->first();
+
+            $secretariaFavorita = $secretariaFavoritaId
+                ? $reservasMes
+                    ->firstWhere('secretaria_id', $secretariaFavoritaId)
+                    ?->secretaria
+                : null;
+        }
+
+        $ultimosDias = collect(range(6, 0))->map(
+            function (int $diferenca) use ($hoje, $reservasMes) {
+                $dia = $hoje->copy()->subDays($diferenca);
+
+                return [
+                    'data' => $dia->toDateString(),
+                    'reservas' => $reservasMes
+                        ->filter(
+                            fn ($reserva) => Carbon::parse($reserva->data)
+                                ->isSameDay($dia),
+                        )
+                        ->count(),
+                ];
+            },
+        )->values();
+
+        return [
+            'diasNoEscritorioMes' => $reservasMes
+                ->pluck('data')
+                ->map(fn ($data) => Carbon::parse($data)->toDateString())
+                ->unique()
+                ->count(),
+
+            'totalReservasMes' => $reservasMes->count(),
+
+            'checkinsRealizados' => $reservasMes
+                ->whereNotNull('check_in_at')
+                ->count(),
+
+            'secretariaFavorita' => $secretariaFavorita ? [
+                'codigo' => $secretariaFavorita->codigo,
+                'piso' => $secretariaFavorita->setor?->piso?->nome,
+                'setor' => $secretariaFavorita->setor?->nome,
+            ] : null,
+
+            'ultimosDias' => $ultimosDias,
+        ];
     }
 
     /**

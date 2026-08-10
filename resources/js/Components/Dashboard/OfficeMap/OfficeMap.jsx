@@ -1,10 +1,11 @@
-import { router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import {
     useEffect,
     useMemo,
     useRef,
     useState,
 } from 'react';
+import { ArrowUpRight } from 'lucide-react';
 
 import DeskDetailPanel from './DeskDetailPanel';
 import MapCanvas from './MapCanvas';
@@ -37,6 +38,14 @@ export default function OfficeMap({
     mostrarTudo = false,
     showOverview = false,
     overviewData,
+    somenteMapa = false,
+    tamanhoMapa = 'padrao',
+    titulo,
+    subtitulo,
+    linkMapaCompleto = false,
+    secretariaFocoId,
+    onSecretariaSelecionada,
+    mostrarLegenda: mostrarLegendaProp,
 }) {
     const sectionRef = useRef(null);
     const dragStartRef = useRef(null);
@@ -248,6 +257,55 @@ export default function OfficeMap({
         );
     }, [secretariasFiltradas, selectedSetorId]);
 
+    // Lista dos setores do piso atual, com contagem real por estado —
+    // mantém o painel lateral útil antes de qualquer seleção (ver
+    // DeskDetailPanel > SetoresDoPisoPanel). Nada aqui é inventado:
+    // vem sempre da mesma `secretarias` que o mapa já usa.
+    const setoresDoPiso = useMemo(
+        () =>
+            (pisoAtual?.setores ?? [])
+                .map((setor) => {
+                    const secretarias = setor.secretarias ?? [];
+                    const total = secretarias.length;
+
+                    const contagem = secretarias.reduce(
+                        (totais, secretaria) => {
+                            const estado = estadoNormalizado(
+                                secretaria.status,
+                            );
+
+                            if (
+                                Object.prototype.hasOwnProperty.call(
+                                    totais,
+                                    estado,
+                                )
+                            ) {
+                                totais[estado] += 1;
+                            }
+
+                            return totais;
+                        },
+                        {
+                            livre: 0,
+                            reservada: 0,
+                            ocupada: 0,
+                            indisponivel: 0,
+                        },
+                    );
+
+                    return {
+                        id: setor.id,
+                        nome: setor.nome,
+                        total,
+                        livres: contagem.livre,
+                        reservadas: contagem.reservada,
+                        ocupadas: contagem.ocupada,
+                    };
+                })
+                .filter((setor) => setor.total > 0),
+        [pisoAtual],
+    );
+
     useEffect(() => {
         if (!pisoAtual) {
             return;
@@ -266,6 +324,34 @@ export default function OfficeMap({
         setSelectedSetorId(null);
         reporMapa();
     }, [pisoAtual?.id]);
+
+    // Foco pedido de fora (ex: reserva de hoje ao abrir a página, ou
+    // clicar na sugestão) — seleciona a secretária e o seu setor assim
+    // que ela existir na lista do piso atualmente selecionado. Quem
+    // chama já tem de garantir que `selectedFloor` aponta para o piso
+    // certo antes de mudar `secretariaFocoId`.
+    useEffect(() => {
+        if (!secretariaFocoId) {
+            return;
+        }
+
+        const alvo = secretarias.find(
+            (secretaria) =>
+                String(secretaria.id) ===
+                String(secretariaFocoId),
+        );
+
+        if (!alvo) {
+            return;
+        }
+
+        setSelectedSetorId(alvo.setor?.id ?? null);
+        setSelectedSecretaria(alvo);
+    }, [secretariaFocoId, secretarias]);
+
+    useEffect(() => {
+        onSecretariaSelecionada?.(selectedSecretaria);
+    }, [selectedSecretaria, onSecretariaSelecionada]);
 
     useEffect(() => {
         const termo = pesquisa.trim();
@@ -390,6 +476,35 @@ export default function OfficeMap({
             ref={sectionRef}
             className="dashboard-card p-4 sm:p-5"
         >
+            {titulo && (
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h2 className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
+                            {titulo}
+                        </h2>
+
+                        {subtitulo && (
+                            <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8fa7bd]">
+                                {subtitulo}
+                            </p>
+                        )}
+                    </div>
+
+                    {linkMapaCompleto && (
+                        <Link
+                            href={route('mapa.index')}
+                            className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-[#dbe8f5] bg-[#f2f7fd] px-3 text-xs font-bold text-navy-900 transition hover:border-teal-400 hover:bg-teal-500/10 hover:text-teal-700 dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#d7e3ed] dark:hover:border-[#18c3b3] dark:hover:text-[#18c3b3]"
+                        >
+                            Abrir mapa completo
+                            <ArrowUpRight
+                                size={13}
+                                strokeWidth={2.4}
+                            />
+                        </Link>
+                    )}
+                </div>
+            )}
+
             <MapToolbar
                 edificios={edificios}
                 selectedEdificio={selectedEdificio}
@@ -411,8 +526,18 @@ export default function OfficeMap({
                 onFullscreen={alternarEcraInteiro}
             />
 
-            <div className="mt-3 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]">
+            <div
+                className={
+                    somenteMapa
+                        ? 'mt-3'
+                        : 'mt-3 grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]'
+                }
+            >
                 <MapCanvas
+                    tamanho={tamanhoMapa}
+                    mostrarLegenda={
+                        mostrarLegendaProp ?? somenteMapa
+                    }
                     pisoAtual={pisoAtual}
                     setoresInterativos={
                         setoresInterativos
@@ -421,9 +546,7 @@ export default function OfficeMap({
                         secretariasVisiveis
                     }
                     selectedSetorId={selectedSetorId}
-                    selectedSecretaria={
-                        selectedSecretaria
-                    }
+                    selectedSecretaria={selectedSecretaria}
                     setorSelecionado={setorSelecionado}
                     zoom={zoom}
                     rotacao={rotacao}
@@ -440,19 +563,25 @@ export default function OfficeMap({
                     }
                 />
 
-                <DeskDetailPanel
-                    secretaria={selectedSecretaria}
-                    setor={setorSelecionado}
-                    piso={pisoAtual}
-                    onClose={() =>
-                        setSelectedSecretaria(null)
-                    }
-                    onReserve={reservarSecretaria}
-                    showOverview={showOverview}
-                    overview={
-                        overviewData?.[pisoAtual?.codigo]
-                    }
-                />
+                {!somenteMapa && (
+                    <DeskDetailPanel
+                        secretaria={selectedSecretaria}
+                        setor={setorSelecionado}
+                        piso={pisoAtual}
+                        onClose={() =>
+                            setSelectedSecretaria(null)
+                        }
+                        onReserve={reservarSecretaria}
+                        showOverview={showOverview}
+                        overview={
+                            overviewData?.[
+                                pisoAtual?.codigo
+                            ]
+                        }
+                        setoresDoPiso={setoresDoPiso}
+                        onSelecionarSetor={selecionarSetor}
+                    />
+                )}
             </div>
         </section>
     );

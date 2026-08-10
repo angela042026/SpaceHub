@@ -14,6 +14,7 @@ export default function SectorMarker({
     if (!temSecretarias) {
         return (
             <div
+                title={setor.nome}
                 className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-white/80 bg-white/90 px-2.5 py-1.5 text-left text-slate-800 shadow-lg backdrop-blur-sm"
                 style={{
                     left: `${setor.centroX}%`,
@@ -28,6 +29,7 @@ export default function SectorMarker({
     return (
         <button
             type="button"
+            title={setor.nome}
             onPointerDown={(event) =>
                 event.stopPropagation()
             }

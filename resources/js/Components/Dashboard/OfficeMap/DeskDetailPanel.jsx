@@ -1,6 +1,11 @@
+import { Link } from '@inertiajs/react';
 import {
     Armchair,
     CalendarDays,
+    Check,
+    ChevronRight,
+    HelpCircle,
+    Info,
     MapPin,
     Sparkles,
     X,
@@ -23,6 +28,8 @@ export default function DeskDetailPanel({
     onReserve,
     showOverview = false,
     overview,
+    setoresDoPiso,
+    onSelecionarSetor,
 }) {
     if (!secretaria) {
         if (!setor && showOverview) {
@@ -34,8 +41,30 @@ export default function DeskDetailPanel({
             );
         }
 
+        if (!setor && setoresDoPiso?.length > 0) {
+            return (
+                <SetoresDoPisoPanel
+                    piso={piso}
+                    setores={setoresDoPiso}
+                    onSelecionarSetor={onSelecionarSetor}
+                />
+            );
+        }
+
+        if (setor && setoresDoPiso?.length > 0) {
+            return (
+                <SetorSelecionadoPanel
+                    setor={setor}
+                    piso={piso}
+                    onAlterarSetor={() =>
+                        onSelecionarSetor?.(setor)
+                    }
+                />
+            );
+        }
+
         return (
-            <aside className="dashboard-card relative flex min-h-[555px] flex-col items-center justify-center overflow-hidden p-7 text-center">
+            <aside className="dashboard-card relative flex h-[460px] flex-col items-center justify-center overflow-hidden p-7 text-center sm:h-[550px] xl:h-[585px]">
                 {/* Onda decorativa com padrão de pontos, só estética */}
                 <svg
                     aria-hidden="true"
@@ -104,7 +133,7 @@ export default function DeskDetailPanel({
     ).slice(0, 5);
 
     return (
-        <aside className="dashboard-card flex h-full min-h-[555px] flex-col overflow-hidden p-5">
+        <aside className="dashboard-card flex h-[460px] flex-col overflow-hidden p-5 sm:h-[550px] xl:h-[585px]">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
                     {secretaria.setor?.nome}
@@ -170,11 +199,11 @@ export default function DeskDetailPanel({
                             ([chave, label, Icon]) => (
                                 <div
                                     key={chave}
-                                    className="text-center"
+                                    className="group text-center"
                                     title={label}
                                 >
-                                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                                        <Icon size={15} />
+                                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-700 transition-colors duration-200 group-hover:bg-teal-500/15 group-hover:text-teal-700 dark:bg-slate-800 dark:text-slate-200 dark:group-hover:bg-[#18c3b3]/20 dark:group-hover:text-[#18c3b3]">
+                                        <Icon size={15} strokeWidth={1.8} />
                                     </div>
                                     <p className="mt-1 truncate text-[8px] font-medium text-slate-500 dark:text-[#8fa7bd]">
                                         {label}
@@ -194,7 +223,7 @@ export default function DeskDetailPanel({
                 periodos={secretaria.disponibilidade ?? []}
             />
 
-            <div className="space-y-2 pt-8">
+            <div className="flex flex-1 flex-col items-stretch justify-center space-y-2">
                 <button
                     type="button"
                     onClick={() => onReserve(secretaria)}
@@ -210,7 +239,54 @@ export default function DeskDetailPanel({
     );
 }
 
-function AvailabilityTimeline({ periodos }) {
+function formatarMinutos(minutos) {
+    const horas = Math.floor(minutos / 60) % 24;
+    const mins = minutos % 60;
+
+    return `${String(horas).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+}
+
+// Resumo dinâmico acima da timeline — olha só para os dados reais de
+// `periodos` (nunca inventa texto): identifica o segmento que contém a
+// hora atual e descreve até quando esse estado se mantém.
+function resumirDisponibilidade(periodos, agoraMinutos) {
+    const segmentoAtual = periodos.find((periodo) => {
+        const inicio = minutosDoDia(periodo.inicio);
+        const fim = minutosDoDia(periodo.fim);
+        return agoraMinutos >= inicio && agoraMinutos < fim;
+    });
+
+    if (segmentoAtual) {
+        const estadoAtual = estadoNormalizado(segmentoAtual.estado);
+        const fim = minutosDoDia(segmentoAtual.fim);
+
+        if (estadoAtual === 'livre') {
+            return `Disponível até às ${formatarMinutos(fim)}`;
+        }
+
+        const rotulo = ESTADO_VISUAL[estadoAtual]?.label ?? 'Indisponível';
+        return `${rotulo} até às ${formatarMinutos(fim)}`;
+    }
+
+    const proximoBloqueio = periodos
+        .filter((periodo) => estadoNormalizado(periodo.estado) !== 'livre')
+        .map((periodo) => minutosDoDia(periodo.inicio))
+        .filter((inicio) => inicio > agoraMinutos)
+        .sort((a, b) => a - b)[0];
+
+    if (proximoBloqueio !== undefined) {
+        return `Disponível até às ${formatarMinutos(proximoBloqueio)}`;
+    }
+
+    return 'Disponível durante todo o período selecionado';
+}
+
+export function AvailabilityTimeline({ periodos }) {
+    const agoraMinutos = minutosDoDia(
+        new Date().toTimeString().slice(0, 5),
+    );
+    const resumo = resumirDisponibilidade(periodos, agoraMinutos);
+
     return (
         <div className="border-b border-slate-200 py-4 dark:border-[#2a5069]">
             <div className="flex items-center justify-between">
@@ -222,6 +298,10 @@ function AvailabilityTimeline({ periodos }) {
                     className="text-slate-400 dark:text-[#8fa7bd]"
                 />
             </div>
+
+            <p className="mt-1.5 text-xs font-semibold text-slate-600 dark:text-[#d7e3ed]">
+                {resumo}
+            </p>
 
             <div className="mt-3 flex justify-between text-[8px] font-semibold text-slate-400 dark:text-[#8fa7bd]">
                 <span>00h</span>
@@ -237,16 +317,17 @@ function AvailabilityTimeline({ periodos }) {
                         periodo.inicio,
                     );
                     const fim = minutosDoDia(periodo.fim);
+                    const estadoChave = estadoNormalizado(
+                        periodo.estado,
+                    );
                     const estado =
-                        ESTADO_VISUAL[
-                            estadoNormalizado(
-                                periodo.estado,
-                            )
-                        ] ?? ESTADO_VISUAL.reservada;
+                        ESTADO_VISUAL[estadoChave] ??
+                        ESTADO_VISUAL.reservada;
 
                     return (
                         <span
                             key={`${periodo.inicio}-${periodo.fim}-${indice}`}
+                            title={`${estado.label} · ${periodo.inicio}–${periodo.fim}`}
                             className={`absolute inset-y-0 ${estado.bar}`}
                             style={{
                                 left: `${(inicio / 1440) * 100}%`,
@@ -259,6 +340,14 @@ function AvailabilityTimeline({ periodos }) {
                         />
                     );
                 })}
+
+                <span
+                    aria-hidden="true"
+                    className="absolute inset-y-0 w-[2px] -translate-x-1/2 bg-navy-900/70 dark:bg-white/70"
+                    style={{
+                        left: `${Math.min(100, Math.max(0, (agoraMinutos / 1440) * 100))}%`,
+                    }}
+                />
             </div>
 
             <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1 text-[8px] font-semibold text-slate-500 dark:text-[#8fa7bd]">
@@ -301,6 +390,373 @@ const CORES_TEXTO = {
     ocupada: 'text-rose-500',
 };
 
+/**
+ * Alternativa ao estado vazio genérico quando nada está selecionado —
+ * em vez de só pedir para clicar num setor no mapa, já lista os
+ * setores do piso atual com disponibilidade real e características,
+ * para o espaço continuar útil antes de qualquer seleção. Só aparece
+ * quando `showOverview` não está ativo (ou seja, não no Administrador).
+ */
+const SEGMENTOS_DISPONIBILIDADE = 12;
+
+function BarraDisponibilidadeSetor({ livres, reservadas, total }) {
+    const segmentosLivres =
+        total > 0
+            ? Math.round((livres / total) * SEGMENTOS_DISPONIBILIDADE)
+            : 0;
+    const segmentosReservados =
+        total > 0
+            ? Math.round(
+                  (reservadas / total) * SEGMENTOS_DISPONIBILIDADE,
+              )
+            : 0;
+
+    return (
+        <div className="mt-2 flex gap-[3px]">
+            {Array.from({ length: SEGMENTOS_DISPONIBILIDADE }).map(
+                (_, indice) => {
+                    let cor = 'bg-slate-200 dark:bg-[#2a5069]';
+
+                    if (indice < segmentosLivres) {
+                        cor = 'bg-teal-500 dark:bg-[#18c3b3]';
+                    } else if (
+                        indice <
+                        segmentosLivres + segmentosReservados
+                    ) {
+                        cor = 'bg-amber-400';
+                    }
+
+                    return (
+                        <span
+                            key={indice}
+                            className={`h-1.5 flex-1 rounded-full ${cor}`}
+                        />
+                    );
+                },
+            )}
+        </div>
+    );
+}
+
+function SetoresDoPisoPanel({ piso, setores, onSelecionarSetor }) {
+    const maiorSetorId = setores.reduce(
+        (maior, setor) =>
+            !maior || setor.total > maior.total ? setor : maior,
+        null,
+    )?.id;
+
+    const passos = [
+        { numero: 1, label: 'Setor' },
+        { numero: 2, label: 'Secretária' },
+        { numero: 3, label: 'Reservar' },
+    ];
+    const passoAtual = 1;
+
+    return (
+        <aside className="dashboard-card flex h-[460px] flex-col p-5 sm:h-[550px] xl:h-[585px]">
+            <div className="flex shrink-0 items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-[#18c3b3]">
+                        Reserva rápida
+                    </p>
+
+                    <h3 className="mt-1 text-xl font-bold text-slate-900 dark:text-[#f8fafc]">
+                        Escolha onde quer ficar
+                    </h3>
+
+                    <p className="mt-1 text-xs text-slate-500 dark:text-[#8fa7bd]">
+                        Selecione primeiro um setor
+                        {piso?.nome ? ` do ${piso.nome}` : ''}.
+                    </p>
+                </div>
+
+                <Link
+                    href={route('faqs.index')}
+                    title="Ajuda"
+                    aria-label="Ajuda"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:border-teal-400 hover:text-teal-600 dark:border-[#2a5069] dark:text-[#8fa7bd]"
+                >
+                    <HelpCircle size={16} strokeWidth={1.9} />
+                </Link>
+            </div>
+
+            <div className="relative mt-4 shrink-0">
+                {/* Linha de ligação por trás dos círculos — comprimento
+                    fixo relativo aos centros das colunas 1 e 3 (cada
+                    coluna tem 1/3 da largura, por isso os centros ficam
+                    a 1/6 e 5/6). Os círculos têm fundo opaco para a
+                    tapar por cima. */}
+                <div className="absolute left-[16.6%] right-[16.6%] top-4 h-px bg-slate-200 dark:bg-[#2a5069]" />
+
+                <div className="relative z-10 grid grid-cols-3">
+                    {passos.map((passo) => (
+                        <div
+                            key={passo.numero}
+                            className="flex flex-col items-center gap-1.5"
+                        >
+                            <span
+                                className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
+                                    passo.numero === passoAtual
+                                        ? 'bg-teal-500 text-white dark:bg-[#18c3b3]'
+                                        : 'border-2 border-slate-200 bg-white text-slate-400 dark:border-[#2a5069] dark:bg-[#163a56] dark:text-[#8fa7bd]'
+                                }`}
+                            >
+                                {passo.numero}
+                            </span>
+
+                            <span
+                                className={`whitespace-nowrap text-[11px] font-bold ${
+                                    passo.numero === passoAtual
+                                        ? 'text-teal-700 dark:text-[#18c3b3]'
+                                        : 'text-slate-400 dark:text-[#8fa7bd]'
+                                }`}
+                            >
+                                {passo.label}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <p className="mt-4 shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8fa7bd]">
+                Setores disponíveis
+            </p>
+
+            <div className="spacehub-scroll mt-2.5 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+                {setores.map((setor) => (
+                    <button
+                        key={setor.id}
+                        type="button"
+                        onClick={() => onSelecionarSetor?.(setor)}
+                        className="group flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 text-left shadow-[0_1px_3px_rgba(15,42,67,0.04)] transition hover:-translate-y-0.5 hover:border-teal-400/50 hover:shadow-[0_8px_16px_rgba(15,42,67,0.08)] dark:border-[#2a5069]/60 dark:bg-[#101f34]"
+                    >
+                        <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                                <span className="text-sm font-bold leading-snug text-slate-900 dark:text-[#f8fafc]">
+                                    {setor.nome}
+                                </span>
+
+                                {setor.id === maiorSetorId && (
+                                    <span className="shrink-0 rounded-full bg-teal-500/10 px-2 py-0.5 text-[10px] font-bold text-teal-700 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
+                                        Mais opções
+                                    </span>
+                                )}
+                            </div>
+
+                            <p className="mt-0.5 text-xs font-semibold text-slate-400 dark:text-[#8fa7bd]">
+                                {setor.livres} livres de{' '}
+                                {setor.total}
+                            </p>
+
+                            <BarraDisponibilidadeSetor
+                                livres={setor.livres}
+                                reservadas={setor.reservadas}
+                                total={setor.total}
+                            />
+                        </div>
+
+                        <ChevronRight
+                            size={18}
+                            strokeWidth={2}
+                            className="shrink-0 text-slate-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-teal-500 dark:text-[#3d5a75]"
+                        />
+                    </button>
+                ))}
+            </div>
+
+            <div className="mt-3 flex shrink-0 items-start gap-2.5 rounded-xl bg-teal-500/10 px-3.5 py-2.5 dark:bg-[#18c3b3]/10">
+                <MapPin
+                    size={15}
+                    strokeWidth={1.9}
+                    className="mt-0.5 shrink-0 text-teal-600 dark:text-[#18c3b3]"
+                />
+                <p className="text-[11px] leading-relaxed text-teal-700 dark:text-[#18c3b3]">
+                    Ao escolher um setor, as secretárias disponíveis
+                    aparecem no mapa.
+                </p>
+            </div>
+        </aside>
+    );
+}
+
+/**
+ * Passo 2 da "Reserva rápida" — quando um setor já está escolhido mas
+ * nenhuma secretária ainda. Mesma linguagem visual do passo 1
+ * (SetoresDoPisoPanel), com o passo 1 marcado como concluído e
+ * instruções de como continuar diretamente no mapa.
+ */
+function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
+    const secretarias = setor.secretarias ?? [];
+    const total = secretarias.length;
+    const contagem = secretarias.reduce(
+        (totais, secretaria) => {
+            const estado = estadoNormalizado(secretaria.status);
+
+            if (
+                Object.prototype.hasOwnProperty.call(totais, estado)
+            ) {
+                totais[estado] += 1;
+            }
+
+            return totais;
+        },
+        { livre: 0, reservada: 0, ocupada: 0, indisponivel: 0 },
+    );
+
+    return (
+        <aside className="dashboard-card flex h-[460px] flex-col p-5 sm:h-[550px] xl:h-[585px]">
+            <div className="flex shrink-0 items-start justify-between gap-3">
+                <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-[#18c3b3]">
+                        Reserva rápida
+                    </p>
+
+                    <h3 className="mt-1 text-xl font-bold text-slate-900 dark:text-[#f8fafc]">
+                        Escolha uma secretária
+                    </h3>
+
+                    <p className="mt-1 text-xs text-slate-500 dark:text-[#8fa7bd]">
+                        As secretárias de {setor.nome} estão
+                        visíveis no mapa.
+                    </p>
+                </div>
+
+                <Link
+                    href={route('faqs.index')}
+                    title="Ajuda"
+                    aria-label="Ajuda"
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:border-teal-400 hover:text-teal-600 dark:border-[#2a5069] dark:text-[#8fa7bd]"
+                >
+                    <HelpCircle size={16} strokeWidth={1.9} />
+                </Link>
+            </div>
+
+            <div className="relative mt-4 shrink-0">
+                <div className="absolute left-[16.6%] right-[16.6%] top-4 h-px bg-slate-200 dark:bg-[#2a5069]" />
+                <div className="absolute left-[16.6%] top-4 h-px w-1/3 bg-teal-500 dark:bg-[#18c3b3]" />
+
+                <div className="relative z-10 grid grid-cols-3">
+                    <div className="flex flex-col items-center gap-1.5">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-500 text-white dark:bg-[#18c3b3]">
+                            <Check size={16} strokeWidth={2.5} />
+                        </span>
+                        <span className="whitespace-nowrap text-[11px] font-bold text-teal-700 dark:text-[#18c3b3]">
+                            Setor
+                        </span>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-1.5">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-500 text-sm font-bold text-white dark:bg-[#18c3b3]">
+                            2
+                        </span>
+                        <span className="whitespace-nowrap text-[11px] font-bold text-teal-700 dark:text-[#18c3b3]">
+                            Secretária
+                        </span>
+                    </div>
+
+                    <div className="flex flex-col items-center gap-1.5">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-slate-200 bg-white text-sm font-bold text-slate-400 dark:border-[#2a5069] dark:bg-[#163a56] dark:text-[#8fa7bd]">
+                            3
+                        </span>
+                        <span className="whitespace-nowrap text-[11px] font-bold text-slate-400 dark:text-[#8fa7bd]">
+                            Reservar
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <p className="mt-4 shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8fa7bd]">
+                Setor selecionado
+            </p>
+
+            <div className="mt-2.5 shrink-0 rounded-2xl border border-teal-500/20 bg-teal-500/[0.04] p-3.5 dark:border-[#18c3b3]/20 dark:bg-[#18c3b3]/[0.06]">
+                <div className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-teal-600 dark:bg-[#101f34] dark:text-[#18c3b3]">
+                        <MapPin size={17} strokeWidth={1.9} />
+                    </span>
+
+                    <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
+                            {setor.nome}
+                        </p>
+                        <p className="text-xs font-semibold text-slate-500 dark:text-[#8fa7bd]">
+                            {piso?.nome} · {contagem.livre} de{' '}
+                            {total} livres
+                        </p>
+                    </div>
+                </div>
+
+                <BarraDisponibilidadeSetor
+                    livres={contagem.livre}
+                    reservadas={contagem.reservada}
+                    total={total}
+                />
+
+                <button
+                    type="button"
+                    onClick={onAlterarSetor}
+                    className="mt-2.5 text-xs font-bold text-teal-700 transition hover:text-teal-800 dark:text-[#18c3b3] dark:hover:text-[#5eead4]"
+                >
+                    ← Alterar setor
+                </button>
+            </div>
+
+            <p className="mt-4 shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8fa7bd]">
+                Escolha no mapa
+            </p>
+
+            <div className="mt-2.5 flex-1 space-y-3">
+                <div className="flex gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-500/10 text-teal-600 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
+                        <Armchair size={16} strokeWidth={1.9} />
+                    </span>
+                    <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-800 dark:text-[#f8fafc]">
+                            Selecione uma secretária numerada
+                        </p>
+                        <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 dark:text-[#8fa7bd]">
+                            Clique num número turquesa para
+                            consultar os detalhes e a
+                            disponibilidade.
+                        </p>
+
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] font-semibold text-slate-500 dark:text-[#8fa7bd]">
+                            <span className="flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-teal-500 dark:bg-[#18c3b3]" />
+                                Livre
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                                Reservada
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                                Ocupada
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-[#3d5a75]" />
+                                Indisponível
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="mt-3 flex shrink-0 items-start gap-2.5 rounded-xl bg-teal-500/10 px-3.5 py-2.5 dark:bg-[#18c3b3]/10">
+                <Info
+                    size={15}
+                    strokeWidth={1.9}
+                    className="mt-0.5 shrink-0 text-teal-600 dark:text-[#18c3b3]"
+                />
+                <p className="text-[11px] leading-relaxed text-teal-700 dark:text-[#18c3b3]">
+                    Depois de escolher a secretária, clique em
+                    Reservar agora para continuar.
+                </p>
+            </div>
+        </aside>
+    );
+}
+
 function OcupacaoRing() {
     return (
         <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-teal-500/10 text-teal-600">
@@ -338,7 +794,7 @@ function FloorOverview({ floorName, overview }) {
     ];
 
     return (
-        <aside className="dashboard-card flex h-full flex-col justify-between overflow-hidden p-5">
+        <aside className="dashboard-card flex h-[460px] flex-col justify-between overflow-hidden p-5 sm:h-[550px] xl:h-[585px]">
             <div>
                 <div className="flex items-center gap-2">
                     <h2 className="text-lg font-extrabold text-slate-900 dark:text-[#f8fafc]">

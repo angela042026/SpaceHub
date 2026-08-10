@@ -173,7 +173,7 @@ export default function Admin({
 
             <DashboardLayout>
                 {/* Indicadores principais */}
-                <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+                <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                     <StatCard
                         title="Reservas Hoje"
                         value={
@@ -301,15 +301,15 @@ export default function Admin({
                 </section>
 
                 {/* Gráficos imediatamente abaixo do mapa */}
-                <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-12">
-                    <div className="min-w-0 xl:col-span-8">
+                <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
+                    <div className="min-w-0 lg:col-span-8">
                         <OccupancyTrendChart
                             data={tendenciaOcupacao}
                             pisos={pisosParaFiltro}
                         />
                     </div>
 
-                    <div className="xl:col-span-4">
+                    <div className="lg:col-span-4">
                         <ReservationsByFloorChart
                             data={reservasPorPiso}
                         />
@@ -336,7 +336,7 @@ export default function Admin({
                 </section>
 
                 {/* Atividade recente e próximas reservas */}
-                <section className="mt-6 grid grid-cols-1 items-stretch gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(420px,1fr)]">
+                <section className="mt-6 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-2 xl:grid-cols-[minmax(0,1.2fr)_minmax(420px,1fr)]">
                     <div className="min-w-0">
                         <RecentActivity
                             eventos={

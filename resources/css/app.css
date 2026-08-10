@@ -59,7 +59,8 @@
         --radius-pill: 9999px;
 
         --shadow-card:
-            0 8px 24px rgb(15 23 42 / 0.05);
+            0 8px 24px rgb(15 42 67 / 0.055),
+            inset 0 1px 0 rgb(255 255 255 / 0.8);
 
         --shadow-card-hover:
             0 10px 25px -5px rgb(0 0 0 / 0.1),
@@ -157,6 +158,31 @@
             var(--color-surface);
     }
 
+    /*
+     * Profundidade muito subtil no fundo das páginas de dashboard —
+     * dois glows radiais quase impercetíveis (turquesa/azul), só em
+     * modo claro. Modo escuro não é tocado.
+     */
+    .spacehub-page-bg {
+        background-color: var(--color-surface);
+    }
+
+    html:not(.dark) .spacehub-page-bg {
+        background-image:
+            radial-gradient(
+                640px 420px at 100% 0%,
+                rgb(20 184 166 / 0.045),
+                transparent 60%
+            ),
+            radial-gradient(
+                580px 460px at 58% 42%,
+                rgb(79 143 234 / 0.035),
+                transparent 55%
+            );
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
     /* =====================================================
        SIDEBAR
        ===================================================== */
@@ -214,6 +240,40 @@
         box-shadow:
             0 10px 26px rgb(4 18 33 / 0.2),
             inset 0 1px 0 rgb(255 255 255 / 0.025);
+    }
+
+    /*
+     * Modificador opt-in para cards clicáveis (chips, tiles, itens de
+     * lista) — nunca aplicado ao .dashboard-card base, para não elevar
+     * painéis estáticos (ex: Visão geral, KPIs) que não reagem a clique.
+     */
+    .dashboard-card-hover {
+        transition:
+            transform 200ms ease,
+            box-shadow 200ms ease,
+            border-color 200ms ease;
+    }
+
+    .dashboard-card-hover:hover {
+        transform: translateY(-2px);
+        border-color: rgb(20 184 166 / 0.35);
+
+        box-shadow:
+            0 12px 28px rgb(15 42 67 / 0.09),
+            inset 0 1px 0 rgb(255 255 255 / 0.8);
+    }
+
+    .dark .dashboard-card-hover:hover {
+        border-color: rgb(24 195 179 / 0.4);
+        box-shadow: var(--shadow-card-hover);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dashboard-card-hover,
+        .dashboard-card-hover:hover {
+            transition: none;
+            transform: none;
+        }
     }
 
     .stat-card {
@@ -451,8 +511,13 @@
 
 .spacehub-scroll {
     scrollbar-width: thin;
-    scrollbar-color: var(--accent) transparent;
+    scrollbar-color: transparent transparent;
     padding-right: 6px;
+}
+
+.spacehub-scroll:hover,
+.spacehub-scroll:focus-within {
+    scrollbar-color: var(--accent) transparent;
 }
 
 .spacehub-scroll::-webkit-scrollbar {
@@ -464,14 +529,18 @@
 }
 
 .spacehub-scroll::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+}
+
+.spacehub-scroll:hover::-webkit-scrollbar-thumb,
+.spacehub-scroll:focus-within::-webkit-scrollbar-thumb {
     background:
         linear-gradient(
             180deg,
             var(--accent),
             var(--accent-dark)
         );
-
-    border-radius: 999px;
 }
 
 .spacehub-scroll::-webkit-scrollbar-thumb:hover {

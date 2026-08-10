@@ -82,7 +82,7 @@ export default function Sidebar({
             )}
 
             <aside
-                className={`fixed left-0 top-0 z-40 flex h-screen w-72 shrink-0 flex-col bg-navy-950 px-5 py-7 text-white shadow-2xl transition-transform duration-300 print:hidden lg:sticky lg:top-0 lg:self-start lg:translate-x-0 ${
+                className={`fixed left-0 top-0 z-40 flex h-screen w-72 shrink-0 flex-col bg-navy-950 px-5 py-7 text-white shadow-2xl transition-transform duration-300 print:hidden lg:sticky lg:top-0 lg:w-[272px] lg:self-start lg:translate-x-0 ${
                     open
                         ? 'translate-x-0'
                         : '-translate-x-full'

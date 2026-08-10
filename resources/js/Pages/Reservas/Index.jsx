@@ -33,7 +33,39 @@ const AVALIACAO_ESTADO_LABEL = {
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
-export default function Index({ reservas, setores, pisos, edificios, filters }) {
+export default function Index({ reservas, setores, pisos, edificios, filters, secretariasFavoritas = [] }) {
+    // Estrela de "secretária favorita" — marca a secretária (não a
+    // reserva), otimista no clique e revertida se o pedido falhar.
+    const [favoritas, setFavoritas] = useState(
+        () => new Set(secretariasFavoritas),
+    );
+
+    const alternarFavorita = (secretariaId) => {
+        const jaEraFavorita = favoritas.has(secretariaId);
+
+        setFavoritas((atual) => {
+            const seguinte = new Set(atual);
+            jaEraFavorita ? seguinte.delete(secretariaId) : seguinte.add(secretariaId);
+            return seguinte;
+        });
+
+        router.post(
+            route('secretarias.favorita.toggle', secretariaId),
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onError: () => {
+                    // Reverte se o backend recusar o pedido.
+                    setFavoritas((atual) => {
+                        const seguinte = new Set(atual);
+                        jaEraFavorita ? seguinte.add(secretariaId) : seguinte.delete(secretariaId);
+                        return seguinte;
+                    });
+                },
+            },
+        );
+    };
 
     // Cancelar reserva
     const [reservaParaCancelar, setReservaParaCancelar] = useState(null);
@@ -254,17 +286,53 @@ export default function Index({ reservas, setores, pisos, edificios, filters }) 
                                     key={reserva.id}
                                     className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
                                 >
-                                    {resolverImagemSecretaria(reserva.secretaria) ? (
-                                        <img
-                                            src={resolverImagemSecretaria(reserva.secretaria)}
-                                            alt={reserva.secretaria?.codigo ?? ''}
-                                            className="h-40 w-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="flex h-40 w-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-slate-800">
-                                            <ImageOff size={28} strokeWidth={1.6} />
-                                        </div>
-                                    )}
+                                    <div className="relative">
+                                        {resolverImagemSecretaria(reserva.secretaria) ? (
+                                            <img
+                                                src={resolverImagemSecretaria(reserva.secretaria)}
+                                                alt={reserva.secretaria?.codigo ?? ''}
+                                                className="h-40 w-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="flex h-40 w-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-slate-800">
+                                                <ImageOff size={28} strokeWidth={1.6} />
+                                            </div>
+                                        )}
+
+                                        {reserva.secretaria?.id && (
+                                            <button
+                                                type="button"
+                                                onClick={() => alternarFavorita(reserva.secretaria.id)}
+                                                aria-label={
+                                                    favoritas.has(reserva.secretaria.id)
+                                                        ? `Remover ${reserva.secretaria.codigo} das favoritas`
+                                                        : `Marcar ${reserva.secretaria.codigo} como favorita`
+                                                }
+                                                aria-pressed={favoritas.has(reserva.secretaria.id)}
+                                                title={
+                                                    favoritas.has(reserva.secretaria.id)
+                                                        ? 'Secretária favorita'
+                                                        : 'Marcar como favorita'
+                                                }
+                                                className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-400 shadow-sm backdrop-blur transition hover:scale-110 hover:text-amber-500 dark:bg-slate-900/80 dark:text-slate-500"
+                                            >
+                                                <Star
+                                                    size={16}
+                                                    strokeWidth={1.9}
+                                                    className={
+                                                        favoritas.has(reserva.secretaria.id)
+                                                            ? 'text-amber-500'
+                                                            : ''
+                                                    }
+                                                    fill={
+                                                        favoritas.has(reserva.secretaria.id)
+                                                            ? 'currentColor'
+                                                            : 'none'
+                                                    }
+                                                />
+                                            </button>
+                                        )}
+                                    </div>
 
                                     <div className="p-4">
                                         <div className="flex items-start justify-between gap-2">

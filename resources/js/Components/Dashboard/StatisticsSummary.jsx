@@ -22,15 +22,6 @@ const DIAS_SEMANA = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
 const GRADIENTE_TEAL = 'linear-gradient(to bottom, #2dd4bf, #0d9488)';
 const GRADIENTE_AZUL = 'linear-gradient(to bottom, #60a5fa, #2563eb)';
 
-function formatarVariacao(valor) {
-    const sinal = valor > 0 ? '+' : valor < 0 ? '−' : '';
-
-    return `${sinal}${Math.abs(valor).toLocaleString('pt-PT', {
-        minimumFractionDigits: 1,
-        maximumFractionDigits: 1,
-    })}%`;
-}
-
 function CardDestaque({ icon: Icon, label, badge, children }) {
     return (
         <div className="relative flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 dark:border-[#2a5069]/60 dark:bg-[#101f34]">
@@ -430,23 +421,6 @@ export default function StatisticsSummary({ estatisticas }) {
                     <CardDestaque
                         icon={Layers3}
                         label="Setor mais procurado"
-                        badge={
-                            tendenciaSetorTop?.variacaoPercentual !=
-                            null ? (
-                                <span
-                                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                                        tendenciaSetorTop.variacaoPercentual >=
-                                        0
-                                            ? 'bg-green-500/10 text-green-600 dark:bg-[#22c983]/10 dark:text-[#22c983]'
-                                            : 'bg-rose-500/10 text-rose-600 dark:bg-[#ff4d6d]/10 dark:text-[#ff4d6d]'
-                                    }`}
-                                >
-                                    {formatarVariacao(
-                                        tendenciaSetorTop.variacaoPercentual,
-                                    )}
-                                </span>
-                            ) : null
-                        }
                     >
                         <p className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
                             {setorTop?.nome ?? 'Sem dados'}

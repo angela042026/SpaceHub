@@ -14,6 +14,11 @@ const STATUS_INFO = {
         badgeClass: 'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-300',
         message: 'Já confirmaste esta reserva hoje.',
     },
+    pendente_pagamento: {
+        label: 'Pendente de pagamento',
+        badgeClass: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400',
+        message: 'Conclui o pagamento desta reserva para poderes fazer o check-in.',
+    },
     fora_da_janela: {
         label: 'Fora da janela horária',
         badgeClass: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400',
