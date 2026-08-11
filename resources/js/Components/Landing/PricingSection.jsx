@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     CalendarCheck,
     CalendarDays,
     Check,
     Clock3,
+    Search,
     Sparkles,
     UserPlus,
 } from 'lucide-react';
@@ -108,6 +109,8 @@ const benefits = [
 ];
 
 export default function PricingSection() {
+    const { auth } = usePage().props;
+
     const [selectedPeriod, setSelectedPeriod] = useState('daily');
 
     const [selectedDailyPeriod, setSelectedDailyPeriod] =
@@ -157,7 +160,7 @@ export default function PricingSection() {
                                 onClick={() =>
                                     setSelectedPeriod(period.id)
                                 }
-                                className={`min-w-[105px] flex-1 rounded-xl px-5 py-2.5 text-sm font-bold transition-all duration-300 ${isActive
+                                className={`min-w-[80px] flex-1 rounded-xl px-5 py-2.5 text-sm font-bold transition-all duration-300 sm:min-w-[105px] ${isActive
                                     ? 'bg-[#071A33] text-white shadow-md'
                                     : 'text-slate-500 hover:bg-[#F1F5F9] hover:text-[#071A33]'
                                     }`}
@@ -201,7 +204,7 @@ export default function PricingSection() {
                 <div className="mx-auto mt-7 max-w-[1000px] overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
                     <div className="grid lg:grid-cols-[0.82fr_1.18fr]">
                         {/* Preço */}
-                        <div className="relative flex flex-col justify-center bg-[#071A33] px-8 py-10 text-white sm:px-10 lg:px-11 lg:py-12">
+                        <div className="relative flex flex-col justify-center bg-[#071A33] px-5 py-10 text-white sm:px-10 lg:px-11 lg:py-12">
                             <div className="absolute left-0 top-10 h-16 w-1 rounded-r-full bg-[#14B8A6]" />
 
                             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#14B8A6]/20 bg-[#14B8A6]/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#5EEAD4]">
@@ -255,7 +258,7 @@ export default function PricingSection() {
                         </div>
 
                         {/* Benefícios incluídos */}
-                        <div className="px-8 py-10 sm:px-10 lg:px-11 lg:py-12">
+                        <div className="px-5 py-10 sm:px-10 lg:px-11 lg:py-12">
                             <div className="flex items-center gap-3">
                                 <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#14B8A6]/10">
                                     <CalendarDays
@@ -297,20 +300,32 @@ export default function PricingSection() {
                             </div>
 
                             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                                <Link
-                                    href={route('register')}
-                                    className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-xl bg-[#14B8A6]/80 px-9 py-3.5 text-base font-black text-[#03172B] shadow-lg shadow-[#14B8A6]/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#14B8A6] hover:shadow-[#14B8A6]/35 sm:min-w-[220px]"
-                                >
-                                    <UserPlus size={19} />
-                                    Criar conta
-                                </Link>
+                                {auth?.user ? (
+                                    <Link
+                                        href={route(
+                                            'reservas.availability',
+                                        )}
+                                        className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-base font-black text-[#071A33] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#14B8A6]/50 hover:bg-[#EAFBF8] sm:whitespace-nowrap"
+                                    >
+                                        <Search size={19} />
+                                        Consultar disponibilidade
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href={route('register')}
+                                        className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-base font-black text-[#071A33] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#14B8A6]/50 hover:bg-[#EAFBF8] sm:whitespace-nowrap"
+                                    >
+                                        <UserPlus size={19} />
+                                        Criar conta
+                                    </Link>
+                                )}
 
                                 <Link
                                     href={route('login')}
-                                    className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-9 py-3.5 text-base font-black text-[#071A33] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#14B8A6]/50 hover:bg-[#EAFBF8] sm:min-w-[220px]"
+                                    className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#14B8A6]/80 px-6 py-3.5 text-base font-black text-[#03172B] shadow-lg shadow-[#14B8A6]/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#14B8A6] hover:shadow-[#14B8A6]/35 sm:whitespace-nowrap"
                                 >
                                     <CalendarCheck size={19} />
-                                    Reservar
+                                    Reservar agora
                                 </Link>
                             </div>
 

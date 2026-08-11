@@ -7,10 +7,10 @@ import {
 } from 'lucide-react';
 
 const benefits = [
-    'Menos tempo perdido à procura de um lugar livre',
-    'Sem confusões de agenda entre colegas de equipa',
-    'Decisões de espaço baseadas em dados reais',
-    'Suporte disponível sempre que precisar',
+    'Encontre espaços livres em tempo real',
+    'Reserve em poucos passos',
+    'Faça check-in através de QR Code',
+    'Consulte ou cancele quando precisar',
 ];
 
 const highlights = [
@@ -46,15 +46,15 @@ export default function BenefitsSection() {
                         </span>
 
                         <h2 className="mt-4 max-w-2xl text-3xl font-black leading-tight tracking-[-0.04em] text-[#071A33] sm:text-4xl lg:text-5xl">
-                            Mais controlo.
+                            Mais liberdade.
                             <br />
                             Menos complicações.
                         </h2>
 
                         <p className="mt-6 max-w-xl text-base leading-8 text-slate-600">
-                            O SpaceHub reúne reservas, acessos e gestão de
-                            espaços numa plataforma simples, moderna e
-                            preparada para o trabalho do dia a dia.
+                            Encontre o espaço certo, consulte a
+                            disponibilidade e reserve tudo de forma
+                            simples, rápida e segura.
                         </p>
 
                         <div className="mt-9 space-y-4">
@@ -82,8 +82,8 @@ export default function BenefitsSection() {
                                 className="text-[#14B8A6]"
                             />
 
-                            Em conformidade com o RGPD, sempre sob o seu
-                            controlo
+                            Os seus dados protegidos em conformidade com
+                            o RGPD.
                         </div>
                     </div>
 

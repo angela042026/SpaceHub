@@ -38,13 +38,12 @@ export default function HeroSection() {
             </div>
 
             {/* Conteúdo */}
-            <div className="relative mx-auto flex min-h-[720px] max-w-[1500px] items-center px-6 py-20 lg:px-10">
-                <div className="max-w-2xl">
-                    <h1 className="text-4xl font-black leading-[1.02] tracking-[-0.03em] text-white sm:text-5xl lg:text-6xl xl:text-[64px]">
+            <div className="relative mx-auto flex min-h-[720px] max-w-[1500px] items-center px-6 py-20 lg:px-10 lg:py-28">
+                <div className="max-w-3xl">
+                    <h1 className="text-[32px] font-black leading-[1.02] tracking-[-0.03em] text-white sm:text-[43px] lg:text-[54px] xl:text-[58px]">
                         Reserve o espaço ideal
                         <br />
-                        para trabalhar
-                        <br />
+                        para trabalhar{' '}
                         <span className="text-[#14B8A6]">
                             melhor.
                         </span>
@@ -86,7 +85,7 @@ export default function HeroSection() {
                 </div>
             </div>
 
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 bg-gradient-to-t from-[#03172B] to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 bg-gradient-to-t from-[#03172B] to-transparent lg:h-36" />
         </section>
     );
 }

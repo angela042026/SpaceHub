@@ -15,6 +15,7 @@ export default function Index({ pisos, edificios }) {
                 <OfficeMap
                     mostrarTudo
                     somenteMapa
+                    reservarAoSelecionar
                     tamanhoMapa="grande"
                     selectedFloor={selectedFloor}
                     setSelectedFloor={setSelectedFloor}
