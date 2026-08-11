@@ -113,7 +113,7 @@ export default function MapToolbar({
                     </select>
                 )}
 
-                <div className="relative min-w-[260px] flex-1 xl:max-w-[300px]">
+                <div className="relative min-w-[160px] flex-1 sm:min-w-[260px] xl:max-w-[300px]">
                     <Search
                         size={17}
                         className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa7bd]"

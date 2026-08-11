@@ -41,7 +41,7 @@ export default function DeskMarker({
                         className={`pointer-events-none absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full border opacity-30 ${estado.ring}`}
                     />
 
-                    <span className="pointer-events-none absolute bottom-1 left-1/2 z-40 h-8 w-8 -translate-x-1/2">
+                    <span className="absolute bottom-1 left-1/2 z-40 h-8 w-8 -translate-x-1/2">
                         <MapPin
                             size={32}
                             strokeWidth={1.5}

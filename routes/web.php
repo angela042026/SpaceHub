@@ -53,6 +53,12 @@ Route::get('/politica-cookies', function () {
     return Inertia::render('Legal/Cookies');
 })->name('legal.cookies');
 
+// ==========================
+// Central de ajuda (pública — funciona com ou sem sessão iniciada)
+// ==========================
+Route::get('/ajuda', [FaqController::class, 'index'])
+    ->name('faqs.index');
+
 /*
 |--------------------------------------------------------------------------
 | Autenticação com Google
@@ -199,12 +205,6 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::post('/reservas/{reserva}/avaliacao', [AvaliacaoController::class, 'store'])
         ->name('avaliacoes.store');
-
-    // ==========================
-    // Help Center
-    // ==========================
-    Route::get('/ajuda', [FaqController::class, 'index'])
-        ->name('faqs.index');
 
     // ==========================
     // Suporte

@@ -46,6 +46,7 @@ export default function OfficeMap({
     secretariaFocoId,
     onSecretariaSelecionada,
     mostrarLegenda: mostrarLegendaProp,
+    reservarAoSelecionar = false,
 }) {
     const sectionRef = useRef(null);
     const dragStartRef = useRef(null);
@@ -458,6 +459,27 @@ export default function OfficeMap({
         });
     }
 
+    // No mapa geral (/mapa), clicar no número de uma secretária vai
+    // direto para a página de reserva, já com ela selecionada — não faz
+    // sentido mostrar aqui o painel de detalhe, que só existe no mapa
+    // embutido no dashboard.
+    function selecionarSecretaria(secretaria) {
+        if (reservarAoSelecionar) {
+            // Primeiro toque só seleciona (o pino cresce e mostra o
+            // estado) — só um segundo toque na mesma secretária, já
+            // localizada no mapa, é que avança para a reserva.
+            if (selectedSecretaria?.id === secretaria.id) {
+                reservarSecretaria(secretaria);
+                return;
+            }
+
+            setSelectedSecretaria(secretaria);
+            return;
+        }
+
+        setSelectedSecretaria(secretaria);
+    }
+
     async function alternarEcraInteiro() {
         if (!document.fullscreenElement) {
             await sectionRef.current?.requestFullscreen?.();
@@ -559,7 +581,7 @@ export default function OfficeMap({
                     onPointerCancel={terminarArrasto}
                     onSelecionarSetor={selecionarSetor}
                     onSelecionarSecretaria={
-                        setSelectedSecretaria
+                        selecionarSecretaria
                     }
                 />
 

@@ -116,7 +116,7 @@ export default function Footer() {
                                         aria-label={label}
                                         target="_blank"
                                         rel="noreferrer"
-                                        className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 text-slate-300 transition-all duration-300 hover:-translate-y-1 hover:border-[#14B8A6]/60 hover:bg-[#14B8A6] hover:text-[#04162A]"
+                                        className="grid h-10 w-10 place-items-center rounded-xl bg-white/5 text-white transition-all duration-300 hover:-translate-y-1 hover:bg-[#14B8A6] hover:text-[#04162A]"
                                     >
                                         <Icon size={17} />
                                     </a>
@@ -181,7 +181,7 @@ export default function Footer() {
                                 href="mailto:spacehubbraga@gmail.com"
                                 className="group flex items-center gap-3 text-sm text-slate-300 transition-colors duration-300 hover:text-[#5EEAD4]"
                             >
-                                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/5 text-[#14B8A6] transition group-hover:bg-[#14B8A6]/10">
+                                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/5 text-white transition group-hover:bg-[#14B8A6]/10">
                                     <Mail size={17} />
                                 </div>
 
@@ -192,7 +192,7 @@ export default function Footer() {
                                 href="tel:+351000000000"
                                 className="group flex items-center gap-3 text-sm text-slate-300 transition-colors duration-300 hover:text-[#5EEAD4]"
                             >
-                                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/5 text-[#14B8A6] transition group-hover:bg-[#14B8A6]/10">
+                                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/5 text-white transition group-hover:bg-[#14B8A6]/10">
                                     <Phone size={17} />
                                 </div>
 
@@ -200,7 +200,7 @@ export default function Footer() {
                             </a>
 
                             <div className="flex items-center gap-3 text-sm text-slate-300">
-                                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/5 text-[#14B8A6]">
+                                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/5 text-white">
                                     <MapPin size={17} />
                                 </div>
 

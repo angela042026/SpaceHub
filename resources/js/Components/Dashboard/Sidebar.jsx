@@ -209,7 +209,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={HelpCircle}
-                            label="Help Center"
+                            label="Central de ajuda"
                             href={route('faqs.index')}
                             active={route().current(
                                 'faqs.index',

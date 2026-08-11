@@ -81,7 +81,8 @@ export default function TestimonialsSection() {
                 </h2>
 
                 <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600">
-                    Feedback real de quem usa a plataforma no dia a dia.
+                    Experiências que mostram como diferentes perfis podem
+                    aproveitar a plataforma no dia a dia.
                 </p>
             </div>
 

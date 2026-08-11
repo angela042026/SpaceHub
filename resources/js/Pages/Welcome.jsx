@@ -1,16 +1,16 @@
 import { Head } from '@inertiajs/react';
 
-import Navbar from '@/Components/landing/Navbar';
-import HeroSection from '@/Components/landing/HeroSection';
-import FeaturesSection from '@/Components/landing/FeaturesSection';
-import HowItWorksSection from '@/Components/landing/HowItWorksSection';
-import SpacesCarousel from '@/Components/landing/SpacesCarousel';
-import TestimonialsSection from '@/Components/landing/TestimonialsSection';
-import BenefitsSection from '@/Components/landing/BenefitsSection';
-import PricingSection from '@/Components/landing/PricingSection';
-import Footer from '@/Components/landing/Footer';
+import Navbar from '@/Components/Landing/Navbar';
+import HeroSection from '@/Components/Landing/HeroSection';
+import FeaturesSection from '@/Components/Landing/FeaturesSection';
+import HowItWorksSection from '@/Components/Landing/HowItWorksSection';
+import SpacesCarousel from '@/Components/Landing/SpacesCarousel';
+import TestimonialsSection from '@/Components/Landing/TestimonialsSection';
+import BenefitsSection from '@/Components/Landing/BenefitsSection';
+import PricingSection from '@/Components/Landing/PricingSection';
+import Footer from '@/Components/Landing/Footer';
 import CookieBanner from '@/Components/CookieBanner';
-import ScrollToTopButton from '@/Components/ScrollToTopButton';
+import LeftFloatingActions from '@/Components/LeftFloatingActions';
 import ChatWidget from '@/Components/Chat/ChatWidget';
 
 export default function Welcome() {
@@ -34,7 +34,7 @@ export default function Welcome() {
                 <Footer />
 
                 <CookieBanner />
-                <ScrollToTopButton />
+                <LeftFloatingActions />
                 <ChatWidget />
             </div>
         </>

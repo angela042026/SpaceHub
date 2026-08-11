@@ -80,12 +80,25 @@ export default {
                         opacity: '1',
                     },
                 },
+
+                'modal-in': {
+                    '0%': {
+                        transform: 'translateY(8px)',
+                        opacity: '0',
+                    },
+                    '100%': {
+                        transform: 'translateY(0)',
+                        opacity: '1',
+                    },
+                },
             },
 
             animation: {
                 marquee: 'marquee 32s linear infinite',
                 'desk-pop':
                     'desk-pop 220ms ease-out forwards',
+                'modal-in':
+                    'modal-in 200ms ease-out forwards',
             },
         },
     },
