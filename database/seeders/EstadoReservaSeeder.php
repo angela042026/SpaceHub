@@ -26,6 +26,10 @@ class EstadoReservaSeeder extends Seeder
                 'codigo' => 'expirada',
                 'nome' => 'Expirada',
             ],
+            [
+                'codigo' => 'concluida',
+                'nome' => 'Concluída',
+            ],
         ];
 
         foreach ($estados as $estado) {

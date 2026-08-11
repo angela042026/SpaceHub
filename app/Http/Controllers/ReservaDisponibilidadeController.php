@@ -82,17 +82,21 @@ class ReservaDisponibilidadeController extends Controller
     }
 
     /**
-     * Lugares de um setor com a disponibilidade de cada período numa data.
+     * Lugares com a disponibilidade de cada período numa data.
      *
-     * Usado pelos cartões das páginas "Nova Reserva" e "Editar Reserva",
-     * onde cada lugar mostra diretamente os períodos (Manhã/Tarde) que
-     * ainda estão livres.
+     * Usado pelos cartões das páginas "Nova Reserva" e "Editar Reserva".
+     * Em "Editar Reserva" vem sempre com setor_id (mantém o comportamento
+     * antigo); em "Nova Reserva", piso_id e setor_id são ambos opcionais
+     * — quando omitidos, devolve lugares de todo o edifício, para os
+     * espaços aparecerem imediatamente sem obrigar a escolher piso e
+     * categoria primeiro.
      */
     public function lugaresPorSetor(Request $request)
     {
         $request->validate([
             'data' => ['required', 'date'],
-            'setor_id' => ['required', 'exists:setores,id'],
+            'setor_id' => ['nullable', 'exists:setores,id'],
+            'piso_id' => ['nullable', 'exists:pisos,id'],
 
             ...array_fill_keys(
                 ReservaDisponibilidadeService::CARACTERISTICAS_FILTRAVEIS,
@@ -105,9 +109,10 @@ class ReservaDisponibilidadeController extends Controller
         return response()->json(
             $this->disponibilidade->secretariasComDisponibilidade(
                 $request->data,
-                $request->setor_id,
+                $request->filled('setor_id') ? $request->setor_id : null,
                 $this->disponibilidade->preferenciasDaRequisicao($request),
-                $request->integer('excluir_reserva_id') ?: null
+                $request->integer('excluir_reserva_id') ?: null,
+                $request->filled('piso_id') ? $request->piso_id : null
             )
         );
     }

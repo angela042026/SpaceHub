@@ -45,7 +45,7 @@ class ReservaController extends Controller
             ->whereNotNull('secretaria_id')
             ->with([
                 'secretaria',
-                'secretaria.setor',
+                'secretaria.setor.piso.edificio',
                 'periodo',
                 'estadoReserva',
                 'pagamento',

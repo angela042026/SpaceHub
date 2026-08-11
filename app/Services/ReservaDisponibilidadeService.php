@@ -168,19 +168,26 @@ class ReservaDisponibilidadeService
     }
 
     /**
-     * Lugares reserváveis e ativos de um setor, cada um com um mapa
+     * Lugares reserváveis e ativos, cada um com um mapa
      * periodo_id => disponível (bool) para a data indicada.
+     *
+     * $setorId e $pisoId são ambos opcionais: quando omitidos, devolve
+     * lugares de todas as categorias/pisos — usado pela página "Nova
+     * Reserva", que já não obriga a escolher um piso e uma categoria
+     * antes de mostrar resultados.
      */
     public function secretariasComDisponibilidade(
         string $data,
-        int|string $setorId,
+        int|string|null $setorId = null,
         array $preferencias = [],
-        ?int $excluirReservaId = null
+        ?int $excluirReservaId = null,
+        int|string|null $pisoId = null
     ) {
         $periodos = $this->periodosReservaAtivos();
 
         $secretarias = $this->secretariasFiltradasPorPreferencias(
             $setorId,
+            $pisoId,
             $preferencias
         );
 
@@ -391,17 +398,35 @@ class ReservaDisponibilidadeService
     }
 
     /**
-     * Secretárias reserváveis e ativas de um setor, filtradas pelas
-     * características marcadas em $preferencias (uma coluna booleana
-     * por característica em CARACTERISTICAS_FILTRAVEIS).
+     * Secretárias reserváveis e ativas, filtradas pelas características
+     * marcadas em $preferencias (uma coluna booleana por característica
+     * em CARACTERISTICAS_FILTRAVEIS).
+     *
+     * $setorId e $pisoId são ambos opcionais e independentes: com os
+     * dois omitidos devolve lugares de todo o edifício; com só o piso
+     * indicado, todas as categorias desse piso; com só a categoria,
+     * esse setor em qualquer piso (não deve acontecer na prática, mas
+     * a query continua correta).
      */
     private function secretariasFiltradasPorPreferencias(
-        int|string $setorId,
+        int|string|null $setorId,
+        int|string|null $pisoId,
         array $preferencias
     ) {
         $query = Secretaria::where('reservavel', true)
             ->where('ativo', true)
-            ->where('setor_id', $setorId);
+            ->with('setor.piso.edificio')
+            ->when(
+                $setorId !== null,
+                fn($q) => $q->where('setor_id', $setorId)
+            )
+            ->when(
+                $pisoId !== null,
+                fn($q) => $q->whereHas(
+                    'setor',
+                    fn($setorQuery) => $setorQuery->where('piso_id', $pisoId)
+                )
+            );
 
         foreach (self::CARACTERISTICAS_FILTRAVEIS as $caracteristica) {
             $query->when(
