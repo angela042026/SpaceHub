@@ -105,10 +105,12 @@ export function correspondePesquisa(secretaria, pesquisa) {
 
     const codigo = normalizarTexto(secretaria.codigo);
     const numero = normalizarTexto(secretaria.numero);
+    const nomeSetor = normalizarTexto(secretaria.setor?.nome);
 
     return (
         codigo.includes(termo) ||
-        numero.includes(termo)
+        numero.includes(termo) ||
+        nomeSetor.includes(termo)
     );
 }
 

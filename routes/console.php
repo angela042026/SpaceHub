@@ -20,7 +20,9 @@ Schedule::command('pagamentos:cancelar-pendentes-expirados')
     ->everyMinute()
     ->withoutOverlapping();
 
-// Marca como concluídas as reservas confirmadas cuja data já passou.
+// Marca como concluídas (ou não compareceu) as reservas confirmadas cujo
+// período já terminou — de 15 em 15 minutos, para o estado "Confirmada"
+// não ficar errado o resto do dia depois de o período de hoje acabar.
 Schedule::command('reservas:marcar-concluidas')
-    ->dailyAt('00:05')
+    ->everyFifteenMinutes()
     ->withoutOverlapping();

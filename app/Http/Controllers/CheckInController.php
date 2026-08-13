@@ -17,10 +17,32 @@ class CheckInController extends Controller
 {
     /**
      * Página com leitura de câmara para ler o QR Code de uma secretária.
+     *
+     * Mostra também, num resumo compacto, as reservas de hoje do
+     * utilizador ainda elegíveis para check-in (sem check-in feito) —
+     * pode haver mais do que uma, daí devolver sempre uma coleção em
+     * vez de só a primeira.
      */
     public function camera(): Response
     {
-        return Inertia::render('CheckIn/Camera');
+        $reservas = Reserva::with([
+                'secretaria.setor.piso.edificio',
+                'periodo',
+                'estadoReserva',
+            ])
+            ->where('user_id', auth()->id())
+            ->whereDate('data', Carbon::today())
+            ->whereIn('estado_reserva_id', EstadoReserva::idsAtivos())
+            ->whereNull('check_in_at')
+            ->orderBy('periodo_id')
+            ->get();
+
+        return Inertia::render('CheckIn/Camera', [
+            'reservas' => $reservas->map(fn (Reserva $reserva) => [
+                ...$reserva->toArray(),
+                'status' => $this->statusDaReserva($reserva),
+            ]),
+        ]);
     }
 
     /**

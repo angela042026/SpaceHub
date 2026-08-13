@@ -171,24 +171,27 @@ class ReservaDisponibilidadeService
      * Lugares reserváveis e ativos, cada um com um mapa
      * periodo_id => disponível (bool) para a data indicada.
      *
-     * $setorId e $pisoId são ambos opcionais: quando omitidos, devolve
-     * lugares de todas as categorias/pisos — usado pela página "Nova
-     * Reserva", que já não obriga a escolher um piso e uma categoria
-     * antes de mostrar resultados.
+     * $setorId, $pisoId e $edificioId são todos opcionais: quando
+     * omitidos, devolve lugares de todas as categorias/pisos/edifícios —
+     * usado pela página "Nova Reserva" (que já não obriga a escolher um
+     * piso e uma categoria antes de mostrar resultados) e por "Consultar
+     * Disponibilidade".
      */
     public function secretariasComDisponibilidade(
         string $data,
         int|string|null $setorId = null,
         array $preferencias = [],
         ?int $excluirReservaId = null,
-        int|string|null $pisoId = null
+        int|string|null $pisoId = null,
+        int|string|null $edificioId = null
     ) {
         $periodos = $this->periodosReservaAtivos();
 
         $secretarias = $this->secretariasFiltradasPorPreferencias(
             $setorId,
             $pisoId,
-            $preferencias
+            $preferencias,
+            $edificioId
         );
 
         $periodosReservadosPorSecretaria = $this->periodosReservadosPorSecretaria(
@@ -411,7 +414,8 @@ class ReservaDisponibilidadeService
     private function secretariasFiltradasPorPreferencias(
         int|string|null $setorId,
         int|string|null $pisoId,
-        array $preferencias
+        array $preferencias,
+        int|string|null $edificioId = null
     ) {
         $query = Secretaria::where('reservavel', true)
             ->where('ativo', true)
@@ -425,6 +429,13 @@ class ReservaDisponibilidadeService
                 fn($q) => $q->whereHas(
                     'setor',
                     fn($setorQuery) => $setorQuery->where('piso_id', $pisoId)
+                )
+            )
+            ->when(
+                $edificioId !== null,
+                fn($q) => $q->whereHas(
+                    'setor.piso',
+                    fn($pisoQuery) => $pisoQuery->where('edificio_id', $edificioId)
                 )
             );
 

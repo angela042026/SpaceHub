@@ -126,7 +126,7 @@ export default function MapToolbar({
                         onChange={(event) =>
                             setPesquisa(event.target.value)
                         }
-                        placeholder="Pesquisar secretária..."
+                        placeholder="Pesquisar espaço ou secretária..."
                         className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#f8fafc] dark:placeholder-[#8fa7bd] dark:focus:border-[#18c3b3] dark:focus:ring-[#18c3b3]/15"
                     />
 

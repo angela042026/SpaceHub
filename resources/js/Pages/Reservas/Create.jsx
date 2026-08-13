@@ -1,6 +1,6 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, router, usePage } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, CalendarDays, CalendarPlus, Inbox, RotateCcw, Star } from 'lucide-react';
 import LugarCard from '@/Components/Reservas/LugarCard';
 import LugarCardSkeleton from '@/Components/Reservas/LugarCardSkeleton';
@@ -169,6 +169,39 @@ export default function Create({
             block: 'center',
         });
     }, [lugares, secretariaAlvo]);
+
+    // Período vindo de "Consultar Disponibilidade" (filters.periodo_id),
+    // pré-selecionado assim que o lugar-alvo aparece na lista — só uma
+    // vez, para não sobrepor uma escolha manual feita depois.
+    const periodoPreenchidoRef = useRef(false);
+
+    useEffect(() => {
+        if (
+            periodoPreenchidoRef.current ||
+            !secretariaAlvo ||
+            !filters?.periodo_id
+        ) {
+            return;
+        }
+
+        const alvoCarregado = lugares.some(
+            (lugar) => lugar.id === secretariaAlvo,
+        );
+
+        if (!alvoCarregado) {
+            return;
+        }
+
+        setPeriodosEscolhidos((atual) => ({
+            ...atual,
+            [secretariaAlvo]:
+                filters.periodo_id === 'dia_inteiro'
+                    ? 'dia_inteiro'
+                    : Number(filters.periodo_id),
+        }));
+
+        periodoPreenchidoRef.current = true;
+    }, [lugares, secretariaAlvo, filters?.periodo_id]);
 
     /*
      * Sempre que a data, a duração ou algum filtro mudam, eliminar

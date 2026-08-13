@@ -19,7 +19,7 @@ class ReservaHistoricoController extends Controller
         $reservas = Reserva::where('user_id', Auth::id())
             ->whereDate('data', '<', now()->toDateString())
             ->with([
-                'secretaria.setor',
+                'secretaria.setor.piso.edificio',
                 'periodo',
                 'estadoReserva',
             ])

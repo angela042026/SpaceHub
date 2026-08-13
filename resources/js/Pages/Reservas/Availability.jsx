@@ -1,240 +1,904 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
-import { useState } from 'react';
-import { CalendarCheck2, ImageOff, Layers3, MapPinned, Search } from 'lucide-react';
-import { resolverImagemSecretaria } from '@/utils/imagemSetor';
+import { Head, Link } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
+import {
+    AlertTriangle,
+    CalendarClock,
+    CheckCircle2,
+    Inbox,
+    RotateCcw,
+    Search,
+    Sun,
+    Sunset,
+    X,
+} from 'lucide-react';
+import Modal from '@/Components/Modal';
+import LocalizacaoEspaco from '@/Components/Reservas/LocalizacaoEspaco';
+import { formatarDataPortugues, proximaDataValida } from '@/Components/Reservas/reservaHelpers';
+import { RESERVA_ALTERACAO_BAR_VISIBILITY_EVENT } from '@/Lib/reservaAlteracaoBar';
+
+const QUANTIDADE_POR_PAGINA = 12;
+const DEBOUNCE_MS = 350;
+const DEBOUNCE_PESQUISA_MS = 300;
+
+/**
+ * Compara texto ignorando maiúsculas/minúsculas e acentos — para
+ * "escritorio" encontrar "Escritório", por exemplo.
+ */
+function normalizarTexto(texto) {
+    return (texto ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+}
 
 const fieldClass =
-    'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+    'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
 const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
-export default function Availability({ periodos, pisos, setores, secretariasDisponiveis, filters }) {
+const botaoReservarDesktopClass =
+    'inline-flex items-center justify-center rounded-lg border border-teal-500 px-4 py-1.5 text-xs font-bold text-teal-600 transition-colors duration-200 hover:bg-teal-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:hover:text-white dark:focus-visible:ring-offset-slate-900';
 
-    const setorAtual = setores.find((setor) => String(setor.id) === String(filters.setor_id ?? ''));
+const botaoReservarMobileClass =
+    'mt-3 flex w-full items-center justify-center rounded-xl bg-teal-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors duration-200 hover:bg-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900';
 
-    const [pisoId, setPisoId] = useState(setorAtual ? String(setorAtual.piso_id) : '');
+/**
+ * Nome de exibição de um espaço — igual em toda a área de reservas
+ * (ex.: "Phone Booth 01"), a partir da categoria (setor) e do número
+ * final do código.
+ */
+function nomeEspaco(secretaria) {
+    if (!secretaria) {
+        return '-';
+    }
 
-    const { data, setData, get, processing } = useForm({
-        data: filters.data ?? '',
-        periodo_id: filters.periodo_id ?? '',
-        setor_id: filters.setor_id ?? '',
+    const categoriaNome = secretaria.setor?.nome;
+    const numeroLugar = secretaria.codigo?.match(/\d+$/)?.[0];
+
+    return categoriaNome
+        ? `${categoriaNome} ${numeroLugar ?? ''}`.trim()
+        : secretaria.codigo;
+}
+
+function PillPeriodo({ disponivel }) {
+    return disponivel ? (
+        <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700 dark:bg-teal-400/10 dark:text-teal-300">
+            <CheckCircle2 size={13} strokeWidth={2} />
+            Livre
+        </span>
+    ) : (
+        <span className="inline-flex h-6 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+            —
+        </span>
+    );
+}
+
+function PillPeriodoRotulada({ nome, disponivel }) {
+    return (
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-100 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-500 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-400">
+            {nome}
+            {disponivel ? (
+                <span className="inline-flex items-center gap-1 text-teal-600 dark:text-teal-400">
+                    <CheckCircle2 size={12} strokeWidth={2} />
+                    Livre
+                </span>
+            ) : (
+                <span className="text-slate-400 dark:text-slate-500">—</span>
+            )}
+        </span>
+    );
+}
+
+export default function Availability({ periodos, pisos, setores, edificios, filters }) {
+    const periodosMeioDia = periodos.filter((periodo) => periodo.nome !== 'Dia inteiro');
+    const periodoDiaInteiro = periodos.find((periodo) => periodo.nome === 'Dia inteiro');
+    const periodoManha = periodosMeioDia.find((periodo) => periodo.nome === 'Manhã');
+    const periodoTarde = periodosMeioDia.find((periodo) => periodo.nome === 'Tarde');
+
+    // Com um único edifício ativo, esse é "o edifício atual"; com mais
+    // do que um, começa em "Todos os edifícios" (não há um óbvio).
+    const edificioPadrao = edificios.length === 1 ? String(edificios[0].id) : '';
+
+    const filtrosPadrao = {
+        data: proximaDataValida(),
+        periodo_id: '',
+        edificio_id: edificioPadrao,
+        piso_id: '',
+        setor_id: '',
+    };
+
+    const [filtros, setFiltros] = useState({
+        data: filters?.data || filtrosPadrao.data,
+        periodo_id: filters?.periodo_id ?? '',
+        edificio_id: filters?.edificio_id ?? edificioPadrao,
+        piso_id: filters?.piso_id ?? '',
+        setor_id: filters?.setor_id ?? '',
     });
 
-    const setoresDoPiso = setores.filter(
-        (setor) => String(setor.piso_id) === String(pisoId)
+    const [pesquisa, setPesquisa] = useState('');
+    const [pesquisaAplicada, setPesquisaAplicada] = useState('');
+
+    const [lugares, setLugares] = useState([]);
+    const [carregando, setCarregando] = useState(false);
+    const [erro, setErro] = useState(false);
+    const [tentativa, setTentativa] = useState(0);
+    const [quantidadeVisivel, setQuantidadeVisivel] = useState(QUANTIDADE_POR_PAGINA);
+    const [secretariaParaEscolherPeriodo, setSecretariaParaEscolherPeriodo] = useState(null);
+    const primeiraCargaFeitaRef = useRef(false);
+
+    // Pesquisa por código/nome — só filtra os dados já carregados (sem
+    // pedido novo ao servidor), mas ainda assim com debounce, para não
+    // recalcular a lista a cada tecla.
+    useEffect(() => {
+        const temporizador = setTimeout(() => {
+            setPesquisaAplicada(pesquisa);
+        }, DEBOUNCE_PESQUISA_MS);
+
+        return () => clearTimeout(temporizador);
+    }, [pesquisa]);
+
+    // Pisos e categorias disponíveis vão-se estreitando com o edifício e
+    // o piso escolhidos, mas nunca ficam bloqueados/desativados — sem
+    // filtro nenhum, mostram sempre tudo.
+    const pisosFiltrados = filtros.edificio_id
+        ? pisos.filter((piso) => String(piso.edificio_id) === filtros.edificio_id)
+        : pisos;
+
+    const setoresFiltrados = filtros.piso_id
+        ? setores.filter((setor) => String(setor.piso_id) === filtros.piso_id)
+        : filtros.edificio_id
+            ? setores.filter((setor) =>
+                pisosFiltrados.some((piso) => String(piso.id) === String(setor.piso_id)),
+            )
+            : setores;
+
+    // Se o piso deixar de pertencer ao edifício escolhido, ou a
+    // categoria deixar de pertencer ao piso escolhido, ambos voltam a
+    // "Todos/Todas" — nunca ficam presos a um valor já inválido.
+    useEffect(() => {
+        setFiltros((atual) => {
+            if (!atual.piso_id) {
+                return atual;
+            }
+
+            const aindaValido = pisosFiltrados.some(
+                (piso) => String(piso.id) === atual.piso_id,
+            );
+
+            return aindaValido ? atual : { ...atual, piso_id: '' };
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filtros.edificio_id]);
+
+    useEffect(() => {
+        setFiltros((atual) => {
+            if (!atual.setor_id) {
+                return atual;
+            }
+
+            const aindaValido = setoresFiltrados.some(
+                (setor) => String(setor.id) === atual.setor_id,
+            );
+
+            return aindaValido ? atual : { ...atual, setor_id: '' };
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filtros.piso_id, filtros.edificio_id]);
+
+    // Volta aos primeiros QUANTIDADE_POR_PAGINA resultados sempre que
+    // algum filtro muda — incluindo o período e a pesquisa, que são
+    // filtrados do lado do cliente.
+    useEffect(() => {
+        setQuantidadeVisivel(QUANTIDADE_POR_PAGINA);
+    }, [
+        filtros.data,
+        filtros.periodo_id,
+        filtros.edificio_id,
+        filtros.piso_id,
+        filtros.setor_id,
+        pesquisaAplicada,
+    ]);
+
+    // Busca os lugares (com disponibilidade por período) para a
+    // data/edifício/piso/categoria escolhidos. O período é filtrado à
+    // parte, do lado do cliente, sobre estes mesmos dados — por isso não
+    // entra nas dependências deste pedido. Com debounce e
+    // AbortController para não aplicar uma resposta que já não
+    // corresponde aos filtros atuais.
+    useEffect(() => {
+        if (!filtros.data) {
+            setLugares([]);
+            setErro(false);
+            setCarregando(false);
+            return;
+        }
+
+        setCarregando(true);
+        setErro(false);
+
+        const controlador = new AbortController();
+
+        const temporizador = setTimeout(() => {
+            fetch(
+                route('reservas.lugaresPorSetor', {
+                    data: filtros.data,
+                    ...(filtros.setor_id ? { setor_id: filtros.setor_id } : {}),
+                    ...(filtros.piso_id ? { piso_id: filtros.piso_id } : {}),
+                    ...(filtros.edificio_id ? { edificio_id: filtros.edificio_id } : {}),
+                }),
+                {
+                    headers: { Accept: 'application/json' },
+                    signal: controlador.signal,
+                },
+            )
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao consultar disponibilidade.');
+                    }
+
+                    return response.json();
+                })
+                .then((dados) => {
+                    setLugares(dados);
+                    setCarregando(false);
+                    primeiraCargaFeitaRef.current = true;
+                })
+                .catch((error) => {
+                    if (error.name === 'AbortError') {
+                        return;
+                    }
+
+                    console.error(error);
+                    setLugares([]);
+                    setErro(true);
+                    setCarregando(false);
+                });
+        }, DEBOUNCE_MS);
+
+        return () => {
+            clearTimeout(temporizador);
+            controlador.abort();
+        };
+    }, [filtros.data, filtros.edificio_id, filtros.piso_id, filtros.setor_id, tentativa]);
+
+    const filtrosAlterados =
+        pesquisa !== '' ||
+        filtros.data !== filtrosPadrao.data ||
+        filtros.periodo_id !== '' ||
+        filtros.edificio_id !== edificioPadrao ||
+        filtros.piso_id !== '' ||
+        filtros.setor_id !== '';
+
+    const limparFiltros = () => {
+        setPesquisa('');
+        setPesquisaAplicada('');
+        setFiltros({ ...filtrosPadrao, edificio_id: edificioPadrao });
+    };
+
+    // Pesquisa por código/nome — aplica-se tanto à lista como aos
+    // indicadores compactos (ao contrário do período, que só filtra a
+    // lista: os indicadores mostram sempre os três períodos lado a
+    // lado, mesmo com um período específico escolhido no filtro).
+    const pesquisaNormalizada = normalizarTexto(pesquisaAplicada.trim());
+
+    const correspondeAPesquisa = (secretaria) => {
+        if (!pesquisaNormalizada) {
+            return true;
+        }
+
+        const alvoPesquisa = normalizarTexto(`${secretaria.codigo ?? ''} ${nomeEspaco(secretaria)}`);
+
+        return alvoPesquisa.includes(pesquisaNormalizada);
+    };
+
+    const lugaresParaContagem = lugares.filter(correspondeAPesquisa);
+
+    // Lista efetivamente mostrada — filtrada pelo período escolhido
+    // (quando não é "Todos os períodos") por cima da pesquisa.
+    const lugaresListados = lugaresParaContagem.filter((secretaria) => {
+        if (filtros.periodo_id === 'dia_inteiro') {
+            return periodosMeioDia.every((periodo) => secretaria.periodos_disponiveis[periodo.id]);
+        }
+
+        if (filtros.periodo_id) {
+            return Boolean(secretaria.periodos_disponiveis[filtros.periodo_id]);
+        }
+
+        return periodosMeioDia.some((periodo) => secretaria.periodos_disponiveis[periodo.id]);
+    });
+
+    const lugaresPaginados = lugaresListados.slice(0, quantidadeVisivel);
+    const existemMaisLugares = lugaresListados.length > quantidadeVisivel;
+
+    // Indicadores compactos — sobre os edifício/piso/categoria/pesquisa
+    // escolhidos, independentemente do período selecionado no filtro.
+    const contagemManha = periodoManha
+        ? lugaresParaContagem.filter((secretaria) => secretaria.periodos_disponiveis[periodoManha.id]).length
+        : 0;
+    const contagemTarde = periodoTarde
+        ? lugaresParaContagem.filter((secretaria) => secretaria.periodos_disponiveis[periodoTarde.id]).length
+        : 0;
+    const contagemDiaInteiro = lugaresParaContagem.filter((secretaria) =>
+        periodosMeioDia.every((periodo) => secretaria.periodos_disponiveis[periodo.id]),
+    ).length;
+
+    const edificioSelecionado = edificios.find(
+        (edificio) => String(edificio.id) === filtros.edificio_id,
     );
 
-    const selecionarPiso = (value) => {
-        setPisoId(value);
-        setData('setor_id', '');
-    };
-
-    const consultar = (e) => {
-        e.preventDefault();
-
-        get(route('reservas.availability'), {
-            preserveState: true,
-            preserveScroll: true,
+    // periodoId explícito serve para a escolha feita dentro do modal
+    // "Escolha o período" — sem ele, usa o período do filtro (quando
+    // houver um específico selecionado).
+    const construirLinkReservar = (secretaria, periodoId = filtros.periodo_id) =>
+        route('reservas.create', {
+            data: filtros.data,
+            secretaria_id: secretaria.id,
+            ...(filtros.piso_id ? { piso_id: filtros.piso_id } : {}),
+            ...(filtros.setor_id ? { setor_id: filtros.setor_id } : {}),
+            ...(periodoId ? { periodo_id: periodoId } : {}),
         });
-    };
 
-    const jaConsultou = secretariasDisponiveis !== null;
+    // Períodos realmente livres para o espaço do modal "Escolha o
+    // período" — só entram os que a própria secretária tem disponíveis,
+    // nunca um período ocupado.
+    const periodosParaEscolher = secretariaParaEscolherPeriodo
+        ? [
+            ...periodosMeioDia
+                .filter((periodo) => secretariaParaEscolherPeriodo.periodos_disponiveis[periodo.id])
+                .map((periodo) => ({ valor: periodo.id, nome: periodo.nome })),
+            ...(periodoDiaInteiro
+                && periodosMeioDia.every((periodo) => secretariaParaEscolherPeriodo.periodos_disponiveis[periodo.id])
+                ? [{ valor: 'dia_inteiro', nome: periodoDiaInteiro.nome }]
+                : []),
+        ]
+        : [];
+
+    const mostrarSkeleton = carregando && !primeiraCargaFeitaRef.current;
+    const aAtualizar = carregando && primeiraCargaFeitaRef.current;
+
+    // Esta página tem uma coluna de ação junto à margem direita — reusa
+    // o mesmo evento global que já afasta o ChatWidget para não tapar
+    // os botões "Reservar" (mesmo mecanismo usado pela barra fixa de
+    // Reservas/Edit.jsx). Só ativo enquanto há linhas visíveis.
+    useEffect(() => {
+        window.dispatchEvent(
+            new CustomEvent(RESERVA_ALTERACAO_BAR_VISIBILITY_EVENT, {
+                detail: { visible: lugaresPaginados.length > 0 },
+            }),
+        );
+
+        return () => {
+            window.dispatchEvent(
+                new CustomEvent(RESERVA_ALTERACAO_BAR_VISIBILITY_EVENT, {
+                    detail: { visible: false },
+                }),
+            );
+        };
+    }, [lugaresPaginados.length]);
 
     return (
         <DashboardLayout>
             <Head title="Consultar Disponibilidade" />
 
-            <section className="dashboard-card overflow-hidden">
-                <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
-                        <Search size={22} strokeWidth={1.9} />
+            <div className="pb-28">
+                <section className="dashboard-card overflow-hidden">
+                    <div className="flex flex-col gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+                                <Search size={22} strokeWidth={1.9} />
+                            </div>
+
+                            <div>
+                                <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                                    Consultar Disponibilidade
+                                </h1>
+
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    Vê que lugares estão livres antes de fazeres a reserva.
+                                </p>
+                            </div>
+                        </div>
+
+                        {filtrosAlterados && (
+                            <button
+                                type="button"
+                                onClick={limparFiltros}
+                                className="self-start text-sm font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900 sm:self-auto"
+                            >
+                                Limpar filtros
+                            </button>
+                        )}
                     </div>
 
-                    <div>
-                        <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Consultar Disponibilidade
-                        </h1>
+                    <div className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+                        <div>
+                            <label htmlFor="pesquisa" className={labelClass}>Pesquisar</label>
+                            <div className="relative">
+                                <Search
+                                    size={16}
+                                    strokeWidth={1.9}
+                                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                />
 
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Vê que lugares estão livres antes de fazeres a reserva.
-                        </p>
+                                <input
+                                    id="pesquisa"
+                                    type="text"
+                                    value={pesquisa}
+                                    onChange={(e) => setPesquisa(e.target.value)}
+                                    placeholder="Pesquisar por nome ou código…"
+                                    aria-label="Pesquisar por nome ou código do espaço"
+                                    className={`${fieldClass} pl-9 ${pesquisa ? 'pr-9' : ''}`}
+                                />
+
+                                {pesquisa && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setPesquisa('')}
+                                        aria-label="Limpar pesquisa"
+                                        className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                                    >
+                                        <X size={14} strokeWidth={2} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="data" className={labelClass}>Data</label>
+                            <input
+                                id="data"
+                                type="date"
+                                value={filtros.data}
+                                onChange={(e) => setFiltros((atual) => ({ ...atual, data: e.target.value }))}
+                                className={fieldClass}
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="periodo_id" className={labelClass}>Período</label>
+                            <select
+                                id="periodo_id"
+                                value={filtros.periodo_id}
+                                onChange={(e) => setFiltros((atual) => ({ ...atual, periodo_id: e.target.value }))}
+                                className={fieldClass}
+                            >
+                                <option value="">Todos os períodos</option>
+
+                                {periodosMeioDia.map((periodo) => (
+                                    <option key={periodo.id} value={periodo.id}>
+                                        {periodo.nome}
+                                    </option>
+                                ))}
+
+                                {periodoDiaInteiro && (
+                                    <option value="dia_inteiro">{periodoDiaInteiro.nome}</option>
+                                )}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="edificio_id" className={labelClass}>Edifício</label>
+                            <select
+                                id="edificio_id"
+                                value={filtros.edificio_id}
+                                onChange={(e) => setFiltros((atual) => ({ ...atual, edificio_id: e.target.value }))}
+                                className={fieldClass}
+                            >
+                                <option value="">Todos os edifícios</option>
+
+                                {edificios.map((edificio) => (
+                                    <option key={edificio.id} value={edificio.id}>
+                                        {edificio.nome}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="piso_id" className={labelClass}>Piso</label>
+                            <select
+                                id="piso_id"
+                                value={filtros.piso_id}
+                                onChange={(e) => setFiltros((atual) => ({ ...atual, piso_id: e.target.value }))}
+                                className={fieldClass}
+                            >
+                                <option value="">Todos os pisos</option>
+
+                                {pisosFiltrados.map((piso) => (
+                                    <option key={piso.id} value={piso.id}>
+                                        {piso.nome}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="setor_id" className={labelClass}>Categoria</label>
+                            <select
+                                id="setor_id"
+                                value={filtros.setor_id}
+                                onChange={(e) => setFiltros((atual) => ({ ...atual, setor_id: e.target.value }))}
+                                className={fieldClass}
+                            >
+                                <option value="">Todas as categorias</option>
+
+                                {setoresFiltrados.map((setor) => (
+                                    <option key={setor.id} value={setor.id}>
+                                        {setor.nome}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                </div>
 
-                <form
-                    onSubmit={consultar}
-                    className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:grid-cols-2 lg:grid-cols-5"
-                >
-                    <div>
-                        <label htmlFor="data" className={labelClass}>Data</label>
-                        <input
-                            id="data"
-                            type="date"
-                            value={data.data}
-                            onChange={(e) => setData('data', e.target.value)}
-                            required
-                            className={fieldClass}
-                        />
+                    <div className="p-6">
+                        <div className="mb-5 flex flex-col gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 px-5 py-4 dark:border-slate-800 dark:bg-slate-800/40 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                                    Disponibilidade para {formatarDataPortugues(filtros.data)}
+                                </h2>
+
+                                <p className="mt-0.5 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                                    {mostrarSkeleton ? (
+                                        'A carregar...'
+                                    ) : (
+                                        <>
+                                            {lugaresListados.length} espaço{lugaresListados.length === 1 ? '' : 's'}{' '}
+                                            disponíve{lugaresListados.length === 1 ? 'l' : 'is'}{' '}
+                                            {edificioSelecionado ? `em ${edificioSelecionado.nome}` : 'em todos os edifícios'}
+                                            {aAtualizar && (
+                                                <span className="inline-flex items-center gap-1 text-xs font-medium text-teal-600 dark:text-teal-400">
+                                                    <RotateCcw size={12} strokeWidth={2} className="animate-spin" />
+                                                    a atualizar
+                                                </span>
+                                            )}
+                                        </>
+                                    )}
+                                </p>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                                {periodoManha && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-teal-500 shadow-sm dark:bg-slate-900">
+                                            <Sun size={16} strokeWidth={1.9} />
+                                        </span>
+                                        <div>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{periodoManha.nome}</p>
+                                            <p className="text-base font-bold text-slate-900 dark:text-white">{contagemManha}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {periodoTarde && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-teal-500 shadow-sm dark:bg-slate-900">
+                                            <Sunset size={16} strokeWidth={1.9} />
+                                        </span>
+                                        <div>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{periodoTarde.nome}</p>
+                                            <p className="text-base font-bold text-slate-900 dark:text-white">{contagemTarde}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {periodoDiaInteiro && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-teal-500 shadow-sm dark:bg-slate-900">
+                                            <CalendarClock size={16} strokeWidth={1.9} />
+                                        </span>
+                                        <div>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{periodoDiaInteiro.nome}</p>
+                                            <p className="text-base font-bold text-slate-900 dark:text-white">{contagemDiaInteiro}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {erro ? (
+                            <div className="flex flex-col items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
+                                <div className="flex items-start gap-2">
+                                    <AlertTriangle size={18} strokeWidth={1.9} className="mt-0.5 shrink-0" />
+                                    <span>Não foi possível carregar os espaços.</span>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setTentativa((atual) => atual + 1)}
+                                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-400/30 dark:text-red-300 dark:hover:bg-red-400/10"
+                                >
+                                    <RotateCcw size={14} strokeWidth={2} />
+                                    Tentar novamente
+                                </button>
+                            </div>
+                        ) : mostrarSkeleton ? (
+                            <>
+                                <div className="hidden overflow-x-auto sm:block">
+                                    <table className="w-full border-collapse text-sm">
+                                        <tbody>
+                                            {Array.from({ length: 6 }).map((_, indice) => (
+                                                <tr key={indice} className="animate-pulse border-b border-slate-100 dark:border-slate-800">
+                                                    <td className="py-3 pr-4"><div className="h-4 w-32 rounded bg-slate-100 dark:bg-slate-800" /></td>
+                                                    <td className="py-3 pr-4"><div className="h-4 w-40 rounded bg-slate-100 dark:bg-slate-800" /></td>
+                                                    <td className="py-3 pr-4"><div className="mx-auto h-6 w-14 rounded-full bg-slate-100 dark:bg-slate-800" /></td>
+                                                    <td className="py-3 pr-4"><div className="mx-auto h-6 w-14 rounded-full bg-slate-100 dark:bg-slate-800" /></td>
+                                                    <td className="py-3 pr-4"><div className="mx-auto h-6 w-14 rounded-full bg-slate-100 dark:bg-slate-800" /></td>
+                                                    <td className="py-3 pl-4"><div className="ml-auto h-7 w-20 rounded-lg bg-slate-100 dark:bg-slate-800" /></td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="space-y-3 sm:hidden">
+                                    {Array.from({ length: 4 }).map((_, indice) => (
+                                        <div key={indice} className="animate-pulse rounded-2xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+                                            <div className="h-4 w-40 rounded bg-slate-100 dark:bg-slate-800" />
+                                            <div className="mt-2 h-3 w-32 rounded bg-slate-100 dark:bg-slate-800" />
+                                            <div className="mt-3 flex gap-2">
+                                                <div className="h-5 w-16 rounded-full bg-slate-100 dark:bg-slate-800" />
+                                                <div className="h-5 w-16 rounded-full bg-slate-100 dark:bg-slate-800" />
+                                                <div className="h-5 w-20 rounded-full bg-slate-100 dark:bg-slate-800" />
+                                            </div>
+                                            <div className="mt-3 h-9 w-full rounded-xl bg-slate-100 dark:bg-slate-800" />
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                        ) : lugaresListados.length === 0 ? (
+                            <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-10 text-center dark:border-slate-800 dark:bg-slate-800/40">
+                                <Inbox size={28} strokeWidth={1.6} className="mb-1 text-slate-300 dark:text-slate-600" />
+
+                                <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
+                                    Nenhum espaço encontrado
+                                </p>
+
+                                <p className="text-sm text-slate-400 dark:text-slate-500">
+                                    Experimente alterar ou limpar os filtros.
+                                </p>
+
+                                <button
+                                    type="button"
+                                    onClick={limparFiltros}
+                                    className="mt-1 text-xs font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900"
+                                >
+                                    Limpar filtros
+                                </button>
+                            </div>
+                        ) : (
+                            <div>
+                                <div className="hidden overflow-x-auto sm:block">
+                                    <table className="w-full border-collapse text-sm">
+                                        <thead className="sticky top-0 z-10 bg-white dark:bg-slate-900">
+                                            <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:border-slate-800">
+                                                <th className="py-2 pr-4 font-semibold">Espaço</th>
+                                                <th className="py-2 pr-4 font-semibold">Localização</th>
+                                                <th className="py-2 pr-4 text-center font-semibold">Manhã</th>
+                                                <th className="py-2 pr-4 text-center font-semibold">Tarde</th>
+                                                <th className="py-2 pr-4 text-center font-semibold">Dia inteiro</th>
+                                                <th className="py-2 pl-4 text-right font-semibold">Ação</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                            {lugaresPaginados.map((secretaria) => (
+                                                <tr
+                                                    key={secretaria.id}
+                                                    className="transition-colors duration-150 hover:bg-teal-50/60 focus-within:bg-teal-50/60 dark:hover:bg-teal-400/5 dark:focus-within:bg-teal-400/5"
+                                                >
+                                                    <td className="py-3 pr-4 align-middle">
+                                                        <div className="flex min-w-0 items-center gap-2.5">
+                                                            <span className="shrink-0 rounded-[9px] bg-[#E9F8F6] px-2 py-1 text-[11px] font-bold text-[#0FA89E] dark:bg-teal-400/10 dark:text-teal-300">
+                                                                {secretaria.codigo}
+                                                            </span>
+                                                            <span className="truncate font-semibold text-slate-900 dark:text-white">
+                                                                {nomeEspaco(secretaria)}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+
+                                                    <td className="py-3 pr-4 align-middle">
+                                                        <LocalizacaoEspaco secretaria={secretaria} />
+                                                    </td>
+
+                                                    <td className="py-3 pr-4 text-center align-middle">
+                                                        <PillPeriodo
+                                                            disponivel={Boolean(
+                                                                periodoManha && secretaria.periodos_disponiveis[periodoManha.id],
+                                                            )}
+                                                        />
+                                                    </td>
+
+                                                    <td className="py-3 pr-4 text-center align-middle">
+                                                        <PillPeriodo
+                                                            disponivel={Boolean(
+                                                                periodoTarde && secretaria.periodos_disponiveis[periodoTarde.id],
+                                                            )}
+                                                        />
+                                                    </td>
+
+                                                    <td className="py-3 pr-4 text-center align-middle">
+                                                        <PillPeriodo
+                                                            disponivel={periodosMeioDia.every(
+                                                                (periodo) => secretaria.periodos_disponiveis[periodo.id],
+                                                            )}
+                                                        />
+                                                    </td>
+
+                                                    <td className="py-3 pl-4 text-right align-middle">
+                                                        {filtros.periodo_id ? (
+                                                            <Link
+                                                                href={construirLinkReservar(secretaria)}
+                                                                className={botaoReservarDesktopClass}
+                                                            >
+                                                                Reservar
+                                                            </Link>
+                                                        ) : (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setSecretariaParaEscolherPeriodo(secretaria)}
+                                                                aria-haspopup="dialog"
+                                                                aria-label={`Reservar ${nomeEspaco(secretaria)} — escolher período`}
+                                                                className={botaoReservarDesktopClass}
+                                                            >
+                                                                Reservar
+                                                            </button>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div className="space-y-3 sm:hidden">
+                                    {lugaresPaginados.map((secretaria) => (
+                                        <div
+                                            key={secretaria.id}
+                                            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                                        >
+                                            <div className="flex min-w-0 items-center gap-2">
+                                                <span className="shrink-0 rounded-[9px] bg-[#E9F8F6] px-2 py-1 text-[11px] font-bold text-[#0FA89E] dark:bg-teal-400/10 dark:text-teal-300">
+                                                    {secretaria.codigo}
+                                                </span>
+                                                <span className="truncate font-semibold text-slate-900 dark:text-white">
+                                                    {nomeEspaco(secretaria)}
+                                                </span>
+                                            </div>
+
+                                            <LocalizacaoEspaco secretaria={secretaria} className="mt-1.5" />
+
+                                            <div className="mt-3 flex flex-wrap items-center gap-2">
+                                                {periodoManha && (
+                                                    <PillPeriodoRotulada
+                                                        nome={periodoManha.nome}
+                                                        disponivel={Boolean(secretaria.periodos_disponiveis[periodoManha.id])}
+                                                    />
+                                                )}
+
+                                                {periodoTarde && (
+                                                    <PillPeriodoRotulada
+                                                        nome={periodoTarde.nome}
+                                                        disponivel={Boolean(secretaria.periodos_disponiveis[periodoTarde.id])}
+                                                    />
+                                                )}
+
+                                                {periodoDiaInteiro && (
+                                                    <PillPeriodoRotulada
+                                                        nome={periodoDiaInteiro.nome}
+                                                        disponivel={periodosMeioDia.every(
+                                                            (periodo) => secretaria.periodos_disponiveis[periodo.id],
+                                                        )}
+                                                    />
+                                                )}
+                                            </div>
+
+                                            {filtros.periodo_id ? (
+                                                <Link
+                                                    href={construirLinkReservar(secretaria)}
+                                                    className={botaoReservarMobileClass}
+                                                >
+                                                    Reservar
+                                                </Link>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSecretariaParaEscolherPeriodo(secretaria)}
+                                                    aria-haspopup="dialog"
+                                                    aria-label={`Reservar ${nomeEspaco(secretaria)} — escolher período`}
+                                                    className={botaoReservarMobileClass}
+                                                >
+                                                    Reservar
+                                                </button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-2 border-t border-slate-100 pt-4 text-xs dark:border-slate-800">
+                                    <span className="inline-flex items-center gap-2">
+                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-50 text-teal-600 dark:bg-teal-400/10 dark:text-teal-300">
+                                            <CheckCircle2 size={12} strokeWidth={2.2} />
+                                        </span>
+                                        <span className="font-semibold text-slate-700 dark:text-slate-200">Livre</span>
+                                        <span className="text-slate-400 dark:text-slate-500">Espaço disponível</span>
+                                    </span>
+
+                                    <span className="inline-flex items-center gap-2">
+                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">—</span>
+                                        <span className="font-semibold text-slate-700 dark:text-slate-200">Ocupado</span>
+                                        <span className="text-slate-400 dark:text-slate-500">Espaço não disponível</span>
+                                    </span>
+                                </div>
+
+                                <div className="mt-6 flex flex-col items-center gap-3">
+                                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                                        A mostrar {lugaresPaginados.length} de {lugaresListados.length} espaço{lugaresListados.length === 1 ? '' : 's'}
+                                    </p>
+
+                                    {existemMaisLugares && (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setQuantidadeVisivel((atual) => atual + QUANTIDADE_POR_PAGINA)
+                                            }
+                                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-teal-500/50 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:border-slate-700 dark:text-slate-300 dark:hover:text-teal-400 dark:focus-visible:ring-offset-slate-900"
+                                        >
+                                            Carregar mais espaços
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
+                </section>
+            </div>
 
-                    <div>
-                        <label htmlFor="periodo_id" className={labelClass}>Período</label>
-                        <select
-                            id="periodo_id"
-                            value={data.periodo_id}
-                            onChange={(e) => setData('periodo_id', e.target.value)}
-                            required
-                            className={fieldClass}
-                        >
-                            <option value="" disabled>Selecione...</option>
+            <Modal
+                show={secretariaParaEscolherPeriodo !== null}
+                onClose={() => setSecretariaParaEscolherPeriodo(null)}
+                maxWidth="sm"
+            >
+                <div className="p-6">
+                    <div className="flex items-start justify-between gap-3">
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                                Escolha o período
+                            </h2>
 
-                            {periodos.map((periodo) => (
-                                <option key={periodo.id} value={periodo.id}>
-                                    {periodo.nome}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                            {secretariaParaEscolherPeriodo && (
+                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    {nomeEspaco(secretariaParaEscolherPeriodo)} · {secretariaParaEscolherPeriodo.codigo}
+                                </p>
+                            )}
+                        </div>
 
-                    <div>
-                        <label htmlFor="piso_id" className={labelClass}>Piso</label>
-                        <select
-                            id="piso_id"
-                            value={pisoId}
-                            onChange={(e) => selecionarPiso(e.target.value)}
-                            required
-                            className={fieldClass}
-                        >
-                            <option value="" disabled>Selecione...</option>
-
-                            {pisos.map((piso) => (
-                                <option key={piso.id} value={piso.id}>
-                                    {piso.nome}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="setor_id" className={labelClass}>Categoria</label>
-                        <select
-                            id="setor_id"
-                            value={data.setor_id}
-                            onChange={(e) => setData('setor_id', e.target.value)}
-                            disabled={!pisoId}
-                            required
-                            className={fieldClass}
-                        >
-                            <option value="" disabled>
-                                {pisoId ? 'Selecione...' : 'Selecione primeiro o piso'}
-                            </option>
-
-                            {setoresDoPiso.map((setor) => (
-                                <option key={setor.id} value={setor.id}>
-                                    {setor.nome}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="flex items-end">
                         <button
-                            type="submit"
-                            disabled={processing}
-                            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-navy-900 text-sm font-bold text-white transition hover:bg-navy-950 disabled:cursor-not-allowed disabled:opacity-60"
+                            type="button"
+                            onClick={() => setSecretariaParaEscolherPeriodo(null)}
+                            aria-label="Fechar"
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                         >
-                            <Search size={16} strokeWidth={2} />
-                            {processing ? 'A consultar...' : 'Consultar'}
+                            <X size={16} strokeWidth={2} />
                         </button>
                     </div>
-                </form>
 
-                <div className="p-6">
-                    {!jaConsultou ? (
-                        <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
-                                <Search size={23} strokeWidth={1.8} />
-                            </div>
-
-                            <p className="mt-4 max-w-xs text-sm leading-6 text-slate-400">
-                                Escolhe data, período, piso e categoria para consultar a disponibilidade.
-                            </p>
-                        </div>
-                    ) : secretariasDisponiveis.length === 0 ? (
-                        <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800">
-                                <CalendarCheck2 size={23} strokeWidth={1.8} />
-                            </div>
-
-                            <p className="mt-4 max-w-xs text-sm leading-6 text-slate-400">
-                                Não há lugares disponíveis para a data, período e categoria selecionados.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                            {secretariasDisponiveis.map((secretaria) => {
-                                const imagem = resolverImagemSecretaria(secretaria);
-
-                                return (
-                                <div
-                                    key={secretaria.id}
-                                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-                                >
-                                    {imagem ? (
-                                        <img
-                                            src={imagem}
-                                            alt={secretaria.codigo}
-                                            className="h-40 w-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="flex h-40 w-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-slate-800">
-                                            <ImageOff size={28} strokeWidth={1.6} />
-                                        </div>
-                                    )}
-
-                                    <div className="p-4">
-                                        <p className="font-bold text-slate-900 dark:text-white">
-                                            {secretaria.codigo}
-                                        </p>
-
-                                        {secretaria.descricao && (
-                                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                                {secretaria.descricao}
-                                            </p>
-                                        )}
-
-                                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
-                                            <span className="flex items-center gap-1.5">
-                                                <Layers3 size={14} strokeWidth={1.9} className="text-teal-500" />
-                                                {secretaria.setor?.piso?.nome ?? '-'}
-                                            </span>
-
-                                            <span className="flex items-center gap-1.5">
-                                                <MapPinned size={14} strokeWidth={1.9} className="text-teal-500" />
-                                                {secretaria.setor?.piso?.edificio?.nome} · {secretaria.setor?.nome}
-                                            </span>
-                                        </div>
-
-                                        <Link
-                                            href={route('reservas.create', {
-                                                data: data.data,
-                                                piso_id: pisoId,
-                                                setor_id: data.setor_id,
-                                            })}
-                                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-teal-500 px-3 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
-                                        >
-                                            Reservar
-                                        </Link>
-                                    </div>
-                                </div>
-                                );
-                            })}
-                        </div>
-                    )}
+                    <div className="mt-5 space-y-2.5">
+                        {periodosParaEscolher.map((opcao) => (
+                            <Link
+                                key={opcao.valor}
+                                href={construirLinkReservar(secretariaParaEscolherPeriodo, opcao.valor)}
+                                className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors duration-150 hover:border-teal-500 hover:bg-teal-50 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:border-slate-700 dark:text-slate-200 dark:hover:border-teal-400 dark:hover:bg-teal-400/10 dark:hover:text-teal-300 dark:focus-visible:ring-offset-slate-900"
+                            >
+                                {opcao.nome}
+                            </Link>
+                        ))}
+                    </div>
                 </div>
-            </section>
+            </Modal>
         </DashboardLayout>
     );
 }

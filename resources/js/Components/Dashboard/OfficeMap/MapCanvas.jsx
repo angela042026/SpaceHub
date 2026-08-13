@@ -1,6 +1,7 @@
 import DeskMarker from './DeskMarker';
 import MapLegend from './MapLegend';
 import SectorMarker from './SectorMarker';
+import SelectedSectorFloatingCard from './SelectedSectorFloatingCard';
 
 export default function MapCanvas({
     pisoAtual,
@@ -9,6 +10,7 @@ export default function MapCanvas({
     selectedSetorId,
     selectedSecretaria,
     setorSelecionado,
+    areaSetorSelecionado,
     zoom,
     rotacao,
     position,
@@ -22,6 +24,9 @@ export default function MapCanvas({
     onSelecionarSecretaria,
     tamanho = 'padrao',
     mostrarLegenda = false,
+    somenteMapa = false,
+    onVerSecretariasDoSetor,
+    onFecharSetorSelecionado,
 }) {
     const alturas = {
         padrao: 'h-[460px] sm:h-[550px] xl:h-[585px]',
@@ -60,6 +65,18 @@ export default function MapCanvas({
                         className="pointer-events-none absolute inset-0 h-full w-full object-fill saturate-[1.04] contrast-[1.02]"
                     />
 
+                    {somenteMapa && areaSetorSelecionado && (
+                        <div
+                            className="pointer-events-none absolute z-[5] rounded-xl border-2 border-teal-400/70 bg-teal-400/[0.06]"
+                            style={{
+                                left: `${areaSetorSelecionado.left}%`,
+                                top: `${areaSetorSelecionado.top}%`,
+                                width: `${areaSetorSelecionado.right - areaSetorSelecionado.left}%`,
+                                height: `${areaSetorSelecionado.bottom - areaSetorSelecionado.top}%`,
+                            }}
+                        />
+                    )}
+
                     {setoresInterativos.map((setor) => (
                         <SectorMarker
                             key={setor.id}
@@ -69,6 +86,7 @@ export default function MapCanvas({
                                 String(setor.id)
                             }
                             onSelect={onSelecionarSetor}
+                            destaqueDiscreto={somenteMapa}
                         />
                     ))}
 
@@ -93,14 +111,25 @@ export default function MapCanvas({
                     )}
                 </div>
 
-                <div
-                    data-map-control="true"
-                    className="absolute bottom-3 left-3 rounded-lg border border-white/60 bg-white/90 px-3 py-2 text-[11px] font-semibold text-slate-500 shadow-sm backdrop-blur dark:border-[#2a5069]/60 dark:bg-[#101f34]/90 dark:text-[#b5c5d5] xl:hidden"
-                >
-                    {setorSelecionado
-                        ? `${setorSelecionado.nome}: escolha uma secretária`
-                        : 'Clique num setor para ver as secretárias'}
-                </div>
+                {!(somenteMapa && setorSelecionado) && (
+                    <div
+                        data-map-control="true"
+                        className="absolute bottom-3 left-3 rounded-lg border border-white/60 bg-white/90 px-3 py-2 text-[11px] font-semibold text-slate-500 shadow-sm backdrop-blur dark:border-[#2a5069]/60 dark:bg-[#101f34]/90 dark:text-[#b5c5d5] xl:hidden"
+                    >
+                        {setorSelecionado
+                            ? `${setorSelecionado.nome}: escolha uma secretária`
+                            : 'Clique num setor para ver as secretárias'}
+                    </div>
+                )}
+
+                {somenteMapa && setorSelecionado && (
+                    <SelectedSectorFloatingCard
+                        setor={setorSelecionado}
+                        piso={pisoAtual}
+                        onVerSecretarias={onVerSecretariasDoSetor}
+                        onClose={onFecharSetorSelecionado}
+                    />
+                )}
 
                 {mostrarLegenda && (
                     <div className="pointer-events-none absolute inset-0 hidden xl:block">

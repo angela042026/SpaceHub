@@ -34,6 +34,29 @@ export const formatarDataCurta = (valor) => {
     return `${dia}/${mes}/${ano}`;
 };
 
+/**
+ * Encurta visualmente uma referência muito longa, mantendo o início e o
+ * fim (ex: "SPH-AADV…AQM"). A referência completa permanece disponível
+ * no atributo title (tooltip) e num nó sr-only, para não perder nada
+ * nos detalhes nem para tecnologias assistivas.
+ */
+export const encurtarReferencia = (referencia, limite = 14) => {
+    if (!referencia) {
+        return '-';
+    }
+
+    if (referencia.length <= limite) {
+        return referencia;
+    }
+
+    return `${referencia.slice(0, 8)}…${referencia.slice(-3)}`;
+};
+
+/**
+ * Formato fixo "dd/mm/aaaa · HH:mm" — os presets dateStyle/timeStyle do
+ * Intl dão ano com 2 dígitos e vírgula como separador em pt-PT, que não
+ * é o formato usado nas páginas de Pagamentos.
+ */
 export const formatarDataHora = (valor) => {
     if (!valor) {
         return '-';
@@ -45,8 +68,16 @@ export const formatarDataHora = (valor) => {
         return formatarDataCurta(valor);
     }
 
-    return new Intl.DateTimeFormat('pt-PT', {
-        dateStyle: 'short',
-        timeStyle: 'short',
+    const dataFormatada = new Intl.DateTimeFormat('pt-PT', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
     }).format(data);
+
+    const horaFormatada = new Intl.DateTimeFormat('pt-PT', {
+        hour: '2-digit',
+        minute: '2-digit',
+    }).format(data);
+
+    return `${dataFormatada} · ${horaFormatada}`;
 };

@@ -190,7 +190,7 @@ export const calcularDataFim = (dataInicio, tipoDuracao) => {
  * propósito (esconde o botão depois do check-in e nos estados
  * terminais), mas tem de ser sempre o mesmo em todo o lado.
  */
-export const ESTADOS_SEM_CANCELAMENTO = ['cancelada', 'expirada', 'concluida'];
+export const ESTADOS_SEM_CANCELAMENTO = ['cancelada', 'expirada', 'concluida', 'nao_compareceu'];
 
 export function podeCancelarReserva(reserva) {
     return (

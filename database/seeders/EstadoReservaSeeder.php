@@ -30,6 +30,10 @@ class EstadoReservaSeeder extends Seeder
                 'codigo' => 'concluida',
                 'nome' => 'Concluída',
             ],
+            [
+                'codigo' => 'nao_compareceu',
+                'nome' => 'Não compareceu',
+            ],
         ];
 
         foreach ($estados as $estado) {

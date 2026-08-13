@@ -41,6 +41,11 @@ export const ESTADO_RESERVA = {
         dot: 'bg-blue-500',
         label: 'Concluída',
     },
+    nao_compareceu: {
+        badge: BADGE_NEUTRO,
+        dot: 'bg-slate-400',
+        label: 'Não compareceu',
+    },
 };
 
 /** Estados de moderação de uma avaliação. */

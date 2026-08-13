@@ -1,20 +1,26 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
 import { Head, Link, router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import {
     ChevronLeft,
     ChevronRight,
     CreditCard,
     Eye,
+    Search,
+    X,
 } from 'lucide-react';
 import { ESTADO_PAGAMENTO, METODO_PAGAMENTO, badge, etiqueta } from '@/utils/estados';
-import { formatarDataCurta, formatarValorEuro } from '@/utils/formatacaoPagamento';
+import { encurtarReferencia, formatarDataCurta, formatarValorEuro } from '@/utils/formatacaoPagamento';
 
 export default function Index({
     pagamentos,
+    totalGeral,
     filters,
     isAdmin = false,
 }) {
+    const [busca, setBusca] = useState(filters?.busca ?? '');
+
     const irParaPagina = (url) => {
         if (!url) {
             return;
@@ -30,13 +36,48 @@ export default function Index({
         );
     };
 
-    const aplicarFiltro = (campo, valor) => {
+    const aplicarFiltro = (campo, valor, filtrosBase = filters) => {
         router.get(
             route('pagamentos.index'),
             {
-                ...filters,
+                ...filtrosBase,
                 [campo]: valor || undefined,
             },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                replace: true,
+            },
+        );
+    };
+
+    /*
+     * A pesquisa é feita no servidor (referência, nº da reserva, nome/código
+     * do espaço), tal como os filtros — por isso tem debounce, para não
+     * disparar um pedido a cada tecla premida.
+     */
+    useEffect(() => {
+        if (busca === (filters?.busca ?? '')) {
+            return;
+        }
+
+        const temporizador = setTimeout(() => {
+            aplicarFiltro('busca', busca);
+        }, 350);
+
+        return () => clearTimeout(temporizador);
+    }, [busca]);
+
+    const filtrosAtivos = Boolean(
+        filters?.estado || filters?.metodo_pagamento || filters?.busca,
+    );
+
+    const limparFiltros = () => {
+        setBusca('');
+
+        router.get(
+            route('pagamentos.index'),
+            {},
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -51,8 +92,16 @@ export default function Index({
             label: 'Referência',
             render: (pagamento) => (
                 <div>
-                    <p className="font-semibold text-slate-800 dark:text-slate-100">
-                        {pagamento.referencia}
+                    <p
+                        title={pagamento.referencia}
+                        className="font-semibold text-slate-800 dark:text-slate-100"
+                    >
+                        <span aria-hidden="true">
+                            {encurtarReferencia(pagamento.referencia)}
+                        </span>
+                        <span className="sr-only">
+                            {pagamento.referencia}
+                        </span>
                     </p>
 
                     <p className="text-xs text-slate-400">
@@ -84,9 +133,33 @@ export default function Index({
 
         {
             key: 'data',
-            label: 'Data da reserva',
-            render: (pagamento) =>
-                formatarDataCurta(pagamento.reserva?.data),
+            label: 'Data',
+            render: (pagamento) => {
+                const temDataPagamento = Boolean(pagamento.data_pagamento);
+                const cancelado = pagamento.estado === 'cancelado';
+
+                return (
+                    <div>
+                        <p
+                            className={
+                                cancelado
+                                    ? 'text-slate-500 dark:text-slate-400'
+                                    : 'text-slate-700 dark:text-slate-200'
+                            }
+                        >
+                            {temDataPagamento
+                                ? formatarDataCurta(pagamento.data_pagamento)
+                                : formatarDataCurta(pagamento.reserva?.data)}
+                        </p>
+
+                        <p className="text-xs text-slate-400">
+                            {temDataPagamento
+                                ? 'Data do pagamento'
+                                : 'Data da reserva'}
+                        </p>
+                    </div>
+                );
+            },
         },
         {
             key: 'espaco',
@@ -109,7 +182,13 @@ export default function Index({
             key: 'valor',
             label: 'Valor',
             render: (pagamento) => (
-                <span className="font-semibold text-slate-800 dark:text-slate-100">
+                <span
+                    className={`font-semibold ${
+                        pagamento.estado === 'cancelado'
+                            ? 'text-slate-500 dark:text-slate-400'
+                            : 'text-slate-800 dark:text-slate-100'
+                    }`}
+                >
                     {formatarValorEuro(pagamento.valor)}
                 </span>
             ),
@@ -117,12 +196,21 @@ export default function Index({
         {
             key: 'metodo_pagamento',
             label: 'Método',
-            render: (pagamento) =>
-                etiqueta(
-                    METODO_PAGAMENTO,
-                    pagamento.metodo_pagamento,
-                    'Por definir',
-                ),
+            render: (pagamento) => (
+                <span
+                    className={
+                        pagamento.estado === 'cancelado'
+                            ? 'text-slate-400 dark:text-slate-500'
+                            : undefined
+                    }
+                >
+                    {etiqueta(
+                        METODO_PAGAMENTO,
+                        pagamento.metodo_pagamento,
+                        'Por definir',
+                    )}
+                </span>
+            ),
         },
         {
             key: 'estado',
@@ -143,8 +231,9 @@ export default function Index({
             render: (pagamento) => (
                 <Link
                     href={route('pagamentos.show', pagamento.id)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
-                    title="Ver detalhe"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 outline-none transition hover:border-teal-500 hover:bg-teal-50 hover:text-teal-600 focus-visible:border-teal-500 focus-visible:ring-2 focus-visible:ring-teal-500/40 dark:border-slate-700 dark:hover:bg-teal-400/10 dark:hover:text-teal-400"
+                    title="Ver detalhes do pagamento"
+                    aria-label="Ver detalhes do pagamento"
                 >
                     <Eye size={16} strokeWidth={1.9} />
                 </Link>
@@ -171,13 +260,42 @@ export default function Index({
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {pagamentos.total} pagamento
-                                {pagamentos.total === 1 ? '' : 's'} no total.
+                                {filtrosAtivos
+                                    ? `${pagamentos.total} de ${totalGeral} pagamentos`
+                                    : `${pagamentos.total} pagamento${pagamentos.total === 1 ? '' : 's'} no total.`}
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 sm:flex-row">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="relative">
+                            <Search
+                                size={15}
+                                strokeWidth={2}
+                                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                            />
+
+                            <input
+                                type="text"
+                                value={busca}
+                                onChange={(event) => setBusca(event.target.value)}
+                                placeholder="Pesquisar pagamentos"
+                                className="w-56 rounded-xl border-slate-200 bg-white py-2 pl-9 pr-8 text-sm text-slate-700 shadow-sm placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                            />
+
+                            {busca && (
+                                <button
+                                    type="button"
+                                    onClick={() => setBusca('')}
+                                    aria-label="Limpar pesquisa"
+                                    title="Limpar pesquisa"
+                                    className="absolute right-2 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+                                >
+                                    <X size={13} strokeWidth={2.2} />
+                                </button>
+                            )}
+                        </div>
+
                         <select
                             value={filters?.estado ?? ''}
                             onChange={(event) =>
@@ -224,9 +342,23 @@ export default function Index({
                         columns={columns}
                         data={pagamentos.data}
                         emptyMessage={
-                            isAdmin
-                                ? 'Ainda não existem pagamentos registados.'
-                                : 'Ainda não existem pagamentos associados às tuas reservas.'
+                            filtrosAtivos ? (
+                                <>
+                                    Nenhum pagamento encontrado.
+                                    <br />
+                                    <button
+                                        type="button"
+                                        onClick={limparFiltros}
+                                        className="mt-2 font-semibold text-teal-600 underline-offset-2 hover:underline dark:text-teal-400"
+                                    >
+                                        Limpar filtros
+                                    </button>
+                                </>
+                            ) : isAdmin ? (
+                                'Ainda não existem pagamentos registados.'
+                            ) : (
+                                'Ainda não existem pagamentos associados às tuas reservas.'
+                            )
                         }
                     />
 

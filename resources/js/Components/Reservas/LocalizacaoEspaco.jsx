@@ -6,7 +6,11 @@ import { MapPin } from 'lucide-react';
  * "{edifício} · Piso {número}", para as três páginas ficarem idênticas
  * ao ícone, tamanho, cor e espaçamento.
  */
-export default function LocalizacaoEspaco({ secretaria, className = '' }) {
+export default function LocalizacaoEspaco({
+    secretaria,
+    className = '',
+    iconeClassName = 'text-slate-400 dark:text-slate-500',
+}) {
     const nomeEdificio = secretaria?.setor?.piso?.edificio?.nome;
     const numeroPiso = secretaria?.setor?.piso?.numero;
 
@@ -21,7 +25,7 @@ export default function LocalizacaoEspaco({ secretaria, className = '' }) {
             <MapPin
                 size={14}
                 strokeWidth={1.9}
-                className="shrink-0 text-slate-400 dark:text-slate-500"
+                className={`shrink-0 ${iconeClassName}`}
             />
 
             <span className="min-w-0 flex-1 truncate">
