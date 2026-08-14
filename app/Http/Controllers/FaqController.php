@@ -13,11 +13,13 @@ class FaqController extends Controller
         $faqs = Faq::where('ativo', true)
             ->orderByRaw("
             CASE categoria
-                WHEN 'Check-in' THEN 1
-                WHEN 'Reservas' THEN 2
-                WHEN 'Espaços' THEN 3
-                WHEN 'Space Hub' THEN 4
-                WHEN 'Conta' THEN 5
+                WHEN 'Sobre o SpaceHub' THEN 1
+                WHEN 'Espaços e disponibilidade' THEN 2
+                WHEN 'Reservas' THEN 3
+                WHEN 'Pagamentos' THEN 4
+                WHEN 'Check-in' THEN 5
+                WHEN 'Conta' THEN 6
+                ELSE 99
             END
         ")
             ->orderBy('ordem')

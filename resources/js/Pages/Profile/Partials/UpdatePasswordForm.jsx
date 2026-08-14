@@ -1,14 +1,53 @@
 import InputError from '@/Components/InputError';
 import { Transition } from '@headlessui/react';
 import { useForm } from '@inertiajs/react';
-import { useRef } from 'react';
-import { CheckCircle2, KeyRound } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { AlertCircle, CheckCircle2, Eye, EyeOff, KeyRound } from 'lucide-react';
 
 const fieldClass =
-    'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+    'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 pr-10 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
 const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
+
+function CampoPalavraPasse({ id, label, value, onChange, autoComplete, inputRef, erro, colSpan, hint }) {
+    const [visivel, setVisivel] = useState(false);
+
+    return (
+        <div className={colSpan}>
+            <label htmlFor={id} className={labelClass}>
+                {label}
+            </label>
+
+            <div className="relative">
+                <input
+                    id={id}
+                    ref={inputRef}
+                    value={value}
+                    onChange={onChange}
+                    type={visivel ? 'text' : 'password'}
+                    autoComplete={autoComplete}
+                    className={fieldClass}
+                />
+
+                <button
+                    type="button"
+                    onClick={() => setVisivel((atual) => !atual)}
+                    aria-label={visivel ? 'Ocultar palavra-passe' : 'Mostrar palavra-passe'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 dark:hover:text-slate-200"
+                >
+                    {visivel ? <EyeOff size={17} strokeWidth={1.9} /> : <Eye size={17} strokeWidth={1.9} />}
+                </button>
+            </div>
+
+            {hint && !erro && (
+                <p className="mt-1.5 text-xs text-slate-400 dark:text-slate-500">{hint}</p>
+            )}
+
+            <InputError message={erro} className="mt-1.5" />
+        </div>
+    );
+}
 
 export default function UpdatePasswordForm() {
     const passwordInput = useRef();
@@ -27,6 +66,9 @@ export default function UpdatePasswordForm() {
         password: '',
         password_confirmation: '',
     });
+
+    const naoCoincide =
+        data.password_confirmation.length > 0 && data.password !== data.password_confirmation;
 
     const updatePassword = (e) => {
         e.preventDefault();
@@ -57,78 +99,58 @@ export default function UpdatePasswordForm() {
 
                 <div>
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                        Alterar Password
+                        Alterar palavra-passe
                     </h2>
 
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Usa uma password longa e aleatória para manter a conta segura.
+                        Utiliza uma palavra-passe longa e única para manter a conta segura.
                     </p>
                 </div>
             </div>
 
             <form onSubmit={updatePassword} className="p-6">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <div className="sm:col-span-2">
-                        <label htmlFor="current_password" className={labelClass}>
-                            Password Atual
-                        </label>
+                    <CampoPalavraPasse
+                        id="current_password"
+                        label="Palavra-passe atual"
+                        value={data.current_password}
+                        onChange={(e) => setData('current_password', e.target.value)}
+                        autoComplete="current-password"
+                        inputRef={currentPasswordInput}
+                        erro={errors.current_password}
+                        colSpan="sm:col-span-2"
+                    />
 
-                        <input
-                            id="current_password"
-                            ref={currentPasswordInput}
-                            value={data.current_password}
-                            onChange={(e) => setData('current_password', e.target.value)}
-                            type="password"
-                            autoComplete="current-password"
-                            className={fieldClass}
-                        />
+                    <CampoPalavraPasse
+                        id="password"
+                        label="Nova palavra-passe"
+                        value={data.password}
+                        onChange={(e) => setData('password', e.target.value)}
+                        autoComplete="new-password"
+                        inputRef={passwordInput}
+                        erro={errors.password}
+                        hint="Mínimo de 8 caracteres."
+                    />
 
-                        <InputError message={errors.current_password} className="mt-2" />
-                    </div>
-
-                    <div>
-                        <label htmlFor="password" className={labelClass}>Nova Password</label>
-
-                        <input
-                            id="password"
-                            ref={passwordInput}
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            type="password"
-                            autoComplete="new-password"
-                            className={fieldClass}
-                        />
-
-                        <InputError message={errors.password} className="mt-2" />
-                    </div>
-
-                    <div>
-                        <label htmlFor="password_confirmation" className={labelClass}>
-                            Confirmar Password
-                        </label>
-
-                        <input
-                            id="password_confirmation"
-                            value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            type="password"
-                            autoComplete="new-password"
-                            className={fieldClass}
-                        />
-
-                        <InputError message={errors.password_confirmation} className="mt-2" />
-                    </div>
+                    <CampoPalavraPasse
+                        id="password_confirmation"
+                        label="Confirmar palavra-passe"
+                        value={data.password_confirmation}
+                        onChange={(e) => setData('password_confirmation', e.target.value)}
+                        autoComplete="new-password"
+                        erro={errors.password_confirmation}
+                        hint={
+                            naoCoincide ? (
+                                <span className="flex items-center gap-1 text-red-500">
+                                    <AlertCircle size={13} strokeWidth={2} />
+                                    As palavras-passe não coincidem.
+                                </span>
+                            ) : null
+                        }
+                    />
                 </div>
 
-                <div className="mt-6 flex items-center gap-3">
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {processing ? 'A guardar...' : 'Guardar'}
-                    </button>
-
+                <div className="mt-6 flex items-center justify-end gap-3">
                     <Transition
                         show={recentlySuccessful}
                         enter="transition ease-in-out"
@@ -141,6 +163,14 @@ export default function UpdatePasswordForm() {
                             Guardado.
                         </span>
                     </Transition>
+
+                    <button
+                        type="submit"
+                        disabled={processing}
+                        className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        {processing ? 'A atualizar...' : 'Atualizar palavra-passe'}
+                    </button>
                 </div>
             </form>
         </section>

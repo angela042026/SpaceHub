@@ -8,10 +8,11 @@ import {
     CalendarDays,
     Check,
     CheckCircle2,
-    CreditCard,
+    Clock,
     Hash,
     Info,
     LockKeyhole,
+    MapPin,
 } from 'lucide-react';
 
 const METODOS_PAGAMENTO = [
@@ -90,18 +91,27 @@ export default function Pagar({ pagamento }) {
     const secretaria = reserva?.secretaria;
     const setor = secretaria?.setor;
 
+    const nomeEdificio = setor?.piso?.edificio?.nome;
+    const numeroPiso = setor?.piso?.numero;
+    const localizacao = [
+        nomeEdificio,
+        numeroPiso != null ? `Piso ${numeroPiso}` : null,
+    ]
+        .filter(Boolean)
+        .join(' · ');
+
     return (
         <DashboardLayout>
             <Head title="Efetuar pagamento" />
 
-            <div className="mx-auto max-w-5xl space-y-6">
+            <div className="mx-auto flex w-full min-w-0 max-w-[1600px] flex-col gap-[clamp(20px,1.6vw,32px)] pb-10 [overflow-x:clip]">
                 <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-600 dark:text-teal-400">
                             Pagamento simulado
                         </p>
 
-                        <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                        <h1 className="mt-1 text-[clamp(1.875rem,2vw,2.25rem)] font-bold tracking-tight text-slate-900 dark:text-slate-100">
                             Efetuar pagamento
                         </h1>
 
@@ -120,8 +130,8 @@ export default function Pagar({ pagamento }) {
                 </header>
 
                 <section className="dashboard-card overflow-hidden">
-                    <div className="grid gap-0 lg:grid-cols-[1fr_280px]">
-                        <div className="p-6 sm:p-8">
+                    <div className="grid min-w-0 gap-0 lg:grid-cols-[minmax(0,1fr)_clamp(240px,24%,340px)]">
+                        <div className="min-w-0 p-[clamp(20px,2vw,36px)]">
                             <div className="mb-6 flex items-start justify-between gap-4">
                                 <div>
                                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -138,50 +148,40 @@ export default function Pagar({ pagamento }) {
                                 </span>
                             </div>
 
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <ResumoItem
-                                    Icone={CalendarDays}
-                                    titulo="Data"
-                                    valor={formatarDataCurta(reserva?.data)}
-                                />
+                            <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 min-[1600px]:grid-cols-[minmax(135px,0.8fr)_minmax(130px,0.8fr)_minmax(280px,2fr)_minmax(240px,1.6fr)]">
+                                <ResumoItem Icone={CalendarDays} titulo="Data">
+                                    {formatarDataCurta(reserva?.data)}
+                                </ResumoItem>
 
-                                <ResumoItem
-                                    Icone={CreditCard}
-                                    titulo="Duração"
-                                    valor={
-                                        reserva?.tipo_duracao === 'diaria'
-                                            ? (reserva?.periodo?.nome ?? 'Diária')
-                                            : reserva?.tipo_duracao === 'semanal'
-                                                ? 'Semanal'
-                                                : reserva?.tipo_duracao === 'mensal'
-                                                    ? 'Mensal'
-                                                    : reserva?.tipo_duracao === 'anual'
-                                                        ? 'Anual'
-                                                        : '-'
-                                    }
-                                />
+                                <ResumoItem Icone={Clock} titulo="Período">
+                                    {reserva?.periodo?.nome ?? '-'}
+                                </ResumoItem>
 
-                                <ResumoItem
-                                    Icone={Building2}
-                                    titulo="Secretária"
-                                    valor={secretaria?.codigo ?? '-'}
-                                />
+                                <ResumoItem Icone={Building2} titulo="Espaço" quebraLinha>
+                                    <span className="flex flex-wrap items-center gap-2">
+                                        <span>{setor?.nome ?? '-'}</span>
 
-                                <ResumoItem
-                                    Icone={Building2}
-                                    titulo="Setor"
-                                    valor={setor?.nome ?? '-'}
-                                />
+                                        {secretaria?.codigo && (
+                                            <span className="inline-flex items-center rounded-md border border-teal-200 px-2 py-0.5 text-xs font-bold text-teal-700 dark:border-teal-800 dark:text-teal-400">
+                                                {secretaria.codigo}
+                                            </span>
+                                        )}
+                                    </span>
+                                </ResumoItem>
+
+                                <ResumoItem Icone={MapPin} titulo="Localização" quebraLinha>
+                                    {localizacao || '-'}
+                                </ResumoItem>
                             </div>
                         </div>
 
-                        <div className="flex flex-col justify-between border-t border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-950/50 lg:border-l lg:border-t-0">
+                        <div className="flex min-w-0 flex-col justify-between border-t border-slate-200 bg-slate-50 p-[clamp(20px,2vw,36px)] dark:border-slate-800 dark:bg-slate-950/50 lg:border-l lg:border-t-0">
                             <div>
                                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                                     Total a pagar
                                 </p>
 
-                                <p className="mt-2 text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+                                <p className="mt-2 text-[clamp(2.25rem,3vw,3rem)] font-black tracking-tight text-slate-900 dark:text-white">
                                     {formatarValorEuro(pagamento.valor)}
                                 </p>
                             </div>
@@ -241,13 +241,9 @@ export default function Pagar({ pagamento }) {
                         </div>
                     </div>
 
-                    <section className="dashboard-card p-6 sm:p-8">
+                    <section className="dashboard-card p-[clamp(20px,2vw,36px)]">
                         <div className="mb-6">
-                            <p className="text-sm font-semibold text-teal-600 dark:text-teal-400">
-                                Passo 1
-                            </p>
-
-                            <h2 className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                                 Escolhe o método de pagamento
                             </h2>
 
@@ -261,7 +257,7 @@ export default function Pagar({ pagamento }) {
                                 Método de pagamento
                             </legend>
 
-                            <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
                                 {METODOS_PAGAMENTO.map(
                                     ({
                                         valor,
@@ -275,9 +271,9 @@ export default function Pagar({ pagamento }) {
                                         return (
                                             <label
                                                 key={valor}
-                                                className={`group relative cursor-pointer rounded-2xl border p-4 transition duration-200 ${selecionado
-                                                        ? 'border-teal-500 bg-white shadow-sm ring-2 ring-teal-500/10 dark:bg-slate-900'
-                                                        : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'
+                                                className={`group relative flex min-h-[clamp(80px,7vw,108px)] min-w-0 cursor-pointer items-center rounded-2xl p-4 transition duration-200 ${selecionado
+                                                        ? 'border-2 border-teal-500 bg-teal-50 shadow-[0_6px_20px_-4px_rgba(20,184,166,0.35)] dark:border-teal-400 dark:bg-teal-400/10'
+                                                        : 'border border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600'
                                                     }`}
                                             >
                                                 <input
@@ -293,8 +289,8 @@ export default function Pagar({ pagamento }) {
                                                     className="sr-only"
                                                 />
 
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                                                <div className="flex w-full items-center gap-3">
+                                                    <div className="flex h-[clamp(52px,4.2vw,64px)] w-[clamp(52px,4.2vw,64px)] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-700 dark:bg-slate-800">
                                                         <img
                                                             src={imagem}
                                                             alt={titulo}
@@ -607,7 +603,11 @@ export default function Pagar({ pagamento }) {
                                     processing ||
                                     !data.metodo_pagamento
                                 }
-                                className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-teal-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                                className={`inline-flex items-center justify-center gap-2 rounded-xl px-[clamp(20px,1.8vw,28px)] py-[clamp(10px,1vw,14px)] font-semibold shadow-sm transition focus:outline-none focus:ring-4 focus:ring-teal-500/20 ${
+                                    data.metodo_pagamento && !processing
+                                        ? 'bg-teal-600 text-white hover:bg-teal-700'
+                                        : 'cursor-not-allowed bg-slate-200 text-slate-400 shadow-none dark:bg-slate-800 dark:text-slate-500'
+                                }`}
                             >
                                 <CheckCircle2 size={18} />
 
@@ -623,9 +623,13 @@ export default function Pagar({ pagamento }) {
     );
 }
 
-function ResumoItem({ Icone, titulo, valor }) {
+function ResumoItem({ Icone, titulo, children, quebraLinha = false }) {
     return (
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+        <div
+            className={`flex min-h-[76px] min-w-0 gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-800 ${
+                quebraLinha ? 'items-start' : 'items-center'
+            }`}
+        >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300">
                 <Icone size={19} />
             </div>
@@ -635,9 +639,15 @@ function ResumoItem({ Icone, titulo, valor }) {
                     {titulo}
                 </p>
 
-                <p className="mt-0.5 truncate font-semibold text-slate-800 dark:text-slate-200">
-                    {valor}
-                </p>
+                <div
+                    className={`mt-0.5 font-semibold text-slate-800 dark:text-slate-200 ${
+                        quebraLinha
+                            ? 'whitespace-normal break-words'
+                            : 'whitespace-nowrap'
+                    }`}
+                >
+                    {children}
+                </div>
             </div>
         </div>
     );

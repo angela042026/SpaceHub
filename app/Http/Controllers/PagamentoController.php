@@ -137,7 +137,7 @@ class PagamentoController extends Controller
 
         $pagamento->load([
             'reserva.periodo',
-            'reserva.secretaria.setor',
+            'reserva.secretaria.setor.piso.edificio',
         ]);
 
         return Inertia::render('Pagamentos/Pagar', [

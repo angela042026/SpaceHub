@@ -13,7 +13,7 @@ export default function DashboardLayout({ children, header = true }) {
         <div className="min-h-screen bg-surface lg:flex">
             <Sidebar open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
-            <main className="spacehub-page-bg min-h-screen flex-1 print:pl-0">
+            <main className="spacehub-page-bg min-h-screen min-w-0 flex-1 print:pl-0">
                 <div className="mx-auto max-w-[1660px] px-5 py-6 sm:px-7 lg:px-9 print:px-0 print:py-0">
                     {header && (
                         <div className="print:hidden">

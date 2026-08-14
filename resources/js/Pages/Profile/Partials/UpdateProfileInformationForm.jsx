@@ -1,7 +1,7 @@
 import InputError from '@/Components/InputError';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
-import { CheckCircle2, Mail, UserCog, UserRound } from 'lucide-react';
+import { Camera, CheckCircle2, Mail, UserCog, UserRound } from 'lucide-react';
 import { useState } from 'react';
 
 const fieldClass =
@@ -33,6 +33,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
 
         patch(route('profile.update'), {
             forceFormData: true,
+            preserveScroll: true,
         });
     };
 
@@ -55,121 +56,145 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
             </div>
 
             <form onSubmit={submit} className="p-6">
-                <div className="mb-6 flex items-center gap-4">
-                    {preview || user.fotografia_url ? (
-                        <img
-                            src={preview ?? user.fotografia_url}
-                            alt={user.name}
-                            className="h-16 w-16 rounded-full object-cover"
-                        />
-                    ) : (
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-teal-500/10 text-teal-500">
-                            <UserRound size={26} strokeWidth={1.8} />
-                        </div>
-                    )}
+                <div className="flex flex-col gap-6 sm:flex-row sm:gap-7">
+                    {/* Avatar */}
+                    <div className="flex shrink-0 flex-col items-center gap-3 sm:w-44">
+                        <div className="relative">
+                            {preview || user.fotografia_url ? (
+                                <img
+                                    src={preview ?? user.fotografia_url}
+                                    alt={user.name}
+                                    className="h-24 w-24 rounded-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-teal-500/10 text-teal-500">
+                                    <UserRound size={38} strokeWidth={1.6} />
+                                </div>
+                            )}
 
-                    <div>
+                            <label
+                                htmlFor="fotografia"
+                                aria-label="Trocar fotografia"
+                                className="absolute bottom-0.5 right-0.5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white text-teal-600 shadow-md ring-1 ring-slate-200 transition hover:bg-teal-50 dark:bg-slate-800 dark:text-teal-400 dark:ring-slate-700"
+                            >
+                                <Camera size={15} strokeWidth={2} />
+                            </label>
+
+                            <input
+                                id="fotografia"
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                onChange={handleFotografia}
+                                className="hidden"
+                            />
+                        </div>
+
                         <label
                             htmlFor="fotografia"
-                            className="inline-flex cursor-pointer items-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
+                            className="inline-flex cursor-pointer items-center rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                         >
-                            Trocar fotografia
+                            Alterar fotografia
                         </label>
 
-                        <input
-                            id="fotografia"
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp"
-                            onChange={handleFotografia}
-                            className="hidden"
-                        />
-
-                        <InputError message={errors.fotografia} className="mt-2" />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <div>
-                        <label htmlFor="name" className={labelClass}>Nome</label>
-
-                        <input
-                            id="name"
-                            type="text"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            required
-                            autoFocus
-                            autoComplete="name"
-                            className={fieldClass}
-                        />
-
-                        <InputError message={errors.name} className="mt-2" />
+                        <InputError message={errors.fotografia} className="text-center" />
                     </div>
 
-                    <div>
-                        <label htmlFor="email" className={labelClass}>Email</label>
+                    {/* Divisória vertical discreta */}
+                    <div className="hidden w-px shrink-0 self-stretch bg-slate-100 dark:bg-slate-800 sm:block" />
 
-                        <input
-                            id="email"
-                            type="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            required
-                            autoComplete="username"
-                            className={fieldClass}
-                        />
+                    {/* Campos */}
+                    <div className="flex min-w-0 flex-1 flex-col">
+                        <div>
+                            <div className="grid max-w-xl grid-cols-1 gap-5 sm:grid-cols-2">
+                                <div>
+                                    <label htmlFor="name" className={labelClass}>
+                                        Nome
+                                    </label>
 
-                        <InputError message={errors.email} className="mt-2" />
-                    </div>
-                </div>
+                                    <input
+                                        id="name"
+                                        type="text"
+                                        value={data.name}
+                                        onChange={(e) => setData('name', e.target.value)}
+                                        required
+                                        autoFocus
+                                        autoComplete="name"
+                                        className={fieldClass}
+                                    />
 
-                {mustVerifyEmail && user.email_verified_at === null && (
-                    <div className="mt-5 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
-                        <Mail size={19} strokeWidth={1.9} className="mt-0.5 shrink-0" />
+                                    <InputError message={errors.name} className="mt-2" />
+                                </div>
 
-                        <div className="text-sm">
-                            <p>
-                                O teu endereço de email ainda não foi verificado.{' '}
-                                <Link
-                                    href={route('verification.send')}
-                                    method="post"
-                                    as="button"
-                                    className="font-bold underline decoration-2 underline-offset-2 hover:opacity-80"
-                                >
-                                    Clica aqui para reenviar o email de verificação.
-                                </Link>
-                            </p>
+                                <div>
+                                    <label htmlFor="email" className={labelClass}>
+                                        Email
+                                    </label>
 
-                            {status === 'verification-link-sent' && (
-                                <p className="mt-2 font-semibold text-teal-600 dark:text-teal-400">
-                                    Foi enviado um novo link de verificação para o teu email.
-                                </p>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        value={data.email}
+                                        onChange={(e) => setData('email', e.target.value)}
+                                        required
+                                        autoComplete="username"
+                                        className={fieldClass}
+                                    />
+
+                                    <InputError message={errors.email} className="mt-2" />
+                                </div>
+                            </div>
+
+                            {mustVerifyEmail && user.email_verified_at === null && (
+                                <div className="mt-4 flex max-w-xl items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-400">
+                                    <Mail size={19} strokeWidth={1.9} className="mt-0.5 shrink-0" />
+
+                                    <div className="text-sm">
+                                        <p>
+                                            O teu endereço de email ainda não foi verificado.{' '}
+                                            <Link
+                                                href={route('verification.send')}
+                                                method="post"
+                                                as="button"
+                                                className="font-bold underline decoration-2 underline-offset-2 hover:opacity-80"
+                                            >
+                                                Clica aqui para reenviar o email de verificação.
+                                            </Link>
+                                        </p>
+
+                                        {status === 'verification-link-sent' && (
+                                            <p className="mt-2 font-semibold text-teal-600 dark:text-teal-400">
+                                                Foi enviado um novo link de verificação para o teu email.
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
                             )}
                         </div>
+
+                        {/* Alinhado ao fundo da coluna, à mesma altura do "Alterar fotografia" */}
+                        <div className="mt-6 flex items-center justify-end gap-3 sm:mt-auto sm:pt-6">
+                            <Transition
+                                show={recentlySuccessful}
+                                enter="transition ease-in-out"
+                                enterFrom="opacity-0"
+                                leave="transition ease-in-out"
+                                leaveTo="opacity-0"
+                            >
+                                <span className="flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400">
+                                    <CheckCircle2 size={16} strokeWidth={2} />
+                                    Guardado.
+                                </span>
+                            </Transition>
+
+                            <button
+                                type="submit"
+                                disabled={processing}
+                                className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {processing ? 'A guardar...' : 'Guardar alterações'}
+                            </button>
+                        </div>
                     </div>
-                )}
-
-                <div className="mt-6 flex items-center gap-3">
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {processing ? 'A guardar...' : 'Guardar'}
-                    </button>
-
-                    <Transition
-                        show={recentlySuccessful}
-                        enter="transition ease-in-out"
-                        enterFrom="opacity-0"
-                        leave="transition ease-in-out"
-                        leaveTo="opacity-0"
-                    >
-                        <span className="flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400">
-                            <CheckCircle2 size={16} strokeWidth={2} />
-                            Guardado.
-                        </span>
-                    </Transition>
                 </div>
             </form>
         </section>
