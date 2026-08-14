@@ -45,7 +45,7 @@ export default function ChatWidget() {
 
     return (
         <div
-            className={`fixed right-6 z-50 font-sans transition-all duration-300 ${
+            className={`fixed right-6 z-50 font-sans transition-all duration-300 print:hidden ${
                 cookieBannerVisible
                     ? 'bottom-48 lg:bottom-28'
                     : alteracaoBarVisible

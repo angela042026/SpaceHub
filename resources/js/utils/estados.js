@@ -96,10 +96,10 @@ export const ESTADO_PAGAMENTO = {
  * últimos, que é a mais explícita.
  */
 export const METODO_PAGAMENTO = {
-    cartao: { label: 'Cartão' },
-    mbway: { label: 'MB Way' },
-    transferencia: { label: 'Transferência bancária' },
-    paypal: { label: 'PayPal' },
+    cartao: { label: 'Cartão', imagem: '/images/payment/cartao.jpeg' },
+    mbway: { label: 'MB Way', imagem: '/images/payment/mbway.jpeg' },
+    transferencia: { label: 'Transferência bancária', imagem: '/images/payment/transferencia.jpeg' },
+    paypal: { label: 'PayPal', imagem: '/images/payment/paypal.jpeg' },
 };
 
 /**

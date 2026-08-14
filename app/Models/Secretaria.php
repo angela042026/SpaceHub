@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Secretaria extends Model
@@ -66,14 +67,25 @@ class Secretaria extends Model
     }
 
     /**
-     * URL pública da imagem própria da secretária, gerada a partir do
-     * caminho relativo guardado em `imagem` (storage/app/public/...).
-     * Mesmo padrão de User::fotografiaUrl().
+     * URL pública da imagem própria da secretária. Suporta dois formatos
+     * guardados em `imagem`: um ficheiro enviado pelo upload do admin
+     * (guardado em storage/app/public/...) ou um caminho estático já
+     * existente em public/ (ex: "images/landing/saladereuniao.png").
      */
     protected function imagemUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->imagem ? asset('storage/' . $this->imagem) : null,
+            get: function () {
+                if (! $this->imagem) {
+                    return null;
+                }
+
+                if (Storage::disk('public')->exists($this->imagem)) {
+                    return asset('storage/' . $this->imagem);
+                }
+
+                return asset($this->imagem);
+            },
         );
     }
 

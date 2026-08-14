@@ -109,7 +109,7 @@ export default function Sidebar({
                     </button>
                 </div>
 
-                <div className="spacehub-scroll flex-1 overflow-y-auto pr-2">
+                <div className="spacehub-scroll min-h-0 flex-1 overflow-y-auto pb-2 pr-2">
                     <nav className="space-y-2">
                         <SidebarItem
                             icon={Home}
@@ -389,7 +389,7 @@ export default function Sidebar({
                     )}
                 </div>
 
-                <div className="mt-5 flex items-center gap-3 border-t border-white/10 pt-5">
+                <div className="mt-5 flex shrink-0 items-center gap-3 border-t border-white/10 pt-5">
                     {user?.fotografia_url ? (
                         <img
                             src={user.fotografia_url}

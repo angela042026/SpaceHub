@@ -198,12 +198,22 @@ export default function Index({
             label: 'Método',
             render: (pagamento) => (
                 <span
-                    className={
+                    className={`inline-flex items-center gap-2 ${
                         pagamento.estado === 'cancelado'
                             ? 'text-slate-400 dark:text-slate-500'
-                            : undefined
-                    }
+                            : ''
+                    }`}
                 >
+                    {METODO_PAGAMENTO[pagamento.metodo_pagamento]?.imagem && (
+                        <img
+                            src={METODO_PAGAMENTO[pagamento.metodo_pagamento].imagem}
+                            alt=""
+                            className={`h-6 w-6 shrink-0 rounded-md object-cover ${
+                                pagamento.estado === 'cancelado' ? 'opacity-50 grayscale' : ''
+                            }`}
+                        />
+                    )}
+
                     {etiqueta(
                         METODO_PAGAMENTO,
                         pagamento.metodo_pagamento,

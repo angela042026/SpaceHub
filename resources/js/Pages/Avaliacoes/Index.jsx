@@ -1,7 +1,15 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, router } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { Building2, CalendarDays, ChevronLeft, ChevronRight, Hash, Star } from 'lucide-react';
 import { ESTADO_AVALIACAO, badge, etiqueta } from '@/utils/estados';
+
+const rotuloEstadoAvaliacao = (estado) =>
+    estado === 'pendente' ? 'A aguardar moderação' : etiqueta(ESTADO_AVALIACAO, estado);
+
+const badgeEstadoAvaliacao = (estado) =>
+    estado === 'pendente'
+        ? 'bg-amber-50 text-orange-600 dark:bg-amber-500/10 dark:text-amber-400'
+        : badge(ESTADO_AVALIACAO, estado);
 
 export default function Index({ avaliacoes }) {
     const irParaPagina = (url) => {
@@ -41,46 +49,57 @@ export default function Index({ avaliacoes }) {
                             </p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="flex flex-col gap-4">
                             {avaliacoes.data.map((avaliacao) => (
                                 <div
                                     key={avaliacao.id}
-                                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                                    className="flex flex-row items-center justify-between gap-4 rounded-[18px] border border-slate-200 border-l-[3px] border-l-teal-400 bg-white p-4 shadow-sm transition hover:border-teal-200 hover:shadow-md dark:border-slate-800 dark:border-l-teal-500 dark:bg-slate-900 sm:p-5"
                                 >
-                                    <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
                                         <div className="flex gap-0.5 text-amber-400">
                                             {Array.from({ length: 5 }).map((_, indice) => (
                                                 <Star
                                                     key={indice}
-                                                    size={15}
+                                                    size={18}
                                                     fill={indice < avaliacao.nota ? 'currentColor' : 'none'}
                                                     strokeWidth={1.5}
                                                 />
                                             ))}
                                         </div>
 
-                                        <span
-                                            className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                                                badge(ESTADO_AVALIACAO, avaliacao.estado)
-                                            }`}
-                                        >
-                                            {etiqueta(ESTADO_AVALIACAO, avaliacao.estado)}
-                                        </span>
-                                    </div>
-
-                                    <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
-                                        {avaliacao.comentario}
-                                    </p>
-
-                                    <div className="mt-4 border-t border-slate-100 pt-3 dark:border-slate-800">
-                                        <p className="font-semibold text-slate-800 dark:text-slate-100">
-                                            {avaliacao.reserva?.secretaria ?? '-'}
+                                        <p className="mt-3 break-words text-base font-bold text-slate-900 dark:text-white">
+                                            {avaliacao.comentario}
                                         </p>
 
-                                        <p className="text-xs text-slate-400">
-                                            {avaliacao.reserva?.setor ?? '-'} · {new Date(avaliacao.reserva?.data ?? avaliacao.created_at).toLocaleDateString('pt-PT')}
-                                        </p>
+                                        <div className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs text-slate-400 dark:text-slate-500">
+                                            <span className="inline-flex items-center gap-1.5">
+                                                <Hash size={13} strokeWidth={1.9} />
+                                                {avaliacao.reserva?.secretaria ?? '-'}
+                                            </span>
+
+                                            <span className="text-slate-300 dark:text-slate-700">•</span>
+
+                                            <span className="inline-flex items-center gap-1.5">
+                                                <Building2 size={13} strokeWidth={1.9} />
+                                                {avaliacao.reserva?.setor ?? '-'}
+                                            </span>
+
+                                            <span className="text-slate-300 dark:text-slate-700">•</span>
+
+                                            <span className="inline-flex items-center gap-1.5">
+                                                <CalendarDays size={13} strokeWidth={1.9} />
+                                                {new Date(avaliacao.reserva?.data ?? avaliacao.created_at).toLocaleDateString('pt-PT')}
+                                            </span>
+                                        </div>
                                     </div>
+
+                                    <span
+                                        className={`inline-flex shrink-0 items-center self-center whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold ${badgeEstadoAvaliacao(
+                                            avaliacao.estado,
+                                        )}`}
+                                    >
+                                        {rotuloEstadoAvaliacao(avaliacao.estado)}
+                                    </span>
                                 </div>
                             ))}
                         </div>

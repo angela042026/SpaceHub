@@ -47,87 +47,87 @@ export default function DeleteUserForm() {
 
     return (
         <section className="dashboard-card overflow-hidden">
-            <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
-                    <Trash2 size={22} strokeWidth={1.9} />
+            <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
+                        <Trash2 size={22} strokeWidth={1.9} />
+                    </div>
+
+                    <div>
+                        <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                            Eliminar conta
+                        </h2>
+
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Depois de eliminada, todos os dados da conta serão apagados permanentemente.
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                        Eliminar Conta
-                    </h2>
-
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Depois de eliminada, todos os dados da conta são apagados permanentemente.
-                    </p>
-                </div>
-            </div>
-
-            <div className="p-6">
                 <button
                     type="button"
                     onClick={confirmUserDeletion}
-                    className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-transparent px-5 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-950/30"
+                    className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-red-200 bg-transparent px-5 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-950/30 sm:self-center"
                 >
                     <Trash2 size={16} strokeWidth={1.9} />
-                    Eliminar Conta
+                    Eliminar conta
                 </button>
-
-                <Modal show={confirmingUserDeletion} onClose={closeModal}>
-                    <form onSubmit={deleteUser} className="p-6">
-                        <div className="flex items-start gap-3">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
-                                <AlertTriangle size={22} strokeWidth={1.9} />
-                            </div>
-
-                            <div>
-                                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                    Tens a certeza que queres eliminar a tua conta?
-                                </h2>
-
-                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                    Esta ação é permanente. Introduz a tua password para confirmar
-                                    que queres eliminar a conta.
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="mt-6">
-                            <input
-                                id="password"
-                                type="password"
-                                name="password"
-                                ref={passwordInput}
-                                value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
-                                placeholder="Password"
-                                autoFocus
-                                className={fieldClass}
-                            />
-
-                            <InputError message={errors.password} className="mt-2" />
-                        </div>
-
-                        <div className="mt-6 flex justify-end gap-3">
-                            <button
-                                type="button"
-                                onClick={closeModal}
-                                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
-                            >
-                                Cancelar
-                            </button>
-
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                {processing ? 'A eliminar...' : 'Eliminar Conta'}
-                            </button>
-                        </div>
-                    </form>
-                </Modal>
             </div>
+
+            <Modal show={confirmingUserDeletion} onClose={closeModal}>
+                <form onSubmit={deleteUser} className="p-6">
+                    <div className="flex items-start gap-3">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
+                            <AlertTriangle size={22} strokeWidth={1.9} />
+                        </div>
+
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                                Tens a certeza que queres eliminar a tua conta?
+                            </h2>
+
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                Esta ação é permanente e irreversível. Introduz a tua
+                                palavra-passe para confirmar que queres eliminar a conta.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="mt-6">
+                        <input
+                            id="password"
+                            type="password"
+                            name="password"
+                            ref={passwordInput}
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            placeholder="Palavra-passe"
+                            autoFocus
+                            className={fieldClass}
+                        />
+
+                        <InputError message={errors.password} className="mt-2" />
+                    </div>
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={closeModal}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {processing ? 'A eliminar...' : 'Eliminar conta'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </section>
     );
 }
