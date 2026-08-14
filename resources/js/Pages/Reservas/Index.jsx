@@ -11,14 +11,16 @@ import {
     Pencil,
     Plus,
     RotateCcw,
-    Search,
     Star,
     XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
 import { ESTADO_RESERVA, badge } from '@/utils/estados';
-import { podeCancelarReserva } from '@/Components/Reservas/reservaHelpers';
+import { ESTADOS_SEM_CANCELAMENTO, podeCancelarReserva } from '@/Components/Reservas/reservaHelpers';
+import LocalizacaoEspaco from '@/Components/Reservas/LocalizacaoEspaco';
+import { linkGoogleCalendar } from '@/utils/calendario';
+import GoogleCalendarIcon from '@/Components/GoogleCalendarIcon';
 
 /*
  * Texto corrido, não um badge: entra a seguir a "Avaliação " numa frase.
@@ -33,7 +35,15 @@ const AVALIACAO_ESTADO_LABEL = {
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
-export default function Index({ reservas, setores, pisos, edificios, filters, secretariasFavoritas = [] }) {
+export default function Index({
+    reservas,
+    setores,
+    pisos,
+    edificios,
+    filters,
+    secretariasFavoritas = [],
+    googleCalendarConectado = false,
+}) {
     // Estrela de "secretária favorita" — marca a secretária (não a
     // reserva), otimista no clique e revertida se o pedido falhar.
     const [favoritas, setFavoritas] = useState(
@@ -132,15 +142,24 @@ export default function Index({ reservas, setores, pisos, edificios, filters, se
         edificio: filters.edificio ?? '',
     });
 
-    // Pesquisar
-    const pesquisar = (e) => {
-        e.preventDefault();
+    const filtrosAtivos = Object.values(data).some(Boolean);
+
+    // Atualiza os resultados automaticamente ao mudar qualquer filtro,
+    // sem botão de pesquisa — ignora a primeira renderização, para não
+    // repetir o pedido que já trouxe estes props do servidor.
+    const primeiraRenderizacao = useRef(true);
+
+    useEffect(() => {
+        if (primeiraRenderizacao.current) {
+            primeiraRenderizacao.current = false;
+            return;
+        }
 
         get(route('reservas.index'), {
             preserveState: true,
             preserveScroll: true,
         });
-    };
+    }, [data.estado, data.data, data.setor, data.piso, data.edificio]);
 
     // Limpar filtros
     const limpar = () => {
@@ -187,90 +206,81 @@ export default function Index({ reservas, setores, pisos, edificios, filters, se
                     </Link>
                 </div>
 
-                <form
-                    onSubmit={pesquisar}
-                    className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:grid-cols-2 lg:grid-cols-6"
-                >
-                    <select
-                        value={data.estado}
-                        onChange={(e) => setData('estado', e.target.value)}
-                        className={fieldClass}
-                    >
-                        <option value="">Todos os estados</option>
-                        <option value="pendente">Pendente</option>
-                        <option value="confirmada">Confirmada</option>
-                        <option value="cancelada">Cancelada</option>
-                        <option value="concluida">Concluída</option>
-                        <option value="expirada">Expirada</option>
-                    </select>
-
-                    <input
-                        type="date"
-                        value={data.data}
-                        onChange={(e) => setData('data', e.target.value)}
-                        className={fieldClass}
-                    />
-
-                    <select
-                        value={data.edificio}
-                        onChange={(e) => setData('edificio', e.target.value)}
-                        className={fieldClass}
-                    >
-                        <option value="">Todos os edifícios</option>
-
-                        {edificios.map((edificio) => (
-                            <option key={edificio.id} value={edificio.id}>
-                                {edificio.nome}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={data.piso}
-                        onChange={(e) => setData('piso', e.target.value)}
-                        className={fieldClass}
-                    >
-                        <option value="">Todos os pisos</option>
-
-                        {pisos.map((piso) => (
-                            <option key={piso.id} value={piso.id}>
-                                {piso.nome}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={data.setor}
-                        onChange={(e) => setData('setor', e.target.value)}
-                        className={fieldClass}
-                    >
-                        <option value="">Todos os espaços</option>
-
-                        {setores.map((setor) => (
-                            <option key={setor.id} value={setor.id}>
-                                {setor.nome}
-                            </option>
-                        ))}
-                    </select>
-
-                    <div className="flex gap-2">
-                        <button
-                            type="submit"
-                            className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-navy-900 px-4 text-sm font-bold text-white transition hover:bg-navy-950"
+                <div className="flex flex-col gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 lg:flex-row lg:items-center">
+                    <div className="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+                        <select
+                            value={data.estado}
+                            onChange={(e) => setData('estado', e.target.value)}
+                            className={fieldClass}
                         >
-                            <Search size={16} strokeWidth={2} />
-                            Pesquisar
-                        </button>
+                            <option value="">Todos os estados</option>
+                            <option value="pendente">Pendente</option>
+                            <option value="confirmada">Confirmada</option>
+                            <option value="cancelada">Cancelada</option>
+                            <option value="concluida">Concluída</option>
+                            <option value="expirada">Expirada</option>
+                        </select>
 
+                        <input
+                            type="date"
+                            value={data.data}
+                            onChange={(e) => setData('data', e.target.value)}
+                            className={fieldClass}
+                        />
+
+                        <select
+                            value={data.edificio}
+                            onChange={(e) => setData('edificio', e.target.value)}
+                            className={fieldClass}
+                        >
+                            <option value="">Todos os edifícios</option>
+
+                            {edificios.map((edificio) => (
+                                <option key={edificio.id} value={edificio.id}>
+                                    {edificio.nome}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select
+                            value={data.piso}
+                            onChange={(e) => setData('piso', e.target.value)}
+                            className={fieldClass}
+                        >
+                            <option value="">Todos os pisos</option>
+
+                            {pisos.map((piso) => (
+                                <option key={piso.id} value={piso.id}>
+                                    {piso.nome}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select
+                            value={data.setor}
+                            onChange={(e) => setData('setor', e.target.value)}
+                            className={fieldClass}
+                        >
+                            <option value="">Todos os espaços</option>
+
+                            {setores.map((setor) => (
+                                <option key={setor.id} value={setor.id}>
+                                    {setor.nome}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {filtrosAtivos && (
                         <button
                             type="button"
                             onClick={limpar}
-                            className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700"
+                            className="shrink-0 self-start text-sm font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900 lg:self-auto"
                         >
-                            Limpar
+                            Limpar filtros
                         </button>
-                    </div>
-                </form>
+                    )}
+                </div>
 
                 <div className="p-6">
                     {reservas.data.length === 0 ? (
@@ -281,10 +291,18 @@ export default function Index({ reservas, setores, pisos, edificios, filters, se
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                            {reservas.data.map((reserva) => (
+                            {reservas.data.map((reserva) => {
+                                const emVigor = !ESTADOS_SEM_CANCELAMENTO.includes(
+                                    reserva.estado_reserva?.codigo,
+                                );
+                                const linkCalendario = emVigor
+                                    ? linkGoogleCalendar(reserva)
+                                    : null;
+
+                                return (
                                 <div
                                     key={reserva.id}
-                                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                                    className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
                                 >
                                     <div className="relative">
                                         {resolverImagemSecretaria(reserva.secretaria) ? (
@@ -299,6 +317,12 @@ export default function Index({ reservas, setores, pisos, edificios, filters, se
                                             </div>
                                         )}
 
+                                        {reserva.secretaria?.codigo && (
+                                            <span className="absolute left-2.5 top-2.5 rounded-md bg-white/95 px-2 py-1 text-[11px] font-bold text-slate-600 shadow-sm dark:bg-slate-900/90 dark:text-slate-300">
+                                                {reserva.secretaria.codigo}
+                                            </span>
+                                        )}
+
                                         {reserva.secretaria?.id && (
                                             <button
                                                 type="button"
@@ -311,8 +335,8 @@ export default function Index({ reservas, setores, pisos, edificios, filters, se
                                                 aria-pressed={favoritas.has(reserva.secretaria.id)}
                                                 title={
                                                     favoritas.has(reserva.secretaria.id)
-                                                        ? 'Secretária favorita'
-                                                        : 'Marcar como favorita'
+                                                        ? 'Remover dos favoritos'
+                                                        : 'Adicionar aos favoritos'
                                                 }
                                                 className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-400 shadow-sm backdrop-blur transition hover:scale-110 hover:text-amber-500 dark:bg-slate-900/80 dark:text-slate-500"
                                             >
@@ -334,17 +358,11 @@ export default function Index({ reservas, setores, pisos, edificios, filters, se
                                         )}
                                     </div>
 
-                                    <div className="p-4">
+                                    <div className="flex flex-1 flex-col p-4">
                                         <div className="flex items-start justify-between gap-2">
-                                            <div>
-                                                <p className="font-bold text-slate-900 dark:text-white">
-                                                    {reserva.secretaria?.setor?.nome ?? '-'}
-                                                </p>
-
-                                                <p className="text-xs text-slate-400">
-                                                    {reserva.secretaria?.codigo ?? '-'}
-                                                </p>
-                                            </div>
+                                            <p className="font-bold text-slate-900 dark:text-white">
+                                                {reserva.secretaria?.setor?.nome ?? '-'}
+                                            </p>
 
                                             <span
                                                 className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-bold ${badge(
@@ -356,78 +374,106 @@ export default function Index({ reservas, setores, pisos, edificios, filters, se
                                             </span>
                                         </div>
 
-                                        <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+                                        <LocalizacaoEspaco secretaria={reserva.secretaria} className="mt-1.5" />
+
+                                        <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">
                                             {new Date(reserva.data).toLocaleDateString('pt-PT')} · {reserva.periodo?.nome ?? '-'}
                                         </p>
 
-                                        {reserva.estado_reserva?.codigo === 'pendente' ? (
-                                            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                                                <Link
-                                                    href={route('reservas.edit', reserva.id)}
-                                                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
-                                                >
-                                                    <Pencil size={16} strokeWidth={1.9} />
-                                                    Editar
-                                                </Link>
-
-                                                {podeCancelarReserva(reserva) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => abrirCancelamento(reserva)}
-                                                        className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
-                                                    >
-                                                        <XCircle size={16} strokeWidth={1.9} />
-                                                        Cancelar
-                                                    </button>
-                                                )}
-
-                                                {reserva.pagamento?.estado === 'pendente' && (
-                                                    <Link
-                                                        href={route('pagamentos.show', reserva.pagamento.id)}
-                                                        className="flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-md"
-                                                    >
-                                                        <CreditCard size={16} strokeWidth={1.9} />
-                                                        Pagar
-                                                    </Link>
-                                                )}
-
-                                                {reserva.pagamento?.estado === 'pago' && (
-                                                    <div className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                                                        <CreditCard size={16} strokeWidth={1.9} />
-                                                        Pago
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : podeCancelarReserva(reserva) ? (
-                                            <button
-                                                type="button"
-                                                onClick={() => abrirCancelamento(reserva)}
-                                                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
-                                            >
-                                                <XCircle size={16} strokeWidth={1.9} />
-                                                Cancelar
-                                            </button>
-                                        ) : reserva.check_in_at && !reserva.avaliacao ? (
-                                            <button
-                                                type="button"
-                                                onClick={() => setReservaParaAvaliar(reserva)}
-                                                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-amber-300 px-3 py-2 text-sm font-semibold text-amber-600 transition hover:border-amber-400 hover:bg-amber-50 dark:border-amber-500/40 dark:text-amber-400 dark:hover:bg-amber-500/10"
-                                            >
-                                                <Star size={16} strokeWidth={1.9} />
-                                                Avaliar
-                                            </button>
-                                        ) : reserva.avaliacao ? (
-                                            <p className="mt-4 text-center text-xs font-semibold text-slate-400">
-                                                Avaliação {AVALIACAO_ESTADO_LABEL[reserva.avaliacao.estado]}
+                                        {emVigor && googleCalendarConectado ? (
+                                            <p className="mt-1.5 inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-teal-600 dark:text-teal-400">
+                                                <GoogleCalendarIcon size={26} />
+                                                Sincronizado com o Google Calendar
                                             </p>
-                                        ) : (
-                                            <p className="mt-4 text-center text-xs text-slate-400">
-                                                Sem ações
-                                            </p>
+                                        ) : linkCalendario && (
+                                            <a
+                                                href={linkCalendario}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="mt-1.5 inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-teal-600 transition hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300"
+                                            >
+                                                <GoogleCalendarIcon size={26} />
+                                                Adicionar ao Google Calendar
+                                            </a>
                                         )}
+
+                                        <div className="mt-auto pt-4">
+                                            {reserva.estado_reserva?.codigo === 'pendente' ? (
+                                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                                    <Link
+                                                        href={route('reservas.edit', reserva.id)}
+                                                        className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
+                                                    >
+                                                        <Pencil size={16} strokeWidth={1.9} />
+                                                        Editar
+                                                    </Link>
+
+                                                    {podeCancelarReserva(reserva) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => abrirCancelamento(reserva)}
+                                                            className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
+                                                        >
+                                                            <XCircle size={16} strokeWidth={1.9} />
+                                                            Cancelar
+                                                        </button>
+                                                    )}
+
+                                                    {reserva.pagamento?.estado === 'pendente' && (
+                                                        <Link
+                                                            href={route('pagamentos.show', reserva.pagamento.id)}
+                                                            className="flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-md"
+                                                        >
+                                                            <CreditCard size={16} strokeWidth={1.9} />
+                                                            Pagar
+                                                        </Link>
+                                                    )}
+
+                                                    {reserva.pagamento?.estado === 'pago' && (
+                                                        <div className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                                            <CreditCard size={16} strokeWidth={1.9} />
+                                                            Pago
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : podeCancelarReserva(reserva) ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => abrirCancelamento(reserva)}
+                                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
+                                                >
+                                                    <XCircle size={16} strokeWidth={1.9} />
+                                                    Cancelar
+                                                </button>
+                                            ) : reserva.check_in_at && !reserva.avaliacao ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setReservaParaAvaliar(reserva)}
+                                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-300 px-3 py-2 text-sm font-semibold text-amber-600 transition hover:border-amber-400 hover:bg-amber-50 dark:border-amber-500/40 dark:text-amber-400 dark:hover:bg-amber-500/10"
+                                                >
+                                                    <Star size={16} strokeWidth={1.9} />
+                                                    Avaliar
+                                                </button>
+                                            ) : reserva.avaliacao ? (
+                                                <p className="text-center text-xs font-semibold text-slate-400">
+                                                    Avaliação {AVALIACAO_ESTADO_LABEL[reserva.avaliacao.estado]}
+                                                </p>
+                                            ) : reserva.estado_reserva?.codigo === 'cancelada' ? (
+                                                <p className="text-center text-xs text-slate-400">
+                                                    {reserva.cancelada_at
+                                                        ? `Cancelada em ${new Date(reserva.cancelada_at).toLocaleDateString('pt-PT')}`
+                                                        : 'Cancelada'}
+                                                </p>
+                                            ) : (
+                                                <p className="text-center text-xs text-slate-400">
+                                                    Sem ações
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
 

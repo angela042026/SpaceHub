@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
+use App\Http\Controllers\GoogleCalendarAuthController;
 use App\Http\Controllers\MapaController;
 use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\PedidoSuporteController;
@@ -100,6 +101,18 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+
+    // ==========================
+    // Google Calendar (sincronização de reservas)
+    // ==========================
+    Route::get('/perfil/google-calendar/conectar', [GoogleCalendarAuthController::class, 'redirect'])
+        ->name('google-calendar.redirect');
+
+    Route::get('/perfil/google-calendar/callback', [GoogleCalendarAuthController::class, 'callback'])
+        ->name('google-calendar.callback');
+
+    Route::delete('/perfil/google-calendar', [GoogleCalendarAuthController::class, 'desconectar'])
+        ->name('google-calendar.desconectar');
     // ==========================
     // Pagamentos
     // ==========================

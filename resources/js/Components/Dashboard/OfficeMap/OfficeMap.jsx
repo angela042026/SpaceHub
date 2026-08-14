@@ -59,6 +59,11 @@ export default function OfficeMap({
         useState(null);
     const [selectedSetorId, setSelectedSetorId] =
         useState(null);
+    // Só usado com somenteMapa (página "Mapa do Escritório"): o setor
+    // selecionado começa por mostrar só o card-resumo flutuante — as
+    // secretárias só aparecem no mapa depois de "Ver secretárias".
+    const [mostrarSecretariasDoSetor, setMostrarSecretariasDoSetor] =
+        useState(false);
     const [zoom, setZoom] = useState(1);
     const [rotacao, setRotacao] = useState(0);
     const [position, setPosition] = useState({
@@ -251,12 +256,54 @@ export default function OfficeMap({
             return [];
         }
 
+        // Na página "Mapa do Escritório", selecionar o setor só abre o
+        // card-resumo — as secretárias só entram no mapa depois de
+        // "Ver secretárias" (mostrarSecretariasDoSetor).
+        if (somenteMapa && !mostrarSecretariasDoSetor) {
+            return [];
+        }
+
         return secretariasFiltradas.filter(
             (secretaria) =>
                 String(secretaria.setor?.id) ===
                 String(selectedSetorId),
         );
-    }, [secretariasFiltradas, selectedSetorId]);
+    }, [
+        secretariasFiltradas,
+        selectedSetorId,
+        somenteMapa,
+        mostrarSecretariasDoSetor,
+    ]);
+
+    // Contorno discreto à volta das secretárias do setor selecionado —
+    // só na página "Mapa do Escritório" (ver MapCanvas > somenteMapa).
+    const areaSetorSelecionado = useMemo(() => {
+        if (!somenteMapa || !selectedSetorId) {
+            return null;
+        }
+
+        const pontos = secretarias.filter(
+            (secretaria) =>
+                String(secretaria.setor?.id) === String(selectedSetorId) &&
+                secretaria.planta_x !== null &&
+                secretaria.planta_y !== null,
+        );
+
+        if (pontos.length === 0) {
+            return null;
+        }
+
+        const xs = pontos.map((ponto) => Number(ponto.planta_x));
+        const ys = pontos.map((ponto) => Number(ponto.planta_y));
+        const margem = 4;
+
+        return {
+            left: Math.max(0, Math.min(...xs) - margem),
+            top: Math.max(0, Math.min(...ys) - margem),
+            right: Math.min(100, Math.max(...xs) + margem),
+            bottom: Math.min(100, Math.max(...ys) + margem),
+        };
+    }, [secretarias, selectedSetorId, somenteMapa]);
 
     // Lista dos setores do piso atual, com contagem real por estado —
     // mantém o painel lateral útil antes de qualquer seleção (ver
@@ -323,6 +370,7 @@ export default function OfficeMap({
     useEffect(() => {
         setSelectedSecretaria(null);
         setSelectedSetorId(null);
+        setMostrarSecretariasDoSetor(false);
         reporMapa();
     }, [pisoAtual?.id]);
 
@@ -348,6 +396,7 @@ export default function OfficeMap({
 
         setSelectedSetorId(alvo.setor?.id ?? null);
         setSelectedSecretaria(alvo);
+        setMostrarSecretariasDoSetor(true);
     }, [secretariaFocoId, secretarias]);
 
     useEffect(() => {
@@ -368,6 +417,9 @@ export default function OfficeMap({
             primeiraSecretaria?.setor?.id ?? null,
         );
         setSelectedSecretaria(primeiraSecretaria);
+        // Uma pesquisa já é um pedido explícito de ver o resultado —
+        // não faz sentido obrigar a um clique extra em "Ver secretárias".
+        setMostrarSecretariasDoSetor(true);
     }, [pesquisa, secretariasFiltradas]);
 
     function selecionarSetor(setor) {
@@ -376,6 +428,13 @@ export default function OfficeMap({
 
         setSelectedSetorId(mesmoSetor ? null : setor.id);
         setSelectedSecretaria(null);
+        setMostrarSecretariasDoSetor(false);
+    }
+
+    function fecharSetorSelecionado() {
+        setSelectedSetorId(null);
+        setSelectedSecretaria(null);
+        setMostrarSecretariasDoSetor(false);
     }
 
     function reporMapa() {
@@ -570,6 +629,12 @@ export default function OfficeMap({
                     selectedSetorId={selectedSetorId}
                     selectedSecretaria={selectedSecretaria}
                     setorSelecionado={setorSelecionado}
+                    areaSetorSelecionado={areaSetorSelecionado}
+                    somenteMapa={somenteMapa}
+                    onVerSecretariasDoSetor={() =>
+                        setMostrarSecretariasDoSetor(true)
+                    }
+                    onFecharSetorSelecionado={fecharSetorSelecionado}
                     zoom={zoom}
                     rotacao={rotacao}
                     position={position}

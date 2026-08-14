@@ -17,6 +17,8 @@ export default function Index({ pisos, edificios }) {
                     somenteMapa
                     reservarAoSelecionar
                     tamanhoMapa="grande"
+                    titulo="Mapa do escritório"
+                    subtitulo="Selecione um piso e clique numa área para consultar as secretárias disponíveis."
                     selectedFloor={selectedFloor}
                     setSelectedFloor={setSelectedFloor}
                     selectedEdificio={selectedEdificio}

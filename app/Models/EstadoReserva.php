@@ -23,6 +23,7 @@ class EstadoReserva extends Model
         'pendente',
         'confirmada',
         'concluida',
+        'nao_compareceu',
     ];
 
     /**

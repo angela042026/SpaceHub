@@ -5,6 +5,7 @@ export default function Table({
     data = [],
     keyField = 'id',
     emptyMessage = 'Nenhum registo encontrado.',
+    onRowClick,
 }) {
     if (data.length === 0) {
         return (
@@ -42,7 +43,24 @@ export default function Table({
                     {data.map((linha) => (
                         <tr
                             key={linha[keyField]}
-                            className="bg-white transition hover:bg-slate-50 dark:bg-card dark:hover:bg-slate-800/60"
+                            onClick={onRowClick ? () => onRowClick(linha) : undefined}
+                            tabIndex={onRowClick ? 0 : undefined}
+                            role={onRowClick ? 'button' : undefined}
+                            onKeyDown={
+                                onRowClick
+                                    ? (event) => {
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                            event.preventDefault();
+                                            onRowClick(linha);
+                                        }
+                                    }
+                                    : undefined
+                            }
+                            className={`bg-white transition dark:bg-card ${
+                                onRowClick
+                                    ? 'cursor-pointer hover:bg-teal-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-inset dark:hover:bg-teal-400/5'
+                                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                            }`}
                         >
                             {columns.map((coluna) => (
                                 <td

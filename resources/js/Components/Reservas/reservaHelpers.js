@@ -122,6 +122,17 @@ export const dataEhFimDeSemana = (data) => {
 };
 
 /**
+ * Próxima data válida para uma nova reserva.
+ *
+ * Para a duração "Diária" (a duração padrão) não existe, no sistema,
+ * nenhuma regra que impeça reservar hoje nem que exija começar num dia
+ * útil — essa restrição só se aplica às durações longas (semanal,
+ * mensal, anual), já verificada à parte por dataEhFimDeSemana(). Por
+ * isso a próxima data válida, por omissão, é sempre hoje.
+ */
+export const proximaDataValida = () => formatarDataInput(new Date());
+
+/**
  * Calcular a data final contando apenas dias úteis.
  *
  * A data inicial conta como primeiro dia útil.
@@ -179,7 +190,7 @@ export const calcularDataFim = (dataInicio, tipoDuracao) => {
  * propósito (esconde o botão depois do check-in e nos estados
  * terminais), mas tem de ser sempre o mesmo em todo o lado.
  */
-export const ESTADOS_SEM_CANCELAMENTO = ['cancelada', 'expirada', 'concluida'];
+export const ESTADOS_SEM_CANCELAMENTO = ['cancelada', 'expirada', 'concluida', 'nao_compareceu'];
 
 export function podeCancelarReserva(reserva) {
     return (

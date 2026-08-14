@@ -1,8 +1,9 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, ArrowLeft, CalendarDays, CalendarPlus, RotateCcw, Star } from 'lucide-react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AlertTriangle, CalendarDays, CalendarPlus, Inbox, RotateCcw, Star } from 'lucide-react';
 import LugarCard from '@/Components/Reservas/LugarCard';
+import LugarCardSkeleton from '@/Components/Reservas/LugarCardSkeleton';
 import PreferenciasPanel from '@/Components/Reservas/PreferenciasPanel';
 import {
     PREFERENCIAS,
@@ -10,8 +11,8 @@ import {
     formatarDataPortugues,
     dataEhFimDeSemana,
     calcularDataFim,
+    proximaDataValida,
 } from '@/Components/Reservas/reservaHelpers';
-import { resolverImagemPorSetor } from '@/utils/imagemSetor';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -22,6 +23,19 @@ const readOnlyFieldClass =
 const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
+const PREFERENCIAS_PADRAO = {
+    monitor: false,
+    dock_usb: false,
+    hdmi: false,
+    ergonomica: false,
+    junto_janela: false,
+    luz_natural: false,
+    zona_silenciosa: false,
+    proximo_copa: false,
+};
+
+const QUANTIDADE_POR_PAGINA = 12;
+
 export default function Create({
     periodos,
     pisos,
@@ -31,31 +45,28 @@ export default function Create({
     const { errors } = usePage().props;
 
     const [filtros, setFiltros] = useState({
-        data: filters?.data ?? '',
+        data: filters?.data || proximaDataValida(),
         piso_id: filters?.piso_id ?? '',
         setor_id: filters?.setor_id ?? '',
     });
 
     const [preferencias, setPreferencias] = useState({
-        monitor: false,
-        dock_usb: false,
-        hdmi: false,
-        ergonomica: false,
-        junto_janela: false,
-        luz_natural: false,
-        zona_silenciosa: false,
-        proximo_copa: false,
+        ...PREFERENCIAS_PADRAO,
     });
 
     const [setoresFiltrados, setSetoresFiltrados] =
-        useState([]);
+        useState(setores);
 
     const [lugares, setLugares] = useState([]);
+    const [carregando, setCarregando] = useState(false);
     const [erroConsultaLugares, setErroConsultaLugares] = useState(false);
     const [tentativaConsulta, setTentativaConsulta] = useState(0);
 
     const [periodosEscolhidos, setPeriodosEscolhidos] =
         useState({});
+
+    const [quantidadeVisivel, setQuantidadeVisivel] =
+        useState(QUANTIDADE_POR_PAGINA);
 
     const [aReservar, setAReservar] = useState(null);
     const [mostrarTodos, setMostrarTodos] = useState(false);
@@ -92,15 +103,57 @@ export default function Create({
     const descricaoDuracao =
         DURACOES[tipoDuracao] ?? DURACOES.diaria;
 
+    /*
+     * Só mostrar lugares com pelo menos um período disponível para o
+     * modo atual (Manhã/Tarde para reservas diárias, Dia inteiro para
+     * as longas) — um lugar sem nenhuma opção disponível não aparece.
+     */
+    const lugaresComDisponibilidade = lugares.filter((secretaria) => {
+        if (reservaLonga) {
+            return (
+                periodosReserva.length > 1 &&
+                periodosReserva.every(
+                    (periodo) => secretaria.periodos_disponiveis[periodo.id],
+                )
+            );
+        }
+
+        return periodosReserva.some(
+            (periodo) => secretaria.periodos_disponiveis[periodo.id],
+        );
+    });
+
     const lugaresExibidos = secretariaAlvo && !mostrarTodos
-        ? lugares.filter((lugar) => lugar.id === secretariaAlvo)
-        : lugares;
+        ? lugaresComDisponibilidade.filter((lugar) => lugar.id === secretariaAlvo)
+        : lugaresComDisponibilidade;
+
+    const lugaresPaginados = lugaresExibidos.slice(0, quantidadeVisivel);
+    const existemMaisLugares = lugaresExibidos.length > quantidadeVisivel;
+
+    // Muda sempre que um filtro muda — usado para forçar o remonte dos
+    // cartões e assim limpar período selecionado/mensagem de validação
+    // que ainda pertençam à pesquisa anterior.
+    const chaveFiltros = [
+        filtros.data,
+        filtros.piso_id,
+        filtros.setor_id,
+        tipoDuracao,
+        Object.values(preferencias).join(''),
+    ].join('|');
 
     const setorSelecionado = setoresFiltrados.find(
         (setor) => setor.id == filtros.setor_id,
     );
 
-    const imagemPorTipo = resolverImagemPorSetor(setorSelecionado);
+    // Valores de omissão para a data (a próxima data válida, calculada
+    // no momento) e para os restantes filtros — usados para saber se o
+    // utilizador já se afastou deles e mostrar a ação "Limpar filtros".
+    const filtrosAlterados =
+        filtros.data !== proximaDataValida() ||
+        filtros.piso_id !== '' ||
+        filtros.setor_id !== '' ||
+        tipoDuracao !== 'diaria' ||
+        Object.values(preferencias).some(Boolean);
 
     useEffect(() => {
         if (!secretariaAlvo) {
@@ -117,19 +170,63 @@ export default function Create({
         });
     }, [lugares, secretariaAlvo]);
 
+    // Período vindo de "Consultar Disponibilidade" (filters.periodo_id),
+    // pré-selecionado assim que o lugar-alvo aparece na lista — só uma
+    // vez, para não sobrepor uma escolha manual feita depois.
+    const periodoPreenchidoRef = useRef(false);
+
+    useEffect(() => {
+        if (
+            periodoPreenchidoRef.current ||
+            !secretariaAlvo ||
+            !filters?.periodo_id
+        ) {
+            return;
+        }
+
+        const alvoCarregado = lugares.some(
+            (lugar) => lugar.id === secretariaAlvo,
+        );
+
+        if (!alvoCarregado) {
+            return;
+        }
+
+        setPeriodosEscolhidos((atual) => ({
+            ...atual,
+            [secretariaAlvo]:
+                filters.periodo_id === 'dia_inteiro'
+                    ? 'dia_inteiro'
+                    : Number(filters.periodo_id),
+        }));
+
+        periodoPreenchidoRef.current = true;
+    }, [lugares, secretariaAlvo, filters?.periodo_id]);
+
     /*
-     * Quando a duração muda, eliminar seleções anteriores.
-     *
-     * Para reservas longas, o período é automaticamente
-     * considerado Dia inteiro.
+     * Sempre que a data, a duração ou algum filtro mudam, eliminar
+     * seleções de período anteriores (para reservas longas, o período é
+     * automaticamente considerado Dia inteiro) e voltar aos primeiros
+     * QUANTIDADE_POR_PAGINA resultados.
      */
     useEffect(() => {
         setPeriodosEscolhidos({});
-    }, [tipoDuracao]);
+        setQuantidadeVisivel(QUANTIDADE_POR_PAGINA);
+    }, [
+        filtros.data,
+        filtros.piso_id,
+        filtros.setor_id,
+        preferencias,
+        tipoDuracao,
+    ]);
 
+    /*
+     * Sem piso escolhido ("Todos os pisos"), a categoria mostra os
+     * setores de todo o edifício — não fica bloqueada à espera do piso.
+     */
     useEffect(() => {
         if (!filtros.piso_id) {
-            setSetoresFiltrados([]);
+            setSetoresFiltrados(setores);
             return;
         }
 
@@ -155,25 +252,30 @@ export default function Create({
         });
     }, [filtros.piso_id, setores]);
 
+    /*
+     * Carrega os espaços disponíveis assim que há uma data válida — piso,
+     * categoria e preferências são apenas filtros opcionais sobre esse
+     * conjunto, sem botão de pesquisa: qualquer alteração atualiza a
+     * lista automaticamente.
+     */
     useEffect(() => {
-        if (
-            !filtros.data ||
-            !filtros.setor_id ||
-            inicioEmFimDeSemana
-        ) {
+        if (!filtros.data || inicioEmFimDeSemana) {
             setLugares([]);
             setErroConsultaLugares(false);
+            setCarregando(false);
             return;
         }
 
         const controlador = new AbortController();
 
         setErroConsultaLugares(false);
+        setCarregando(true);
 
         fetch(
             route('reservas.lugaresPorSetor', {
                 data: filtros.data,
-                setor_id: filtros.setor_id,
+                ...(filtros.setor_id ? { setor_id: filtros.setor_id } : {}),
+                ...(filtros.piso_id ? { piso_id: filtros.piso_id } : {}),
                 ...preferencias,
             }),
             {
@@ -194,6 +296,7 @@ export default function Create({
             })
             .then((dados) => {
                 setLugares(dados);
+                setCarregando(false);
             })
             .catch((error) => {
                 if (error.name === 'AbortError') {
@@ -203,6 +306,7 @@ export default function Create({
                 console.error(error);
                 setLugares([]);
                 setErroConsultaLugares(true);
+                setCarregando(false);
             });
 
         return () => {
@@ -211,6 +315,7 @@ export default function Create({
     }, [
         filtros.data,
         filtros.setor_id,
+        filtros.piso_id,
         preferencias,
         inicioEmFimDeSemana,
         tentativaConsulta,
@@ -221,6 +326,16 @@ export default function Create({
             ...atual,
             [chave]: !atual[chave],
         }));
+    };
+
+    const limparFiltros = () => {
+        setFiltros({
+            data: proximaDataValida(),
+            piso_id: '',
+            setor_id: '',
+        });
+        setTipoDuracao('diaria');
+        setPreferencias({ ...PREFERENCIAS_PADRAO });
     };
 
     const escolherPeriodo = (
@@ -294,8 +409,8 @@ export default function Create({
         <DashboardLayout>
             <Head title="Nova Reserva" />
 
-            <section className="dashboard-card overflow-hidden">
-                <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+            <div className="space-y-6 pb-28">
+                <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
                         <CalendarPlus
                             size={22}
@@ -316,32 +431,48 @@ export default function Create({
                     </div>
                 </div>
 
-                <div className="p-6">
-                    {Object.keys(errors).length > 0 && (
-                        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
-                            {Object.keys(errors).length ===
-                                1 ? (
-                                Object.values(errors)[0]
-                            ) : (
-                                <ul className="list-disc space-y-1 pl-4">
-                                    {Object.values(
-                                        errors,
-                                    ).map(
-                                        (
-                                            mensagem,
-                                            indice,
-                                        ) => (
-                                            <li key={indice}>
-                                                {
-                                                    mensagem
-                                                }
-                                            </li>
-                                        ),
-                                    )}
-                                </ul>
-                            )}
-                        </div>
-                    )}
+                {Object.keys(errors).length > 0 && (
+                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
+                        {Object.keys(errors).length ===
+                            1 ? (
+                            Object.values(errors)[0]
+                        ) : (
+                            <ul className="list-disc space-y-1 pl-4">
+                                {Object.values(
+                                    errors,
+                                ).map(
+                                    (
+                                        mensagem,
+                                        indice,
+                                    ) => (
+                                        <li key={indice}>
+                                            {
+                                                mensagem
+                                            }
+                                        </li>
+                                    ),
+                                )}
+                            </ul>
+                        )}
+                    </div>
+                )}
+
+                <section className="dashboard-card p-6">
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                            Filtros de pesquisa
+                        </p>
+
+                        {filtrosAlterados && (
+                            <button
+                                type="button"
+                                onClick={limparFiltros}
+                                className="text-xs font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900"
+                            >
+                                Limpar filtros
+                            </button>
+                        )}
+                    </div>
 
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                         <div>
@@ -434,7 +565,7 @@ export default function Create({
                                 className={fieldClass}
                             >
                                 <option value="">
-                                    Selecione...
+                                    Todos os pisos
                                 </option>
 
                                 {pisos.map((piso) => (
@@ -470,13 +601,10 @@ export default function Create({
                                         }),
                                     )
                                 }
-                                disabled={!filtros.piso_id}
                                 className={fieldClass}
                             >
                                 <option value="">
-                                    {filtros.piso_id
-                                        ? 'Selecione...'
-                                        : 'Selecione primeiro o piso'}
+                                    Todas as categorias
                                 </option>
 
                                 {setoresFiltrados.map(
@@ -636,108 +764,138 @@ export default function Create({
                         preferencias={preferencias}
                         onAlternarPreferencia={alternarPreferencia}
                     />
+                </section>
 
-                    <div className="mt-8">
-                        {!filtros.data ||
-                            !filtros.setor_id ? (
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Escolhe a data, o piso e
-                                a categoria do espaço
-                                para veres os lugares
-                                disponíveis.
+                <section className="dashboard-card p-6">
+                    <div className="mb-5">
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                            Espaços disponíveis
+                        </h2>
+
+                        {filtros.data && !inicioEmFimDeSemana && (
+                            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                                {carregando
+                                    ? 'A procurar espaços...'
+                                    : `${lugaresComDisponibilidade.length} espaço${
+                                          lugaresComDisponibilidade.length === 1 ? '' : 's'
+                                      } encontrado${
+                                          lugaresComDisponibilidade.length === 1 ? '' : 's'
+                                      } para ${formatarDataPortugues(filtros.data)}`}
                             </p>
-                        ) : inicioEmFimDeSemana ? (
-                            <p className="text-sm font-medium text-red-600 dark:text-red-300">
-                                Escolhe um dia útil para
-                                consultares os lugares
-                                disponíveis para esta
-                                duração.
-                            </p>
-                        ) : erroConsultaLugares ? (
-                            <div className="flex flex-col items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
-                                <div className="flex items-start gap-2">
-                                    <AlertTriangle size={18} strokeWidth={1.9} className="mt-0.5 shrink-0" />
-                                    <span>
-                                        Não foi possível consultar a disponibilidade dos lugares. Verifica a tua ligação e tenta novamente.
-                                    </span>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={() => setTentativaConsulta((atual) => atual + 1)}
-                                    className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-400/30 dark:text-red-300 dark:hover:bg-red-400/10"
-                                >
-                                    <RotateCcw size={14} strokeWidth={2} />
-                                    Tentar novamente
-                                </button>
-                            </div>
-                        ) : lugares.length === 0 ? (
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Não existem lugares
-                                disponíveis para a data e
-                                categoria selecionadas.
-                            </p>
-                        ) : (
-                            <div>
-                                {secretariaAlvo && !mostrarTodos && (
-                                    <div className="mb-4 flex items-center justify-between rounded-xl border border-teal-500/20 bg-teal-500/5 px-4 py-2.5 text-sm text-teal-700 dark:text-teal-400">
-                                        <span>A reservar diretamente o lugar selecionado no mapa.</span>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => setMostrarTodos(true)}
-                                            className="font-semibold underline underline-offset-2 hover:no-underline"
-                                        >
-                                            Ver todos os lugares deste setor
-                                        </button>
-                                    </div>
-                                )}
-
-                                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                                    {lugaresExibidos.map(
-                                        (secretaria) => (
-                                            <LugarCard
-                                                key={secretaria.id}
-                                                secretaria={secretaria}
-                                                periodosReserva={periodosReserva}
-                                                reservaLonga={reservaLonga}
-                                                periodoEscolhido={
-                                                    reservaLonga
-                                                        ? 'dia_inteiro'
-                                                        : periodosEscolhidos[secretaria.id] ?? null
-                                                }
-                                                onEscolherPeriodo={escolherPeriodo}
-                                                ehAlvo={secretaria.id === secretariaAlvo}
-                                                imagemPorTipo={imagemPorTipo}
-                                                aReservar={aReservar}
-                                                onReservar={reservar}
-                                                dataInicio={filtros.data}
-                                                dataFimCalculada={dataFimCalculada}
-                                            />
-                                        ),
-                                    )}
-                                </div>
-                            </div>
                         )}
                     </div>
 
-                    <div className="mt-8">
-                        <Link
-                            href={route(
-                                'reservas.index',
-                            )}
-                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
-                        >
-                            <ArrowLeft
-                                size={16}
-                                strokeWidth={1.9}
-                            />
+                    {!filtros.data ? (
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Escolhe uma data para veres
+                            os lugares disponíveis.
+                        </p>
+                    ) : inicioEmFimDeSemana ? (
+                        <p className="text-sm font-medium text-red-600 dark:text-red-300">
+                            Escolhe um dia útil para
+                            consultares os lugares
+                            disponíveis para esta
+                            duração.
+                        </p>
+                    ) : erroConsultaLugares ? (
+                        <div className="flex flex-col items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
+                            <div className="flex items-start gap-2">
+                                <AlertTriangle size={18} strokeWidth={1.9} className="mt-0.5 shrink-0" />
+                                <span>
+                                    Não foi possível carregar os espaços.
+                                </span>
+                            </div>
 
-                            Cancelar
-                        </Link>
-                    </div>
-                </div>
-            </section>
+                            <button
+                                type="button"
+                                onClick={() => setTentativaConsulta((atual) => atual + 1)}
+                                className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-400/30 dark:text-red-300 dark:hover:bg-red-400/10"
+                            >
+                                <RotateCcw size={14} strokeWidth={2} />
+                                Tentar novamente
+                            </button>
+                        </div>
+                    ) : carregando ? (
+                        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                            {Array.from({ length: QUANTIDADE_POR_PAGINA }).map((_, indice) => (
+                                <LugarCardSkeleton key={indice} />
+                            ))}
+                        </div>
+                    ) : lugaresComDisponibilidade.length === 0 ? (
+                        <div className="flex flex-col items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-10 text-center dark:border-slate-800 dark:bg-slate-800/40">
+                            <Inbox size={28} strokeWidth={1.6} className="text-slate-300 dark:text-slate-600" />
+
+                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                                Nenhum espaço encontrado com estes filtros.
+                            </p>
+
+                            <button
+                                type="button"
+                                onClick={limparFiltros}
+                                className="text-xs font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900"
+                            >
+                                Limpar filtros
+                            </button>
+                        </div>
+                    ) : (
+                        <div>
+                            {secretariaAlvo && !mostrarTodos && (
+                                <div className="mb-4 flex items-center justify-between rounded-xl border border-teal-500/20 bg-teal-500/5 px-4 py-2.5 text-sm text-teal-700 dark:text-teal-400">
+                                    <span>A reservar diretamente o lugar selecionado no mapa.</span>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setMostrarTodos(true)}
+                                        className="font-semibold underline underline-offset-2 hover:no-underline"
+                                    >
+                                        Ver todos os lugares deste setor
+                                    </button>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                                {lugaresPaginados.map(
+                                    (secretaria) => (
+                                        <LugarCard
+                                            key={`${secretaria.id}-${chaveFiltros}`}
+                                            secretaria={secretaria}
+                                            periodosReserva={periodosReserva}
+                                            reservaLonga={reservaLonga}
+                                            periodoEscolhido={
+                                                reservaLonga
+                                                    ? 'dia_inteiro'
+                                                    : periodosEscolhidos[secretaria.id] ?? null
+                                            }
+                                            onEscolherPeriodo={escolherPeriodo}
+                                            ehAlvo={secretaria.id === secretariaAlvo}
+                                            aReservar={aReservar}
+                                            onReservar={reservar}
+                                            dataInicio={filtros.data}
+                                            dataFimCalculada={dataFimCalculada}
+                                        />
+                                    ),
+                                )}
+                            </div>
+
+                            {existemMaisLugares && (
+                                <div className="mt-6 flex justify-center">
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setQuantidadeVisivel(
+                                                (atual) => atual + QUANTIDADE_POR_PAGINA,
+                                            )
+                                        }
+                                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-teal-500/50 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:border-slate-700 dark:text-slate-300 dark:hover:text-teal-400 dark:focus-visible:ring-offset-slate-900"
+                                    >
+                                        Carregar mais espaços
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </section>
+            </div>
         </DashboardLayout>
     );
 }

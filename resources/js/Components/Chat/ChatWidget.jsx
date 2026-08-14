@@ -3,6 +3,7 @@ import { MessageCircleMore, MessageSquare, X, ArrowRight, BookOpen } from 'lucid
 import { Link } from '@inertiajs/react';
 import ChatBot from './ChatBot';
 import useCookieBannerVisible from '@/Lib/useCookieBannerVisible';
+import useReservaAlteracaoBarVisible from '@/Lib/useReservaAlteracaoBarVisible';
 
 const DURACAO_ANIMACAO_MS = 200;
 
@@ -13,6 +14,7 @@ export default function ChatWidget() {
     const popUpRef = useRef(null);
     const buttonRef = useRef(null);
     const cookieBannerVisible = useCookieBannerVisible();
+    const alteracaoBarVisible = useReservaAlteracaoBarVisible();
 
     function abrir() {
         setMounted(true);
@@ -46,7 +48,9 @@ export default function ChatWidget() {
             className={`fixed right-6 z-50 font-sans transition-all duration-300 ${
                 cookieBannerVisible
                     ? 'bottom-48 lg:bottom-28'
-                    : 'bottom-6'
+                    : alteracaoBarVisible
+                        ? 'bottom-56 lg:bottom-28'
+                        : 'bottom-6'
             }`}
         >
 

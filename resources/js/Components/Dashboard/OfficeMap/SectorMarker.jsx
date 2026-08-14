@@ -2,6 +2,7 @@ export default function SectorMarker({
     setor,
     selected,
     onSelect,
+    destaqueDiscreto = false,
 }) {
     const temSecretarias = setor.secretarias?.length > 0;
 
@@ -39,7 +40,9 @@ export default function SectorMarker({
             }}
             className={`group absolute z-10 -translate-x-1/2 -translate-y-1/2 rounded-lg border px-2.5 py-1.5 text-left shadow-lg backdrop-blur-sm transition hover:z-30 hover:-translate-y-[55%] ${
                 selected
-                    ? 'border-teal-500 bg-teal-600 text-white shadow-teal-950/20'
+                    ? destaqueDiscreto
+                        ? 'border-2 border-teal-500 bg-white text-teal-700 shadow-teal-500/20'
+                        : 'border-teal-500 bg-teal-600 text-white shadow-teal-950/20'
                     : 'border-white/80 bg-white/90 text-slate-800 hover:border-teal-300 hover:text-teal-700'
             }`}
             style={{

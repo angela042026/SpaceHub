@@ -47,6 +47,12 @@ class PagamentoController extends Controller
             });
         }
 
+        /*
+         * Total sem pesquisa/filtros, para a página poder mostrar
+         * "X de Y pagamentos" quando há pesquisa/filtros ativos.
+         */
+        $totalGeral = (clone $query)->count();
+
         if ($request->filled('estado')) {
             $query->where(
                 'estado',
@@ -61,6 +67,21 @@ class PagamentoController extends Controller
             );
         }
 
+        if ($request->filled('busca')) {
+            $busca = $request->input('busca');
+
+            $query->where(function ($query) use ($busca): void {
+                $query->where('referencia', 'like', "%{$busca}%")
+                    ->orWhere('reserva_id', 'like', "%{$busca}%")
+                    ->orWhereHas('reserva.secretaria', function ($query) use ($busca): void {
+                        $query->where('codigo', 'like', "%{$busca}%")
+                            ->orWhereHas('setor', function ($query) use ($busca): void {
+                                $query->where('nome', 'like', "%{$busca}%");
+                            });
+                    });
+            });
+        }
+
         $pagamentos = $query
             ->latest()
             ->paginate(10)
@@ -68,10 +89,12 @@ class PagamentoController extends Controller
 
         return Inertia::render('Pagamentos/Index', [
             'pagamentos' => $pagamentos,
+            'totalGeral' => $totalGeral,
 
             'filters' => $request->only([
                 'estado',
                 'metodo_pagamento',
+                'busca',
             ]),
 
             'isAdmin' => $user->isAdministrador(),
@@ -87,7 +110,7 @@ class PagamentoController extends Controller
 
         $pagamento->load([
             'reserva.periodo',
-            'reserva.secretaria.setor',
+            'reserva.secretaria.setor.piso.edificio',
         ]);
 
         return Inertia::render('Pagamentos/Show', [
