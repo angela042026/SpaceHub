@@ -20,6 +20,7 @@ class Reserva extends Model
         'check_in_at',
         'cancelada_at',
         'observacoes',
+        'google_event_id',
     ];
 
     protected function casts(): array

@@ -1,255 +1,920 @@
-# 6. Evolução do Projeto e Trabalho Futuro
-
-# 6.1 Introdução
-
-O desenvolvimento do SpaceHub foi realizado de forma incremental, permitindo validar continuamente as funcionalidades implementadas e adaptar a solução às necessidades identificadas durante o projeto.
-
-Ao longo do desenvolvimento foram introduzidas melhorias na arquitetura, segurança, organização do código e experiência do utilizador, culminando numa aplicação estável e suportada por testes automatizados.
-
----
-
-# 6.2 Evolução do Projeto
-
-O desenvolvimento iniciou-se com a implementação da estrutura base da aplicação, incluindo autenticação, gestão de utilizadores e definição das principais entidades da base de dados.
-
-Numa fase posterior foram desenvolvidos os módulos de gestão dos espaços físicos, organizando-os segundo a seguinte hierarquia:
-
-- Edifícios;
-- Pisos;
-- Setores;
-- Secretárias.
-
-Posteriormente foi implementado o sistema de reservas, permitindo aos utilizadores reservar postos de trabalho para datas e períodos específicos.
-
-Após estabilização das funcionalidades principais foram introduzidos diversos melhoramentos, nomeadamente:
+6. Evolução do Projeto e Trabalho Futuro
 
-- autenticação através de Laravel Sanctum;
-- autorização baseada em Policies;
-- pesquisa;
-- filtros;
-- ordenação;
-- paginação;
-- upload de fotografias;
-- upload das plantas dos pisos;
-- dashboard estatístico;
-- QR Codes;
-- editor gráfico do mapa;
-- atualização do mapa em tempo real;
-- testes automatizados.
-Numa fase posterior foram ainda desenvolvidos novos módulos que expandiram significativamente as funcionalidades da aplicação, destacando-se:
+6.1 Introdução
 
-- sistema de pagamentos associado às reservas;
-- Help Center com FAQs e pedidos de suporte;
-- atualização em tempo real através de Laravel Reverb;
-- melhoria da segurança através de middleware e Policies adicionais;
-- automatização da expiração de reservas através do Laravel Scheduler;
-- aumento da cobertura da suíte de testes automatizados.
+O desenvolvimento do SpaceHub foi realizado de forma incremental e colaborativa, permitindo implementar, testar e integrar cada módulo por fases.
 
----
+Esta abordagem possibilitou validar continuamente as funcionalidades, corrigir problemas identificados durante o desenvolvimento e adaptar a aplicação às necessidades do projeto, sem alterar a arquitetura inicialmente definida.
 
-# 6.3 Melhorias Introduzidas
+Ao longo do trabalho foram introduzidas melhorias ao nível da:
 
-Durante o desenvolvimento foram efetuadas várias refatorações com o objetivo de melhorar a qualidade do código.
+arquitetura;
 
-Entre as principais melhorias destacam-se:
+segurança;
 
-- utilização sistemática de Form Requests;
-- utilização de API Resources;
-- centralização das regras de autorização através de Policies;
-- separação clara entre validação e lógica de negócio;
-- organização consistente dos Controllers;
-- utilização do sistema Storage para uploads;
-- melhoria das consultas através de eager loading.
+organização do código;
 
-Estas alterações permitiram tornar o código mais organizado, reutilizável e fácil de manter.
-- introdução da camada Service para centralização da lógica de negócio dos pagamentos;
-- separação entre rotas web e API;
-- integração do Laravel Reverb para comunicação em tempo real;
-- implementação de tarefas automáticas através do Laravel Scheduler;
-- melhoria da organização da documentação técnica;
-- reforço da cobertura de testes automatizados.
+base de dados;
 
----
+experiência do utilizador;
 
-# 6.4 Funcionalidades Implementadas
+comunicação em tempo real;
 
-No final do desenvolvimento encontram-se implementadas as seguintes funcionalidades:
+cobertura de testes;
 
-- autenticação;
-- recuperação de password;
-- gestão de utilizadores;
-- gestão de papéis;
-- gestão de edifícios;
-- gestão de pisos;
-- upload da planta dos pisos;
-- gestão de setores;
-- editor gráfico dos mapas;
-- gestão de secretárias;
-- geração de QR Code;
-- reservas;
-- consulta de disponibilidade;
-- dashboard;
-- estatísticas;
-- uploads;
-- testes automatizados.
-- pagamentos;
-- histórico de pagamentos;
-- Help Center;
-- FAQs;
-- pedidos de suporte;
-- atualização em tempo real com Laravel Reverb;
-- expiração automática de reservas;
-- middleware de contas ativas;
-- Policies de autorização;
-- 154 testes automatizados.
----
+documentação técnica.
 
-# 6.5 Trabalho Futuro
+O resultado é uma aplicação modular, funcional e preparada para manutenção e evolução futura.
 
-Embora o sistema se encontre funcional, existem diversas funcionalidades que poderão ser adicionadas em versões futuras.
+6.2 Fases de evolução do projeto
 
-Entre elas destacam-se:
+6.2.1 Estrutura inicial
 
-## Notificações
+A primeira fase foi dedicada à criação da estrutura base da aplicação.
 
-Envio automático de notificações por email relativamente a:
+Foram implementados:
 
-- confirmação da reserva;
-- cancelamento;
-- lembretes de check-in.
+projeto Laravel com React e Inertia.js;
 
----
+configuração da base de dados MySQL;
 
-## Integração com Calendário
+autenticação;
 
-Integração com:
+registo;
 
-- Microsoft Outlook;
-- Google Calendar.
+login e logout;
 
----
+recuperação e alteração da palavra-passe;
 
-## Aplicação Mobile
+gestão do perfil;
 
-Desenvolvimento de aplicações móveis para Android e iOS.
+papéis de utilizador;
 
----
+controlo de utilizadores ativos e inativos;
 
-## Estatísticas Avançadas
+estrutura inicial de rotas, Controllers, Models e migrations.
 
-Implementação de novos indicadores, como:
+Foram definidos quatro papéis:
 
-- ocupação média por edifício;
-- utilização por utilizador;
-- mapas de calor;
-- evolução mensal.
+Administrador;
 
----
+Gestor;
 
-## Gestão de Equipamentos
+Colaborador;
 
-Possibilidade de associar equipamentos às secretárias, como:
+Utilizador.
 
-- monitores;
-- docks;
-- cadeiras;
-- equipamentos multimédia.
+6.2.2 Gestão dos espaços
 
----
+Numa segunda fase foi implementada a organização física dos espaços.
 
----
+A estrutura adotada foi:
 
-## Sistema de Avaliações
+Edifício
+└── Piso
+    └── Setor
+        └── Secretária
 
-Possibilidade de os utilizadores avaliarem:
+Foram desenvolvidas funcionalidades de:
 
-- a experiência de utilização;
-- os espaços;
-- os equipamentos;
-- o processo de reserva.
+criação e atualização das entidades;
 
-As avaliações poderão contribuir para melhorar continuamente a qualidade do serviço disponibilizado.
+pesquisa, filtros, ordenação e paginação;
 
----
+ativação e desativação lógica;
 
-## Comunicados Administrativos
+upload da planta dos pisos;
 
-Implementação de um sistema de comunicados apresentado após o início de sessão.
+posicionamento de setores e secretárias;
 
-O módulo poderá incluir:
+configuração das características das secretárias;
 
-- mensagem do dia;
-- avisos importantes;
-- período de validade;
-- confirmação de leitura;
-- público-alvo por papel.
+geração de QR Codes;
 
----
+visualização dos espaços através do mapa interativo.
 
-## Integração com Gateways de Pagamento
+6.2.3 Sistema de reservas
 
-Substituição do sistema de pagamento simulado por integração com plataformas reais, como:
+Após a gestão dos espaços, foi implementado o módulo central de reservas.
 
-- Stripe;
-- PayPal;
-- MB Way;
-- referências Multibanco.
+O sistema passou a permitir:
 
-## Auditoria
+consulta de disponibilidade;
 
-Registo detalhado das operações realizadas pelos utilizadores, incluindo:
+criação de reservas;
 
-- criação;
-- atualização;
-- cancelamento;
-- check-in.
+edição;
 
----
+cancelamento;
 
-## Notificações em Tempo Real
+histórico;
 
-Melhoria da comunicação em tempo real através de eventos WebSocket para todas as áreas administrativas.
+estados da reserva;
 
----
+validação de conflitos;
 
-## Inteligência Artificial
+check-in através de QR Code;
 
-Numa evolução futura poderá ser incorporado um módulo baseado em Inteligência Artificial para auxiliar a gestão dos espaços.
+atualização do mapa;
 
-Entre as possíveis funcionalidades incluem-se:
+expiração automática de reservas.
 
-- previsão da ocupação;
-- sugestão automática da melhor secretária;
-- otimização da distribuição dos utilizadores;
-- deteção de padrões de utilização.
+Foram definidas regras para impedir:
 
-# 6.6 Escalabilidade
+reservas sobrepostas;
 
-A arquitetura adotada permite expandir facilmente o sistema.
+reservas incompatíveis do mesmo utilizador;
 
-Entre as possíveis evoluções destacam-se:
+utilização de secretárias inativas;
 
-- múltiplos edifícios;
-- múltiplas organizações;
-- autenticação SSO;
-- integração com Microsoft Entra ID;
-- integração com Active Directory;
-- APIs públicas;
-- arquitetura baseada em microsserviços;
-- integração com gateways externos de pagamento;
-- comunicação entre serviços através de eventos;
-- suporte para múltiplas localizações geográficas;
-- infraestrutura cloud distribuída.
-- relatórios exportáveis.
+utilização de secretárias não reserváveis;
 
----
+alterações a reservas canceladas, expiradas ou já confirmadas.
 
-# 6.7 Considerações Finais
+6.2.4 Segurança e organização da aplicação
 
-A evolução do SpaceHub ao longo do projeto permitiu desenvolver uma plataforma mais completa, segura e preparada para futuras extensões.
+Durante a evolução do projeto foram reforçadas a segurança e a separação de responsabilidades.
 
-A introdução de módulos como os pagamentos, o Help Center, o sistema de comunicação em tempo real através do Laravel Reverb e a automatização de processos com o Laravel Scheduler demonstram a capacidade de evolução da arquitetura inicialmente definida.
+Foram introduzidos ou consolidados:
 
-A utilização de boas práticas de desenvolvimento, da separação de responsabilidades e de uma suíte composta por **154 testes automatizados**, todos aprovados, reforça a qualidade e a robustez da solução desenvolvida.
+autenticação da API através de Laravel Sanctum;
 
-Desta forma, o SpaceHub apresenta uma base sólida para futuras evoluções e para uma eventual utilização em contextos organizacionais de maior dimensão.
+autorização baseada em Policies;
+
+middleware para contas ativas;
+
+middleware de restrição por papel;
+
+Form Requests para validação;
+
+API Resources para respostas JSON;
+
+proteção contra mass assignment;
+
+validação de uploads;
+
+separação entre rotas web e rotas API;
+
+Services para regras de negócio mais complexas;
+
+eager loading para reduzir consultas redundantes;
+
+transações em operações relacionadas.
+
+6.2.5 Interface e comunicação em tempo real
+
+O frontend foi desenvolvido com React, Inertia.js e Tailwind CSS.
+
+Ao longo do projeto foram efetuadas melhorias em:
+
+dashboard;
+
+navegação;
+
+responsividade;
+
+acessibilidade;
+
+formulários;
+
+tabelas;
+
+mapas;
+
+estados visuais;
+
+apresentação de erros;
+
+consistência entre módulos.
+
+A integração com Laravel Reverb e Laravel Echo permitiu acrescentar comunicação em tempo real, utilizada em funcionalidades como:
+
+atualização do mapa;
+
+atualização de indicadores;
+
+notificações;
+
+chat.
+
+6.2.6 Pagamentos e reservas de longa duração
+
+Numa fase posterior foi implementado o módulo de pagamentos simulados.
+
+Foram acrescentadas as seguintes funcionalidades:
+
+criação automática de um pagamento por reserva;
+
+cálculo do valor;
+
+geração de referência;
+
+confirmação;
+
+cancelamento;
+
+consulta do histórico;
+
+consulta do detalhe;
+
+diferentes métodos de pagamento.
+
+Os métodos atualmente suportados são:
+
+Cartão;
+
+MB Way;
+
+Transferência Bancária;
+
+PayPal.
+
+Foi também implementado suporte para reservas:
+
+diárias;
+
+semanais;
+
+mensais;
+
+anuais.
+
+As reservas longas:
+
+utilizam o período Dia inteiro;
+
+geram apenas uma reserva;
+
+geram apenas um pagamento;
+
+possuem data final calculada automaticamente.
+
+6.2.7 Expansão funcional
+
+A aplicação foi posteriormente expandida com novos módulos e melhorias, incluindo:
+
+Help Center;
+
+FAQs;
+
+pedidos de suporte;
+
+notificações persistentes;
+
+notificações por email, quando aplicável;
+
+sistema de avaliações;
+
+moderação de avaliações;
+
+cálculo da média por setor;
+
+chat em tempo real;
+
+Single Sign-On;
+
+melhorias no dashboard;
+
+cache e otimização de consultas;
+
+cancelamento automático de reservas com pagamento pendente;
+
+melhorias de segurança e acessibilidade.
+
+6.2.8 Integração e estabilização
+
+O desenvolvimento foi realizado através de branches e Pull Requests.
+
+O processo de integração incluiu:
+
+desenvolvimento numa branch própria;
+
+commit das alterações;
+
+push para o GitHub;
+
+criação de Pull Request;
+
+revisão e resolução de conflitos;
+
+execução de testes;
+
+merge através de Create a merge commit;
+
+atualização da branch main.
+
+Esta abordagem permitiu preservar a autoria dos diferentes elementos do grupo e manter um histórico claro da evolução do projeto.
+
+6.3 Melhorias técnicas introduzidas
+
+As principais melhorias técnicas implementadas ao longo do projeto incluem:
+
+Backend
+
+utilização consistente do padrão MVC;
+
+Controllers focados na coordenação dos pedidos;
+
+utilização de Services para lógica de negócio;
+
+utilização de Form Requests;
+
+utilização de Policies e Gates;
+
+middleware de autenticação, conta ativa e papel;
+
+API Resources;
+
+utilização de Eloquent ORM;
+
+transações em operações relacionadas;
+
+eventos e broadcasting;
+
+tarefas automáticas através do Scheduler;
+
+organização das rotas web e API;
+
+validação de regras de reserva e pagamento.
+
+Base de dados
+
+normalização das entidades;
+
+utilização de chaves estrangeiras;
+
+utilização de índices;
+
+restrições de unicidade;
+
+relações Eloquent;
+
+ativação lógica;
+
+suporte para reservas de vários dias;
+
+separação entre reservas e pagamentos;
+
+preservação do histórico.
+
+Frontend
+
+componentes React reutilizáveis;
+
+layouts partilhados;
+
+navegação responsiva;
+
+melhorias de acessibilidade;
+
+atualização parcial através do Inertia.js;
+
+estados visuais consistentes;
+
+integração com Laravel Echo;
+
+redução de duplicação;
+
+melhoria do desempenho.
+
+Qualidade
+
+testes automatizados;
+
+testes de autenticação e autorização;
+
+testes das regras de negócio;
+
+testes de reservas e pagamentos;
+
+testes das entidades administrativas;
+
+build do frontend;
+
+revisão da documentação;
+
+utilização de Git e GitHub.
+
+6.4 Funcionalidades implementadas
+
+Na versão atual encontram-se implementadas as seguintes funcionalidades.
+
+Autenticação e perfil
+
+registo;
+
+login;
+
+logout;
+
+recuperação da palavra-passe;
+
+redefinição da palavra-passe;
+
+alteração da palavra-passe;
+
+gestão do perfil;
+
+fotografia do utilizador;
+
+utilizador ativo/inativo;
+
+Laravel Sanctum;
+
+Single Sign-On.
+
+Utilizadores e permissões
+
+gestão de utilizadores;
+
+gestão de papéis;
+
+Administrador, Gestor, Colaborador e Utilizador;
+
+middleware de papel;
+
+Policies;
+
+proteção de recursos;
+
+controlo de propriedade das reservas e pagamentos.
+
+Gestão de espaços
+
+edifícios;
+
+pisos;
+
+setores;
+
+secretárias;
+
+ativação e desativação;
+
+upload de plantas;
+
+características das secretárias;
+
+editor gráfico;
+
+mapa interativo;
+
+QR Codes.
+
+Reservas
+
+disponibilidade;
+
+reservas diárias;
+
+reservas semanais;
+
+reservas mensais;
+
+reservas anuais;
+
+cálculo da data final;
+
+edição;
+
+cancelamento;
+
+histórico;
+
+estados;
+
+validação de conflitos;
+
+check-in por QR Code;
+
+expiração automática;
+
+cancelamento automático associado a pagamentos pendentes.
+
+Pagamentos
+
+criação automática;
+
+cálculo do valor;
+
+confirmação;
+
+cancelamento;
+
+histórico;
+
+detalhe;
+
+referência única;
+
+Cartão;
+
+MB Way;
+
+Transferência Bancária;
+
+PayPal;
+
+ambiente simulado.
+
+Dashboard e estatísticas
+
+indicadores de utilização;
+
+próximas reservas;
+
+ocupação;
+
+estados;
+
+mapa;
+
+informação financeira autorizada;
+
+consultas agregadas;
+
+cache;
+
+atualização em tempo real.
+
+Comunicação e apoio
+
+notificações persistentes;
+
+notificações por email, quando aplicável;
+
+chat em tempo real;
+
+Laravel Reverb;
+
+Laravel Echo;
+
+Help Center;
+
+FAQs;
+
+pedidos de suporte.
+
+Avaliações
+
+avaliação de reservas elegíveis;
+
+classificação;
+
+comentários;
+
+moderação;
+
+média por setor;
+
+regras de autorização.
+
+Qualidade e suporte técnico
+
+pesquisa;
+
+filtros;
+
+ordenação;
+
+paginação;
+
+uploads;
+
+API REST;
+
+testes automatizados;
+
+documentação técnica;
+
+controlo de versões com Git.
+
+À data da última validação registada na documentação, a suíte apresentava 154 testes aprovados. Como foram posteriormente integrados novos commits, a contagem final deve ser confirmada antes da entrega através de:
+
+php artisan test
+
+6.5 Tarefas finais imediatas
+
+O projeto encontra-se numa fase de consolidação.
+
+As tarefas imediatas não correspondem ao desenvolvimento de grandes módulos, mas sim a:
+
+execução da suíte completa de testes;
+
+testes manuais dos principais fluxos;
+
+correção de pequenas anomalias;
+
+verificação das permissões por papel;
+
+validação da responsividade;
+
+revisão da acessibilidade;
+
+confirmação do build de produção;
+
+revisão das migrations e seeders;
+
+atualização da documentação;
+
+preparação da base de dados para entrega;
+
+preparação das credenciais de demonstração;
+
+preparação da apresentação final.
+
+Comandos de validação recomendados:
+
+composer install
+npm.cmd install
+php artisan optimize:clear
+php artisan migrate
+npm.cmd run build
+php artisan test
+php artisan route:list
+
+6.6 Trabalho futuro
+
+As funcionalidades seguintes não fazem parte das tarefas finais imediatas. Representam possíveis evoluções posteriores do projeto.
+
+6.6.1 Comunicados e mensagem do dia
+
+Criação de um módulo administrativo para apresentar informações após o início de sessão.
+
+Poderá incluir:
+
+título;
+
+conteúdo;
+
+prioridade;
+
+período de validade;
+
+público-alvo por papel;
+
+confirmação de leitura;
+
+opção de não voltar a mostrar no mesmo dia.
+
+6.6.2 Exportação de documentos e relatórios
+
+Criação de mecanismos de exportação para:
+
+comprovativos em PDF;
+
+relatórios de reservas;
+
+relatórios de pagamentos;
+
+estatísticas;
+
+ficheiros Excel;
+
+informação para análise administrativa.
+
+6.6.3 Dashboard financeiro
+
+Evolução da informação financeira através de:
+
+receitas simuladas por período;
+
+valores pendentes;
+
+distribuição por método;
+
+valores por edifício ou setor;
+
+comparação mensal;
+
+exportação de resultados.
+
+6.6.4 Integração com calendários
+
+Integração das reservas com:
+
+Google Calendar;
+
+Microsoft Outlook.
+
+Esta funcionalidade poderá permitir criar, atualizar ou remover eventos no calendário do utilizador.
+
+6.6.5 Aplicação móvel
+
+Desenvolvimento de uma aplicação para Android e iOS.
+
+A aplicação móvel poderá permitir:
+
+consultar disponibilidade;
+
+criar reservas;
+
+receber notificações;
+
+efetuar check-in;
+
+consultar pagamentos;
+
+utilizar o chat.
+
+6.6.6 Previsão de ocupação
+
+Criação de uma primeira versão estatística baseada no histórico das reservas.
+
+Poderá incluir:
+
+previsão por dia da semana;
+
+previsão por período;
+
+previsão por edifício;
+
+identificação das áreas mais utilizadas;
+
+sugestão de horários com menor ocupação.
+
+Numa evolução posterior, esta funcionalidade poderá utilizar técnicas de Inteligência Artificial.
+
+6.6.7 Auditoria administrativa
+
+Implementação de um sistema próprio de auditoria, separado dos logs técnicos.
+
+Poderá registar:
+
+utilizador responsável;
+
+ação executada;
+
+entidade afetada;
+
+valores anteriores;
+
+novos valores;
+
+data e hora;
+
+endereço IP, quando adequado.
+
+6.6.8 Pagamentos reais
+
+Substituição do ambiente simulado por gateways reais, como:
+
+Stripe;
+
+PayPal;
+
+MB Way;
+
+referências Multibanco.
+
+Esta evolução exigirá requisitos adicionais de segurança, tratamento de webhooks e proteção de dados financeiros.
+
+6.6.9 Melhorias no Help Center
+
+Possíveis evoluções incluem:
+
+anexos nos pedidos;
+
+categorias;
+
+atribuição a responsáveis;
+
+histórico de respostas;
+
+notificações de atualização;
+
+métricas de resolução;
+
+base de conhecimento mais completa.
+
+6.6.10 Gestão avançada de equipamentos
+
+As secretárias já possuem características como monitor, dock USB, proximidade de janela e ergonomia.
+
+Uma evolução futura poderá criar um módulo próprio para:
+
+inventário de equipamentos;
+
+número de série;
+
+estado;
+
+manutenção;
+
+avarias;
+
+associação temporária a secretárias;
+
+histórico de intervenções.
+
+6.7 Escalabilidade
+
+A arquitetura atual permite uma evolução gradual, sem obrigar a substituir a estrutura existente.
+
+Possíveis cenários de crescimento incluem:
+
+maior número de edifícios;
+
+novas localizações;
+
+múltiplas organizações;
+
+maior volume de utilizadores;
+
+maior número de reservas;
+
+APIs para integrações externas;
+
+armazenamento externo;
+
+filas de processamento;
+
+Redis;
+
+cache distribuída;
+
+múltiplos workers;
+
+monitorização;
+
+infraestrutura cloud;
+
+balanceamento de carga.
+
+Uma arquitetura de microsserviços não é necessária para a dimensão atual do projeto. Só deverá ser considerada caso o crescimento, a carga ou a independência dos módulos justifiquem essa complexidade.
+
+O Single Sign-On já se encontra implementado e, por esse motivo, não é apresentado como trabalho futuro.
+
+6.8 Lições aprendidas
+
+O desenvolvimento do SpaceHub permitiu aplicar conhecimentos relacionados com:
+
+levantamento de requisitos;
+
+modelação de bases de dados;
+
+arquitetura MVC;
+
+desenvolvimento backend;
+
+desenvolvimento frontend;
+
+autenticação;
+
+autorização;
+
+regras de negócio;
+
+APIs REST;
+
+comunicação em tempo real;
+
+testes automatizados;
+
+integração de código;
+
+resolução de conflitos;
+
+trabalho em equipa;
+
+documentação técnica;
+
+apresentação de um produto de software.
+
+O desenvolvimento incremental demonstrou a importância de testar continuamente, preservar a arquitetura e integrar as alterações de forma controlada.
+
+6.9 Considerações finais
+
+A evolução do SpaceHub permitiu transformar uma estrutura inicial de autenticação e gestão de espaços numa plataforma integrada de reservas de postos de trabalho.
+
+A aplicação reúne:
+
+gestão de utilizadores;
+
+gestão de espaços;
+
+reservas de diferentes durações;
+
+pagamentos simulados;
+
+check-in por QR Code;
+
+mapa interativo;
+
+dashboard;
+
+avaliações;
+
+notificações;
+
+chat;
+
+Help Center;
+
+comunicação em tempo real.
+
+A utilização de Laravel, React, Inertia.js, MySQL, Sanctum, Reverb e PHPUnit permitiu desenvolver uma solução modular e tecnicamente consistente.
+
+O projeto encontra-se na fase final de estabilização, sendo as tarefas seguintes sobretudo correções pontuais, testes, revisão da documentação e preparação da entrega.
+
+As funcionalidades apresentadas como trabalho futuro representam possíveis evoluções posteriores e não fazem parte dos objetivos imediatos da versão académica atual.

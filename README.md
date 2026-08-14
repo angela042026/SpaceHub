@@ -1,343 +1,467 @@
 <div align="center">
 
-# 🏢 SpaceHub
+🏢 SpaceHub
 
-### Sistema de Gestão e Reserva de Espaços Colaborativos
+Sistema de Gestão e Reserva de Espaços Colaborativos
 
-Aplicação web desenvolvida em **Laravel 12**, **React** e **Inertia.js** para gestão de espaços colaborativos, reservas de secretárias, pagamentos, suporte e monitorização da ocupação.
+Aplicação web desenvolvida em Laravel 12, React, Inertia.js e MySQL para gestão de espaços, reservas de secretárias, pagamentos simulados, check-in, suporte e monitorização da ocupação.
 
-![Laravel](https://img.shields.io/badge/Laravel-12-red?logo=laravel)
-![PHP](https://img.shields.io/badge/PHP-8-blue?logo=php)
-![React](https://img.shields.io/badge/React-19-61dafb?logo=react)
-![Inertia.js](https://img.shields.io/badge/Inertia.js-SPA-purple)
-![MySQL](https://img.shields.io/badge/MySQL-Database-blue?logo=mysql)
-![Sanctum](https://img.shields.io/badge/Auth-Sanctum-success)
-![Reverb](https://img.shields.io/badge/WebSockets-Reverb-purple)
-![PHPUnit](https://img.shields.io/badge/Tests-154%20Passed-brightgreen)
+
 
 </div>
 
----
+📖 Sobre o projeto
 
-# 📖 Sobre o Projeto
+O SpaceHub é uma aplicação web destinada à gestão de espaços de trabalho colaborativos e à reserva de postos de trabalho.
 
-O **SpaceHub** é uma aplicação web destinada à gestão de espaços de trabalho colaborativos e à reserva de secretárias.
+O sistema organiza os espaços através da seguinte hierarquia:
 
-O sistema permite organizar edifícios, pisos, setores e secretárias, possibilitando aos utilizadores consultar a disponibilidade dos espaços e reservar postos de trabalho de forma simples, segura e centralizada.
+Edifício
+└── Piso
+    └── Setor
+        └── Secretária
 
-Além da gestão dos espaços e das reservas, a aplicação disponibiliza:
+A plataforma permite consultar a disponibilidade, reservar secretárias, efetuar check-in por QR Code, gerir pagamentos simulados e acompanhar a utilização dos espaços através de dashboards, mapas e estatísticas.
 
-* autenticação e recuperação de password;
-* autorização baseada em papéis;
-* gestão de utilizadores;
-* dashboard com estatísticas;
-* mapa interativo dos espaços;
-* check-in através de QR Code;
-* pagamentos simulados associados às reservas;
-* Help Center e pedidos de suporte;
-* upload de fotografias e plantas;
-* comunicação e atualizações em tempo real;
-* expiração automática de reservas sem check-in.
+O projeto foi desenvolvido em contexto académico por uma equipa de quatro elementos, com integração através de branches, Pull Requests e merge commits.
 
----
+✨ Funcionalidades principais
 
-# ✨ Funcionalidades
+👤 Autenticação e utilizadores
 
-## 👤 Utilizadores e autenticação
+registo;
 
-* Registo de utilizadores
-* Login e logout
-* Recuperação e redefinição de password
-* Consulta do perfil autenticado
-* Gestão administrativa de utilizadores
-* Alteração do papel do utilizador
-* Ativação e desativação de contas
-* Upload e substituição da fotografia de perfil
-* Bloqueio de utilizadores inativos
+login e logout;
 
-Os papéis disponíveis são:
+recuperação e redefinição da palavra-passe;
 
-* Administrador
-* Gestor
-* Colaborador
-* Utilizador
+gestão do perfil;
+
+fotografia de perfil;
+
+contas ativas e inativas;
+
+gestão administrativa de utilizadores;
+
+papéis e permissões;
+
+autenticação da API com Laravel Sanctum;
+
+Single Sign-On.
+
+Papéis existentes:
+
+Administrador;
+
+Gestor;
+
+Colaborador;
+
+Utilizador.
 
 Os papéis são fixos e criados através de seeders. Não existe CRUD de papéis.
 
----
+🏢 Gestão de espaços
 
-## 🏢 Gestão de espaços
+gestão de edifícios;
 
-* Gestão de edifícios
-* Gestão de pisos
-* Gestão de setores
-* Gestão de secretárias
-* Pesquisa
-* Filtros
-* Ordenação
-* Paginação
-* Ativação e desativação lógica
-* Upload e substituição das plantas dos pisos
-* Configuração das características das secretárias
-* Posicionamento de setores e secretárias no mapa
+gestão de pisos;
 
-A hierarquia dos espaços é:
+gestão de setores;
 
-```text
-Edifício
-    ↓
-Piso
-    ↓
-Setor
-    ↓
-Secretária
-```
+gestão de secretárias;
 
----
+pesquisa;
 
-## 📅 Reservas
+filtros;
 
-* Criação de reservas
-* Consulta das reservas
-* Atualização de reservas elegíveis
-* Histórico de reservas
-* Consulta de disponibilidade
-* Cancelamento de reservas
-* Validação de conflitos
-* Validação da disponibilidade da secretária
-* Controlo dos estados da reserva
-* Expiração automática de reservas sem check-in
-* Atualização do mapa após alterações relevantes
+ordenação;
 
-Os estados implementados são:
+paginação;
 
-* `pendente`
-* `confirmada`
-* `cancelada`
-* `expirada`
+ativação e desativação lógica;
 
-O sistema impede:
+upload e substituição das plantas dos pisos;
 
-* duas reservas ativas para a mesma secretária, data e período;
-* mais do que uma reserva do mesmo utilizador para a mesma data e período;
-* reservas em secretárias inativas ou não reserváveis;
-* alterações a reservas canceladas, expiradas ou com check-in;
-* cancelamentos de reservas não elegíveis.
+características das secretárias;
 
----
+posicionamento no mapa;
 
-## 💳 Pagamentos
+editor gráfico;
 
-* Associação de pagamentos às reservas
-* Criação de pagamentos
-* Geração de referência única
-* Consulta do estado
-* Confirmação de pagamentos
-* Cancelamento de pagamentos
-* Histórico de pagamentos
-* Validação das transições de estado
-* Controlo de acesso aos pagamentos
+QR Code único por secretária.
 
-Os estados utilizados são:
+📅 Reservas
 
-* `pendente`
-* `pago`
-* `cancelado`
+criação;
 
-Os pagamentos são simulados para fins académicos, não existindo comunicação com bancos ou fornecedores externos.
+consulta;
 
----
+edição;
 
-## 📱 QR Code e check-in
+cancelamento;
 
-* Geração de QR Code único para cada secretária
-* Leitura do QR Code através da câmara
-* Validação do utilizador autenticado
-* Validação da reserva
-* Validação da data e do período
-* Validação da secretária
-* Confirmação do check-in
-* Alteração da reserva para o estado `confirmada`
-* Atualização do mapa após o check-in
+histórico;
 
----
+consulta de disponibilidade;
 
-## 📊 Dashboard e estatísticas
+validação de conflitos;
 
-* Dashboard principal
-* Taxa de ocupação
-* Reservas por período
-* Reservas por estado
-* Reservas por edifício
-* Indicadores gerais de utilização
-* Próximas reservas
-* Visualização gráfica através de Recharts
+estados da reserva;
 
----
+check-in por QR Code;
 
-## 🗺️ Mapa interativo
+expiração automática;
 
-* Visualização dos pisos
-* Visualização dos setores
-* Visualização das secretárias
-* Identificação dos estados de ocupação
-* Editor gráfico dos setores
-* Posicionamento dos elementos
-* Atualização em tempo real
-* Integração com Laravel Echo e Laravel Reverb
+atualização do mapa em tempo real;
 
----
+associação automática a um pagamento.
 
-## 🆘 Help Center e suporte
+Durações suportadas:
 
-* Consulta de perguntas frequentes
-* Organização de FAQs
-* Apresentação de conteúdos ativos
-* Submissão de pedidos de suporte
-* Reporte de problemas e avarias
-* Associação do pedido ao utilizador autenticado
-* Acompanhamento do estado do pedido
-* Resposta administrativa
+diária;
 
----
+semanal;
 
-## 💬 Comunicação em tempo real
+mensal;
 
-* Laravel Reverb
-* Laravel Echo
-* Broadcasting
-* Eventos Laravel
-* WebSockets
-* Atualização do mapa em tempo real
-* Funcionalidade de chat
-* Evento `MapaAtualizado`
-* Evento `EnviarMensagem`
+anual.
 
----
+Períodos suportados:
 
-## 📁 Uploads
+Manhã;
 
-A aplicação permite:
+Tarde;
 
-* upload de fotografias dos utilizadores;
-* substituição da fotografia existente;
-* upload de plantas dos pisos;
-* substituição da planta existente;
-* validação do tipo e tamanho do ficheiro;
-* remoção segura dos ficheiros antigos;
-* prevenção de ficheiros órfãos em caso de erro.
+Dia inteiro.
 
----
+As reservas longas utilizam o período Dia inteiro, possuem data final calculada e correspondem a um único registo de reserva e a um único pagamento.
 
-# 🏗️ Arquitetura
+Estados principais:
 
-O SpaceHub utiliza uma arquitetura em camadas baseada no padrão **Model-View-Controller**.
+pendente;
 
-O backend é desenvolvido em Laravel e o frontend utiliza React com Inertia.js.
+confirmada;
 
-```text
+cancelada;
+
+expirada.
+
+💳 Pagamentos simulados
+
+criação automática;
+
+cálculo do valor;
+
+referência única;
+
+consulta;
+
+confirmação;
+
+cancelamento;
+
+histórico;
+
+comprovativo;
+
+controlo de acesso.
+
+Métodos suportados:
+
+Cartão;
+
+MB Way;
+
+Transferência Bancária;
+
+PayPal.
+
+Estados:
+
+pendente;
+
+pago;
+
+cancelado.
+
+Os pagamentos são simulados para fins académicos. Não existe movimentação financeira real.
+
+📱 QR Code e check-in
+
+geração de QR Code;
+
+leitura através da câmara;
+
+validação do utilizador;
+
+validação da reserva;
+
+validação da data, período e secretária;
+
+confirmação do check-in;
+
+atualização do estado para confirmada;
+
+atualização do mapa.
+
+📊 Dashboard, estatísticas e mapa
+
+dashboard;
+
+indicadores de utilização;
+
+taxa de ocupação;
+
+reservas por estado;
+
+reservas por período;
+
+reservas por edifício;
+
+próximas reservas;
+
+mapa interativo;
+
+editor gráfico;
+
+atualização em tempo real;
+
+gráficos com Recharts.
+
+⭐ Avaliações
+
+avaliação de reservas elegíveis;
+
+classificação;
+
+comentários;
+
+moderação;
+
+média por setor;
+
+regras de autorização.
+
+🔔 Notificações
+
+notificações persistentes;
+
+estado de leitura;
+
+notificações relacionadas com reservas, pagamentos, check-in, avaliações e suporte;
+
+comunicação em tempo real quando aplicável.
+
+💬 Chat e tempo real
+
+Laravel Reverb;
+
+Laravel Echo;
+
+Broadcasting;
+
+WebSockets;
+
+eventos Laravel;
+
+chat;
+
+atualização do mapa;
+
+notificações em tempo real.
+
+Eventos utilizados incluem:
+
+MapaAtualizado
+EnviarMensagem
+
+🆘 Help Center
+
+FAQs;
+
+categorias;
+
+conteúdos ativos;
+
+pedidos de suporte;
+
+reporte de problemas e avarias;
+
+acompanhamento do estado;
+
+resposta administrativa;
+
+associação ao utilizador autenticado.
+
+🏗️ Arquitetura
+
+O SpaceHub utiliza uma arquitetura em camadas baseada no padrão Model-View-Controller.
+
 Utilizador
-    │
-    ▼
+    ↓
 React + Inertia.js
-    │
-    ▼
+    ↓
 Rotas Web / API
-    │
-    ▼
+    ↓
+Middleware
+    ↓
 Controllers
-    │
-    ▼
-Form Requests
-    │
-    ▼
-Policies / Gates / Middleware
-    │
-    ▼
-Services
-    │
-    ▼
+    ↓
+Form Requests / Policies / Services
+    ↓
 Models Eloquent
-    │
-    ▼
+    ↓
 MySQL
-```
 
 A API utiliza:
 
-* Laravel Sanctum
-* API Resources
-* Form Requests
-* Policies
-* Gates
-* Middleware
-* Route Model Binding
-* Eloquent ORM
-* Respostas JSON
+Laravel Sanctum;
 
-As páginas web utilizam:
+API Resources;
 
-* React
-* Inertia.js
-* Tailwind CSS
-* Controllers Laravel
-* Componentes reutilizáveis
+Form Requests;
 
----
+Policies;
 
-# 🔐 Segurança
+Gates;
 
-A segurança da aplicação inclui:
+Middleware;
 
-* autenticação com Laravel Sanctum;
-* passwords protegidas por hashing;
-* Policies;
-* Gates;
-* middleware de autenticação;
-* middleware de utilizador ativo;
-* middleware de papéis;
-* autorização por recurso;
-* validação através de Form Requests;
-* limitação de operações por papel;
-* bloqueio de utilizadores inativos;
-* prevenção de alterações a recursos de outros utilizadores;
-* revogação de tokens após redefinição da password.
+Route Model Binding;
 
----
+Eloquent ORM;
 
-# 🛠️ Tecnologias
+respostas JSON.
 
-| Tecnologia      | Utilização                               |
-| --------------- | ---------------------------------------- |
-| Laravel 12      | Backend                                  |
-| PHP 8           | Linguagem de backend                     |
-| React 19        | Frontend                                 |
-| Inertia.js      | Comunicação entre Laravel e React        |
-| Tailwind CSS    | Interface                                |
-| MySQL           | Base de dados                            |
-| Laravel Sanctum | Autenticação da API                      |
-| Laravel Reverb  | Servidor WebSocket                       |
-| Laravel Echo    | Comunicação em tempo real                |
-| Broadcasting    | Emissão de eventos                       |
-| Recharts        | Gráficos estatísticos                    |
-| Simple QR Code  | Geração de QR Codes                      |
-| html5-qrcode    | Leitura de QR Codes                      |
-| PHPUnit         | Testes automatizados                     |
-| Vite            | Desenvolvimento e compilação do frontend |
+A interface web utiliza:
 
----
+React;
 
-# 📂 Estrutura do Projeto
+Inertia.js;
 
-```text
+Tailwind CSS;
+
+componentes reutilizáveis;
+
+Controllers Laravel.
+
+🔐 Segurança
+
+A aplicação inclui:
+
+hashing das palavras-passe;
+
+Laravel Sanctum;
+
+autenticação por sessão;
+
+middleware de autenticação;
+
+middleware de conta ativa;
+
+middleware de papel;
+
+Policies;
+
+Gates;
+
+Form Requests;
+
+controlo de propriedade dos recursos;
+
+validação de uploads;
+
+proteção contra mass assignment;
+
+revogação de tokens;
+
+listas seguras de campos de ordenação;
+
+desativação lógica das entidades.
+
+🛠️ Tecnologias
+
+Tecnologia
+
+Utilização
+
+Laravel 12
+
+Backend
+
+PHP 8.2
+
+Linguagem de backend
+
+React 19
+
+Frontend
+
+Inertia.js
+
+Integração Laravel/React
+
+Tailwind CSS
+
+Interface
+
+MySQL
+
+Base de dados
+
+Laravel Sanctum
+
+Autenticação da API
+
+Laravel Reverb
+
+Servidor WebSocket
+
+Laravel Echo
+
+Comunicação em tempo real
+
+Broadcasting
+
+Emissão de eventos
+
+Recharts
+
+Gráficos
+
+Simple QR Code
+
+Geração de QR Codes
+
+html5-qrcode
+
+Leitura de QR Codes
+
+PHPUnit
+
+Testes automatizados
+
+Vite
+
+Desenvolvimento e compilação
+
+Git e GitHub
+
+Controlo de versões e integração
+
+📂 Estrutura do projeto
+
 app/
 ├── Events/
 ├── Http/
 │   ├── Controllers/
+│   │   └── Api/
 │   ├── Middleware/
 │   ├── Requests/
 │   └── Resources/
 ├── Models/
+├── Notifications/
 ├── Policies/
 ├── Providers/
 └── Services/
@@ -348,6 +472,8 @@ database/
 └── seeders/
 
 docs/
+
+public/
 
 resources/
 ├── css/
@@ -367,511 +493,561 @@ storage/
 tests/
 ├── Feature/
 └── Unit/
-```
 
----
+✅ Requisitos
 
-# 🚀 Instalação
+Para executar o projeto são necessários:
 
-## 1. Clonar o projeto
+PHP 8.2 ou versão compatível;
 
-```bash
+Composer;
+
+Node.js;
+
+npm;
+
+MySQL ou MariaDB compatível;
+
+extensões PHP exigidas pelo Laravel;
+
+Git, para clonar o repositório.
+
+🚀 Instalação
+
+1. Clonar o projeto
+
 git clone https://github.com/angela042026/SpaceHub.git
 cd SpaceHub
-```
 
----
+2. Instalar as dependências PHP
 
-## 2. Instalar as dependências PHP
-
-```bash
 composer install
-```
 
----
+3. Instalar as dependências JavaScript
 
-## 3. Instalar as dependências JavaScript
-
-```bash
 npm install
-```
-
-No Windows, caso a execução de scripts PowerShell esteja bloqueada, pode ser utilizado:
-
-```bash
-npm.cmd install
-```
-
----
-
-## 4. Configurar o ambiente
-
-Copiar o ficheiro:
-
-```text
-.env.example
-```
-
-para:
-
-```text
-.env
-```
 
 No Windows:
 
-```bash
+npm.cmd install
+
+4. Configurar o ambiente
+
+Copiar o ficheiro .env.example para .env.
+
+Windows:
+
 copy .env.example .env
-```
 
-Em Linux ou macOS:
+Linux ou macOS:
 
-```bash
 cp .env.example .env
-```
 
 Gerar a chave da aplicação:
 
-```bash
 php artisan key:generate
-```
 
----
+O ficheiro .env não deve ser enviado para o repositório.
 
-## 5. Configurar a base de dados
+5. Configurar a base de dados
 
-Criar uma base de dados MySQL e configurar as seguintes variáveis no ficheiro `.env`:
+A base de dados esperada chama-se:
 
-```env
+spacehub
+
+Configuração local exemplificativa:
+
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=spacehub
 DB_USERNAME=root
 DB_PASSWORD=
-```
 
----
+Os dados reais de acesso devem ser configurados apenas no ficheiro .env.
 
-## 6. Executar migrations e seeders
+6. Importar a base de dados entregue
 
-Para criar a base de dados:
+Para avaliação, a estrutura e os dados são entregues separadamente num ficheiro SQL:
 
-```bash
+spacehub_bd.sql
+
+O ficheiro SQL não deve ser colocado no repositório Git.
+
+Importação através do phpMyAdmin:
+
+criar ou selecionar a base de dados spacehub;
+
+abrir a opção Importar;
+
+selecionar spacehub_bd.sql;
+
+iniciar a importação;
+
+confirmar que as tabelas e os dados foram criados.
+
+Também pode ser utilizado o MySQL:
+
+mysql -u root -p spacehub < spacehub_bd.sql
+
+As migrations e os seeders permanecem no projeto, mas a instalação para avaliação deve utilizar o ficheiro SQL entregue separadamente.
+
+7. Migrations e seeders em desenvolvimento
+
+Num ambiente de desenvolvimento vazio pode ser utilizado:
+
 php artisan migrate --seed
-```
 
-Para recriar toda a base de dados durante o desenvolvimento:
+Para recriar completamente a base de dados durante o desenvolvimento:
 
-```bash
 php artisan migrate:fresh --seed
-```
 
-Os principais seeders incluem:
+migrate:fresh elimina todos os dados. Não deve ser utilizado numa base de dados que contenha informação a preservar.
 
-```text
-RoleSeeder
-PeriodoSeeder
-EstadoReservaSeeder
-UserSeeder
-SpaceHubEstruturaSeeder
-ReservaSeeder
-FaqSeeder
-```
+8. Criar o link do Storage
 
----
-
-## 7. Criar o link do storage
-
-```bash
 php artisan storage:link
-```
 
-Este comando permite disponibilizar publicamente:
+Este comando disponibiliza publicamente:
 
-* fotografias dos utilizadores;
-* plantas dos pisos;
-* outros ficheiros guardados no disco público.
+fotografias dos utilizadores;
 
----
+plantas dos pisos;
 
-## 8. Limpar e preparar a aplicação
+outros ficheiros guardados no disco público.
 
-```bash
+9. Compilar o frontend
+
+Produção:
+
+npm run build
+
+Windows:
+
+npm.cmd run build
+
+Desenvolvimento:
+
+npm run dev
+
+Windows:
+
+npm.cmd run dev
+
+10. Limpar e preparar a aplicação
+
 php artisan optimize:clear
 composer dump-autoload
-```
 
----
+11. Executar o servidor Laravel
 
-## 9. Executar o frontend
-
-Durante o desenvolvimento:
-
-```bash
-npm run dev
-```
-
-No Windows:
-
-```bash
-npm.cmd run dev
-```
-
-Para gerar a versão de produção:
-
-```bash
-npm run build
-```
-
-No Windows:
-
-```bash
-npm.cmd run build
-```
-
----
-
-## 10. Executar o servidor Laravel
-
-```bash
 php artisan serve
-```
 
-A aplicação ficará disponível em:
+Endereço local:
 
-```text
 http://127.0.0.1:8000
-```
 
----
-
-## 11. Executar o Laravel Reverb
+12. Executar o Laravel Reverb
 
 Noutro terminal:
 
-```bash
 php artisan reverb:start
-```
 
-O Reverb é necessário para as funcionalidades de WebSockets, comunicação em tempo real, mapa e chat.
+O Reverb é necessário para as funcionalidades WebSocket, chat e atualizações em tempo real.
 
----
+13. Executar o Scheduler
 
-## 12. Executar o Scheduler
+Noutro terminal:
 
-Para executar localmente as tarefas agendadas:
-
-```bash
 php artisan schedule:work
-```
 
-Também é possível executar manualmente o comando responsável pela expiração das reservas:
+O Scheduler é utilizado para tarefas automáticas, incluindo atualização de reservas expiradas e outros processos agendados.
 
-```bash
-php artisan reservas:cancelar-expiradas
-```
+▶️ Execução em desenvolvimento
 
-O Scheduler verifica periodicamente as reservas pendentes e atualiza as que perderam a validade sem check-in.
+Durante o desenvolvimento podem permanecer ativos quatro terminais.
 
----
+Terminal 1 — Laravel
 
-# ▶️ Execução em desenvolvimento
-
-Durante o desenvolvimento devem permanecer ativos, em terminais separados:
-
-### Terminal 1 — Laravel
-
-```bash
 php artisan serve
-```
 
-### Terminal 2 — Frontend
+Terminal 2 — Frontend
 
-```bash
 npm.cmd run dev
-```
 
-### Terminal 3 — Laravel Reverb
+Terminal 3 — Reverb
 
-```bash
 php artisan reverb:start
-```
 
-### Terminal 4 — Scheduler
+Terminal 4 — Scheduler
 
-```bash
 php artisan schedule:work
-```
 
----
+🖼️ Imagens e uploads
 
-# 🧪 Testes
+Os recursos estáticos da aplicação encontram-se principalmente em:
 
-Executar todos os testes:
+public/
+resources/
 
-```bash
+Os uploads efetuados através da aplicação utilizam o Storage público do Laravel, incluindo:
+
+storage/app/public/utilizadores/fotografias
+storage/app/public/pisos/plantas
+
+O acesso público é efetuado através do link:
+
+public/storage
+
+Por esse motivo, deve ser executado:
+
+php artisan storage:link
+
+As imagens necessárias ao funcionamento e à demonstração devem estar incluídas no repositório ou na pasta compactada entregue, conforme a sua natureza.
+
+🧪 Testes e validação
+
+Executar a suíte de testes:
+
 php artisan test
-```
 
-Estado atual:
+A documentação anterior registava 154 testes aprovados. Como foram integradas alterações posteriores, o número final deve ser confirmado através do comando anterior.
 
-✅ **154 testes automatizados aprovados**
+Antes de uma integração ou entrega:
 
-Os testes cobrem:
-
-* autenticação;
-* registo;
-* login;
-* logout;
-* recuperação de password;
-* redefinição de password;
-* autorização;
-* Policies;
-* Gates;
-* Middleware;
-* utilizadores inativos;
-* gestão de utilizadores;
-* gestão de edifícios;
-* gestão de pisos;
-* gestão de setores;
-* gestão de secretárias;
-* pesquisa;
-* filtros;
-* ordenação;
-* paginação;
-* uploads;
-* reservas;
-* disponibilidade;
-* atualização de reservas;
-* cancelamento;
-* expiração automática;
-* QR Code;
-* check-in;
-* pagamentos;
-* dashboard;
-* estatísticas;
-* mapa interativo;
-* Help Center;
-* pedidos de suporte;
-* validação;
-* regras de negócio;
-* integridade das relações;
-* performance de queries.
-
-Antes de uma integração ou entrega devem ser executados:
-
-```bash
 php artisan optimize:clear
 composer dump-autoload
 npm.cmd run build
 php artisan test
 php artisan route:list
-```
 
----
+Para confirmar as rotas da API:
 
-# 📚 Documentação
+php artisan route:list --path=api
 
-A documentação técnica encontra-se na pasta `docs`.
+📚 Documentação
 
-| Documento               | Descrição                                                 |
-| ----------------------- | --------------------------------------------------------- |
-| `01-Requisitos.md`      | Requisitos funcionais, não funcionais e regras de negócio |
-| `02-CasosDeUso.md`      | Atores, interações e casos de uso                         |
-| `03-ModeloBaseDados.md` | Entidades, relações e modelo da base de dados             |
-| `04-Arquitetura.md`     | Arquitetura técnica da aplicação                          |
-| `05-API.md`             | Endpoints, autenticação, autorização e respostas          |
-| `06-EvolucaoProjeto.md` | Evolução do projeto e trabalho futuro                     |
-| `07-DicionarioDados.md` | Estrutura das tabelas e respetivos campos                 |
-| `08-DocumentoMestre.md` | Contexto permanente e decisões consolidadas               |
+A documentação técnica encontra-se em docs/.
 
----
+Documento
 
-# 🌱 Seeders e dados iniciais
+Descrição
 
-A aplicação inclui dados iniciais para facilitar a instalação e demonstração.
+01-Requisitos.md
 
-São criados:
+Requisitos e regras de negócio
 
-* papéis;
-* utilizadores;
-* períodos;
-* estados das reservas;
-* edifícios;
-* pisos;
-* setores;
-* secretárias;
-* reservas de exemplo;
-* FAQs.
+02-CasosDeUso.md
 
-Os períodos principais são:
+Atores e casos de uso
 
-* Manhã
-* Tarde
+03-ModeloBaseDados.md
 
-Os estados das reservas são:
+Entidades e relações
 
-* pendente
-* confirmada
-* cancelada
-* expirada
+04-Arquitetura.md
 
----
+Arquitetura técnica
 
-# 🔄 Estados e regras principais
+05-API.md
 
-## Reservas
+Endpoints, autenticação e respostas
 
-```text
-pendente
-    ├── confirmada
-    ├── cancelada
-    └── expirada
-```
+06-Roadmap.md
 
-## Pagamentos
+Evolução do projeto e trabalho futuro
 
-```text
-pendente
-    ├── pago
-    └── cancelado
-```
+07-DicionarioDados.md
 
-As alterações de estado respeitam regras de negócio e autorização.
+Estrutura das tabelas
 
----
+08-PROJECT_CONTEXT.md
 
-# 👥 Equipa
+Contexto consolidado do projeto
+
+📦 Entrega do projeto
+
+A entrega deve incluir:
+
+SpaceHub_Entrega/
+├── SpaceHub_Projeto.zip
+├── spacehub_bd.sql
+└── SpaceHub_Credenciais.txt
+
+Repositório Git
+
+O repositório deve conter:
+
+todo o código Laravel;
+
+app;
+
+bootstrap;
+
+config;
+
+database;
+
+public;
+
+resources;
+
+routes;
+
+storage, quando necessário;
+
+tests;
+
+docs;
+
+imagens utilizadas;
+
+composer.json;
+
+composer.lock;
+
+package.json;
+
+package-lock.json;
+
+.env.example;
+
+README.md.
+
+Elementos que não devem ficar no Git
+
+.env;
+
+vendor/;
+
+node_modules/;
+
+credenciais reais;
+
+ficheiros SQL com dados;
+
+logs;
+
+ficheiros temporários;
+
+chaves e segredos.
+
+Base de dados
+
+A estrutura e os dados de demonstração são entregues em:
+
+spacehub_bd.sql
+
+Credenciais
+
+As credenciais devem ser entregues separadamente em:
+
+SpaceHub_Credenciais.txt
+
+O ficheiro deve incluir:
+
+URL da aplicação;
+
+utilizador administrador;
+
+palavra-passe do administrador;
+
+utilizadores de demonstração necessários.
+
+As credenciais não devem ser incluídas no repositório Git.
+
+🌱 Dados iniciais
+
+O projeto inclui migrations e seeders para:
+
+papéis;
+
+utilizadores;
+
+períodos;
+
+estados das reservas;
+
+edifícios;
+
+pisos;
+
+setores;
+
+secretárias;
+
+reservas;
+
+FAQs;
+
+outros módulos definidos na versão atual.
+
+Os dados de avaliação são fornecidos principalmente através do ficheiro SQL entregue.
+
+👥 Equipa
 
 Projeto desenvolvido por:
 
-* Ângela Costa
-* Eduardo
-* Joana Oliveira
-* Hanna Sampaio
+Ângela Costa;
 
-Divisão principal do trabalho:
+Eduardo;
 
-* **Pessoa 1 — Joana:** Reservas
-* **Pessoa 2 — Ângela:** Administração, espaços, segurança, integração e documentação
-* **Pessoa 3 — Eduardo:** Comunicação em tempo real, Laravel Reverb e chat
-* **Pessoa 4 — Hanna:** Dashboard, estatísticas, mapa, QR Code e check-in
+Joana Oliveira;
 
-Formadores:
+Hanna Sampaio.
 
-* Sara
-* Rui
+Divisão principal:
 
-O trabalho foi integrado através de branches de funcionalidade e Pull Requests, preservando a autoria dos commits dos diferentes elementos da equipa.
+Pessoa 1 — Joana: reservas e fluxo de utilização;
 
----
+Pessoa 2 — Ângela: administração, espaços, segurança, integração e documentação;
 
-# 🔀 Git e integração
+Pessoa 3 — Eduardo: comunicação em tempo real, Reverb e chat;
 
-O processo de integração utilizado foi:
+Pessoa 4 — Hanna: dashboard, estatísticas, mapa, QR Code e check-in.
 
-```text
+O desenvolvimento foi integrado através de branches, Pull Requests e merge commits, preservando a autoria dos commits.
+
+🔀 Git e integração
+
 Branch de funcionalidade
-        ↓
+    ↓
 Commit
-        ↓
+    ↓
 Push
-        ↓
+    ↓
 Pull Request
-        ↓
+    ↓
+Revisão e testes
+    ↓
 Create a merge commit
-        ↓
+    ↓
 main
-```
 
 Este processo permite:
 
-* preservar a autoria dos commits;
-* manter o histórico do projeto;
-* facilitar a revisão;
-* identificar as contribuições individuais;
-* reduzir o risco durante as integrações.
+desenvolvimento paralelo;
 
----
+revisão das alterações;
 
-# 📌 Estado do Projeto
+preservação da autoria;
 
-O projeto encontra-se em fase de revisão final e preparação da entrega.
+histórico completo;
 
-Funcionalidades concluídas:
+redução do risco nas integrações.
 
-* autenticação;
-* autorização;
-* gestão de utilizadores;
-* gestão de espaços;
-* reservas;
-* disponibilidade;
-* pagamentos simulados;
-* QR Code;
-* check-in;
-* dashboard;
-* estatísticas;
-* mapa interativo;
-* uploads;
-* Help Center;
-* pedidos de suporte;
-* Laravel Reverb;
-* comunicação em tempo real;
-* testes automatizados;
-* documentação técnica.
+📌 Estado do projeto
+
+O projeto encontra-se em fase de consolidação e preparação da entrega.
+
+Principais módulos concluídos:
+
+autenticação;
+
+Single Sign-On;
+
+utilizadores;
+
+gestão de espaços;
+
+reservas;
+
+reservas longas;
+
+pagamentos simulados;
+
+QR Code;
+
+check-in;
+
+dashboard;
+
+estatísticas;
+
+mapa;
+
+avaliações;
+
+notificações;
+
+chat;
+
+Help Center;
+
+testes;
+
+documentação.
 
 Tarefas finais:
 
-* revisão visual do frontend;
-* confirmação do número final de rotas;
-* remoção de código e rotas técnicas;
-* atualização final da documentação;
-* preparação da apresentação;
-* preparação da entrega.
+correções pontuais;
 
----
+testes manuais;
 
-# 🔮 Trabalho Futuro
+confirmação da suíte de testes;
+
+revisão visual;
+
+revisão das permissões;
+
+remoção de código técnico temporário;
+
+atualização do README;
+
+exportação SQL;
+
+preparação do ZIP;
+
+preparação das credenciais;
+
+apresentação final.
+
+🔮 Trabalho futuro
 
 Possíveis evoluções:
 
-* integração com pagamentos reais;
-* integração com Google Calendar;
-* integração com Microsoft Outlook;
-* notificações por email;
-* notificações em tempo real;
-* auditoria persistente;
-* aplicação mobile;
-* Single Sign-On;
-* integração com sistemas de controlo de acessos;
-* histórico persistente de mensagens;
-* relatórios avançados;
-* previsão de ocupação através de Inteligência Artificial;
-* novo estado `concluida` para as reservas, após definição formal do respetivo ciclo de vida.
+comunicados e mensagem do dia;
 
----
+exportação PDF dos comprovativos;
 
-# 📄 Licença
+relatórios Excel;
 
-Este projeto foi desenvolvido no âmbito académico e destina-se a fins educativos.
+dashboard financeiro avançado;
 
----
+integração com Google Calendar;
+
+integração com Microsoft Outlook;
+
+aplicação móvel;
+
+previsão estatística da ocupação;
+
+evolução da previsão para Inteligência Artificial;
+
+auditoria administrativa;
+
+integração com gateways reais de pagamento;
+
+melhorias no Help Center;
+
+gestão avançada de equipamentos.
+
+O Single Sign-On, as avaliações e as notificações já estão implementados e não devem ser apresentados como funcionalidades pendentes.
+
+📄 Licença
+
+Este projeto foi desenvolvido em contexto académico e destina-se a fins educativos.
 
 <div align="center">
 
-# SpaceHub
+SpaceHub
 
-### Sistema de Gestão e Reserva de Espaços Colaborativos
+Sistema de Gestão e Reserva de Espaços Colaborativos
 
 Laravel • React • Inertia.js • Tailwind CSS • MySQL
 
 Sanctum • Reverb • Echo • PHPUnit
 
----
-
-**154 testes automatizados aprovados**
-
-**Projeto revisto, documentado e em preparação para a entrega final**
+Projeto em consolidação e preparação da entrega final
 
 </div>

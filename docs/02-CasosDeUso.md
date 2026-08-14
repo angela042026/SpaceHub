@@ -1,450 +1,1217 @@
-# 2. Casos de Uso
+2. Casos de Uso
 
-## Introdução
+2.1 Introdução
 
 Os casos de uso descrevem as principais funcionalidades disponibilizadas pelo SpaceHub e a forma como os diferentes atores interagem com o sistema.
 
-Cada caso de uso apresenta o objetivo da funcionalidade, os intervenientes, as pré-condições, o fluxo principal, os fluxos alternativos e as pós-condições.
+Cada caso de uso apresenta:
 
----
+objetivo;
 
-# UC01 — Registo de Utilizador
+atores;
 
-## Objetivo
+pré-condições;
+
+fluxo principal;
+
+fluxos alternativos;
+
+pós-condições.
+
+Os atores considerados são:
+
+Administrador;
+
+Gestor;
+
+Colaborador;
+
+Utilizador.
+
+UC01 — Registo de Utilizador
+
+Objetivo
 
 Permitir o registo de novos utilizadores na aplicação.
 
-## Atores
+Atores
 
-- Utilizador
+Utilizador
 
-## Pré-condições
+Pré-condições
 
-- O utilizador não possui conta.
+O utilizador ainda não possui uma conta.
 
-## Fluxo Principal
+O endereço de email não se encontra registado.
 
-1. O utilizador acede ao formulário de registo.
-2. Introduz nome, email e password.
-3. O sistema valida os dados.
-4. O sistema cria o utilizador.
-5. É atribuído automaticamente o papel **Utilizador**.
-6. O utilizador fica autenticado.
+Fluxo principal
 
-## Fluxos Alternativos
+O utilizador acede ao formulário de registo.
 
-### A1
+Introduz o nome, email, palavra-passe e confirmação da palavra-passe.
 
-O email já existe.
+O sistema valida os dados introduzidos.
 
-O sistema apresenta uma mensagem de erro.
+O sistema cria a conta.
 
-### A2
+O papel Utilizador é atribuído automaticamente.
 
-Os dados introduzidos são inválidos.
+O utilizador é autenticado e redirecionado para a aplicação.
 
-O sistema apresenta os respetivos erros de validação.
+Fluxos alternativos
 
-## Pós-condições
+A1 — Email já registado
 
-O utilizador fica registado na aplicação.
+O sistema identifica que o email já está associado a uma conta.
 
----
+É apresentada uma mensagem de erro.
 
-# UC02 — Autenticação
+O registo não é concluído.
 
-## Objetivo
+A2 — Dados inválidos
 
-Permitir a autenticação dos utilizadores.
+O sistema identifica campos em falta ou dados inválidos.
 
-## Atores
+São apresentadas mensagens de validação.
 
-- Administrador
-- Gestor
-- Colaborador
-- Utilizador
+O utilizador pode corrigir os dados e submeter novamente o formulário.
 
-## Pré-condições
+Pós-condições
 
-- O utilizador encontra-se registado.
-- A conta está ativa.
+O utilizador fica registado com o papel Utilizador.
 
-## Fluxo Principal
+A sessão fica iniciada.
 
-1. O utilizador introduz email e password.
-2. O sistema valida as credenciais.
-3. É criado um token de autenticação.
-4. O utilizador inicia sessão.
+UC02 — Autenticação e encerramento de sessão
 
-## Fluxos Alternativos
+Objetivo
 
-### A1
+Permitir que os utilizadores iniciem e terminem sessão em segurança.
 
-Credenciais inválidas.
+Atores
 
-### A2
+Administrador
 
-Conta desativada.
+Gestor
 
-## Pós-condições
+Colaborador
 
-O utilizador fica autenticado.
+Utilizador
 
----
+Pré-condições
 
-# UC03 — Gestão de Utilizadores
+O utilizador possui uma conta registada.
 
-## Objetivo
+A conta encontra-se ativa.
+
+Fluxo principal
+
+O utilizador introduz o email e a palavra-passe.
+
+O sistema valida as credenciais.
+
+O sistema confirma que a conta está ativa.
+
+A sessão é iniciada.
+
+O utilizador é redirecionado para o dashboard.
+
+Quando pretender sair, seleciona a opção de terminar sessão.
+
+O sistema invalida a sessão ou o token de autenticação.
+
+Fluxos alternativos
+
+A1 — Credenciais inválidas
+
+O sistema rejeita a autenticação.
+
+É apresentada uma mensagem de erro.
+
+A2 — Conta desativada
+
+O sistema bloqueia o acesso.
+
+É apresentada uma mensagem a informar que a conta se encontra inativa.
+
+Pós-condições
+
+O utilizador fica autenticado ou, no caso de logout, a sessão fica terminada.
+
+UC03 — Recuperação e alteração da palavra-passe
+
+Objetivo
+
+Permitir recuperar ou alterar a palavra-passe de acesso à aplicação.
+
+Atores
+
+Administrador
+
+Gestor
+
+Colaborador
+
+Utilizador
+
+Pré-condições
+
+O utilizador possui uma conta registada.
+
+Fluxo principal
+
+O utilizador seleciona a opção de recuperação da palavra-passe.
+
+Introduz o endereço de email associado à conta.
+
+O sistema envia as instruções de recuperação.
+
+O utilizador define uma nova palavra-passe.
+
+O sistema valida e guarda a nova palavra-passe.
+
+Fluxos alternativos
+
+A1 — Email inexistente ou inválido
+
+O sistema não encontra uma conta correspondente.
+
+É apresentada uma mensagem adequada.
+
+A2 — Token inválido ou expirado
+
+O sistema rejeita o pedido.
+
+O utilizador deve solicitar um novo link de recuperação.
+
+Pós-condições
+
+A palavra-passe fica atualizada.
+
+UC04 — Gestão do perfil
+
+Objetivo
+
+Permitir ao utilizador consultar e atualizar os próprios dados.
+
+Atores
+
+Administrador
+
+Gestor
+
+Colaborador
+
+Utilizador
+
+Pré-condições
+
+O utilizador encontra-se autenticado.
+
+A conta encontra-se ativa.
+
+Fluxo principal
+
+O utilizador acede ao perfil.
+
+Consulta os seus dados.
+
+Altera os campos permitidos.
+
+Pode carregar ou substituir a fotografia de perfil.
+
+O sistema valida os dados.
+
+As alterações são guardadas.
+
+Fluxos alternativos
+
+A1 — Dados inválidos
+
+O sistema apresenta os erros de validação.
+
+As alterações não são guardadas.
+
+A2 — Ficheiro de imagem inválido
+
+O sistema rejeita o upload.
+
+É apresentada uma mensagem de erro.
+
+Pós-condições
+
+O perfil fica atualizado.
+
+UC05 — Gestão de utilizadores
+
+Objetivo
 
 Permitir ao Administrador gerir os utilizadores da aplicação.
 
-## Atores
+Atores
 
-- Administrador
+Administrador
 
-## Pré-condições
+Pré-condições
 
-- O Administrador encontra-se autenticado.
+O Administrador encontra-se autenticado.
 
-## Fluxo Principal
+A conta encontra-se ativa.
 
-1. Consultar utilizadores.
-2. Pesquisar utilizadores.
-3. Filtrar resultados.
-4. Criar utilizadores.
-5. Editar utilizadores.
-6. Alterar papel.
-7. Ativar ou desativar utilizadores.
-8. Carregar fotografia de perfil.
+Fluxo principal
 
-## Fluxos Alternativos
+O Administrador acede à área de utilizadores.
 
-### A1
+Consulta a listagem existente.
 
-Email já existente.
+Pode pesquisar, filtrar, ordenar e paginar os resultados.
 
-### A2
+Pode criar um novo utilizador.
 
-Fotografia inválida.
+Pode editar os dados de um utilizador.
 
-## Pós-condições
+Pode associar ou alterar o respetivo papel.
 
-O utilizador fica atualizado.
+Pode ativar ou desativar a conta.
 
----
+O sistema valida e guarda as alterações.
 
-# UC04 — Gestão de Edifícios
+Fluxos alternativos
 
-## Objetivo
+A1 — Email já existente
 
-Permitir a gestão dos edifícios existentes.
+O sistema rejeita a operação.
 
-## Atores
+É apresentada uma mensagem de erro.
 
-- Administrador
+A2 — Dados inválidos
 
-## Fluxo Principal
+O sistema apresenta os erros de validação.
 
-1. Criar edifício.
-2. Editar edifício.
-3. Consultar edifícios.
-4. Pesquisar.
-5. Ordenar.
-6. Ativar ou desativar.
+As alterações não são guardadas.
 
-## Pós-condições
+A3 — Operação não autorizada
 
-A informação fica atualizada.
+O sistema bloqueia a ação.
 
----
+É devolvida uma resposta de acesso negado.
 
-# UC05 — Gestão de Pisos
+Pós-condições
 
-## Objetivo
+A informação do utilizador fica criada ou atualizada.
 
-Permitir gerir os pisos pertencentes a um edifício.
+O histórico das reservas e restantes relações é preservado.
 
-## Atores
+UC06 — Gestão de edifícios
 
-- Administrador
-- Gestor
+Objetivo
 
-## Fluxo Principal
+Permitir gerir os edifícios registados no sistema.
 
-1. Criar piso.
-2. Editar piso.
-3. Carregar planta.
-4. Consultar pisos.
-5. Pesquisar.
-6. Ativar ou desativar.
+Atores
 
-## Fluxos Alternativos
+Administrador
 
-### A1
+Gestor
 
-Código duplicado no mesmo edifício.
+Pré-condições
 
-### A2
+O ator encontra-se autenticado.
 
-Planta inválida.
+Possui permissões de gestão de espaços.
 
-## Pós-condições
+Fluxo principal
 
-O piso fica atualizado.
+O ator acede à área de edifícios.
 
----
+Consulta a listagem.
 
-# UC06 — Gestão de Setores
+Pode pesquisar, filtrar, ordenar e paginar os resultados.
 
-## Objetivo
+Pode criar um edifício.
 
-Permitir gerir os setores de um piso.
+Pode editar os respetivos dados.
 
-## Atores
+Pode ativar ou desativar o edifício.
 
-- Administrador
-- Gestor
+O sistema valida e guarda a operação.
 
-## Fluxo Principal
+Fluxos alternativos
 
-1. Criar setor.
-2. Editar setor.
-3. Posicionar o setor na planta.
-4. Consultar setores.
-5. Ativar ou desativar.
+A1 — Dados inválidos
 
-## Pós-condições
+O sistema apresenta os erros de validação.
 
-O setor fica atualizado.
+A operação não é concluída.
 
----
+A2 — Operação não autorizada
 
-# UC07 — Gestão de Secretárias
+O sistema bloqueia a ação.
 
-## Objetivo
+É apresentada uma mensagem de acesso negado.
 
-Permitir gerir as secretárias disponíveis.
+Pós-condições
 
-## Atores
+A informação do edifício fica atualizada.
 
-- Administrador
-- Gestor
+A desativação não elimina o respetivo histórico.
 
-## Fluxo Principal
+UC07 — Gestão de pisos
 
-1. Criar secretária.
-2. Editar secretária.
-3. Configurar características.
-4. Gerar QR Code.
-5. Ativar ou desativar.
+Objetivo
 
-## Fluxos Alternativos
+Permitir gerir os pisos associados a um edifício.
 
-### A1
+Atores
 
-Código duplicado.
+Administrador
 
-## Pós-condições
+Gestor
 
-A secretária fica disponível para reserva.
+Pré-condições
 
----
+O ator encontra-se autenticado.
 
-# UC08 — Criar Reserva
+O edifício associado existe.
 
-## Objetivo
+Fluxo principal
 
-Permitir reservar uma secretária.
+O ator acede à área de pisos.
 
-## Atores
+Consulta, pesquisa, filtra e ordena a listagem.
 
-- Utilizador
+Pode criar um piso associado a um edifício.
 
-## Pré-condições
+Pode editar os dados do piso.
 
-- Utilizador autenticado.
-- Conta ativa.
+Pode carregar ou substituir a planta.
 
-## Fluxo Principal
+Pode ativar ou desativar o piso.
 
-1. Selecionar data.
-2. Selecionar período.
-3. Consultar disponibilidade.
-4. Escolher secretária.
-5. Validar regras de negócio.
-6. Criar reserva.
-7. Atualizar o mapa em tempo real.
+O sistema valida e guarda a operação.
 
-## Fluxos Alternativos
+Fluxos alternativos
 
-### A1
+A1 — Código duplicado no mesmo edifício
 
-Secretária já reservada.
+O sistema rejeita a operação.
 
-### A2
+É apresentada uma mensagem de erro.
 
-Utilizador já possui reserva.
+A2 — Planta inválida
 
-### A3
+O sistema rejeita o ficheiro.
 
-Secretária não reservável.
+É apresentada uma mensagem com os requisitos do upload.
 
-## Pós-condições
+Pós-condições
 
-A reserva fica registada no estado **Pendente**.
+O piso fica criado ou atualizado.
 
----
+A planta, quando fornecida, fica disponível para o mapa.
 
-# UC09 — Consultar Reservas
+UC08 — Gestão de setores
 
-## Objetivo
+Objetivo
 
-Permitir consultar reservas.
+Permitir gerir os setores existentes num piso.
 
-## Atores
+Atores
 
-- Administrador
-- Gestor
-- Colaborador
-- Utilizador
+Administrador
 
-## Fluxo Principal
+Gestor
 
-1. Consultar reservas.
-2. Aplicar filtros.
-3. Ordenar resultados.
-4. Visualizar detalhes.
+Pré-condições
 
-## Fluxos Alternativos
+O ator encontra-se autenticado.
 
-O utilizador comum apenas consulta as suas reservas.
+O piso associado existe.
 
-## Pós-condições
+Fluxo principal
 
-As reservas são apresentadas ao utilizador.
+O ator acede à área de setores.
 
----
+Consulta a listagem.
 
-# UC10 — Cancelar Reserva
+Pode criar ou editar um setor.
 
-## Objetivo
+Define as respetivas características e preços.
 
-Permitir cancelar reservas elegíveis.
+Pode posicionar e redimensionar o setor na planta.
 
-## Atores
+Pode ativar, desativar ou definir se o setor é reservável.
 
-- Administrador
-- Utilizador
+O sistema valida e guarda as alterações.
 
-## Pré-condições
+Fluxos alternativos
 
-- Reserva existente.
-- Reserva pendente.
-- Reserva elegível para cancelamento.
+A1 — Dados inválidos
 
-## Fluxo Principal
+O sistema apresenta os erros de validação.
 
-1. Selecionar reserva.
-2. Confirmar cancelamento.
-3. Atualizar estado.
-4. Atualizar mapa.
+As alterações não são guardadas.
 
-## Fluxos Alternativos
+A2 — Posição inválida na planta
 
-### A1
+O sistema rejeita a atualização.
 
-Reserva confirmada.
+A posição anterior é mantida.
 
-### A2
+Pós-condições
 
-Reserva expirada.
+O setor fica atualizado e representado no mapa.
 
-### A3
+Os preços ficam disponíveis para o cálculo das reservas.
 
-Reserva já cancelada.
+UC09 — Gestão de secretárias
 
-### A4
+Objetivo
 
-Reserva com check-in.
+Permitir gerir as secretárias disponíveis nos setores.
 
-## Pós-condições
+Atores
 
-A reserva passa ao estado **Cancelada**.
+Administrador
 
----
+Gestor
 
-# UC11 — Check-in por QR Code
+Pré-condições
 
-## Objetivo
+O ator encontra-se autenticado.
 
-Permitir confirmar a presença através do QR Code.
+O setor associado existe.
 
-## Atores
+Fluxo principal
 
-- Utilizador
+O ator acede à área de secretárias.
 
-## Pré-condições
+Consulta, pesquisa e filtra a listagem.
 
-- Reserva existente.
-- Reserva válida.
-- QR Code correspondente.
+Pode criar ou editar uma secretária.
 
-## Fluxo Principal
+Configura as respetivas características, posição, estado e disponibilidade.
 
-1. Ler QR Code.
-2. Validar reserva.
-3. Validar data.
-4. Validar período.
-5. Confirmar check-in.
-6. Atualizar estado da reserva.
+O sistema gera ou mantém um QR Code único.
 
-## Fluxos Alternativos
+O ator pode ativar, desativar ou definir a secretária como reservável.
 
-### A1
+O sistema valida e guarda as alterações.
 
-QR Code inválido.
+Fluxos alternativos
 
-### A2
+A1 — Código duplicado
 
-Reserva inexistente.
+O sistema rejeita a operação.
 
-### A3
+É apresentada uma mensagem de erro.
 
-Reserva não pertence ao utilizador.
+A2 — Setor inativo ou inexistente
 
-## Pós-condições
+O sistema impede a associação.
 
-A reserva fica confirmada.
+A operação não é concluída.
 
----
+Pós-condições
 
-# UC12 — Dashboard
+A secretária fica criada ou atualizada.
 
-## Objetivo
+Quando ativa e reservável, fica disponível no processo de reserva.
 
-Disponibilizar indicadores estatísticos sobre a utilização dos espaços.
+UC10 — Consultar disponibilidade e mapa
 
-## Atores
+Objetivo
 
-- Administrador
-- Gestor
+Permitir consultar os espaços e secretárias disponíveis para uma data e duração específicas.
 
-## Fluxo Principal
+Atores
 
-1. Consultar dashboard.
-2. Selecionar período.
-3. Visualizar indicadores.
-4. Consultar gráficos e estatísticas.
+Administrador
 
-## Informação apresentada
+Gestor
 
-- Reservas totais.
-- Taxa de ocupação.
-- Reservas por período.
-- Reservas por edifício.
-- Reservas por estado.
+Colaborador
 
-## Pós-condições
+Utilizador
 
-Os indicadores estatísticos são apresentados ao utilizador.
+Pré-condições
 
+O ator encontra-se autenticado.
+
+A conta encontra-se ativa.
+
+Fluxo principal
+
+O ator acede ao mapa ou à página de disponibilidade.
+
+Seleciona a data de início.
+
+Seleciona a duração da reserva.
+
+Quando aplicável, seleciona o período.
+
+O sistema determina a data final.
+
+O sistema verifica os edifícios, pisos, setores e secretárias elegíveis.
+
+São apresentadas apenas as secretárias ativas, reserváveis e livres.
+
+O mapa identifica visualmente os diferentes estados das secretárias.
+
+Fluxos alternativos
+
+A1 — Não existem secretárias disponíveis
+
+O sistema apresenta uma mensagem informativa.
+
+O utilizador pode alterar a data, duração, período ou filtros.
+
+A2 — Seleção inválida
+
+O sistema apresenta os erros de validação.
+
+A consulta não é efetuada.
+
+Pós-condições
+
+A disponibilidade é apresentada sem alterar dados do sistema.
+
+UC11 — Criar reserva
+
+Objetivo
+
+Permitir reservar uma secretária por uma duração diária, semanal, mensal ou anual.
+
+Atores
+
+Utilizador
+
+Colaborador
+
+Gestor
+
+Administrador
+
+Pré-condições
+
+O ator encontra-se autenticado.
+
+A conta encontra-se ativa.
+
+A secretária encontra-se ativa e reservável.
+
+Fluxo principal
+
+O ator inicia o processo de reserva.
+
+Seleciona a data de início.
+
+Seleciona a duração:
+
+diária;
+
+semanal;
+
+mensal;
+
+anual.
+
+Numa reserva diária, seleciona o período:
+
+Manhã;
+
+Tarde;
+
+Dia inteiro.
+
+Nas reservas semanais, mensais ou anuais, o sistema utiliza automaticamente o período Dia inteiro.
+
+O sistema calcula a data final.
+
+O ator escolhe uma secretária disponível.
+
+O sistema valida conflitos e regras de negócio.
+
+O sistema calcula o preço de acordo com a duração, o período e os valores definidos no setor.
+
+O sistema cria uma única reserva.
+
+O sistema cria o pagamento associado.
+
+A reserva e o mapa são atualizados.
+
+Fluxos alternativos
+
+A1 — Secretária indisponível
+
+O sistema rejeita a reserva.
+
+É apresentada uma mensagem informativa.
+
+A2 — Conflito com outra reserva
+
+O sistema deteta sobreposição de datas ou períodos.
+
+A reserva não é criada.
+
+A3 — Utilizador já possui uma reserva incompatível
+
+O sistema rejeita a operação.
+
+É apresentada uma mensagem de conflito.
+
+A4 — Secretária ou setor não reservável
+
+O sistema impede a criação da reserva.
+
+A5 — Dados inválidos
+
+O sistema apresenta os erros de validação.
+
+A reserva não é criada.
+
+Pós-condições
+
+É criada uma reserva.
+
+É criado um pagamento associado.
+
+A secretária deixa de aparecer como disponível no intervalo reservado.
+
+UC12 — Consultar, editar e cancelar reservas
+
+Objetivo
+
+Permitir acompanhar e gerir reservas existentes.
+
+Atores
+
+Administrador
+
+Gestor
+
+Colaborador
+
+Utilizador
+
+Pré-condições
+
+O ator encontra-se autenticado.
+
+Existe pelo menos uma reserva acessível ao ator.
+
+Fluxo principal
+
+O ator acede à área de reservas.
+
+Consulta reservas futuras e o histórico.
+
+Pode aplicar pesquisa, filtros, ordenação e paginação.
+
+Seleciona uma reserva para consultar os detalhes.
+
+Quando permitido, pode editar a reserva.
+
+Quando elegível, pode solicitar o cancelamento.
+
+O sistema valida a autorização e o estado.
+
+O sistema guarda as alterações e atualiza o mapa.
+
+Fluxos alternativos
+
+A1 — Reserva não pertence ao utilizador
+
+O sistema bloqueia a operação.
+
+É devolvida uma resposta de acesso negado.
+
+A2 — Reserva confirmada, cancelada ou expirada
+
+O sistema impede alterações incompatíveis com o estado atual.
+
+É apresentada uma mensagem explicativa.
+
+A3 — Reserva com pagamento não elegível para cancelamento
+
+O sistema rejeita a operação de acordo com as regras definidas.
+
+Pós-condições
+
+A reserva mantém-se inalterada ou passa ao estado resultante da operação.
+
+A disponibilidade é recalculada quando aplicável.
+
+UC13 — Realizar check-in por QR Code
+
+Objetivo
+
+Permitir confirmar a presença do utilizador na secretária reservada.
+
+Atores
+
+Utilizador
+
+Colaborador
+
+Gestor
+
+Administrador
+
+Pré-condições
+
+Existe uma reserva válida.
+
+A reserva pertence ao utilizador autenticado.
+
+A data e o período permitem o check-in.
+
+O QR Code pertence à secretária reservada.
+
+Fluxo principal
+
+O ator acede à funcionalidade de check-in.
+
+Lê o QR Code da secretária.
+
+O sistema identifica a secretária.
+
+Valida o utilizador, a reserva, a data, o período e o estado.
+
+O utilizador confirma a operação.
+
+O sistema regista o check-in.
+
+O estado da reserva é atualizado para Confirmada.
+
+Fluxos alternativos
+
+A1 — QR Code inválido
+
+O sistema não identifica uma secretária válida.
+
+O check-in é rejeitado.
+
+A2 — Reserva inexistente
+
+O sistema não encontra uma reserva elegível.
+
+É apresentada uma mensagem de erro.
+
+A3 — Reserva de outro utilizador
+
+O sistema bloqueia o check-in.
+
+A4 — Data, período ou estado inválido
+
+O sistema rejeita a operação.
+
+É apresentada a respetiva justificação.
+
+Pós-condições
+
+O check-in fica registado.
+
+A reserva passa ao estado Confirmada.
+
+UC14 — Gerir pagamentos
+
+Objetivo
+
+Permitir consultar e confirmar os pagamentos simulados associados às reservas.
+
+Atores
+
+Administrador
+
+Gestor
+
+Colaborador
+
+Utilizador
+
+Pré-condições
+
+O ator encontra-se autenticado.
+
+Existe uma reserva com pagamento associado.
+
+Fluxo principal
+
+O ator acede à área de pagamentos.
+
+Consulta o histórico e os detalhes dos pagamentos permitidos.
+
+Seleciona um pagamento pendente.
+
+Escolhe um método:
+
+Cartão;
+
+MB Way;
+
+Transferência;
+
+PayPal.
+
+Confirma a operação.
+
+O sistema atualiza o estado do pagamento.
+
+Quando aplicável, o estado da reserva é atualizado.
+
+Fluxos alternativos
+
+A1 — Pagamento já processado
+
+O sistema impede uma nova confirmação.
+
+É apresentada uma mensagem informativa.
+
+A2 — Pagamento não pertence ao utilizador
+
+O sistema bloqueia o acesso ou a operação.
+
+A3 — Método de pagamento inválido
+
+O sistema rejeita a confirmação.
+
+O estado permanece inalterado.
+
+Pós-condições
+
+O pagamento fica registado com o estado resultante da operação.
+
+A reserva associada é atualizada quando aplicável.
+
+UC15 — Consultar o dashboard e estatísticas
+
+Objetivo
+
+Disponibilizar uma visão geral da utilização e ocupação dos espaços.
+
+Atores
+
+Administrador
+
+Gestor
+
+Colaborador
+
+Utilizador
+
+Pré-condições
+
+O ator encontra-se autenticado.
+
+A conta encontra-se ativa.
+
+Fluxo principal
+
+O ator acede ao dashboard.
+
+O sistema carrega os indicadores autorizados para o respetivo papel.
+
+São apresentadas informações como:
+
+reservas totais;
+
+reservas por estado;
+
+reservas por período;
+
+taxa de ocupação;
+
+ocupação por edifício ou setor;
+
+próximas reservas;
+
+informação financeira, quando aplicável.
+
+O ator pode aplicar filtros temporais ou de localização.
+
+Os indicadores e gráficos são atualizados.
+
+Fluxos alternativos
+
+A1 — Não existem dados para o filtro selecionado
+
+O sistema apresenta os indicadores sem valores ou uma mensagem informativa.
+
+A2 — Dados temporariamente indisponíveis
+
+O sistema apresenta uma mensagem de erro.
+
+O utilizador pode repetir a consulta.
+
+Pós-condições
+
+Os indicadores são apresentados sem alterar os dados do sistema.
+
+UC16 — Submeter e moderar avaliações
+
+Objetivo
+
+Permitir avaliar uma reserva concluída e gerir a moderação das avaliações.
+
+Atores
+
+Utilizador
+
+Administrador
+
+Gestor
+
+Pré-condições
+
+O utilizador encontra-se autenticado.
+
+A reserva é elegível para avaliação.
+
+A avaliação ainda não foi submetida para essa reserva.
+
+Fluxo principal
+
+O utilizador acede ao histórico de reservas.
+
+Seleciona uma reserva elegível.
+
+Introduz a classificação e, quando aplicável, um comentário.
+
+O sistema valida e regista a avaliação.
+
+A média do setor é recalculada.
+
+Um utilizador com permissões de moderação pode consultar e moderar a avaliação.
+
+Fluxos alternativos
+
+A1 — Reserva não elegível
+
+O sistema impede a avaliação.
+
+É apresentada uma mensagem explicativa.
+
+A2 — Avaliação duplicada
+
+O sistema rejeita uma segunda avaliação para a mesma reserva.
+
+A3 — Conteúdo inválido
+
+O sistema apresenta os erros de validação.
+
+A avaliação não é guardada.
+
+Pós-condições
+
+A avaliação fica registada.
+
+As estatísticas do setor são atualizadas.
+
+UC17 — Consultar notificações
+
+Objetivo
+
+Permitir acompanhar acontecimentos relevantes relacionados com a utilização da plataforma.
+
+Atores
+
+Administrador
+
+Gestor
+
+Colaborador
+
+Utilizador
+
+Pré-condições
+
+O ator encontra-se autenticado.
+
+Fluxo principal
+
+O ator acede ao centro de notificações.
+
+O sistema apresenta as notificações associadas à conta.
+
+O utilizador consulta o conteúdo.
+
+Pode marcar uma notificação como lida.
+
+Quando aplicável, pode seguir a ligação para a funcionalidade relacionada.
+
+Fluxos alternativos
+
+A1 — Não existem notificações
+
+O sistema apresenta uma mensagem informativa.
+
+A2 — Recurso associado indisponível
+
+O sistema impede o acesso ao recurso.
+
+A notificação permanece disponível para consulta.
+
+Pós-condições
+
+O estado de leitura das notificações fica atualizado.
+
+UC18 — Utilizar o chat em tempo real
+
+Objetivo
+
+Permitir a comunicação entre utilizadores através do chat da aplicação.
+
+Atores
+
+Administrador
+
+Gestor
+
+Colaborador
+
+Utilizador
+
+Pré-condições
+
+O ator encontra-se autenticado.
+
+O serviço de comunicação em tempo real encontra-se disponível.
+
+Fluxo principal
+
+O ator acede ao chat.
+
+Seleciona uma conversa ou canal disponível.
+
+Introduz uma mensagem.
+
+O sistema valida e guarda a mensagem.
+
+A mensagem é distribuída em tempo real aos participantes autorizados.
+
+A conversa é atualizada sem recarregar a página.
+
+Fluxos alternativos
+
+A1 — Falha na ligação em tempo real
+
+O sistema apresenta uma mensagem de erro.
+
+A aplicação tenta restabelecer a ligação.
+
+A2 — Mensagem inválida
+
+O sistema rejeita o envio.
+
+O utilizador pode corrigir o conteúdo.
+
+Pós-condições
+
+A mensagem fica guardada e visível para os participantes autorizados.
+
+UC19 — Utilizar o Help Center
+
+Objetivo
+
+Disponibilizar apoio ao utilizador através de perguntas frequentes e pedidos de suporte.
+
+Atores
+
+Administrador
+
+Gestor
+
+Colaborador
+
+Utilizador
+
+Pré-condições
+
+O ator encontra-se autenticado para submeter ou acompanhar pedidos de suporte.
+
+Fluxo principal
+
+O ator acede ao Help Center.
+
+Consulta as perguntas frequentes.
+
+Pode pesquisar informação de apoio.
+
+Quando necessário, cria um pedido de suporte.
+
+Introduz o assunto e a descrição.
+
+O sistema valida e regista o pedido.
+
+O utilizador pode acompanhar o respetivo estado.
+
+Os responsáveis autorizados podem analisar e responder ao pedido.
+
+Fluxos alternativos
+
+A1 — Dados obrigatórios em falta
+
+O sistema apresenta os erros de validação.
+
+O pedido não é criado.
+
+A2 — Pedido inacessível ao utilizador
+
+O sistema bloqueia a consulta.
+
+É apresentada uma mensagem de acesso negado.
+
+Pós-condições
+
+O pedido de suporte fica registado e disponível para acompanhamento.
+
+UC20 — Atualização automática de estados
+
+Objetivo
+
+Garantir que as reservas e pagamentos mantêm estados coerentes com as regras de negócio.
+
+Atores
+
+Sistema
+
+Pré-condições
+
+Existem reservas ou pagamentos sujeitos a atualização automática.
+
+Fluxo principal
+
+O sistema executa as tarefas agendadas.
+
+Identifica reservas sem check-in dentro do prazo definido.
+
+Identifica reservas com pagamento pendente que ultrapassaram o limite permitido.
+
+Atualiza os estados aplicáveis.
+
+Liberta as secretárias quando necessário.
+
+Regista ou envia as notificações correspondentes.
+
+Fluxos alternativos
+
+A1 — Nenhum registo elegível
+
+A tarefa termina sem alterações.
+
+A2 — Falha durante o processamento
+
+O sistema preserva os registos ainda não processados.
+
+A falha pode ser registada para análise.
+
+Pós-condições
+
+As reservas, pagamentos e disponibilidades ficam coerentes com as regras definidas.
+
+2.2 Considerações finais
+
+Os casos de uso apresentados cobrem as principais interações entre os atores e o SpaceHub, desde a autenticação e gestão dos espaços até às reservas, pagamentos, check-in, avaliações, notificações, comunicação e suporte.
+
+A autorização de cada operação é validada de acordo com o papel do utilizador, o estado das entidades e as regras de negócio aplicáveis.

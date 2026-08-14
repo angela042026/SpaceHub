@@ -1,508 +1,699 @@
-# 1. Objetivo do Projeto
+SpaceHub — Requisitos, Regras de Negócio e Funcionalidades
 
-O **SpaceHub** é uma aplicação web desenvolvida para a gestão e reserva de postos de trabalho em espaços colaborativos.
+1. Enquadramento e objetivo
 
-O sistema permite administrar edifícios, pisos, setores e secretárias, possibilitando aos utilizadores efetuar reservas para um determinado dia e período, realizar o respetivo check-in através de QR Code e consultar o histórico das suas reservas.
+O SpaceHub é uma aplicação web destinada à gestão e reserva de postos de trabalho em espaços colaborativos.
 
-A aplicação disponibiliza ainda funcionalidades de administração, gestão de utilizadores, monitorização da ocupação dos espaços e um dashboard com indicadores estatísticos de utilização.
+A plataforma centraliza a administração de edifícios, pisos, setores e secretárias, permitindo aos utilizadores consultar a disponibilidade dos espaços, efetuar reservas, realizar check-in através de QR Code e acompanhar o respetivo histórico.
 
-O projeto foi desenvolvido recorrendo ao framework **Laravel**, com frontend em **React** e **Inertia.js**, disponibilizando uma API REST protegida por autenticação através de **Laravel Sanctum**.
+O sistema inclui ainda gestão de utilizadores e permissões, pagamentos simulados, indicadores estatísticos, notificações, avaliações, apoio ao utilizador e funcionalidades de comunicação em tempo real.
 
----
+O principal objetivo do projeto é simplificar a utilização de espaços partilhados, reduzir conflitos de ocupação e disponibilizar informação fiável sobre reservas, pagamentos e utilização dos recursos.
 
-# 2. Atores do Sistema
+2. Arquitetura e tecnologias
 
-O SpaceHub define quatro tipos de utilizadores, cada um com diferentes níveis de acesso.
+O projeto segue uma arquitetura baseada no padrão Model-View-Controller (MVC), mantendo uma separação clara entre interface, regras de negócio, acesso a dados e mecanismos de segurança.
 
-## 2.1 Administrador
+Backend
 
-O Administrador possui acesso total ao sistema.
+Laravel 12;
 
-Pode:
+PHP;
 
-- gerir utilizadores;
-- gerir papéis;
-- gerir edifícios;
-- gerir pisos;
-- gerir setores;
-- gerir secretárias;
-- consultar todas as reservas;
-- consultar estatísticas;
-- aceder ao dashboard;
-- ativar ou desativar entidades do sistema.
+API REST;
 
----
+Laravel Sanctum;
 
-## 2.2 Gestor
+Laravel Reverb;
 
-O Gestor é responsável pela administração operacional dos espaços.
+Services;
 
-Pode:
+Controllers;
 
-- gerir pisos;
-- gerir setores;
-- gerir secretárias;
-- consultar reservas;
-- consultar a ocupação dos espaços;
-- consultar o dashboard.
+Form Requests;
 
----
+Resources;
 
-## 2.3 Colaborador
+Policies;
 
-O Colaborador apoia a operação diária dos espaços.
+Middleware;
 
-Pode:
+Events e notificações;
 
-- consultar ocupação;
-- consultar secretárias disponíveis;
-- consultar reservas;
-- apoiar operações de manutenção.
+Migrations e Seeders.
 
-Não possui permissões de administração.
+Frontend
 
----
+React;
 
-## 2.4 Utilizador
+Inertia.js;
 
-O Utilizador representa o colaborador que utiliza os espaços.
+Tailwind CSS;
 
-Pode:
+componentes reutilizáveis;
 
-- registar-se;
-- iniciar sessão;
-- gerir o próprio perfil;
-- reservar secretárias;
-- consultar as suas reservas;
-- cancelar reservas permitidas;
-- realizar check-in através de QR Code.
+interface responsiva.
 
----
+Dados, testes e versionamento
 
-# 3. Requisitos Funcionais
+MySQL;
 
-## RF01 — Registo de Utilizador
+PHPUnit;
 
-O sistema deve permitir o registo de novos utilizadores.
+Git;
 
-Durante o registo é automaticamente atribuído o papel **Utilizador**.
+GitHub;
 
----
+desenvolvimento por branches;
 
-## RF02 — Autenticação
+integração através de Pull Requests e merge commits.
+
+3. Atores e permissões
+
+O SpaceHub define quatro perfis de utilizador.
+
+Perfil
+
+Responsabilidades e permissões principais
+
+Administrador
+
+Gestão global da plataforma, utilizadores, papéis, espaços, reservas, pagamentos, avaliações, estatísticas e ativação ou desativação de entidades.
+
+Gestor
+
+Administração operacional dos espaços, incluindo edifícios, pisos, setores e secretárias, bem como consulta de reservas, ocupação e dashboard.
+
+Colaborador
+
+Consulta dos espaços, disponibilidade e reservas, sem acesso às operações administrativas reservadas ao Administrador e ao Gestor.
+
+Utilizador
+
+Gestão do próprio perfil, consulta de disponibilidade, criação e gestão das próprias reservas, pagamentos, check-in e consulta do histórico.
+
+As permissões são aplicadas através de Policies, middleware e validações específicas em cada operação.
+
+4. Requisitos funcionais
+
+RF01 — Registo e autenticação
 
 O sistema deve permitir:
 
-- login;
-- logout;
-- recuperação de password;
-- alteração de password.
+registo de novos utilizadores;
 
-A autenticação da API é efetuada através de **Laravel Sanctum**.
+login e logout;
 
----
+recuperação da palavra-passe;
 
-## RF03 — Gestão de Utilizadores
+alteração da palavra-passe;
+
+gestão do próprio perfil.
+
+No registo é atribuído, por defeito, o papel Utilizador.
+
+A autenticação da API é efetuada através de Laravel Sanctum.
+
+RF02 — Gestão de utilizadores e papéis
 
 O Administrador deve poder:
 
-- criar utilizadores;
-- consultar utilizadores;
-- editar utilizadores;
-- ativar ou desativar utilizadores;
-- associar um papel.
+criar e consultar utilizadores;
+
+editar dados de utilizadores;
+
+ativar ou desativar contas;
+
+associar um papel;
+
+consultar informação relevante sobre a atividade do utilizador.
 
 Cada utilizador pode possuir uma fotografia de perfil.
 
----
+Os papéis disponíveis são:
 
-## RF04 — Gestão de Papéis
+Administrador;
 
-O sistema deve permitir associar cada utilizador a um dos seguintes papéis:
+Gestor;
 
-- Administrador;
-- Gestor;
-- Colaborador;
-- Utilizador.
+Colaborador;
 
----
+Utilizador.
 
-## RF05 — Gestão de Edifícios
+RF03 — Gestão de edifícios
 
-O Administrador pode:
+Administradores e Gestores devem poder:
 
-- criar;
-- editar;
-- consultar;
-- ativar ou desativar edifícios.
+criar edifícios;
 
----
+consultar edifícios;
 
-## RF06 — Gestão de Pisos
+editar edifícios;
 
-Administradores e Gestores podem:
+ativar ou desativar edifícios.
 
-- criar pisos;
-- editar pisos;
-- consultar pisos;
-- ativar ou desativar pisos.
+RF04 — Gestão de pisos
 
-Cada piso pode possuir uma planta associada.
+Administradores e Gestores devem poder:
 
----
+criar pisos;
 
-## RF07 — Gestão de Setores
+consultar pisos;
 
-Administradores e Gestores podem:
+editar pisos;
 
-- criar;
-- editar;
-- consultar;
-- ativar ou desativar setores.
+ativar ou desativar pisos;
 
-Os setores possuem posicionamento gráfico na planta do piso.
+associar uma planta ao piso.
 
----
+RF05 — Gestão de setores
 
-## RF08 — Gestão de Secretárias
+Administradores e Gestores devem poder:
 
-Administradores e Gestores podem:
+criar setores;
 
-- criar;
-- editar;
-- consultar;
-- ativar ou desativar secretárias.
+consultar setores;
+
+editar setores;
+
+ativar ou desativar setores;
+
+definir a respetiva posição e dimensão na planta;
+
+configurar preços de utilização.
+
+RF06 — Gestão de secretárias
+
+Administradores e Gestores devem poder:
+
+criar secretárias;
+
+consultar secretárias;
+
+editar secretárias;
+
+ativar ou desativar secretárias;
+
+configurar características e condições de utilização;
+
+definir a posição da secretária no mapa.
 
 Cada secretária possui um QR Code único.
 
----
+RF07 — Mapa dos espaços
 
-## RF09 — Reserva de Secretárias
+O sistema deve disponibilizar uma representação visual dos pisos, setores e secretárias.
 
-Os utilizadores autenticados podem reservar secretárias para uma determinada data e período.
+O mapa deve permitir:
 
----
+identificar a localização das secretárias;
 
-## RF10 — Períodos de Reserva
+distinguir estados de disponibilidade;
 
-O sistema suporta reservas para os períodos:
+editar posições quando o perfil possui autorização;
 
-- Manhã;
-- Tarde.
+refletir alterações relevantes em tempo real.
 
----
+RF08 — Consulta de disponibilidade
 
-## RF11 — Disponibilidade
+O sistema deve apresentar apenas secretárias que estejam:
 
-O sistema apresenta apenas secretárias:
+ativas;
 
-- ativas;
-- reserváveis;
-- livres para a data e período selecionados.
+configuradas como reserváveis;
 
----
+disponíveis para a data, duração e período selecionados.
 
-## RF12 — Validação de Reservas
+A disponibilidade deve considerar reservas de um único dia e reservas com vários dias de duração.
 
-O sistema impede:
+RF09 — Criação de reservas
 
-- reservas duplicadas da mesma secretária;
-- mais de uma reserva por utilizador no mesmo período.
+Os utilizadores autenticados devem poder criar reservas para uma secretária disponível.
 
----
+A reserva deve registar, entre outros dados:
 
-## RF13 — Consulta de Reservas
+utilizador;
 
-Os utilizadores podem consultar:
+secretária;
 
-- reservas futuras;
-- reservas anteriores.
+data de início;
+
+data de fim, quando aplicável;
+
+período;
+
+tipo de duração;
+
+estado da reserva.
+
+RF10 — Períodos e durações
+
+O sistema suporta os seguintes períodos:
+
+Manhã;
+
+Tarde;
+
+Dia inteiro.
+
+As reservas podem ter as seguintes durações:
+
+diária;
+
+semanal;
+
+mensal;
+
+anual.
+
+As reservas semanais, mensais e anuais utilizam o período Dia inteiro e originam uma única reserva com data de início e data de fim.
+
+RF11 — Gestão das reservas
+
+Os utilizadores devem poder:
+
+consultar reservas futuras;
+
+consultar o histórico;
+
+editar reservas elegíveis;
+
+cancelar reservas elegíveis;
+
+consultar o respetivo estado.
 
 Os Administradores podem consultar todas as reservas.
 
----
+RF12 — Estados e validação das reservas
 
-## RF14 — Cancelamento de Reservas
+O sistema deve gerir os estados das reservas e impedir:
 
-As reservas podem ser canceladas apenas quando respeitam as regras de negócio definidas pelo sistema.
+sobreposição de reservas para a mesma secretária;
 
----
+reservas incompatíveis com outras reservas do mesmo utilizador;
 
-## RF15 — Check-in por QR Code
+alterações a reservas canceladas ou expiradas;
 
-O sistema permite realizar o check-in através da leitura do QR Code existente na secretária.
+operações não autorizadas pelo perfil do utilizador.
 
----
+RF13 — Check-in por QR Code
 
-## RF16 — Validação do Check-in
+O sistema deve permitir realizar o check-in através da leitura do QR Code da secretária.
 
-Durante o check-in o sistema valida:
+Durante o processo devem ser validados:
 
-- utilizador;
-- reserva;
-- data;
-- período;
-- secretária;
-- estado da reserva.
+utilizador autenticado;
 
----
+reserva associada;
 
-## RF17 — Dashboard
+data e período;
 
-O sistema disponibiliza um dashboard com indicadores estatísticos, incluindo:
+secretária reservada;
 
-- número de reservas;
-- taxa de ocupação;
-- reservas por período;
-- reservas por edifício;
-- reservas por estado.
+QR Code apresentado;
 
----
+estado atual da reserva.
 
-## RF18 — Pesquisa
+RF14 — Pagamentos
 
-As áreas administrativas suportam pesquisa por texto.
+O sistema deve criar automaticamente um pagamento associado à reserva quando aplicável.
 
----
+O módulo deve permitir:
 
-## RF19 — Filtros
+consultar o valor;
 
-As listagens permitem aplicar filtros específicos por entidade.
+selecionar o método de pagamento;
 
----
+confirmar o pagamento;
 
-## RF20 — Ordenação e Paginação
+consultar o histórico;
 
-As listagens administrativas suportam:
+consultar o detalhe;
 
-- ordenação;
-- paginação;
-- número configurável de registos por página.
-# 4. Requisitos Não Funcionais
+acompanhar o estado do pagamento.
 
-## RNF01 — Segurança
+Métodos simulados disponíveis:
+
+Cartão;
+
+MB Way;
+
+Transferência;
+
+PayPal.
+
+RF15 — Cálculo de preços
+
+O preço deve ser calculado de acordo com:
+
+setor da secretária;
+
+período selecionado;
+
+tipo de duração;
+
+número de dias úteis considerado.
+
+Regras aplicadas às reservas longas:
+
+semanal: 5 dias úteis;
+
+mensal: 22 dias úteis, com desconto de 10%;
+
+anual: 264 dias úteis, com desconto de 20%.
+
+RF16 — Dashboard e estatísticas
+
+O sistema deve disponibilizar indicadores de utilização, incluindo, quando aplicável:
+
+número de reservas;
+
+taxa de ocupação;
+
+reservas por período;
+
+reservas por edifício;
+
+reservas por estado;
+
+utilização dos espaços;
+
+informação associada a pagamentos e avaliações.
+
+RF17 — Notificações e comunicação
+
+O sistema deve disponibilizar mecanismos de comunicação e atualização do utilizador, incluindo:
+
+notificações persistentes;
+
+atualização de informação relevante;
+
+comunicação em tempo real através de Laravel Reverb;
+
+chat integrado.
+
+RF18 — Avaliações
+
+Os utilizadores elegíveis devem poder avaliar reservas concluídas.
+
+O sistema deve permitir:
+
+registar avaliações;
+
+consultar avaliações;
+
+moderar avaliações quando o perfil possui autorização;
+
+calcular indicadores médios por setor.
+
+RF19 — Ajuda e suporte
+
+O sistema deve disponibilizar uma área de apoio ao utilizador, incluindo:
+
+perguntas frequentes;
+
+pedidos de suporte;
+
+consulta de informação de ajuda.
+
+RF20 — Pesquisa, filtros, ordenação e paginação
+
+As listagens administrativas devem suportar, de acordo com a entidade:
+
+pesquisa por texto;
+
+filtros específicos;
+
+ordenação;
+
+paginação;
+
+seleção do número de registos por página.
+
+5. Requisitos não funcionais
+
+RNF01 — Segurança
 
 O sistema deve garantir:
 
-- autenticação através de Laravel Sanctum;
-- autorização baseada em Policies;
-- proteção das rotas da API;
-- armazenamento seguro das passwords através de hashing;
-- validação de dados através de Form Requests;
-- controlo de permissões de acordo com o papel do utilizador.
+autenticação através de Laravel Sanctum;
 
----
+autorização baseada em Policies;
 
-## RNF02 — Performance
+proteção das rotas privadas;
 
-A API deve responder de forma eficiente às operações mais frequentes.
+hashing seguro das palavras-passe;
 
-As listagens devem suportar:
+validação através de Form Requests;
 
-- pesquisa;
-- filtros;
-- ordenação;
-- paginação.
+controlo de acesso por papel;
 
-Sempre que possível devem ser evitadas consultas redundantes à base de dados.
+prevenção de operações sobre recursos de outros utilizadores;
 
----
+validação de redirecionamentos e dados introduzidos.
 
-## RNF03 — Usabilidade
+RNF02 — Performance
 
-A interface deve apresentar uma navegação simples e intuitiva, permitindo que utilizadores com pouca experiência técnica consigam utilizar o sistema sem necessidade de formação especializada.
+A aplicação deve responder de forma eficiente às operações mais frequentes.
 
----
+Devem ser aplicadas, quando adequadas:
 
-## RNF04 — Escalabilidade
+paginação;
 
-A arquitetura da aplicação deve permitir o crescimento do sistema, suportando:
+consultas otimizadas;
 
-- múltiplos edifícios;
-- múltiplos pisos;
-- múltiplos setores;
-- elevado número de secretárias;
-- elevado número de utilizadores;
-- elevado número de reservas.
+redução de pedidos redundantes;
 
----
+reutilização de dados;
 
-## RNF05 — Disponibilidade
+cache;
 
-O sistema deve manter-se disponível durante o horário normal de funcionamento da organização, garantindo o acesso às funcionalidades de reserva e consulta.
+atualização em tempo real apenas quando necessária.
 
----
+RNF03 — Usabilidade e acessibilidade
 
-## RNF06 — Manutenibilidade
+A interface deve ser:
 
-O código encontra-se organizado segundo a arquitetura MVC disponibilizada pelo Laravel.
+clara;
 
-A aplicação utiliza uma separação clara de responsabilidades através de:
+consistente;
 
-- Models;
-- Controllers;
-- Form Requests;
-- Resources;
-- Policies;
-- Middleware;
-- Seeders;
-- Migrations.
+intuitiva;
 
----
+responsiva;
 
-## RNF07 — Qualidade do Software
+utilizável em diferentes dimensões de ecrã;
 
-O projeto possui uma suíte de testes automatizados que valida as principais funcionalidades da aplicação.
+compatível com boas práticas de acessibilidade.
 
-À data da conclusão do projeto, a suíte é composta por **111 testes automatizados**, cobrindo, entre outras, as seguintes áreas:
+RNF04 — Escalabilidade
 
-- autenticação;
-- autorização;
-- gestão de utilizadores;
-- gestão de edifícios;
-- gestão de pisos;
-- gestão de setores;
-- gestão de secretárias;
-- reservas;
-- dashboard;
-- mapa dos setores;
-- uploads de fotografias e plantas;
-- check-in por QR Code.
+A arquitetura deve suportar o crescimento do sistema, nomeadamente:
 
-A existência desta suíte permite reduzir regressões e aumentar a fiabilidade da aplicação.
+múltiplos edifícios;
 
----
+múltiplos pisos;
 
-## RNF08 — Armazenamento de Ficheiros
+múltiplos setores;
 
-As fotografias dos utilizadores e as plantas dos pisos são armazenadas no diretório público da aplicação utilizando o sistema de armazenamento do Laravel (`storage/app/public`), sendo disponibilizadas através do respetivo link simbólico para `public/storage`.
+elevado número de secretárias;
 
----
+elevado número de utilizadores;
 
-# 5. Regras de Negócio
+elevado volume de reservas e pagamentos.
 
-## RN01
+RNF05 — Disponibilidade
 
-Uma secretária apenas pode possuir uma reserva ativa para a mesma data e período.
+A aplicação deve permanecer acessível durante o período normal de funcionamento da organização, garantindo o acesso às funcionalidades essenciais de consulta, reserva e administração.
 
----
+RNF06 — Manutenibilidade
 
-## RN02
+O código deve manter uma separação clara de responsabilidades através de:
 
-Um utilizador apenas pode possuir uma reserva por período e por dia.
+Models;
 
----
+Controllers;
 
-## RN03
+Services;
+
+Form Requests;
+
+Resources;
+
+Policies;
+
+Middleware;
+
+Events;
+
+Notifications;
+
+Seeders;
+
+Migrations;
+
+componentes React reutilizáveis.
+
+RNF07 — Qualidade do software
+
+O projeto deve possuir testes automatizados que cubram as áreas críticas, incluindo:
+
+autenticação;
+
+autorização;
+
+utilizadores e papéis;
+
+gestão de espaços;
+
+reservas;
+
+pagamentos;
+
+avaliações;
+
+dashboard;
+
+mapas;
+
+uploads;
+
+check-in;
+
+regras de negócio.
+
+A contagem final de testes deve corresponder ao resultado obtido na execução da versão entregue através do comando php artisan test.
+
+RNF08 — Armazenamento de ficheiros
+
+As fotografias dos utilizadores e as plantas dos pisos são armazenadas através do sistema de ficheiros do Laravel, em storage/app/public, e disponibilizadas através do link simbólico para public/storage.
+
+RNF09 — Versionamento e integração
+
+O desenvolvimento deve utilizar Git e GitHub, com:
+
+branches por funcionalidade ou correção;
+
+commits identificáveis;
+
+Pull Requests;
+
+revisão e integração na branch principal;
+
+preservação do histórico através de merge commits.
+
+6. Regras de negócio
+
+RN01 — Disponibilidade da secretária
+
+Uma secretária apenas pode possuir uma reserva ativa para o mesmo intervalo de datas e período.
+
+RN02 — Reservas do utilizador
+
+Um utilizador não pode possuir reservas incompatíveis ou sobrepostas no mesmo período.
+
+RN03 — Elegibilidade da secretária
 
 Apenas secretárias ativas e configuradas como reserváveis podem ser reservadas.
 
----
+RN04 — Reservas de longa duração
 
-## RN04
+As reservas semanais, mensais e anuais:
 
-O check-in apenas pode ser realizado pelo utilizador proprietário da reserva.
+utilizam o período Dia inteiro;
 
----
+possuem data de início e data de fim;
 
-## RN05
+originam apenas um registo de reserva;
 
-O sistema valida que o QR Code pertence à secretária reservada antes de confirmar o check-in.
+originam apenas um pagamento.
 
----
+RN05 — Cálculo da data final
 
-## RN06
+A data final é calculada automaticamente de acordo com o tipo de duração selecionado.
+
+RN06 — Cálculo do preço
+
+O valor da reserva é determinado pelos preços configurados no setor, pelo período e pela duração selecionada.
+
+RN07 — Pagamento e confirmação
+
+A confirmação do pagamento deve atualizar o estado da reserva de acordo com o fluxo definido pela aplicação.
+
+Reservas com pagamento pendente podem ser canceladas automaticamente quando ultrapassam o prazo estabelecido.
+
+RN08 — Check-in
+
+O check-in apenas pode ser realizado pelo utilizador proprietário da reserva e para a secretária efetivamente reservada.
+
+RN09 — Validação do QR Code
+
+O sistema deve confirmar que o QR Code apresentado identifica a secretária associada à reserva.
+
+RN10 — Estados da reserva
 
 Reservas canceladas ou expiradas não podem ser alteradas.
 
----
+Reservas confirmadas apenas podem ser canceladas quando as regras de negócio o permitirem.
 
-## RN07
-
-Reservas confirmadas não podem ser canceladas pelo utilizador.
-
----
-
-## RN08
-
-Apenas reservas futuras e elegíveis podem ser canceladas pelo respetivo utilizador.
-
----
-
-## RN09
+RN11 — Utilizadores inativos
 
 Utilizadores inativos não podem autenticar-se nem executar operações protegidas.
 
----
+RN12 — Gestão de utilizadores
 
-## RN10
+A gestão administrativa de utilizadores é reservada ao perfil Administrador.
 
-Cada QR Code identifica unicamente uma secretária.
+RN13 — Gestão de espaços
 
----
+Administradores e Gestores podem gerir edifícios, pisos, setores e secretárias, de acordo com as Policies aplicadas.
 
-## RN11
+RN14 — Controlo por perfil
 
-Apenas Administradores podem gerir utilizadores.
+Colaboradores e Utilizadores apenas podem executar as operações autorizadas para o respetivo papel.
 
----
+RN15 — Desativação lógica
 
-## RN12
+As entidades principais utilizam o campo ativo para preservar o histórico e a integridade dos dados, evitando eliminações físicas desnecessárias.
 
-Administradores e Gestores podem gerir edifícios, pisos, setores e secretárias.
+RN16 — Avaliações
 
----
+Uma avaliação apenas pode ser registada quando o utilizador e a reserva cumprem os critérios definidos pelo sistema.
 
-## RN13
+7. Funcionalidades implementadas
 
-Colaboradores e Utilizadores apenas possuem acesso às funcionalidades previstas para o respetivo papel.
+A versão atual do SpaceHub integra os seguintes módulos:
 
----
+Autenticação e perfis — registo, login, logout, recuperação de palavra-passe, perfil e controlo de utilizadores ativos ou inativos.
 
-## RN14
+Gestão de utilizadores e permissões — papéis, Policies e acessos diferenciados.
 
-As entidades principais da aplicação utilizam desativação lógica através do campo **ativo**, preservando o histórico de utilização e a integridade dos dados.
+Gestão de espaços — edifícios, pisos, plantas, setores, secretárias, características e mapas.
 
----
+Reservas — disponibilidade, criação, edição, cancelamento, histórico, estados e reservas de longa duração.
 
-# 6. Funcionalidades Implementadas
+Check-in — validação de reservas através de QR Code.
 
-Na versão atual do SpaceHub encontram-se implementadas as seguintes funcionalidades:
+Pagamentos simulados — cálculo automático, métodos de pagamento, confirmação, histórico e detalhe.
 
-- Gestão de utilizadores;
-- Gestão de papéis;
-- Gestão de edifícios;
-- Gestão de pisos;
-- Upload da planta dos pisos;
-- Gestão de setores;
-- Gestão de secretárias;
-- Upload da fotografia dos utilizadores;
-- Reserva de secretárias;
-- Consulta de disponibilidade;
-- Check-in através de QR Code;
-- Dashboard estatístico;
-- Pesquisa nas listagens;
-- Filtros;
-- Ordenação;
-- Paginação;
-- API REST;
-- Autenticação com Laravel Sanctum;
-- Autorização baseada em Policies;
-- Validação através de Form Requests;
-- Resources para serialização das respostas;
-- Upload de ficheiros;
-- Testes automatizados.
+Dashboard e estatísticas — indicadores de ocupação e utilização dos espaços.
 
-- Editor gráfico do mapa dos setores;
-- Atualização em tempo real do mapa através de eventos;
-- Upload da fotografia dos utilizadores;
-- Upload da planta dos pisos;
-- API REST protegida por Laravel Sanctum;
-- Suíte com 111 testes automatizados.
----
+Notificações e tempo real — notificações persistentes, eventos e comunicação através de Laravel Reverb.
 
-# 7. Considerações Finais
+Avaliações — registo, consulta, moderação e médias por setor.
 
-O SpaceHub foi desenvolvido segundo uma arquitetura modular baseada em Laravel e React, privilegiando a separação de responsabilidades, a reutilização de componentes e a segurança da aplicação.
+Ajuda e comunicação — Help Center, pedidos de suporte e chat.
 
-A estrutura adotada facilita a manutenção e evolução futura do sistema, permitindo a introdução de novas funcionalidades com reduzido impacto na arquitetura existente.
+Ferramentas administrativas — pesquisa, filtros, ordenação, paginação e ativação ou desativação de entidades.
+
+API e segurança — API REST, Laravel Sanctum, Policies, middleware, Form Requests e Resources.
+
+Qualidade e integração — testes automatizados, Git, GitHub, branches e Pull Requests.
+
+8. Considerações finais
+
+O SpaceHub apresenta uma arquitetura modular baseada em Laravel e React, com separação de responsabilidades entre backend, frontend, regras de negócio, persistência de dados e segurança.
+
+A estrutura adotada facilita a manutenção, os testes e a evolução da aplicação, permitindo acrescentar novas funcionalidades sem alterar os princípios arquiteturais definidos para o projeto.
+
+A documentação deve ser validada juntamente com a versão final da aplicação, garantindo que os requisitos, as regras de negócio e a contagem de testes correspondem ao estado efetivamente entregue.

@@ -1,515 +1,947 @@
-# 3. Modelo da Base de Dados
+3. Modelo da Base de Dados
 
-## 3.1 Introdução
+3.1 Introdução
 
-O modelo da base de dados do SpaceHub foi desenvolvido segundo o modelo relacional, garantindo a integridade da informação, a normalização dos dados e a consistência entre as diferentes entidades da aplicação.
+O modelo da base de dados do SpaceHub segue o modelo relacional e foi concebido para garantir:
 
-A estrutura permite gerir edifícios, pisos, setores, secretárias, utilizadores, reservas, pagamentos e módulos de suporte, mantendo uma organização hierárquica dos espaços e assegurando que todas as operações respeitam as regras de negócio definidas.
+integridade referencial;
 
-A implementação foi realizada utilizando o ORM **Eloquent** do Laravel, recorrendo a chaves primárias, chaves estrangeiras, restrições de integridade, índices e relações entre modelos.
+normalização dos dados;
 
----
+consistência entre entidades;
 
-# 3.2 Entidades Principais
+preservação do histórico;
 
-O sistema é composto pelas seguintes entidades.
+suporte às regras de negócio;
 
-| Entidade       | Finalidade                                         |
-| -------------- | -------------------------------------------------- |
-| Users          | Utilizadores da aplicação                          |
-| Roles          | Papéis dos utilizadores                            |
-| Edificios      | Edifícios existentes                               |
-| Pisos          | Pisos pertencentes a um edifício                   |
-| Setores        | Divisão funcional dos pisos                        |
-| Secretarias    | Postos de trabalho reserváveis                     |
-| Periodos       | Períodos disponíveis para reserva                  |
-| EstadoReservas | Estados possíveis de uma reserva                   |
-| Reservas       | Reservas efetuadas pelos utilizadores              |
-| Pagamentos     | Pagamentos associados às reservas                  |
-| PedidoSuportes | Pedidos de apoio ou suporte                        |
-| FAQs           | Perguntas frequentes apresentadas aos utilizadores |
+facilidade de manutenção e evolução.
 
----
+A implementação utiliza o ORM Eloquent do Laravel, migrations, seeders, chaves primárias, chaves estrangeiras, índices e restrições de unicidade.
 
-# 3.3 Organização Hierárquica
+A estrutura suporta a gestão de utilizadores, espaços, reservas, pagamentos, avaliações, notificações, comunicação e apoio ao utilizador.
 
-Os espaços físicos encontram-se organizados hierarquicamente.
+3.2 Organização por módulos
 
-```text
+As entidades encontram-se organizadas por domínio funcional.
+
+Identidade e controlo de acesso
+
+Entidade
+
+Finalidade
+
+roles
+
+Define os papéis existentes na aplicação
+
+users
+
+Armazena os utilizadores e os respetivos dados de autenticação e perfil
+
+Gestão de espaços
+
+Entidade
+
+Finalidade
+
+edificios
+
+Representa os edifícios disponíveis
+
+pisos
+
+Representa os pisos pertencentes a cada edifício
+
+setores
+
+Divide os pisos em áreas funcionais
+
+secretarias
+
+Representa os postos de trabalho reserváveis
+
+Reservas e pagamentos
+
+Entidade
+
+Finalidade
+
+periodos
+
+Define os períodos diários disponíveis
+
+estado_reservas
+
+Centraliza os estados possíveis das reservas
+
+reservas
+
+Regista as reservas efetuadas
+
+pagamentos
+
+Regista os pagamentos simulados associados às reservas
+
+avaliacoes
+
+Regista as avaliações submetidas após reservas elegíveis
+
+Apoio, notificações e comunicação
+
+Entidade
+
+Finalidade
+
+pedido_suportes
+
+Regista pedidos de apoio submetidos pelos utilizadores
+
+faqs
+
+Armazena perguntas e respostas frequentes
+
+notifications
+
+Mantém notificações persistentes associadas aos utilizadores
+
+Entidades do chat
+
+Armazenam mensagens e dados necessários às conversas em tempo real
+
+A designação exata das tabelas do módulo de chat deve corresponder às migrations existentes no projeto.
+
+3.3 Organização hierárquica dos espaços
+
+Os espaços físicos são representados através da seguinte hierarquia:
+
 Edifício
-    │
-    └── Piso
-            │
-            └── Setor
-                    │
-                    └── Secretária
-```
+└── Piso
+    └── Setor
+        └── Secretária
 
-Esta estrutura permite representar edifícios com vários pisos, pisos com vários setores e setores com múltiplas secretárias.
+Esta estrutura permite:
 
-A organização hierárquica facilita a gestão dos espaços, a aplicação de filtros e a apresentação dos postos de trabalho no mapa interativo.
+associar vários pisos a um edifício;
 
----
+associar vários setores a um piso;
 
-# 3.4 Relações entre Entidades
+associar várias secretárias a um setor;
 
-As principais relações existentes na base de dados são apresentadas na tabela seguinte.
+aplicar filtros por localização;
 
-| Relação                  | Cardinalidade |
-| ------------------------ | ------------- |
-| Role → Users             | 1 : N         |
-| Edifício → Pisos         | 1 : N         |
-| Piso → Setores           | 1 : N         |
-| Setor → Secretárias      | 1 : N         |
-| User → Reservas          | 1 : N         |
-| Secretária → Reservas    | 1 : N         |
-| Período → Reservas       | 1 : N         |
-| EstadoReserva → Reservas | 1 : N         |
-| Reserva → Pagamento      | 1 : 0..1      |
-| User → PedidoSuportes    | 1 : N         |
+representar os espaços no mapa interativo;
 
-Estas relações são implementadas através de chaves estrangeiras e relações Eloquent, nomeadamente:
+calcular disponibilidade e ocupação por nível hierárquico.
 
-* `belongsTo`;
-* `hasMany`;
-* `hasOne`.
+3.4 Relações principais
 
-A relação entre reservas e pagamentos é opcional, uma vez que uma reserva pode existir antes de possuir um pagamento associado.
+Relação
 
----
+Cardinalidade
 
-# 3.5 Estrutura das Reservas
+Role → Users
 
-A entidade **Reserva** constitui um dos elementos centrais da aplicação.
+1 : N
+
+Edifício → Pisos
+
+1 : N
+
+Piso → Setores
+
+1 : N
+
+Setor → Secretárias
+
+1 : N
+
+User → Reservas
+
+1 : N
+
+Secretária → Reservas
+
+1 : N
+
+Período → Reservas
+
+1 : N
+
+EstadoReserva → Reservas
+
+1 : N
+
+Reserva → Pagamento
+
+1 : 0..1
+
+Reserva → Avaliação
+
+1 : 0..1
+
+User → Avaliações
+
+1 : N
+
+User → Pedidos de suporte
+
+1 : N
+
+User → Notificações
+
+1 : N
+
+As relações são implementadas através dos métodos Eloquent:
+
+belongsTo;
+
+hasMany;
+
+hasOne.
+
+3.5 Entidade users
+
+A entidade users representa todos os utilizadores da aplicação.
+
+Cada utilizador encontra-se associado a um papel e pode possuir:
+
+nome;
+
+email;
+
+palavra-passe protegida por hashing;
+
+fotografia de perfil;
+
+estado ativo/inativo;
+
+dados de verificação e recuperação de acesso;
+
+datas de criação e atualização.
+
+Relações principais
+
+Um utilizador:
+
+pertence a um papel;
+
+pode possuir várias reservas;
+
+pode efetuar avaliações;
+
+pode criar pedidos de suporte;
+
+pode receber notificações;
+
+pode participar no chat.
+
+O email deve ser único.
+
+A desativação da conta impede a autenticação e o acesso a operações protegidas, sem eliminar o histórico associado.
+
+3.6 Entidades de gestão de espaços
+
+Edifícios
+
+A entidade edificios representa as localizações físicas principais da aplicação.
+
+Pode armazenar, entre outros:
+
+nome;
+
+código;
+
+morada;
+
+código postal;
+
+cidade;
+
+país;
+
+contactos;
+
+horário;
+
+descrição;
+
+estado ativo.
+
+Pisos
+
+Cada piso pertence obrigatoriamente a um edifício.
+
+Pode armazenar:
+
+edifício associado;
+
+nome;
+
+código;
+
+planta;
+
+descrição;
+
+estado ativo.
+
+O código do piso deve ser único dentro do respetivo edifício.
+
+Setores
+
+Cada setor pertence obrigatoriamente a um piso.
+
+Pode armazenar:
+
+piso associado;
+
+nome e código;
+
+tipo;
+
+capacidade;
+
+estado ativo;
+
+indicação de reservável;
+
+posição e dimensões na planta;
+
+preços aplicáveis às reservas.
+
+Os preços permanecem armazenados no setor:
+
+preco_meio_dia;
+
+preco_dia_inteiro;
+
+preco_semanal;
+
+preco_mensal;
+
+preco_anual.
+
+Secretárias
+
+Cada secretária pertence obrigatoriamente a um setor.
+
+Pode armazenar:
+
+setor associado;
+
+código;
+
+características e equipamentos;
+
+posição e rotação no mapa;
+
+estado ativo;
+
+indicação de reservável;
+
+token QR único.
+
+A secretária apenas pode ser utilizada numa reserva quando se encontra ativa e configurada como reservável.
+
+3.7 Entidade reservas
+
+A entidade reservas constitui o elemento central do sistema.
 
 Cada reserva associa:
 
-* um utilizador;
-* uma secretária;
-* um período;
-* um estado;
-* uma data.
+um utilizador;
 
-Adicionalmente, são armazenadas informações relativas ao ciclo de vida da reserva, como:
+uma secretária;
 
-* data de cancelamento;
-* data de check-in;
-* observações;
-* data de criação;
-* data de atualização.
+um período;
 
-A entidade permite acompanhar a reserva desde a sua criação até ao cancelamento, confirmação por check-in ou expiração automática.
+um estado;
 
----
+uma data de início;
 
-# 3.6 Estados da Reserva
+uma duração;
 
-Cada reserva encontra-se num dos seguintes estados:
+uma data final.
 
-| Código     | Significado                         |
-| ---------- | ----------------------------------- |
-| pendente   | Reserva criada e ainda sem check-in |
-| confirmada | Check-in efetuado com sucesso       |
-| cancelada  | Reserva cancelada                   |
-| expirada   | Reserva que perdeu validade         |
+Entre os campos relevantes encontram-se:
 
-Os estados são armazenados na tabela **estado_reservas**, permitindo uma gestão centralizada do ciclo de vida das reservas.
+user_id;
 
-A utilização de uma tabela própria para os estados evita a repetição de valores e permite manter uma referência consistente em todas as reservas.
+secretaria_id;
 
----
+periodo_id;
 
-# 3.7 Pagamentos
+estado_reserva_id;
 
-Cada reserva pode possuir um pagamento associado.
+data;
 
-A entidade **Pagamento** permite acompanhar o processo de pagamento da reserva, armazenando informação como:
+tipo_duracao;
 
-* reserva associada;
-* valor;
-* método de pagamento;
-* estado;
-* referência;
-* data de criação;
-* data de atualização.
+data_fim;
 
-Os métodos de pagamento atualmente suportados incluem:
+data de cancelamento;
 
-* Cartão;
-* MB Way;
-* Transferência Bancária.
+data de check-in;
 
-Os estados possíveis incluem:
+observações;
 
-| Estado    | Significado                             |
-| --------- | --------------------------------------- |
-| pendente  | Pagamento criado e ainda não confirmado |
-| pago      | Pagamento confirmado                    |
-| cancelado | Pagamento cancelado                     |
+datas de criação e atualização.
 
-Na versão atual da aplicação, o pagamento é simulado, não existindo movimentação financeira real.
+A reserva permite acompanhar todo o seu ciclo de vida, desde a criação até à confirmação, cancelamento ou expiração.
 
-A arquitetura foi preparada para permitir uma futura integração com plataformas externas de pagamento, sem necessidade de alterar significativamente a relação entre reservas e pagamentos.
+3.8 Períodos e durações
 
-A relação entre as entidades pode ser representada da seguinte forma:
+Os períodos e as durações representam conceitos diferentes.
 
-```text
-Reserva
-   │
-   └── Pagamento
-```
+Períodos
 
-Uma reserva pode não possuir pagamento, mas um pagamento pertence obrigatoriamente a uma reserva.
+A tabela periodos mantém apenas:
 
----
+Manhã;
 
-# 3.8 Pedidos de Suporte e FAQs
+Tarde;
 
-O Help Center utiliza duas entidades principais:
+Dia inteiro.
 
-* `PedidoSuportes`;
-* `FAQs`.
+Durações
 
-## Pedidos de Suporte
+A duração é armazenada na própria reserva através de tipo_duracao.
 
-A entidade **PedidoSuporte** permite registar pedidos de ajuda submetidos pelos utilizadores.
+Os valores suportados são:
 
-Um pedido pode armazenar informação como:
+diária;
 
-* utilizador;
-* assunto;
-* descrição;
-* estado;
-* prioridade;
-* data de criação;
-* data de atualização.
+semanal;
 
-Cada pedido pertence a um utilizador, enquanto um utilizador pode criar vários pedidos de suporte.
+mensal;
 
-## FAQs
+anual.
 
-A entidade **FAQ** permite armazenar perguntas e respostas frequentes apresentadas aos utilizadores.
+As reservas semanais, mensais e anuais utilizam sempre o período Dia inteiro.
 
-Uma FAQ pode incluir:
+A data final é calculada automaticamente:
 
-* pergunta;
-* resposta;
-* estado ativo;
-* ordem de apresentação;
-* data de criação;
-* data de atualização.
+semanal: cinco dias úteis;
 
-As FAQs podem ser ativadas ou desativadas sem necessidade de eliminação física.
+mensal: vinte e dois dias úteis;
 
----
+anual: duzentos e sessenta e quatro dias úteis.
 
-# 3.9 Integridade Referencial
+Cada reserva longa gera apenas:
 
-A base de dados utiliza chaves estrangeiras para garantir a consistência da informação.
+um registo em reservas;
+
+um pagamento associado.
+
+3.9 Estados das reservas
+
+Os estados são centralizados na tabela estado_reservas.
+
+Estado
+
+Significado
+
+pendente
+
+Reserva criada e ainda não confirmada por check-in
+
+confirmada
+
+Check-in efetuado com sucesso
+
+cancelada
+
+Reserva cancelada
+
+expirada
+
+Reserva que perdeu validade por incumprimento das condições
+
+A utilização de uma entidade própria para os estados permite:
+
+evitar valores inconsistentes;
+
+centralizar a gestão do ciclo de vida;
+
+facilitar filtros e relatórios;
+
+suportar alterações futuras.
+
+3.10 Entidade pagamentos
+
+A entidade pagamentos foi separada da reserva para isolar a informação financeira e permitir evolução futura.
+
+Cada pagamento pertence obrigatoriamente a uma reserva e pode armazenar:
+
+reserva associada;
+
+valor;
+
+método;
+
+estado;
+
+referência;
+
+data de confirmação;
+
+datas de criação e atualização.
+
+Métodos suportados
+
+Cartão;
+
+MB Way;
+
+Transferência Bancária;
+
+PayPal.
+
+Estados
+
+Estado
+
+Significado
+
+pendente
+
+Pagamento criado e ainda não confirmado
+
+pago
+
+Pagamento confirmado
+
+cancelado
+
+Pagamento cancelado
+
+O pagamento é criado automaticamente quando a reserva é registada.
+
+Na versão atual, o processo é simulado e não envolve movimentação financeira real.
+
+Cálculo do valor
+
+O valor é calculado de acordo com:
+
+setor da secretária;
+
+período, nas reservas diárias;
+
+duração selecionada;
+
+regras de desconto aplicáveis.
+
+Regras atuais:
+
+semanal: cinco dias úteis;
+
+mensal: vinte e dois dias úteis, com 10% de desconto;
+
+anual: duzentos e sessenta e quatro dias úteis, com 20% de desconto.
+
+A referência do pagamento deve ser única.
+
+3.11 Entidade avaliacoes
+
+A entidade avaliacoes permite registar a opinião do utilizador após uma reserva elegível.
+
+Uma avaliação encontra-se associada:
+
+ao utilizador;
+
+à reserva;
+
+indiretamente à secretária e ao setor reservados.
+
+Pode armazenar:
+
+classificação;
+
+comentário;
+
+estado de moderação;
+
+datas de criação e atualização.
+
+Cada reserva pode possuir, no máximo, uma avaliação.
+
+A média por setor é calculada através da relação entre:
+
+Avaliação → Reserva → Secretária → Setor
+
+Esta estrutura evita guardar valores médios duplicados e permite recalculá-los a partir dos dados reais.
+
+3.12 Help Center
+
+Pedidos de suporte
+
+A entidade pedido_suportes regista os pedidos de ajuda submetidos pelos utilizadores.
+
+Pode armazenar:
+
+utilizador;
+
+assunto;
+
+descrição;
+
+estado;
+
+prioridade;
+
+resposta ou acompanhamento;
+
+datas de criação e atualização.
+
+Cada pedido pertence a um utilizador, enquanto um utilizador pode criar vários pedidos.
+
+FAQs
+
+A entidade faqs armazena perguntas e respostas frequentes.
+
+Pode incluir:
+
+pergunta;
+
+resposta;
+
+estado ativo;
+
+ordem de apresentação;
+
+datas de criação e atualização.
+
+As FAQs podem ser desativadas sem eliminação física.
+
+3.13 Notificações e chat
+
+Notificações
+
+As notificações persistentes permitem informar os utilizadores sobre acontecimentos como:
+
+criação ou alteração de reservas;
+
+confirmação ou cancelamento;
+
+expiração;
+
+alterações de pagamentos;
+
+eventos relacionados com avaliações ou suporte.
+
+A estrutura pode guardar:
+
+destinatário;
+
+tipo;
+
+conteúdo serializado;
+
+data de leitura;
+
+datas de criação e atualização.
+
+Chat
+
+O módulo de chat utiliza Laravel Reverb para comunicação em tempo real.
+
+A base de dados mantém os dados necessários para preservar o histórico das mensagens, enquanto o Reverb assegura a transmissão imediata dos eventos aos participantes autorizados.
+
+A persistência das mensagens deve manter separadas:
+
+identidade do remetente;
+
+conversa ou destinatário;
+
+conteúdo;
+
+datas de criação e atualização.
+
+3.14 Integridade referencial
+
+A base de dados utiliza chaves estrangeiras para impedir associações a registos inexistentes.
 
 Exemplos:
 
-* um piso pertence obrigatoriamente a um edifício;
-* um setor pertence obrigatoriamente a um piso;
-* uma secretária pertence obrigatoriamente a um setor;
-* uma reserva referencia obrigatoriamente um utilizador, uma secretária, um período e um estado;
-* um pagamento pertence obrigatoriamente a uma reserva;
-* um pedido de suporte pertence a um utilizador.
+um utilizador pertence a um papel válido;
 
-Sempre que adequado, são utilizadas restrições de integridade e índices únicos para impedir duplicação de dados.
+um piso pertence a um edifício;
 
-Entre os exemplos de campos únicos encontram-se:
+um setor pertence a um piso;
 
-* email do utilizador;
-* código do piso dentro do edifício;
-* token QR da secretária;
-* referência do pagamento.
+uma secretária pertence a um setor;
 
-As chaves estrangeiras asseguram que não são criados registos associados a entidades inexistentes.
+uma reserva referencia utilizador, secretária, período e estado;
 
----
+um pagamento pertence a uma reserva;
 
-# 3.10 Decisões de Modelação
+uma avaliação pertence a uma reserva e a um utilizador;
 
-Durante o desenvolvimento foram tomadas várias decisões importantes relativamente à estrutura da base de dados.
+um pedido de suporte pertence a um utilizador.
 
-## Edifícios
+As ações de eliminação ou desativação devem preservar o histórico e respeitar as relações existentes.
 
-Inicialmente estava prevista a entidade **Localidade**.
+3.15 Restrições e campos únicos
 
-Após análise funcional, verificou-se que a entidade **Edifício** representava melhor a realidade da aplicação, tendo sido adotada como entidade principal da organização física dos espaços.
+Entre os campos ou combinações que devem ser únicos encontram-se:
 
-O edifício permite armazenar informação mais completa, como:
-
-* nome;
-* código;
-* morada;
-* código postal;
-* cidade;
-* país;
-* contactos;
-* horário;
-* descrição;
-* estado ativo.
-
----
-
-## Ativação Lógica
-
-As principais entidades possuem o atributo **ativo**.
-
-Em vez da eliminação física dos registos, optou-se pela desativação lógica, permitindo:
-
-* preservar o histórico;
-* evitar perda de informação;
-* manter a integridade das reservas;
-* impedir a utilização de entidades desativadas;
-* permitir a reativação futura.
-
-Esta decisão é aplicada, entre outras, às seguintes entidades:
-
-* utilizadores;
-* edifícios;
-* pisos;
-* setores;
-* secretárias;
-* FAQs.
-
----
-
-## Upload de Ficheiros
-
-O modelo suporta armazenamento de ficheiros.
-
-Foram adicionados os seguintes atributos:
-
-| Entidade | Campo      |
-| -------- | ---------- |
-| Users    | fotografia |
-| Pisos    | planta     |
-
-Os ficheiros são armazenados utilizando o sistema de armazenamento público do Laravel.
-
-Na base de dados é guardado apenas o caminho relativo do ficheiro, evitando o armazenamento direto de dados binários.
-
-Esta abordagem facilita:
-
-* substituição dos ficheiros;
-* eliminação segura;
-* geração de URLs públicas;
-* alteração futura do sistema de armazenamento.
-
----
-
-## QR Code
-
-Cada secretária possui um identificador único utilizado para geração do respetivo QR Code.
-
-Este identificador é armazenado no campo:
-
-```text
-qr_token
-```
-
-O token é utilizado durante o processo de check-in para:
-
-* identificar a secretária;
-* localizar a reserva associada;
-* validar o utilizador;
-* confirmar o check-in.
-
-A utilização de um token único evita expor diretamente o identificador numérico da secretária.
-
----
-
-## Pagamentos
-
-A entidade **Pagamento** foi modelada separadamente da entidade **Reserva**.
-
-Esta decisão permite:
-
-* manter os dados financeiros isolados;
-* controlar o ciclo de vida do pagamento;
-* adicionar novos métodos no futuro;
-* integrar gateways externos;
-* manter o histórico;
-* testar a lógica de pagamento de forma independente.
-
-A relação escolhida foi de um pagamento por reserva, podendo a reserva ainda não possuir pagamento.
-
----
-
-## Estados das Reservas
-
-Os estados das reservas foram armazenados numa entidade própria em vez de serem definidos apenas através de texto livre.
-
-Esta decisão permite:
-
-* centralizar os estados;
-* manter consistência;
-* evitar erros de escrita;
-* facilitar consultas;
-* permitir evolução futura.
-
----
-
-# 3.11 Regras de Integridade
-
-A estrutura da base de dados foi concebida para garantir o cumprimento das principais regras de negócio.
-
-Entre elas destacam-se:
-
-* uma secretária apenas pode possuir uma reserva ativa para a mesma data e período;
-* um utilizador apenas pode possuir uma reserva por período e por dia;
-* apenas secretárias ativas e reserváveis podem receber reservas;
-* apenas reservas válidas podem efetuar check-in;
-* utilizadores inativos não podem executar operações protegidas;
-* um pagamento pertence apenas a uma reserva;
-* uma reserva possui, no máximo, um pagamento;
-* cada referência de pagamento deve ser única;
-* apenas pisos pertencentes a edifícios válidos podem ser criados;
-* apenas setores pertencentes a pisos válidos podem ser criados;
-* apenas secretárias pertencentes a setores válidos podem ser criadas.
-
-Estas regras são reforçadas pela lógica implementada nos:
-
-* Controllers;
-* Form Requests;
-* Policies;
-* Services;
-* Models;
-* migrations.
-
-Algumas regras dependem da aplicação e não apenas da base de dados, como a verificação de conflitos entre reservas.
-
----
-
-# 3.12 Índices e Restrições
-
-A base de dados utiliza índices e restrições para melhorar a integridade e o desempenho.
-
-Entre os campos que podem beneficiar de índices encontram-se:
-
-* chaves estrangeiras;
-* email;
-* estado;
-* data da reserva;
-* período;
-* secretária;
-* utilizador;
-* referência do pagamento;
-* token QR.
-
-As restrições únicas são utilizadas em campos que não podem ser repetidos.
-
-Exemplos:
-
-```text
 users.email
 secretarias.qr_token
 pagamentos.referencia
-```
+pisos(edificio_id, codigo)
 
-Nos pisos, o código deve ser único dentro do respetivo edifício.
+Outras restrições podem ser aplicadas de acordo com as migrations, por exemplo:
 
-A combinação pode ser representada por:
+códigos únicos dentro da respetiva entidade superior;
 
-```text
-edificio_id + codigo
-```
+uma avaliação por reserva;
 
----
+um pagamento por reserva.
 
-# 3.13 Normalização
+As regras de conflito de reservas são validadas principalmente na aplicação, porque dependem de intervalos de datas, duração, período e estado.
 
-O modelo foi desenvolvido seguindo princípios de normalização.
+3.16 Ativação lógica
 
-A separação entre entidades permite evitar a duplicação de informação.
+As principais entidades utilizam o atributo ativo.
 
-Por exemplo:
+Esta abordagem permite:
 
-* os papéis são armazenados em `roles`;
-* os períodos são armazenados em `periodos`;
-* os estados das reservas são armazenados em `estado_reservas`;
-* os pagamentos são armazenados separadamente das reservas;
-* os dados dos espaços são divididos entre edifícios, pisos, setores e secretárias.
+preservar o histórico;
 
-Esta organização reduz redundâncias e facilita a manutenção dos dados.
+evitar perda de informação;
 
----
+impedir novas operações com entidades desativadas;
 
-# 3.14 Diagrama Entidade-Relacionamento
+manter relações antigas;
 
-O modelo relacional completo encontra-se representado no diagrama Entidade-Relacionamento apresentado em anexo.
+permitir reativação futura.
 
-O diagrama deve incluir as seguintes entidades:
+A ativação lógica aplica-se, entre outras, a:
 
-```text
-Roles
-Users
-Edificios
-Pisos
-Setores
-Secretarias
-Periodos
-EstadoReservas
-Reservas
-Pagamentos
-PedidoSuportes
-FAQs
-```
+utilizadores;
 
-As principais relações podem ser representadas da seguinte forma:
+edifícios;
 
-```text
-Role
-  │
-  └── Users
-        │
-        ├── Reservas
-        │      │
-        │      └── Pagamento
-        │
-        └── PedidoSuportes
+pisos;
 
+setores;
 
-Edificio
-   │
-   └── Pisos
-          │
-          └── Setores
-                 │
-                 └── Secretarias
-                        │
-                        └── Reservas
+secretárias;
 
+FAQs.
 
-Periodo
-   │
-   └── Reservas
+A desativação não equivale a eliminação física.
 
+3.17 Upload de ficheiros
 
-EstadoReserva
-   │
-   └── Reservas
-```
+O modelo suporta ficheiros associados aos utilizadores e aos pisos.
 
-O diagrama evidencia todas as entidades da aplicação, respetivas relações e cardinalidades, constituindo uma representação gráfica da estrutura persistente do sistema.
+Entidade
 
----
+Campo
 
-# 3.15 Considerações Finais
+users
 
-O modelo da base de dados foi desenvolvido de forma modular e normalizada, permitindo a evolução da aplicação sem alterações estruturais significativas.
+fotografia
 
-A utilização do Eloquent ORM, das migrations e dos seeders do Laravel facilita a manutenção da base de dados, a criação de relações e a consistência dos dados.
+pisos
 
-A organização hierárquica entre edifícios, pisos, setores e secretárias representa de forma clara a estrutura física dos espaços.
+planta
 
-A entidade Reserva permite relacionar utilizadores, secretárias, períodos e estados, constituindo o elemento central do processo de reserva.
+Os ficheiros são armazenados através do sistema de armazenamento público do Laravel:
 
-A introdução da entidade **Pagamento** permite separar a informação financeira da restante informação da reserva e prepara o sistema para futuras integrações com serviços externos.
+storage/app/public
 
-As entidades **FAQ** e **PedidoSuporte** suportam o Help Center e demonstram a capacidade de expansão do modelo de dados sem comprometer a organização existente.
+A disponibilização pública é efetuada através do link simbólico:
 
-Desta forma, a estrutura adotada oferece uma base consistente, extensível e adequada às funcionalidades atuais e futuras do SpaceHub.
+public/storage
+
+Na base de dados é guardado apenas o caminho relativo do ficheiro, evitando o armazenamento de dados binários.
+
+Esta abordagem facilita:
+
+substituição;
+
+eliminação segura;
+
+geração de URLs;
+
+mudança futura de sistema de armazenamento.
+
+3.18 QR Code das secretárias
+
+Cada secretária possui um token único:
+
+qr_token
+
+O token é utilizado para:
+
+identificar a secretária;
+
+localizar a reserva correspondente;
+
+validar o utilizador;
+
+validar a data e o período;
+
+confirmar o check-in.
+
+A utilização de um token evita expor diretamente o identificador numérico da secretária.
+
+3.19 Regras de integridade e negócio
+
+A estrutura da base de dados e a lógica da aplicação garantem, entre outras, as seguintes regras:
+
+Uma secretária não pode possuir reservas incompatíveis no mesmo intervalo.
+
+Um utilizador não pode possuir reservas incompatíveis entre si.
+
+Apenas secretárias ativas e reserváveis podem ser reservadas.
+
+Reservas longas utilizam o período Dia inteiro.
+
+A data final é calculada a partir da duração.
+
+Cada reserva gera, no máximo, um pagamento.
+
+Cada pagamento pertence a uma única reserva.
+
+Cada reserva pode receber, no máximo, uma avaliação.
+
+Apenas reservas elegíveis podem ser avaliadas.
+
+O check-in apenas pode ser efetuado pelo proprietário da reserva.
+
+O QR Code deve pertencer à secretária reservada.
+
+Reservas canceladas ou expiradas não podem ser alteradas.
+
+Utilizadores inativos não podem executar operações protegidas.
+
+Entidades desativadas não podem ser utilizadas em novas reservas.
+
+A hierarquia Edifício → Piso → Setor → Secretária deve permanecer válida.
+
+Estas regras são reforçadas através de:
+
+migrations;
+
+Models;
+
+Form Requests;
+
+Policies;
+
+Services;
+
+Controllers;
+
+comandos e tarefas agendadas.
+
+3.20 Índices e desempenho
+
+Devem possuir índices os campos utilizados frequentemente em:
+
+relações;
+
+filtros;
+
+pesquisa;
+
+ordenação;
+
+verificação de conflitos.
+
+Entre os principais encontram-se:
+
+chaves estrangeiras;
+
+email;
+
+estado;
+
+data inicial e final da reserva;
+
+tipo de duração;
+
+período;
+
+secretária;
+
+utilizador;
+
+referência do pagamento;
+
+token QR;
+
+data de leitura das notificações.
+
+Os índices melhoram o desempenho das consultas de disponibilidade, dashboard, relatórios e listagens administrativas.
+
+3.21 Normalização
+
+O modelo segue princípios de normalização para reduzir redundâncias.
+
+Exemplos:
+
+os papéis são armazenados em roles;
+
+os períodos são armazenados em periodos;
+
+os estados são armazenados em estado_reservas;
+
+os espaços são divididos entre edifícios, pisos, setores e secretárias;
+
+os pagamentos são separados das reservas;
+
+as avaliações são armazenadas separadamente;
+
+os ficheiros são guardados no sistema de armazenamento, mantendo apenas o caminho na base de dados.
+
+A separação das entidades facilita a manutenção e evita inconsistências.
+
+3.22 Diagrama conceptual
+
+erDiagram
+    ROLES ||--o{ USERS : atribui
+    EDIFICIOS ||--o{ PISOS : possui
+    PISOS ||--o{ SETORES : possui
+    SETORES ||--o{ SECRETARIAS : possui
+
+    USERS ||--o{ RESERVAS : efetua
+    SECRETARIAS ||--o{ RESERVAS : recebe
+    PERIODOS ||--o{ RESERVAS : define
+    ESTADO_RESERVAS ||--o{ RESERVAS : classifica
+
+    RESERVAS ||--o| PAGAMENTOS : gera
+    RESERVAS ||--o| AVALIACOES : recebe
+    USERS ||--o{ AVALIACOES : submete
+
+    USERS ||--o{ PEDIDO_SUPORTES : cria
+    USERS ||--o{ NOTIFICATIONS : recebe
+
+O diagrama físico final deve ser gerado a partir das migrations e refletir todas as tabelas, campos, chaves estrangeiras e restrições efetivamente existentes na versão entregue.
+
+3.23 Considerações finais
+
+O modelo da base de dados do SpaceHub encontra-se organizado por módulos e representa de forma coerente:
+
+os utilizadores e respetivas permissões;
+
+a hierarquia física dos espaços;
+
+o ciclo completo das reservas;
+
+os pagamentos simulados;
+
+as avaliações;
+
+o Help Center;
+
+as notificações;
+
+a comunicação em tempo real.
+
+A utilização do Eloquent ORM, migrations, seeders, índices e relações explícitas facilita a manutenção e reduz o risco de inconsistências.
+
+A estrutura adotada permite acrescentar novas funcionalidades sem comprometer a organização existente, mantendo a separação de responsabilidades e a integridade dos dados.
