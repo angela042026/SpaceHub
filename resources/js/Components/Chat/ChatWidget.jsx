@@ -187,9 +187,9 @@ export default function ChatWidget() {
                         abrir();
                     }}
                     aria-label="Abrir chat de suporte"
-                    className="flex h-[52px] w-[52px] items-center justify-center rounded-full bg-teal-500 text-white shadow-lg shadow-teal-500/30 transition-all duration-250 hover:bg-teal-600 active:scale-95"
+                    className="flex h-12 w-12 items-center justify-center rounded-full bg-teal-500 text-white shadow-lg shadow-teal-500/30 transition-all duration-250 hover:bg-teal-600 active:scale-95"
                 >
-                    <MessageCircleMore size={24} />
+                    <MessageCircleMore size={22} />
                 </button>
             )}
         </div>

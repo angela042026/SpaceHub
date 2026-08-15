@@ -310,10 +310,23 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
     ].includes(papel);
 
     // Só o dashboard do "Utilizador" tem cartão de reserva de hoje —
-    // nas outras roles mantém-se a frase genérica de sempre.
+    // nas outras roles mantém-se a frase genérica de sempre, exceto em
+    // páginas administrativas específicas que já têm um subtítulo mais
+    // adequado ao que se está a fazer ali.
     let subtituloHeader = 'Bem-vindo ao seu Dashboard.';
 
-    if (ehDashboardUtilizador) {
+    if (route().current('admin.reservas.index')) {
+        subtituloHeader = 'Consulte e faça a gestão de todas as reservas do SpaceHub.';
+    } else if (route().current('secretarias.qrcodes')) {
+        // Mensagem genérica de propósito — a descrição específica sobre
+        // imprimir/transferir QR Codes já está no cabeçalho interno do
+        // card desta página, e repeti-la aqui era redundante.
+        subtituloHeader = 'Faça a gestão dos espaços e recursos do SpaceHub.';
+    } else if (route().current('setores.mapa.edit')) {
+        subtituloHeader = 'Organize a localização dos espaços no mapa.';
+    } else if (route().current('admin.atividade.index')) {
+        subtituloHeader = 'Acompanhe as ações realizadas no SpaceHub.';
+    } else if (ehDashboardUtilizador) {
         if (!reservaHojeUtilizador) {
             subtituloHeader =
                 'Encontre o espaço certo para cada momento.';

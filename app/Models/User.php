@@ -89,6 +89,15 @@ class User extends Authenticatable
     }
 
     /**
+     * Ações registadas no Registo de Atividade em que este utilizador
+     * foi o autor.
+     */
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class, 'actor_id');
+    }
+
+    /**
      * Secretárias marcadas com estrela pelo utilizador — usado para
      * mostrar a secretária favorita real (escolhida manualmente) em vez
      * de depender só da mais reservada no mês. Ver

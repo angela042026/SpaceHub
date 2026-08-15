@@ -7,14 +7,17 @@ import { router } from '@inertiajs/react';
  *
  * Aceita tanto o formato de API Resource paginado (`{ meta, links }`)
  * como o formato por omissão do Laravel (`current_page`, `last_page`,
- * `prev_page_url`, `next_page_url` diretamente no objeto) — usado
- * pela listagem de Reservas.
+ * `prev_page_url`, `next_page_url` diretamente no objeto) — usado pela
+ * listagem de Reservas.
+ *
+ * `itemLabel` é opcional — sem ele, o texto usa "resultados" por omissão.
  */
 export default function Pagination({
     pagination,
     disabled = false,
     onStart,
     onFinish,
+    itemLabel = 'resultados',
 }) {
     if (!pagination) {
         return null;
@@ -33,37 +36,47 @@ export default function Pagination({
             return;
         }
 
+        // Sem preserveScroll: true, o Inertia repõe o scroll no topo da
+        // página depois da navegação — antes, o utilizador ficava parado
+        // junto ao rodapé (onde clicou "Seguinte") sem ver as linhas
+        // novas até subir manualmente.
         router.get(
             url,
             {},
-            { preserveState: true, preserveScroll: true, onStart, onFinish },
+            { preserveState: true, onStart, onFinish },
         );
     };
 
     return (
-        <div className="mt-5 flex items-center justify-between">
-            <p className="text-xs text-slate-400">
-                Página {meta.current_page} de {meta.last_page}
+        <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-center text-xs text-slate-400 sm:text-left">
+                A mostrar {meta.from ?? 0}–{meta.to ?? 0} de {meta.total ?? 0} {itemLabel}
             </p>
 
-            <div className="flex gap-2">
+            <div className="flex items-center gap-3">
                 <button
                     type="button"
                     aria-label="Página anterior"
                     disabled={disabled || !urlAnterior}
                     onClick={() => irParaPagina(urlAnterior)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
                 >
                     <ChevronLeft size={16} strokeWidth={1.9} />
+                    Anterior
                 </button>
+
+                <p className="whitespace-nowrap text-xs font-medium text-slate-500">
+                    Página {meta.current_page} de {meta.last_page}
+                </p>
 
                 <button
                     type="button"
                     aria-label="Página seguinte"
                     disabled={disabled || !urlSeguinte}
                     onClick={() => irParaPagina(urlSeguinte)}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
                 >
+                    Seguinte
                     <ChevronRight size={16} strokeWidth={1.9} />
                 </button>
             </div>

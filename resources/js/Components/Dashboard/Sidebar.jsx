@@ -70,6 +70,12 @@ export default function Sidebar({
         roleName === 'Administrador' ||
         roleName === 'Gestor';
 
+    // O Registo de Atividade é só para Administrador (ver
+    // ActivityLogPolicy::viewAny) — mais restrito do que "isAdmin", que
+    // também inclui Gestor. Gestor não vê o item, para não apontar para
+    // uma página que lhe devolveria 403.
+    const isAdministrador = roleName === 'Administrador';
+
     return (
         <>
             {open && (
@@ -173,6 +179,8 @@ export default function Sidebar({
                             href={route('mapa.index')}
                             active={route().current(
                                 'mapa.index',
+                            ) || route().current(
+                                'setores.mapa.edit',
                             )}
                             onNavigate={onClose}
                         />
@@ -300,18 +308,6 @@ export default function Sidebar({
                                 />
 
                                 <SidebarItem
-                                    icon={Star}
-                                    label="Avaliações"
-                                    href={route(
-                                        'admin.avaliacoes.index',
-                                    )}
-                                    active={route().current(
-                                        'admin.avaliacoes.*',
-                                    )}
-                                    onNavigate={onClose}
-                                />
-
-                                <SidebarItem
                                     icon={CalendarDays}
                                     label="Reservas"
                                     href={route(
@@ -347,6 +343,20 @@ export default function Sidebar({
                                     onNavigate={onClose}
                                 />
 
+                                {isAdministrador && (
+                                    <SidebarItem
+                                        icon={History}
+                                        label="Registo de Atividade"
+                                        href={route(
+                                            'admin.atividade.index',
+                                        )}
+                                        active={route().current(
+                                            'admin.atividade.*',
+                                        )}
+                                        onNavigate={onClose}
+                                    />
+                                )}
+
                                 <SidebarItem
                                     icon={BarChart3}
                                     label="Estatísticas"
@@ -367,6 +377,18 @@ export default function Sidebar({
                                     )}
                                     active={route().current(
                                         'admin.reports.*',
+                                    )}
+                                    onNavigate={onClose}
+                                />
+
+                                <SidebarItem
+                                    icon={Star}
+                                    label="Avaliações"
+                                    href={route(
+                                        'admin.avaliacoes.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.avaliacoes.*',
                                     )}
                                     onNavigate={onClose}
                                 />

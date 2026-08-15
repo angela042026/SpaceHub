@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Piso;
 use App\Models\Secretaria;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -45,13 +44,39 @@ class SecretariaQrCodeController extends Controller
 
     /**
      * Gera a imagem SVG do QR Code de uma secretária, apontando para a página de check-in.
+     *
+     * Não devolve um Illuminate\Http\Response normal de propósito: neste
+     * ambiente (servidor embutido do PHP, SAPI cli-server), o
+     * Response::send() do Symfony chama closeOutputBuffers(), que insere 4
+     * bytes de espaço antes do corpo da resposta. Inofensivo em HTML (os
+     * browsers ignoram espaço antes de <!DOCTYPE>), mas inválido em SVG —
+     * a declaração XML deixa de estar no início do documento e o browser
+     * recusa-se a renderizar ("XML declaration allowed only at the start
+     * of the document"). Confirmado isolando cada camada (geração do SVG,
+     * middleware, bootstrap do Laravel) até restar só o Response::send().
+     * O envio manual e imediato evita esse caminho de código.
      */
-    public function show(Secretaria $secretaria): Response
+    public function show(Secretaria $secretaria): never
     {
         Gate::authorize('update', $secretaria);
 
-        $svg = QrCode::format('svg')->size(300)->margin(1)->generate($secretaria->checkinUrl());
+        ob_start();
+        $svg = (string) QrCode::format('svg')->size(300)->margin(1)->generate($secretaria->checkinUrl());
+        ob_end_clean();
 
-        return response($svg, 200)->header('Content-Type', 'image/svg+xml');
+        // Drena qualquer buffer de output que o próprio Laravel ainda
+        // tenha ativo neste ponto do pedido. Sem isto, o echo() abaixo
+        // escreve para dentro desse buffer em vez de ir direto para a
+        // rede — e é precisamente quando esse buffer do Laravel é
+        // enviado (via Response::send()/closeOutputBuffers()) que os 4
+        // bytes de espaço voltam a ser inseridos antes do SVG.
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: image/svg+xml');
+        header('Cache-Control: no-store, must-revalidate');
+        echo $svg;
+        exit;
     }
 }

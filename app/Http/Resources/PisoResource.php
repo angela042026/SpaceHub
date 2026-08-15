@@ -19,8 +19,15 @@ class PisoResource extends JsonResource
 
             'planta' => $this->planta,
 
+            // Os pisos semeados (SpaceHubEstruturaSeeder) guardam a planta
+            // como caminho público absoluto (ex: "/images/maps/Piso0.png"),
+            // enquanto uploads feitos pelo formulário guardam um caminho
+            // relativo ao disco "public" (via Storage::disk('public')->store()).
+            // É preciso distinguir os dois para gerar sempre a URL correta.
             'planta_url' => $this->planta
-                ? asset('storage/' . $this->planta)
+                ? (str_starts_with($this->planta, '/')
+                    ? asset($this->planta)
+                    : asset('storage/' . $this->planta))
                 : null,
 
             'descricao' => $this->descricao,

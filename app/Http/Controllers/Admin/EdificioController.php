@@ -7,8 +7,10 @@ use App\Http\Requests\StoreEdificioRequest;
 use App\Http\Requests\UpdateEdificioRequest;
 use App\Http\Resources\EdificioResource;
 use App\Models\Edificio;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -93,7 +95,7 @@ class EdificioController extends Controller
         }
 
         try {
-            Edificio::create($dados);
+            $edificio = Edificio::create($dados);
         } catch (Throwable $exception) {
             if ($imagemGuardada !== null) {
                 Storage::disk('public')->delete($imagemGuardada);
@@ -101,6 +103,13 @@ class EdificioController extends Controller
 
             throw $exception;
         }
+
+        ActivityLogger::log(
+            Auth::user(),
+            'espaco_criado',
+            $edificio->nome,
+            $edificio
+        );
 
         return redirect()
             ->route('admin.edificios.index')
@@ -112,7 +121,12 @@ class EdificioController extends Controller
         Gate::authorize('update', $edificio);
 
         return Inertia::render('Admin/Edificios/Edit', [
-            'edificio' => new EdificioResource($edificio),
+            // ->resolve() em vez de passar o Resource diretamente: o Inertia
+            // trata qualquer Responsable chamando ->toResponse()->getData(true),
+            // e o JsonResource embrulha sempre em {"data": {...}} (via
+            // JsonResource::$wrap = 'data'). Sem isto, o React recebia
+            // edificio.data.nome em vez de edificio.nome e o formulário ficava vazio.
+            'edificio' => (new EdificioResource($edificio))->resolve(),
         ]);
     }
 
@@ -143,6 +157,13 @@ class EdificioController extends Controller
             Storage::disk('public')->delete($imagemAntiga);
         }
 
+        ActivityLogger::log(
+            Auth::user(),
+            'espaco_atualizado',
+            $edificio->nome,
+            $edificio
+        );
+
         return redirect()
             ->route('admin.edificios.index')
             ->with('success', 'Edifício atualizado com sucesso.');
@@ -154,6 +175,13 @@ class EdificioController extends Controller
 
         $edificio->ativo = ! $edificio->ativo;
         $edificio->save();
+
+        ActivityLogger::log(
+            Auth::user(),
+            $edificio->ativo ? 'espaco_ativado' : 'espaco_desativado',
+            $edificio->nome,
+            $edificio
+        );
 
         return redirect()
             ->back()

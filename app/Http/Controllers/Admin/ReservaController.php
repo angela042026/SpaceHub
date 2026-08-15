@@ -13,11 +13,13 @@ use App\Models\ReservaDia;
 use App\Models\Secretaria;
 use App\Models\Setor;
 use App\Notifications\ReservaCanceladaNotification;
+use App\Services\ActivityLogger;
 use App\Services\PagamentoService;
 use App\Services\ReservaDisponibilidadeService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -82,10 +84,17 @@ class ReservaController extends Controller
             });
         }
 
+        // Só 15/25/50 são aceites — qualquer outro valor (ou nenhum) cai
+        // para 15, para não permitir pedir uma página arbitrariamente
+        // grande via query string.
+        $perPage = in_array($request->integer('per_page'), [15, 25, 50], true)
+            ? $request->integer('per_page')
+            : 15;
+
         $reservas = $query
             ->orderByDesc('data')
             ->orderByDesc('id')
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
 
         return Inertia::render('Admin/Reservas/Index', [
@@ -240,6 +249,12 @@ class ReservaController extends Controller
             return $this->respostaConflitoReserva($e);
         }
 
+        ActivityLogger::log(
+            Auth::user(),
+            'reserva_editada',
+            $this->descreverReserva($reserva->refresh())
+        );
+
         return redirect()
             ->route('admin.reservas.index')
             ->with('success', 'Reserva atualizada com sucesso.');
@@ -294,12 +309,34 @@ class ReservaController extends Controller
             );
         });
 
+        ActivityLogger::log(
+            Auth::user(),
+            'reserva_cancelada',
+            $this->descreverReserva($reserva->refresh())
+        );
+
         return redirect()
             ->route('admin.reservas.index')
             ->with(
                 'success',
                 'Reserva e pagamento cancelados com sucesso.'
             );
+    }
+
+    /**
+     * Descrição legível de uma reserva para o Registo de Atividade —
+     * "{utilizador} · {código da secretária} · {data}".
+     */
+    private function descreverReserva(Reserva $reserva): string
+    {
+        $reserva->loadMissing(['user', 'secretaria']);
+
+        return sprintf(
+            '%s · %s · %s',
+            $reserva->user?->name ?? '-',
+            $reserva->secretaria?->codigo ?? '-',
+            $reserva->data->format('d/m/Y')
+        );
     }
 
     /**
