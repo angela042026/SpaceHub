@@ -9,8 +9,10 @@ use App\Http\Resources\SecretariaResource;
 use App\Models\Piso;
 use App\Models\Secretaria;
 use App\Models\Setor;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -98,7 +100,7 @@ class SecretariaController extends Controller
         }
 
         try {
-            Secretaria::create($dados);
+            $secretaria = Secretaria::create($dados);
         } catch (Throwable $exception) {
             if ($imagemGuardada !== null) {
                 Storage::disk('public')->delete($imagemGuardada);
@@ -106,6 +108,13 @@ class SecretariaController extends Controller
 
             throw $exception;
         }
+
+        ActivityLogger::log(
+            Auth::user(),
+            'espaco_criado',
+            $this->descreverSecretaria($secretaria),
+            $secretaria
+        );
 
         return redirect()
             ->route('admin.secretarias.index')
@@ -119,7 +128,13 @@ class SecretariaController extends Controller
         $secretaria->load('setor');
 
         return Inertia::render('Admin/Secretarias/Edit', [
-            'secretaria' => new SecretariaResource($secretaria),
+            // ->resolve() em vez de passar o Resource diretamente: o Inertia
+            // trata qualquer Responsable chamando ->toResponse()->getData(true),
+            // e o JsonResource embrulha sempre em {"data": {...}} (via
+            // JsonResource::$wrap = 'data'). Sem isto, o React recebia
+            // secretaria.data.codigo em vez de secretaria.codigo e o
+            // formulário ficava vazio.
+            'secretaria' => (new SecretariaResource($secretaria))->resolve(),
             'pisos' => Piso::orderBy('numero')->get(['id', 'nome']),
             'setores' => Setor::where('reservavel', true)->orderBy('nome')->get(['id', 'nome', 'piso_id']),
         ]);
@@ -152,6 +167,13 @@ class SecretariaController extends Controller
             Storage::disk('public')->delete($imagemAntiga);
         }
 
+        ActivityLogger::log(
+            Auth::user(),
+            'espaco_atualizado',
+            $this->descreverSecretaria($secretaria),
+            $secretaria
+        );
+
         return redirect()
             ->route('admin.secretarias.index')
             ->with('success', 'Secretária atualizada com sucesso.');
@@ -164,8 +186,30 @@ class SecretariaController extends Controller
         $secretaria->ativo = ! $secretaria->ativo;
         $secretaria->save();
 
+        ActivityLogger::log(
+            Auth::user(),
+            $secretaria->ativo ? 'espaco_ativado' : 'espaco_desativado',
+            $this->descreverSecretaria($secretaria),
+            $secretaria
+        );
+
         return redirect()
             ->back()
             ->with('success', $secretaria->ativo ? 'Secretária ativada.' : 'Secretária desativada.');
+    }
+
+    /**
+     * Descrição legível de uma secretária para o Registo de Atividade —
+     * "Secretária {código} · {setor}".
+     */
+    private function descreverSecretaria(Secretaria $secretaria): string
+    {
+        $secretaria->loadMissing('setor');
+
+        return sprintf(
+            'Secretária %s · %s',
+            $secretaria->codigo,
+            $secretaria->setor?->nome ?? '-'
+        );
     }
 }

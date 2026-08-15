@@ -11,6 +11,7 @@ use App\Models\Reserva;
 use App\Models\ReservaDia;
 use App\Models\Setor;
 use App\Notifications\ReservaCanceladaNotification;
+use App\Services\ActivityLogger;
 use App\Services\GoogleCalendarService;
 use App\Services\PagamentoService;
 use App\Services\ReservaCriacaoService;
@@ -159,7 +160,14 @@ class ReservaController extends Controller
             'observacoes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $criacao->criarMeioDia($dadosValidados, (int) Auth::id());
+        $reserva = $criacao->criarMeioDia($dadosValidados, (int) Auth::id());
+
+        ActivityLogger::log(
+            $request->user(),
+            'reserva_criada',
+            $this->descreverReserva($reserva),
+            $reserva
+        );
 
         return redirect()
             ->route('reservas.index')
@@ -183,7 +191,14 @@ class ReservaController extends Controller
             'observacoes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $criacao->criarDiaInteiro($dadosValidados, (int) Auth::id());
+        $reserva = $criacao->criarDiaInteiro($dadosValidados, (int) Auth::id());
+
+        ActivityLogger::log(
+            $request->user(),
+            'reserva_criada',
+            $this->descreverReserva($reserva),
+            $reserva
+        );
 
         $descricaoDuracao = $criacao->descricaoDuracao(
             $dadosValidados['tipo_duracao']
@@ -244,6 +259,11 @@ class ReservaController extends Controller
             );
         });
 
+        ActivityLogger::log(
+            Auth::user(),
+            'reserva_cancelada',
+            $this->descreverReserva($reserva->refresh())
+        );
         $googleCalendar->removerEvento($reserva->fresh(['user']));
 
         return redirect()
@@ -416,9 +436,32 @@ class ReservaController extends Controller
             return $this->respostaConflitoReserva($e);
         }
 
+        ActivityLogger::log(
+            Auth::user(),
+            'reserva_editada',
+            $this->descreverReserva($reserva->refresh())
+        );
+
         return redirect()
             ->route('reservas.index')
             ->with('success', 'Reserva atualizada com sucesso.');
+    }
+
+    /**
+     * Descrição legível de uma reserva para o Registo de Atividade —
+     * "{setor} {código da secretária} · {data} · {período}".
+     */
+    private function descreverReserva(Reserva $reserva): string
+    {
+        $reserva->loadMissing(['secretaria.setor', 'periodo']);
+
+        return sprintf(
+            '%s %s · %s · %s',
+            $reserva->secretaria?->setor?->nome ?? '-',
+            $reserva->secretaria?->codigo ?? '-',
+            $reserva->data->format('d/m/Y'),
+            $reserva->periodo?->nome ?? '-'
+        );
     }
 
     /**

@@ -1,56 +1,83 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
 import Pagination from '@/Components/Pagination';
-import { LoadingOverlay } from '@/Components/Loading';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import Modal from '@/Components/Modal';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
+    AlertTriangle,
     Pencil,
     Plus,
     Power,
     RotateCcw,
     Search,
     UserRound,
+    X,
 } from 'lucide-react';
-import { useState } from 'react';
-import { ESTADO_UTILIZADOR, badge } from '@/utils/estados';
+import { useEffect, useRef, useState } from 'react';
+import { ESTADO_UTILIZADOR, badge, etiqueta } from '@/utils/estados';
 
 export default function Index({ users, roles, filters }) {
-    const [processingId, setProcessingId] = useState(null);
+    const { auth } = usePage().props;
+
+    const [search, setSearch] = useState(filters.search ?? '');
+    const [roleId, setRoleId] = useState(filters.role_id ?? '');
+    const [ativoFiltro, setAtivoFiltro] = useState(filters.ativo ?? '');
     const [carregando, setCarregando] = useState(false);
+    const [processingId, setProcessingId] = useState(null);
+    const [confirmando, setConfirmando] = useState(null);
+    const primeiraRenderizacao = useRef(true);
 
-    const { data, setData, get } = useForm({
-        search: filters.search ?? '',
-        role_id: filters.role_id ?? '',
-        ativo: filters.ativo ?? '',
-    });
-
-    const pesquisar = (event) => {
-        event.preventDefault();
-
-        get(route('admin.users.index'), {
+    const irComFiltros = (valores) => {
+        router.get(route('admin.users.index'), valores, {
             preserveState: true,
             preserveScroll: true,
+            replace: true,
             onStart: () => setCarregando(true),
             onFinish: () => setCarregando(false),
         });
     };
 
-    const limpar = () => {
-        router.get(route('admin.users.index'), {}, {
-            onStart: () => setCarregando(true),
-            onFinish: () => setCarregando(false),
-        });
-    };
-
-    const alternarAtivo = (user) => {
-        const mensagem = user.ativo
-            ? `Desativar a conta de ${user.name}?`
-            : `Ativar a conta de ${user.name}?`;
-
-        if (!confirm(mensagem)) {
+    // Pesquisa automática, com debounce, enquanto o utilizador escreve.
+    useEffect(() => {
+        if (primeiraRenderizacao.current) {
+            primeiraRenderizacao.current = false;
             return;
         }
 
+        const temporizador = setTimeout(() => {
+            irComFiltros({ search, role_id: roleId, ativo: ativoFiltro });
+        }, 350);
+
+        return () => clearTimeout(temporizador);
+    }, [search]);
+
+    const pesquisarAgora = () => {
+        irComFiltros({ search, role_id: roleId, ativo: ativoFiltro });
+    };
+
+    const handleRoleChange = (value) => {
+        setRoleId(value);
+        irComFiltros({ search, role_id: value, ativo: ativoFiltro });
+    };
+
+    const handleAtivoChange = (value) => {
+        setAtivoFiltro(value);
+        irComFiltros({ search, role_id: roleId, ativo: value });
+    };
+
+    const limparPesquisa = () => {
+        setSearch('');
+        irComFiltros({ search: '', role_id: roleId, ativo: ativoFiltro });
+    };
+
+    const limparTudo = () => {
+        setSearch('');
+        setRoleId('');
+        setAtivoFiltro('');
+        irComFiltros({});
+    };
+
+    const executarToggle = (user) => {
         setProcessingId(user.id);
 
         router.patch(
@@ -58,9 +85,21 @@ export default function Index({ users, roles, filters }) {
             {},
             {
                 preserveScroll: true,
-                onFinish: () => setProcessingId(null),
+                onFinish: () => {
+                    setProcessingId(null);
+                    setConfirmando(null);
+                },
             },
         );
+    };
+
+    const pedirAlternarAtivo = (user) => {
+        if (user.ativo) {
+            setConfirmando(user);
+            return;
+        }
+
+        executarToggle(user);
     };
 
     const columns = [
@@ -105,7 +144,7 @@ export default function Index({ users, roles, filters }) {
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${badge(ESTADO_UTILIZADOR, String(user.ativo))}`}
                 >
-                    {user.ativo ? 'Ativo' : 'Inativo'}
+                    {etiqueta(ESTADO_UTILIZADOR, String(user.ativo))}
                 </span>
             ),
         },
@@ -113,35 +152,54 @@ export default function Index({ users, roles, filters }) {
             key: 'acoes',
             label: 'Ações',
             align: 'right',
-            render: (user) => (
-                <div className="flex justify-end gap-2">
-                    <Link
-                        href={route('admin.users.edit', user.id)}
-                        title="Editar"
-                        className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
-                    >
-                        <Pencil size={16} strokeWidth={1.9} />
-                    </Link>
+            render: (user) => {
+                const ehContaPropria = user.id === auth.user.id;
+                const impedirDesativar = user.ativo && ehContaPropria;
 
-                    <button
-                        type="button"
-                        onClick={() => alternarAtivo(user)}
-                        disabled={processingId === user.id}
-                        title={user.ativo ? 'Desativar' : 'Ativar'}
-                        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
-                            user.ativo
-                                ? 'border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-500 dark:border-slate-700'
-                                : 'border-slate-200 text-slate-500 hover:border-teal-500 hover:text-teal-500 dark:border-slate-700'
-                        }`}
-                    >
-                        {processingId === user.id ? (
-                            <RotateCcw size={16} strokeWidth={1.9} className="animate-spin" />
-                        ) : (
-                            <Power size={16} strokeWidth={1.9} />
-                        )}
-                    </button>
-                </div>
-            ),
+                return (
+                    <div className="flex justify-end gap-2">
+                        <Link
+                            href={route('admin.users.edit', user.id)}
+                            title="Editar utilizador"
+                            aria-label="Editar utilizador"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
+                        >
+                            <Pencil size={16} strokeWidth={1.9} />
+                        </Link>
+
+                        <button
+                            type="button"
+                            onClick={() => pedirAlternarAtivo(user)}
+                            disabled={processingId === user.id || impedirDesativar}
+                            title={
+                                impedirDesativar
+                                    ? 'Não pode desativar a sua própria conta'
+                                    : user.ativo
+                                        ? 'Desativar utilizador'
+                                        : 'Ativar utilizador'
+                            }
+                            aria-label={
+                                impedirDesativar
+                                    ? 'Não pode desativar a sua própria conta'
+                                    : user.ativo
+                                        ? 'Desativar utilizador'
+                                        : 'Ativar utilizador'
+                            }
+                            className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                                user.ativo
+                                    ? 'border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-500 dark:border-slate-700'
+                                    : 'border-slate-200 text-slate-500 hover:border-teal-500 hover:text-teal-500 dark:border-slate-700'
+                            }`}
+                        >
+                            {processingId === user.id ? (
+                                <RotateCcw size={16} strokeWidth={1.9} className="animate-spin" />
+                            ) : (
+                                <Power size={16} strokeWidth={1.9} />
+                            )}
+                        </button>
+                    </div>
+                );
+            },
         },
     ];
 
@@ -176,10 +234,7 @@ export default function Index({ users, roles, filters }) {
                     </Link>
                 </div>
 
-                <form
-                    onSubmit={pesquisar}
-                    className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:grid-cols-[1fr_200px_160px_auto]"
-                >
+                <div className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:grid-cols-[1fr_200px_160px_auto]">
                     <div className="relative">
                         <Search
                             size={16}
@@ -189,16 +244,33 @@ export default function Index({ users, roles, filters }) {
 
                         <input
                             type="text"
-                            value={data.search}
-                            onChange={(event) => setData('search', event.target.value)}
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            onKeyDown={(event) => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    pesquisarAgora();
+                                }
+                            }}
                             placeholder="Pesquisar por nome ou e-mail"
-                            className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                            className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
+
+                        {search && (
+                            <button
+                                type="button"
+                                onClick={limparPesquisa}
+                                aria-label="Limpar pesquisa"
+                                className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                            >
+                                <X size={14} strokeWidth={2} />
+                            </button>
+                        )}
                     </div>
 
                     <select
-                        value={data.role_id}
-                        onChange={(event) => setData('role_id', event.target.value)}
+                        value={roleId}
+                        onChange={(event) => handleRoleChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                         <option value="">Todos os papéis</option>
@@ -211,8 +283,8 @@ export default function Index({ users, roles, filters }) {
                     </select>
 
                     <select
-                        value={data.ativo}
-                        onChange={(event) => setData('ativo', event.target.value)}
+                        value={ativoFiltro}
+                        onChange={(event) => handleAtivoChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                         <option value="">Todos os estados</option>
@@ -220,31 +292,40 @@ export default function Index({ users, roles, filters }) {
                         <option value="0">Inativos</option>
                     </select>
 
-                    <div className="flex gap-2">
-                        <button
-                            type="submit"
-                            className="h-11 flex-1 rounded-xl bg-navy-900 px-4 text-sm font-bold text-white transition hover:bg-navy-950 sm:flex-none"
-                        >
-                            Pesquisar
-                        </button>
+                    <button
+                        type="button"
+                        onClick={limparTudo}
+                        className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700"
+                    >
+                        Limpar
+                    </button>
+                </div>
 
-                        <button
-                            type="button"
-                            onClick={limpar}
-                            className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700"
-                        >
-                            Limpar
-                        </button>
-                    </div>
-                </form>
-
-                <div className="relative p-6">
-                    <LoadingOverlay show={carregando} />
-
+                <div className="p-6 pb-24">
                     <Table
                         columns={columns}
                         data={users.data}
-                        emptyMessage="Nenhum utilizador encontrado."
+                        loading={carregando}
+                        stickyHeader
+                        emptyMessage={
+                            <div className="flex flex-col items-center gap-1.5">
+                                <p className="font-semibold text-slate-600 dark:text-slate-300">
+                                    Nenhum utilizador encontrado
+                                </p>
+
+                                <p className="text-sm text-slate-400">
+                                    Experimente alterar ou limpar os filtros.
+                                </p>
+
+                                <button
+                                    type="button"
+                                    onClick={limparTudo}
+                                    className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
+                                >
+                                    Limpar filtros
+                                </button>
+                            </div>
+                        }
                     />
 
                     <Pagination
@@ -255,6 +336,46 @@ export default function Index({ users, roles, filters }) {
                     />
                 </div>
             </section>
+
+            <Modal show={!!confirmando} onClose={() => setConfirmando(null)}>
+                <div className="p-6">
+                    <div className="flex items-start gap-3">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 text-red-500">
+                            <AlertTriangle size={22} strokeWidth={1.9} />
+                        </div>
+
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                                Desativar {confirmando?.name}?
+                            </h2>
+
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                O utilizador deixa de conseguir aceder à plataforma até a conta
+                                ser reativada.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setConfirmando(null)}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
+                        >
+                            Cancelar
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => confirmando && executarToggle(confirmando)}
+                            disabled={processingId === confirmando?.id}
+                            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {processingId === confirmando?.id ? 'A desativar...' : 'Desativar utilizador'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </DashboardLayout>
     );
 }

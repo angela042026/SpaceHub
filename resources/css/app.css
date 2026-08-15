@@ -552,8 +552,24 @@
 }
 
 @media print {
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
     * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+    }
+
+    /*
+        Sem isto, um card (KPI, gráfico, lista) que caia perto do fim
+        de uma página impressa é cortado a meio pelo browser — nunca
+        havia nenhuma regra de quebra de página definida. Cada card
+        salta inteiro para a página seguinte em vez de ser fatiado.
+    */
+    .dashboard-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
     }
 }

@@ -8,8 +8,10 @@ use App\Http\Requests\UpdateSetorRequest;
 use App\Http\Resources\SetorResource;
 use App\Models\Piso;
 use App\Models\Setor;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -85,7 +87,14 @@ class SetorController extends Controller
     {
         Gate::authorize('create', Setor::class);
 
-        Setor::create($request->validated());
+        $setor = Setor::create($request->validated());
+
+        ActivityLogger::log(
+            Auth::user(),
+            'espaco_criado',
+            $this->descreverSetor($setor),
+            $setor
+        );
 
         return redirect()
             ->route('admin.setores.index')
@@ -99,7 +108,12 @@ class SetorController extends Controller
         $setor->load('piso');
 
         return Inertia::render('Admin/Setores/Edit', [
-            'setor' => new SetorResource($setor),
+            // ->resolve() em vez de passar o Resource diretamente: o Inertia
+            // trata qualquer Responsable chamando ->toResponse()->getData(true),
+            // e o JsonResource embrulha sempre em {"data": {...}} (via
+            // JsonResource::$wrap = 'data'). Sem isto, o React recebia
+            // setor.data.nome em vez de setor.nome e o formulário ficava vazio.
+            'setor' => (new SetorResource($setor))->resolve(),
             'pisos' => Piso::orderBy('nome')->get(['id', 'nome']),
         ]);
     }
@@ -109,6 +123,13 @@ class SetorController extends Controller
         Gate::authorize('update', $setor);
 
         $setor->update($request->validated());
+
+        ActivityLogger::log(
+            Auth::user(),
+            'espaco_atualizado',
+            $this->descreverSetor($setor),
+            $setor
+        );
 
         return redirect()
             ->route('admin.setores.index')
@@ -122,8 +143,30 @@ class SetorController extends Controller
         $setor->ativo = ! $setor->ativo;
         $setor->save();
 
+        ActivityLogger::log(
+            Auth::user(),
+            $setor->ativo ? 'espaco_ativado' : 'espaco_desativado',
+            $this->descreverSetor($setor),
+            $setor
+        );
+
         return redirect()
             ->back()
             ->with('success', $setor->ativo ? 'Setor ativado.' : 'Setor desativado.');
+    }
+
+    /**
+     * Descrição legível de um setor para o Registo de Atividade —
+     * "{nome} · {piso}".
+     */
+    private function descreverSetor(Setor $setor): string
+    {
+        $setor->loadMissing('piso');
+
+        return sprintf(
+            '%s · %s',
+            $setor->nome,
+            $setor->piso?->nome ?? '-'
+        );
     }
 }

@@ -38,6 +38,7 @@ export default function MapToolbar({
     onZoom,
     onReset,
     onFullscreen,
+    simples = false,
 }) {
     const inputRef = useRef(null);
 
@@ -55,40 +56,67 @@ export default function MapToolbar({
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, []);
 
+    const abasDePiso = (
+        <div className="flex min-w-0 items-center gap-1 overflow-x-auto rounded-xl p-0.5">
+            {pisos.map((piso) => {
+                const ativo = String(piso.codigo) === String(selectedFloor);
+
+                return (
+                    <button
+                        key={piso.id}
+                        type="button"
+                        onClick={() => setSelectedFloor?.(piso.codigo)}
+                        className={`relative h-10 min-w-[74px] rounded-lg px-4 text-sm font-bold transition ${
+                            ativo
+                                ? 'bg-teal-600 text-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]'
+                                : 'text-slate-600 hover:bg-white/70 dark:text-[#b5c5d5] dark:hover:bg-[#183f5d]'
+                        }`}
+                    >
+                        {Number(piso.numero) === -1 ? `Piso ${piso.numero}` : piso.nome}
+
+                        {ativo && (
+                            <span className="absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-white/70" />
+                        )}
+                    </button>
+                );
+            })}
+        </div>
+    );
+
+    // Versão simplificada — página de Estatísticas: só consulta, não
+    // edita, por isso pesquisa/filtro/rodar/zoom (controlos de edição
+    // do mapa) ficam de fora, mantendo apenas o essencial para
+    // navegar entre pisos e ver em ecrã inteiro.
+    if (simples) {
+        return (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#e6edf5] bg-[#f8fafc] p-2 dark:border-[#2a5069] dark:bg-[#101f34]">
+                {abasDePiso}
+
+                <div className="flex shrink-0 items-center gap-2">
+                    {edificios.length > 1 && (
+                        <select
+                            value={selectedEdificio}
+                            onChange={(event) => setSelectedEdificio?.(event.target.value)}
+                            className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#f8fafc]"
+                            aria-label="Selecionar edifício"
+                        >
+                            {edificios.map((edificio) => (
+                                <option key={edificio.id} value={edificio.id}>
+                                    {edificio.nome}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+
+                    <IconButtonBox icon={Expand} label="Ecrã inteiro" onClick={onFullscreen} />
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col gap-3 rounded-2xl border border-[#e6edf5] bg-[#f8fafc] p-2 xl:flex-row xl:items-center xl:justify-between dark:border-[#2a5069] dark:bg-[#101f34]">
-            <div className="flex min-w-0 items-center gap-1 overflow-x-auto rounded-xl p-0.5">
-                {pisos.map((piso) => {
-                    const ativo =
-                        String(piso.codigo) ===
-                        String(selectedFloor);
-
-                    return (
-                        <button
-                            key={piso.id}
-                            type="button"
-                            onClick={() =>
-                                setSelectedFloor?.(
-                                    piso.codigo,
-                                )
-                            }
-                            className={`relative h-10 min-w-[74px] rounded-lg px-4 text-sm font-bold transition ${
-                                ativo
-                                    ? 'bg-teal-600 text-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]'
-                                    : 'text-slate-600 hover:bg-white/70 dark:text-[#b5c5d5] dark:hover:bg-[#183f5d]'
-                            }`}
-                        >
-                            {Number(piso.numero) === -1
-                                ? `Piso ${piso.numero}`
-                                : piso.nome}
-
-                            {ativo && (
-                                <span className="absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-white/70" />
-                            )}
-                        </button>
-                    );
-                })}
-            </div>
+            {abasDePiso}
 
             <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
                 {edificios.length > 1 && (

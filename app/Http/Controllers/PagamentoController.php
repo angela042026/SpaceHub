@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pagamento;
+use App\Services\ActivityLogger;
 use App\Services\PagamentoService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -280,6 +281,17 @@ class PagamentoController extends Controller
         $this->pagamentoService->confirmarPagamento(
             $pagamento,
             $dados['metodo_pagamento']
+        );
+
+        ActivityLogger::log(
+            Auth::user(),
+            'pagamento_atualizado',
+            sprintf(
+                'Pagamento #%d · %s',
+                $pagamento->id,
+                $dados['metodo_pagamento']
+            ),
+            $pagamento->refresh()
         );
 
         return redirect()

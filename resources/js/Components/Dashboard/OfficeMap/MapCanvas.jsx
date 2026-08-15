@@ -25,6 +25,13 @@ export default function MapCanvas({
     tamanho = 'padrao',
     mostrarLegenda = false,
     somenteMapa = false,
+    ajustarProporcao = false,
+    // Só a linha final das Estatísticas: em vez de uma altura fixa em
+    // pixels, o canvas passa a ocupar 100% do espaço que o grid
+    // (items-stretch) já reservou para esta coluna — é assim que o
+    // mapa acompanha exatamente a altura dos donuts vizinhos, em vez
+    // de forçar a linha inteira a ficar mais alta que eles.
+    preencherAltura = false,
     onVerSecretariasDoSetor,
     onFecharSetorSelecionado,
 }) {
@@ -32,13 +39,30 @@ export default function MapCanvas({
         padrao: 'h-[460px] sm:h-[550px] xl:h-[585px]',
         grande: 'h-[500px] sm:h-[610px] xl:h-[690px]',
         compacto: 'h-[420px] sm:h-[470px] xl:h-[520px]',
+        // Não usado diretamente quando preencherAltura está ativo (ver
+        // abaixo) — mantido só para o resto da app, onde este tier
+        // ainda serve de altura fixa normal.
+        miniatura: 'h-[210px] sm:h-[240px] xl:h-[260px]',
     };
+
+    // Só na miniatura "de lista" (não usada atualmente nas
+    // Estatísticas, que já passou a ocupar uma linha própria e
+    // proeminente) — rótulos de setor e legenda mais discretos.
+    const compacto = tamanho === 'miniatura';
+
+    // "Mapa de Ocupação" nas Estatísticas: o mapa deve ser um elemento
+    // de destaque, não uma miniatura — h-full acompanha a altura que o
+    // grid (items-stretch) já decidiu para a linha, e este min-height
+    // generoso garante que é o PRÓPRIO mapa a estabelecer essa altura
+    // (o card vizinho, mais simples, é que se estica para o acompanhar
+    // — ver content-center no DonutCard), em vez do inverso.
+    const alturaClasse = preencherAltura
+        ? 'h-full min-h-[420px] sm:min-h-[480px] xl:min-h-[560px]'
+        : (alturas[tamanho] ?? alturas.padrao);
 
     return (
         <div
-            className={`min-w-0 rounded-[20px] bg-[#edf3f8] p-2.5 shadow-[inset_0_1px_3px_rgba(15,42,67,0.06)] dark:bg-[#0c1f33] dark:p-0 ${
-                alturas[tamanho] ?? alturas.padrao
-            }`}
+            className={`min-w-0 rounded-[20px] bg-[#edf3f8] p-2.5 shadow-[inset_0_1px_3px_rgba(15,42,67,0.06)] dark:bg-[#0c1f33] dark:p-0 ${alturaClasse}`}
         >
             <div
                 onWheel={onWheel}
@@ -62,7 +86,9 @@ export default function MapCanvas({
                         src={pisoAtual.planta}
                         alt={`Planta do ${pisoAtual.nome}`}
                         draggable={false}
-                        className="pointer-events-none absolute inset-0 h-full w-full object-fill saturate-[1.04] contrast-[1.02]"
+                        className={`pointer-events-none absolute inset-0 h-full w-full saturate-[1.04] contrast-[1.02] ${
+                            ajustarProporcao ? 'object-contain' : 'object-fill'
+                        }`}
                     />
 
                     {somenteMapa && areaSetorSelecionado && (
@@ -87,6 +113,7 @@ export default function MapCanvas({
                             }
                             onSelect={onSelecionarSetor}
                             destaqueDiscreto={somenteMapa}
+                            compacto={compacto}
                         />
                     ))}
 
@@ -133,7 +160,7 @@ export default function MapCanvas({
 
                 {mostrarLegenda && (
                     <div className="pointer-events-none absolute inset-0 hidden xl:block">
-                        <MapLegend />
+                        <MapLegend compacto={compacto} />
                     </div>
                 )}
             </div>

@@ -8,8 +8,10 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -70,7 +72,7 @@ class UserController extends Controller
 
         $users = $query
             ->orderBy($sortBy, $sortDirection)
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('Admin/Users/Index', [
@@ -117,7 +119,7 @@ class UserController extends Controller
         }
 
         try {
-            User::create([
+            $novoUtilizador = User::create([
                 'name' => $dados['name'],
                 'email' => $dados['email'],
                 'password' => Hash::make($dados['password']),
@@ -132,6 +134,13 @@ class UserController extends Controller
 
             throw $exception;
         }
+
+        ActivityLogger::log(
+            Auth::user(),
+            'utilizador_criado',
+            "{$novoUtilizador->name} · {$novoUtilizador->email}",
+            $novoUtilizador
+        );
 
         return redirect()
             ->route('admin.users.index')
@@ -148,7 +157,12 @@ class UserController extends Controller
         $user->load('role');
 
         return Inertia::render('Admin/Users/Edit', [
-            'user' => new UserResource($user),
+            // ->resolve() em vez de passar o Resource diretamente: o Inertia
+            // trata qualquer Responsable chamando ->toResponse()->getData(true),
+            // e o JsonResource embrulha sempre em {"data": {...}} (via
+            // JsonResource::$wrap = 'data'). Sem isto, o React recebia
+            // user.data.name em vez de user.name e o formulário ficava vazio.
+            'user' => (new UserResource($user))->resolve(),
             'roles' => Role::orderBy('nome')->get(['id', 'nome']),
         ]);
     }
@@ -201,6 +215,13 @@ class UserController extends Controller
             Storage::disk('public')->delete($fotografiaAntiga);
         }
 
+        ActivityLogger::log(
+            Auth::user(),
+            'utilizador_atualizado',
+            "{$user->name} · {$user->email}",
+            $user
+        );
+
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'Utilizador atualizado com sucesso.');
@@ -209,12 +230,25 @@ class UserController extends Controller
     /**
      * Ativa ou desativa um utilizador.
      */
-    public function toggleAtivo(User $user): RedirectResponse
+    public function toggleAtivo(Request $request, User $user): RedirectResponse
     {
         Gate::authorize('toggleAtivo', $user);
 
+        if ($user->ativo && $user->id === $request->user()->id) {
+            return redirect()
+                ->back()
+                ->with('error', 'Não pode desativar a sua própria conta.');
+        }
+
         $user->ativo = ! $user->ativo;
         $user->save();
+
+        ActivityLogger::log(
+            Auth::user(),
+            $user->ativo ? 'utilizador_ativado' : 'utilizador_desativado',
+            "{$user->name} · {$user->email}",
+            $user
+        );
 
         return redirect()
             ->back()

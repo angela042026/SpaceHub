@@ -6,9 +6,11 @@ use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Models\Secretaria;
+use App\Services\ActivityLogger;
 use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -115,6 +117,19 @@ class CheckInController extends Controller
         $reserva->update([
             'check_in_at' => now(),
         ]);
+
+        $reserva->loadMissing('secretaria.setor');
+
+        ActivityLogger::log(
+            Auth::user(),
+            'checkin_efetuado',
+            sprintf(
+                '%s · %s',
+                $reserva->secretaria?->setor?->nome ?? '-',
+                $reserva->secretaria?->codigo ?? '-'
+            ),
+            $reserva
+        );
 
         broadcast(new MapaAtualizado());
         DashboardMetricsService::limparCacheDoDia();

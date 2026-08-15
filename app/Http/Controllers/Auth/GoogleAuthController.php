@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\RoleName;
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +56,7 @@ class GoogleAuthController extends Controller
                     'email_verified_at' => now(),
                     'password' => Str::random(40),
                     'ativo' => true,
+                    'role_id' => Role::where('nome', RoleName::Utilizador->value)->value('id'),
                 ]);
             } else {
                 if (! $user->ativo) {
@@ -65,6 +68,13 @@ class GoogleAuthController extends Controller
                 }
 
                 $atributos = ['google_id' => $googleId];
+
+                // Conta antiga sem papel atribuído (ex: criada antes desta
+                // regra existir) — assume o papel por omissão em vez de
+                // deixar a coluna a null indefinidamente.
+                if ($user->role_id === null) {
+                    $atributos['role_id'] = Role::where('nome', RoleName::Utilizador->value)->value('id');
+                }
 
                 // O e-mail desta conta nunca foi confirmado, ou seja, pode
                 // ter sido registada por outra pessoa. O Google agora prova

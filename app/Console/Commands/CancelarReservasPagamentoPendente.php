@@ -8,6 +8,7 @@ use App\Models\Pagamento;
 use App\Models\Reserva;
 use App\Models\ReservaDia;
 use App\Notifications\PagamentoExpiradoNotification;
+use App\Services\ActivityLogger;
 use App\Services\DashboardMetricsService;
 use App\Services\PagamentoService;
 use Illuminate\Console\Command;
@@ -106,6 +107,17 @@ class CancelarReservasPagamentoPendente extends Command
 
                     $reserva->user?->notify(
                         new PagamentoExpiradoNotification($reserva)
+                    );
+
+                    ActivityLogger::log(
+                        null,
+                        'reserva_cancelada',
+                        sprintf(
+                            '%s · %s (pagamento pendente expirado)',
+                            $reserva->user?->name ?? '-',
+                            $reserva->secretaria?->codigo ?? '-'
+                        ),
+                        $reservaBloqueada
                     );
 
                     $canceladas++;

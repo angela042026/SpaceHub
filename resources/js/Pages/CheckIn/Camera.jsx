@@ -114,25 +114,25 @@ const RESUMO_STATUS = {
 const steps = [
     {
         icon: LocateFixed,
-        title: 'Encontre a secretária',
+        title: '1. Encontre a secretária',
         description:
             'Dirija-se à secretária indicada na sua reserva e localize o QR Code afixado.',
     },
     {
         icon: Smartphone,
-        title: 'Autorize a câmara',
+        title: '2. Autorize a câmara',
         description:
             'Clique em iniciar leitura e permita o acesso à câmara do dispositivo.',
     },
     {
         icon: ScanLine,
-        title: 'Leia o QR Code',
+        title: '3. Leia o QR Code',
         description:
             'Mantenha o código enquadrado na área de leitura durante alguns segundos.',
     },
     {
         icon: CircleCheck,
-        title: 'Confirme o check-in',
+        title: '4. Check-in confirmado',
         description:
             'O sistema valida a reserva e confirma automaticamente a sua chegada.',
     },
@@ -334,28 +334,29 @@ export default function Camera({ reservas }) {
 
             <DashboardLayout>
                 <main className="mx-auto max-w-6xl pb-28">
+                    <section className="dashboard-card overflow-hidden">
                     {/* Cabeçalho */}
-                    <header className="mb-6">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-[#14B8A6]/20 bg-[#14B8A6]/10 px-3 py-1.5 text-xs font-extrabold uppercase tracking-[0.16em] text-[#0F766E] dark:text-[#5EEAD4]">
-                            <QrCode size={14} />
-                            Check-in
+                    <header className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+                            <QrCode size={22} strokeWidth={1.9} />
                         </div>
 
-                        <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-900 dark:text-white">
-                            Confirme a sua chegada
-                        </h1>
+                        <div>
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                                Check-in
+                            </h1>
 
-                        <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                            Leia o QR Code afixado na secretária reservada para
-                            confirmar a sua presença no espaço.
-                        </p>
+                            <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+                                Confirme a sua chegada
+                            </p>
+                        </div>
                     </header>
 
                     {/* Resumo da reserva atual — sem reserva elegível, o
                         estado completo já aparece dentro do leitor, por
                         isso não repetimos o aviso aqui em cima. */}
                     {temReservaElegivel && (
-                        <div className="mb-6 space-y-2.5">
+                        <div className="space-y-2.5 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
                             {reservas.length > 1 && (
                                 <div className="flex items-center gap-2">
                                     <label htmlFor="reserva-selecionada" className="text-xs font-bold text-slate-500 dark:text-slate-400">
@@ -377,8 +378,8 @@ export default function Camera({ reservas }) {
                                 </div>
                             )}
 
-                            <div className="flex flex-col gap-4 rounded-[19px] border border-slate-200/80 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-900 sm:flex-row sm:items-center sm:gap-0 sm:divide-x sm:divide-slate-100 sm:px-5 sm:py-3.5 dark:sm:divide-slate-800">
-                                <div className="flex items-center gap-3 sm:pr-5">
+                            <div className="flex flex-col gap-4 rounded-[19px] border border-slate-200/80 bg-white p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)] dark:border-slate-700 dark:bg-slate-900 lg:flex-row lg:items-center lg:gap-0 lg:divide-x lg:divide-slate-100 lg:px-5 lg:py-3.5 dark:lg:divide-slate-800">
+                                <div className="flex items-center gap-3 lg:pr-5">
                                     <span className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                                         {reservaSelecionada.secretaria.codigo}
                                     </span>
@@ -391,14 +392,14 @@ export default function Camera({ reservas }) {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-2 sm:px-5">
+                                <div className="flex items-center gap-2 lg:px-5">
                                     <CalendarDays size={16} strokeWidth={1.9} className="shrink-0 text-slate-400" />
                                     <span className="whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">
                                         Hoje, {dataFormatada}
                                     </span>
                                 </div>
 
-                                <div className="flex items-center gap-2 sm:px-5">
+                                <div className="flex items-center gap-2 lg:px-5">
                                     <Clock size={16} strokeWidth={1.9} className="shrink-0 text-slate-400" />
                                     <span className="whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">
                                         {reservaSelecionada.periodo?.hora_inicio ?? '-'}–{reservaSelecionada.periodo?.hora_fim ?? '-'}
@@ -406,7 +407,7 @@ export default function Camera({ reservas }) {
                                 </div>
 
                                 {resumo && (
-                                    <div className="sm:ml-auto sm:pl-5">
+                                    <div className="lg:ml-auto lg:pl-5">
                                         <span className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-bold ${resumo.className}`}>
                                             <CheckCircle2 size={13} strokeWidth={2.2} />
                                             {resumo.label}
@@ -417,9 +418,9 @@ export default function Camera({ reservas }) {
                         </div>
                     )}
 
-                    <div className="grid gap-6 lg:grid-cols-[0.37fr_0.63fr]">
+                    <div className="grid gap-4 p-4 sm:gap-6 sm:p-6 lg:grid-cols-[0.37fr_0.63fr] lg:p-7">
                         {/* Passo a passo */}
-                        <section className="dashboard-card p-6 lg:p-7">
+                        <div className="order-2 rounded-2xl border border-slate-100 p-4 dark:border-slate-800 sm:p-5 lg:order-1">
                             <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-600 dark:text-teal-400">
                                 Guia rápido
                             </p>
@@ -452,9 +453,9 @@ export default function Camera({ reservas }) {
                                 ))}
                             </div>
 
-                            <div className="mt-2 rounded-2xl border border-sky-100 bg-sky-50/80 p-3.5 dark:border-sky-900/30 dark:bg-sky-950/20">
-                                <div className="flex gap-2.5">
-                                    <ShieldCheck size={17} strokeWidth={1.9} className="mt-0.5 shrink-0 text-sky-600 dark:text-sky-300" />
+                            <div className="mt-4 rounded-xl border border-sky-100 bg-sky-50/80 p-3 dark:border-sky-900/30 dark:bg-sky-950/20">
+                                <div className="flex gap-2">
+                                    <ShieldCheck size={14} strokeWidth={1.9} className="mt-0.5 shrink-0 text-sky-600 dark:text-sky-300" />
 
                                     <div>
                                         <p className="text-xs font-bold text-sky-900 dark:text-sky-200">
@@ -467,10 +468,10 @@ export default function Camera({ reservas }) {
                                     </div>
                                 </div>
                             </div>
-                        </section>
+                        </div>
 
                         {/* Scanner */}
-                        <section className="dashboard-card p-6 sm:p-7">
+                        <div className="order-1 rounded-2xl border border-slate-100 p-4 dark:border-slate-800 sm:p-5 lg:order-2">
                             <div className="flex items-center gap-4">
                                 <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#14B8A6]/10 text-[#14B8A6]">
                                     <CameraIcon size={24} strokeWidth={1.9} />
@@ -488,7 +489,11 @@ export default function Camera({ reservas }) {
                             </div>
 
                             <div
-                                className="relative mt-6 h-[360px] overflow-hidden rounded-[20px] border border-slate-200 bg-white bg-[radial-gradient(ellipse_at_center,rgba(20,184,166,0.06),transparent_65%)] dark:border-slate-700 dark:bg-slate-900"
+                                className={`relative mt-6 overflow-hidden rounded-[20px] border border-slate-200 bg-white bg-[radial-gradient(ellipse_at_center,rgba(20,184,166,0.06),transparent_65%)] transition-[height] duration-200 dark:border-slate-700 dark:bg-slate-900 ${
+                                    temReservaElegivel
+                                        ? 'h-[300px] sm:h-[330px] lg:h-[360px]'
+                                        : 'h-[240px] sm:h-[260px] lg:h-[280px]'
+                                }`}
                                 role="status"
                                 aria-live="polite"
                                 aria-disabled={!temReservaElegivel}
@@ -527,11 +532,11 @@ export default function Camera({ reservas }) {
                                             <CalendarDays size={32} strokeWidth={1.7} />
                                         </div>
 
-                                        <h3 className="mt-6 text-xl font-black text-slate-900 dark:text-white">
+                                        <h3 className="mt-4 text-lg font-black text-slate-900 dark:text-white sm:text-xl">
                                             Nenhuma reserva disponível para check-in
                                         </h3>
 
-                                        <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                        <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
                                             Consulta as tuas reservas ou reserva um espaço para realizar o check-in.
                                         </p>
                                     </div>
@@ -543,11 +548,11 @@ export default function Camera({ reservas }) {
                                             <CameraIcon size={32} strokeWidth={1.7} />
                                         </div>
 
-                                        <h3 className="mt-6 text-xl font-black text-slate-900 dark:text-white">
+                                        <h3 className="mt-4 text-lg font-black text-slate-900 dark:text-white sm:text-xl">
                                             Pronto para começar?
                                         </h3>
 
-                                        <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                        <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
                                             Aponte a câmara para o QR Code da secretária.
                                         </p>
                                     </div>
@@ -557,11 +562,11 @@ export default function Camera({ reservas }) {
                                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
                                         <Loader2 size={36} className="animate-spin text-[#14B8A6]" strokeWidth={1.9} />
 
-                                        <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-white">
+                                        <h3 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">
                                             A pedir acesso à câmara...
                                         </h3>
 
-                                        <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                        <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
                                             O navegador vai pedir a tua autorização.
                                         </p>
                                     </div>
@@ -571,11 +576,11 @@ export default function Camera({ reservas }) {
                                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-6 text-center">
                                         <Loader2 size={36} className="animate-spin text-[#14B8A6]" strokeWidth={1.9} />
 
-                                        <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-white">
+                                        <h3 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">
                                             A validar o código...
                                         </h3>
 
-                                        <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                        <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
                                             Estamos a confirmar a tua reserva.
                                         </p>
                                     </div>
@@ -587,11 +592,11 @@ export default function Camera({ reservas }) {
                                             <CheckCircle2 size={34} strokeWidth={1.9} />
                                         </div>
 
-                                        <h3 className="mt-5 text-lg font-black text-emerald-900 dark:text-emerald-200">
+                                        <h3 className="mt-4 text-lg font-black text-emerald-900 dark:text-emerald-200">
                                             QR Code lido com sucesso
                                         </h3>
 
-                                        <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-emerald-700 dark:text-emerald-300">
+                                        <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-emerald-700 dark:text-emerald-300">
                                             {message}
                                         </p>
 
@@ -607,11 +612,11 @@ export default function Camera({ reservas }) {
                                             <AlertTriangle size={26} strokeWidth={1.9} />
                                         </div>
 
-                                        <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-white">
+                                        <h3 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">
                                             {errorInfo.title}
                                         </h3>
 
-                                        <p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                        <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
                                             {errorInfo.message}
                                         </p>
                                     </div>
@@ -636,12 +641,12 @@ export default function Camera({ reservas }) {
 
                             {/* Ações */}
                             {temReservaElegivel ? (
-                                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                                <div className="mx-auto mt-3 flex max-w-xs flex-col gap-3">
                                     <button
                                         type="button"
                                         onClick={aLerOuAPedir ? pararLeituraManualmente : iniciarLeitura}
                                         disabled={acoesDesativadas}
-                                        className="group inline-flex flex-1 items-center justify-center gap-2.5 rounded-xl bg-[#14B8A6] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(20,184,166,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0F9C8E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:focus-visible:ring-offset-slate-900"
+                                        className="group inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#14B8A6] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(20,184,166,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0F9C8E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:focus-visible:ring-offset-slate-900"
                                     >
                                         <CameraIcon size={18} strokeWidth={1.9} className="transition-transform duration-200 group-hover:scale-110" />
                                         {aLerOuAPedir ? 'Parar leitura' : 'Iniciar leitura'}
@@ -651,7 +656,7 @@ export default function Camera({ reservas }) {
                                         type="button"
                                         onClick={() => fileInputRef.current?.click()}
                                         disabled={acoesDesativadas}
-                                        className="inline-flex flex-1 items-center justify-center gap-2.5 rounded-xl border border-navy-900 bg-white px-6 py-3 text-sm font-bold text-navy-900 transition-colors duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
+                                        className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-navy-900 transition-colors duration-200 hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
                                     >
                                         <ImageUp size={18} strokeWidth={1.9} />
                                         Selecionar imagem
@@ -667,10 +672,10 @@ export default function Camera({ reservas }) {
                                     />
                                 </div>
                             ) : (
-                                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                                <div className="mx-auto mt-3 flex max-w-xs flex-col gap-3">
                                     <Link
                                         href={route('reservas.index')}
-                                        className="inline-flex flex-1 items-center justify-center gap-2.5 rounded-xl bg-[#14B8A6] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(20,184,166,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0F9C8E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                                        className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#14B8A6] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(20,184,166,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0F9C8E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                                     >
                                         <CalendarDays size={18} strokeWidth={1.9} />
                                         Ver minhas reservas
@@ -678,7 +683,7 @@ export default function Camera({ reservas }) {
 
                                     <Link
                                         href={route('reservas.create')}
-                                        className="inline-flex flex-1 items-center justify-center gap-2.5 rounded-xl border border-navy-900 bg-white px-6 py-3 text-sm font-bold text-navy-900 transition-colors duration-200 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
+                                        className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-navy-900 transition-colors duration-200 hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
                                     >
                                         <CalendarPlus size={18} strokeWidth={1.9} />
                                         Reservar espaço
@@ -695,8 +700,9 @@ export default function Camera({ reservas }) {
 
                             {/* Alvo oculto para a leitura por ficheiro */}
                             <div id={FILE_READER_ID} className="hidden" />
-                        </section>
+                        </div>
                     </div>
+                    </section>
                 </main>
             </DashboardLayout>
         </>

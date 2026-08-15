@@ -8,8 +8,10 @@ use App\Http\Requests\UpdatePisoRequest;
 use App\Http\Resources\PisoResource;
 use App\Models\Edificio;
 use App\Models\Piso;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -92,7 +94,7 @@ class PisoController extends Controller
         }
 
         try {
-            Piso::create($dados);
+            $piso = Piso::create($dados);
         } catch (Throwable $exception) {
             if ($plantaGuardada !== null) {
                 Storage::disk('public')->delete($plantaGuardada);
@@ -100,6 +102,13 @@ class PisoController extends Controller
 
             throw $exception;
         }
+
+        ActivityLogger::log(
+            Auth::user(),
+            'espaco_criado',
+            $this->descreverPiso($piso),
+            $piso
+        );
 
         return redirect()
             ->route('admin.pisos.index')
@@ -113,7 +122,12 @@ class PisoController extends Controller
         $piso->load('edificio');
 
         return Inertia::render('Admin/Pisos/Edit', [
-            'piso' => new PisoResource($piso),
+            // ->resolve() em vez de passar o Resource diretamente: o Inertia
+            // trata qualquer Responsable chamando ->toResponse()->getData(true),
+            // e o JsonResource embrulha sempre em {"data": {...}} (via
+            // JsonResource::$wrap = 'data'). Sem isto, o React recebia
+            // piso.data.nome em vez de piso.nome e o formulário ficava vazio.
+            'piso' => (new PisoResource($piso))->resolve(),
             'edificios' => Edificio::orderBy('nome')->get(['id', 'nome']),
         ]);
     }
@@ -145,6 +159,13 @@ class PisoController extends Controller
             Storage::disk('public')->delete($plantaAntiga);
         }
 
+        ActivityLogger::log(
+            Auth::user(),
+            'espaco_atualizado',
+            $this->descreverPiso($piso),
+            $piso
+        );
+
         return redirect()
             ->route('admin.pisos.index')
             ->with('success', 'Piso atualizado com sucesso.');
@@ -157,8 +178,30 @@ class PisoController extends Controller
         $piso->ativo = ! $piso->ativo;
         $piso->save();
 
+        ActivityLogger::log(
+            Auth::user(),
+            $piso->ativo ? 'espaco_ativado' : 'espaco_desativado',
+            $this->descreverPiso($piso),
+            $piso
+        );
+
         return redirect()
             ->back()
             ->with('success', $piso->ativo ? 'Piso ativado.' : 'Piso desativado.');
+    }
+
+    /**
+     * Descrição legível de um piso para o Registo de Atividade —
+     * "{nome} · {edifício}".
+     */
+    private function descreverPiso(Piso $piso): string
+    {
+        $piso->loadMissing('edificio');
+
+        return sprintf(
+            '%s · %s',
+            $piso->nome,
+            $piso->edificio?->nome ?? '-'
+        );
     }
 }

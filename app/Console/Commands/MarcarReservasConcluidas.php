@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
+use App\Services\ActivityLogger;
 use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -113,6 +114,19 @@ class MarcarReservasConcluidas extends Command
                             ? $estadoConcluidaId
                             : $estadoNaoCompareceuId,
                     ]);
+
+                    $reservaBloqueada->loadMissing(['user', 'secretaria']);
+
+                    ActivityLogger::log(
+                        null,
+                        $fezCheckIn ? 'reserva_concluida' : 'reserva_nao_compareceu',
+                        sprintf(
+                            '%s · %s',
+                            $reservaBloqueada->user?->name ?? '-',
+                            $reservaBloqueada->secretaria?->codigo ?? '-'
+                        ),
+                        $reservaBloqueada
+                    );
 
                     if ($fezCheckIn) {
                         $concluidas++;

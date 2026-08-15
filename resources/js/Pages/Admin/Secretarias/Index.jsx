@@ -2,7 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
 import Pagination from '@/Components/Pagination';
 import { LoadingOverlay } from '@/Components/Loading';
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import {
     Armchair,
     Pencil,
@@ -12,34 +12,57 @@ import {
     RotateCcw,
     Search,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { formatarNomePiso } from '@/utils/formatarNomePiso';
 
 export default function Index({ secretarias, setores, filters }) {
     const [processingId, setProcessingId] = useState(null);
     const [carregando, setCarregando] = useState(false);
 
-    const { data, setData, get } = useForm({
-        search: filters.search ?? '',
-        setor_id: filters.setor_id ?? '',
-        ativo: filters.ativo ?? '',
-    });
+    const [search, setSearch] = useState(filters.search ?? '');
+    const [setorId, setSetorId] = useState(filters.setor_id ?? '');
+    const [ativoFiltro, setAtivoFiltro] = useState(filters.ativo ?? '');
+    const primeiraRenderizacao = useRef(true);
 
-    const pesquisar = (event) => {
-        event.preventDefault();
-
-        get(route('admin.secretarias.index'), {
+    const irComFiltros = (valores) => {
+        router.get(route('admin.secretarias.index'), valores, {
             preserveState: true,
             preserveScroll: true,
+            replace: true,
             onStart: () => setCarregando(true),
             onFinish: () => setCarregando(false),
         });
     };
 
+    // Pesquisa automática, com debounce, enquanto o utilizador escreve.
+    useEffect(() => {
+        if (primeiraRenderizacao.current) {
+            primeiraRenderizacao.current = false;
+            return;
+        }
+
+        const temporizador = setTimeout(() => {
+            irComFiltros({ search, setor_id: setorId, ativo: ativoFiltro });
+        }, 350);
+
+        return () => clearTimeout(temporizador);
+    }, [search]);
+
+    const handleSetorChange = (value) => {
+        setSetorId(value);
+        irComFiltros({ search, setor_id: value, ativo: ativoFiltro });
+    };
+
+    const handleAtivoChange = (value) => {
+        setAtivoFiltro(value);
+        irComFiltros({ search, setor_id: setorId, ativo: value });
+    };
+
     const limpar = () => {
-        router.get(route('admin.secretarias.index'), {}, {
-            onStart: () => setCarregando(true),
-            onFinish: () => setCarregando(false),
-        });
+        setSearch('');
+        setSetorId('');
+        setAtivoFiltro('');
+        irComFiltros({});
     };
 
     const alternarAtivo = (secretaria) => {
@@ -86,12 +109,22 @@ export default function Index({ secretarias, setores, filters }) {
         {
             key: 'piso',
             label: 'Piso',
-            render: (secretaria) => secretaria.piso ?? '-',
+            render: (secretaria) => formatarNomePiso(secretaria.piso),
         },
         {
             key: 'reservavel',
             label: 'Reservável',
-            render: (secretaria) => (secretaria.reservavel ? 'Sim' : 'Não'),
+            render: (secretaria) => (
+                <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        secretaria.reservavel
+                            ? 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+                            : 'bg-slate-50 text-slate-400 dark:bg-slate-800/50 dark:text-slate-500'
+                    }`}
+                >
+                    {secretaria.reservavel ? 'Reservável' : 'Não reservável'}
+                </span>
+            ),
         },
         {
             key: 'ativo',
@@ -117,6 +150,7 @@ export default function Index({ secretarias, setores, filters }) {
                     <Link
                         href={route('secretarias.qrcode', secretaria.id)}
                         title="Ver QR Code"
+                        aria-label="Ver QR Code"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
@@ -126,7 +160,8 @@ export default function Index({ secretarias, setores, filters }) {
 
                     <Link
                         href={route('admin.secretarias.edit', secretaria.id)}
-                        title="Editar"
+                        title="Editar secretária"
+                        aria-label="Editar secretária"
                         className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
                     >
                         <Pencil size={16} strokeWidth={1.9} />
@@ -136,7 +171,8 @@ export default function Index({ secretarias, setores, filters }) {
                         type="button"
                         onClick={() => alternarAtivo(secretaria)}
                         disabled={processingId === secretaria.id}
-                        title={secretaria.ativo ? 'Desativar' : 'Ativar'}
+                        title={secretaria.ativo ? 'Desativar secretária' : 'Ativar secretária'}
+                        aria-label={secretaria.ativo ? 'Desativar secretária' : 'Ativar secretária'}
                         className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
                             secretaria.ativo
                                 ? 'border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-500 dark:border-slate-700'
@@ -195,10 +231,7 @@ export default function Index({ secretarias, setores, filters }) {
                     </div>
                 </div>
 
-                <form
-                    onSubmit={pesquisar}
-                    className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:grid-cols-[1fr_200px_160px_auto]"
-                >
+                <div className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:grid-cols-[1fr_200px_160px_auto]">
                     <div className="relative">
                         <Search
                             size={16}
@@ -208,16 +241,16 @@ export default function Index({ secretarias, setores, filters }) {
 
                         <input
                             type="text"
-                            value={data.search}
-                            onChange={(event) => setData('search', event.target.value)}
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
                             placeholder="Pesquisar por código"
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                     </div>
 
                     <select
-                        value={data.setor_id}
-                        onChange={(event) => setData('setor_id', event.target.value)}
+                        value={setorId}
+                        onChange={(event) => handleSetorChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                         <option value="">Todos os setores</option>
@@ -230,8 +263,8 @@ export default function Index({ secretarias, setores, filters }) {
                     </select>
 
                     <select
-                        value={data.ativo}
-                        onChange={(event) => setData('ativo', event.target.value)}
+                        value={ativoFiltro}
+                        onChange={(event) => handleAtivoChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                         <option value="">Todos os estados</option>
@@ -241,13 +274,6 @@ export default function Index({ secretarias, setores, filters }) {
 
                     <div className="flex gap-2">
                         <button
-                            type="submit"
-                            className="h-11 flex-1 rounded-xl bg-navy-900 px-4 text-sm font-bold text-white transition hover:bg-navy-950 sm:flex-none"
-                        >
-                            Pesquisar
-                        </button>
-
-                        <button
                             type="button"
                             onClick={limpar}
                             className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700"
@@ -255,7 +281,7 @@ export default function Index({ secretarias, setores, filters }) {
                             Limpar
                         </button>
                     </div>
-                </form>
+                </div>
 
                 <div className="relative p-6">
                     <LoadingOverlay show={carregando} />

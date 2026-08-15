@@ -2,26 +2,13 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
+import { TIPOS_SETOR } from '@/utils/tiposSetor';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
 const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
-
-const TIPOS = [
-    { value: 'coworking', label: 'Coworking' },
-    { value: 'reuniao', label: 'Sala de reunião' },
-    { value: 'rececao', label: 'Receção' },
-    { value: 'cafetaria', label: 'Cafetaria' },
-    { value: 'lounge', label: 'Lounge' },
-    { value: 'estacionamento', label: 'Estacionamento' },
-    { value: 'concentracao', label: 'Zona de concentração' },
-    { value: 'phone_booth', label: 'Phone booth' },
-    { value: 'wc', label: 'Casa de banho' },
-    { value: 'tecnico', label: 'Sala técnica' },
-    { value: 'outro', label: 'Outro' },
-];
 
 export default function Edit({ setor, pisos }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -93,7 +80,7 @@ export default function Edit({ setor, pisos }) {
                         <div>
                             <label htmlFor="tipo" className={labelClass}>Tipo</label>
                             <select id="tipo" value={data.tipo} onChange={(e) => setData('tipo', e.target.value)} className={fieldClass}>
-                                {TIPOS.map((tipo) => (
+                                {TIPOS_SETOR.map((tipo) => (
                                     <option key={tipo.value} value={tipo.value}>{tipo.label}</option>
                                 ))}
                             </select>

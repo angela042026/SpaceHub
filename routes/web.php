@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AtividadeController as AdminAtividadeController;
 use App\Http\Controllers\Admin\AvaliacaoController as AdminAvaliacaoController;
 use App\Http\Controllers\Admin\EdificioController as AdminEdificioController;
 use App\Http\Controllers\Admin\PisoController as AdminPisoController;
@@ -282,6 +283,12 @@ Route::middleware(['auth', 'active', 'role:Administrador'])
 
         Route::patch('/reservas/{reserva}/cancelar', [AdminReservaController::class, 'cancelar'])
             ->name('reservas.cancelar');
+
+        Route::get('/atividade', [AdminAtividadeController::class, 'index'])
+            ->name('atividade.index');
+
+        Route::get('/atividade/exportar', [AdminAtividadeController::class, 'export'])
+            ->name('atividade.export');
     });
 
 // Gestão de espaços: acessível a Administrador e Gestor (ver *Policy::before()).
@@ -384,6 +391,15 @@ Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
 
         Route::get('/relatorios/suporte', [AdminReportController::class, 'suporte'])
             ->name('reports.suporte');
+
+        Route::get('/relatorios/ocupacao', [AdminReportController::class, 'ocupacao'])
+            ->name('reports.ocupacao');
+
+        Route::get('/relatorios/espacos', [AdminReportController::class, 'espacos'])
+            ->name('reports.espacos');
+
+        Route::get('/relatorios/cancelamentos', [AdminReportController::class, 'cancelamentos'])
+            ->name('reports.cancelamentos');
     });
 
 require __DIR__ . '/auth.php';

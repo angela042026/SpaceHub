@@ -7,6 +7,7 @@ use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Models\ReservaDia;
 use App\Notifications\ReservaExpiradaNotification;
+use App\Services\ActivityLogger;
 use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -113,6 +114,19 @@ class CancelarReservasExpiradas extends Command
 
                     $reserva->user?->notify(
                         new ReservaExpiradaNotification($reserva)
+                    );
+
+                    $reservaBloqueada->loadMissing('secretaria');
+
+                    ActivityLogger::log(
+                        null,
+                        'reserva_cancelada',
+                        sprintf(
+                            '%s · %s (sem check-in dentro do prazo)',
+                            $reserva->user?->name ?? '-',
+                            $reservaBloqueada->secretaria?->codigo ?? '-'
+                        ),
+                        $reservaBloqueada
                     );
 
                     $expiradas++;

@@ -1,5 +1,6 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
+import Pagination from '@/Components/Pagination';
 import PrintHeader from '@/Components/Admin/PrintHeader';
 import PrintFooter from '@/Components/Admin/PrintFooter';
 import PrintButton from '@/Components/Admin/PrintButton';
@@ -66,26 +67,30 @@ export default function Reservas({ reservas, estados, filters, geradoEm }) {
 
             <PrintHeader
                 title="Relatório de Reservas"
-                subtitle={`${reservas.length} reserva${reservas.length === 1 ? '' : 's'} listada${reservas.length === 1 ? '' : 's'}`}
+                subtitle={`${reservas.total} reserva${reservas.total === 1 ? '' : 's'} listada${reservas.total === 1 ? '' : 's'}`}
                 geradoEm={geradoEm}
             />
 
-            <PrintButton />
-
             <section className="dashboard-card overflow-hidden">
-                <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800 print:hidden">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
-                        <CalendarDays size={22} strokeWidth={1.9} />
+                <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800 print:hidden">
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+                            <CalendarDays size={22} strokeWidth={1.9} />
+                        </div>
+
+                        <div>
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                                Relatório de Reservas
+                            </h1>
+
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                {reservas.total} reserva{reservas.total === 1 ? '' : 's'} encontrada{reservas.total === 1 ? '' : 's'}.
+                            </p>
+                        </div>
                     </div>
 
-                    <div>
-                        <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Relatório de Reservas
-                        </h1>
-
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {reservas.length} reserva{reservas.length === 1 ? '' : 's'} encontrada{reservas.length === 1 ? '' : 's'}.
-                        </p>
+                    <div className="-mb-5">
+                        <PrintButton />
                     </div>
                 </div>
 
@@ -140,9 +145,11 @@ export default function Reservas({ reservas, estados, filters, geradoEm }) {
                 <div className="p-6">
                     <Table
                         columns={columns}
-                        data={reservas}
+                        data={reservas.data}
                         emptyMessage="Nenhuma reserva encontrada para os filtros selecionados."
                     />
+
+                    <Pagination pagination={reservas} itemLabel="reservas" />
                 </div>
             </section>
 

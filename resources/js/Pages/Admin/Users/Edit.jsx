@@ -6,7 +6,7 @@ import {
     Pencil,
     UserRound,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -25,6 +25,23 @@ export default function Edit({ user, roles }) {
         role_id: user.role_id ?? '',
         fotografia: null,
     });
+
+    // O useForm só inicializa uma vez, na primeira montagem. Se se navegar
+    // desta página para editar outro utilizador (ou para "Criar utilizador")
+    // sem recarregar, o React reaproveita o mesmo componente e o formulário
+    // fica preso nos dados antigos — por isso sincroniza-se aqui sempre que
+    // o utilizador realmente muda.
+    useEffect(() => {
+        setData({
+            name: user.name ?? '',
+            email: user.email ?? '',
+            password: '',
+            password_confirmation: '',
+            role_id: user.role_id ?? '',
+            fotografia: null,
+        });
+        setPreview(null);
+    }, [user.id]);
 
     const passwordConfirmationMismatch =
         data.password.length > 0 &&
