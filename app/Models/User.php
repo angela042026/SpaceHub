@@ -28,6 +28,9 @@ class User extends Authenticatable
         'ativo',
         'fotografia',
         'email_verified_at',
+        'google_calendar_access_token',
+        'google_calendar_refresh_token',
+        'google_calendar_token_expira_em',
     ];
 
     protected $appends = [
@@ -57,7 +60,20 @@ class User extends Authenticatable
             'password' => 'hashed',
             'ativo' => 'boolean',
             'role_id' => 'integer',
+            'google_calendar_access_token' => 'encrypted',
+            'google_calendar_refresh_token' => 'encrypted',
+            'google_calendar_token_expira_em' => 'datetime',
         ];
+    }
+
+    /**
+     * Se o utilizador já autorizou o acesso ao Google Calendar — sabemos
+     * pelo refresh_token, que só existe depois dessa autorização (ao
+     * contrário do login com Google, que nunca o pede).
+     */
+    public function googleCalendarConectado(): bool
+    {
+        return $this->google_calendar_refresh_token !== null;
     }
 
     /**

@@ -12,6 +12,7 @@ use App\Models\ReservaDia;
 use App\Models\Setor;
 use App\Notifications\ReservaCanceladaNotification;
 use App\Services\ActivityLogger;
+use App\Services\GoogleCalendarService;
 use App\Services\PagamentoService;
 use App\Services\ReservaCriacaoService;
 use App\Services\ReservaDisponibilidadeService;
@@ -119,6 +120,8 @@ class ReservaController extends Controller
             'secretariasFavoritas' => Auth::user()
                 ->secretariasFavoritas()
                 ->pluck('secretarias.id'),
+
+            'googleCalendarConectado' => Auth::user()->googleCalendarConectado(),
         ]);
     }
 
@@ -214,7 +217,8 @@ class ReservaController extends Controller
      */
     public function cancelar(
         Reserva $reserva,
-        PagamentoService $pagamentoService
+        PagamentoService $pagamentoService,
+        GoogleCalendarService $googleCalendar
     ) {
         Gate::authorize('gerirPropria', $reserva);
 
@@ -260,6 +264,7 @@ class ReservaController extends Controller
             'reserva_cancelada',
             $this->descreverReserva($reserva->refresh())
         );
+        $googleCalendar->removerEvento($reserva->fresh(['user']));
 
         return redirect()
             ->route('reservas.index')

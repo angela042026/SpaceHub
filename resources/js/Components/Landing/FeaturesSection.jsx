@@ -1,31 +1,18 @@
-import { Fragment } from 'react';
 import {
-    Armchair,
     BarChart3,
-    Building2,
     History,
-    Layers,
-    LayoutGrid,
     Lock,
     Map,
     MapPin,
     MessageSquare,
+    RefreshCw,
     ShieldCheck,
-    Users,
 } from 'lucide-react';
 
 const historico = [
-    { data: '12 Mai 2024', hora: '09:00 – 12:00', estado: 'Concluída' },
-    { data: '8 Mai 2024', hora: '14:00 – 17:00', estado: 'Cancelada' },
-    { data: '2 Mai 2024', hora: '09:00 – 11:00', estado: 'Concluída' },
-];
-
-const gestaoFluxo = [
-    { label: 'Edifício', icon: Building2 },
-    { label: 'Piso', icon: Layers },
-    { label: 'Setor', icon: LayoutGrid },
-    { label: 'Secretária', icon: Armchair },
-    { label: 'Utilizadores', icon: Users },
+    { data: '12 Mai 2024', hora: '08:00 – 13:00', estado: 'Concluída' },
+    { data: '8 Mai 2024', hora: '13:00 – 18:00', estado: 'Cancelada' },
+    { data: '2 Mai 2024', hora: '08:00 – 13:00', estado: 'Concluída' },
 ];
 
 const acessos = ['Acesso de administrador', 'Acesso de utilizador'];
@@ -241,32 +228,35 @@ export default function FeaturesSection() {
 
                     <CardFeature
                         indice={0}
-                        icon={Building2}
-                        title="Gestão centralizada"
-                        description="Administre edifícios, pisos, setores, secretárias e utilizadores numa única plataforma."
+                        icon={RefreshCw}
+                        title="Sincronização com o Google Calendar"
+                        description="Ligue a sua conta e veja as reservas aparecerem automaticamente no seu calendário."
                     >
-                        <div className="relative z-10 flex h-full items-center justify-center gap-1 px-2">
-                            {gestaoFluxo.map((item, indice) => (
-                                <Fragment key={item.label}>
-                                    <div className="flex flex-col items-center gap-1">
-                                        <div className="grid h-8 w-8 place-items-center rounded-lg border border-[#14B8A6]/40 bg-white/70 text-[#14B8A6]">
-                                            <item.icon
-                                                size={14}
-                                                strokeWidth={1.8}
-                                            />
-                                        </div>
+                        <div className="relative z-10 flex h-full flex-col justify-center gap-2 px-4">
+                            <div className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2 shadow-sm">
+                                <img
+                                    src="/images/logo/google-calendar-icon.png"
+                                    alt="Google Calendar"
+                                    className="h-7 w-7 shrink-0"
+                                />
 
-                                        <span className="text-[7.5px] font-semibold text-slate-500">
-                                            {item.label}
-                                        </span>
-                                    </div>
+                                <div className="min-w-0">
+                                    <p className="truncate text-[11px] font-bold text-[#071A33]">
+                                        Escritório Executivo
+                                    </p>
 
-                                    {indice <
-                                        gestaoFluxo.length - 1 && (
-                                        <div className="mb-4 h-px w-2 border-t border-dashed border-[#14B8A6]/40" />
-                                    )}
-                                </Fragment>
-                            ))}
+                                    <p className="text-[9px] text-slate-400">
+                                        17 Ago · 08:00 – 13:00
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 pl-1">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                                <span className="text-[9px] font-bold text-[#14B8A6]">
+                                    Sincronizado
+                                </span>
+                            </div>
                         </div>
                     </CardFeature>
 
