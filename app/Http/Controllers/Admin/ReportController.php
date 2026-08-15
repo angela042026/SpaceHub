@@ -5,18 +5,22 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\EstadoReserva;
 use App\Models\PedidoSuporte;
+use App\Models\Piso;
 use App\Models\Reserva;
 use App\Models\Role;
+use App\Models\Secretaria;
 use App\Models\Setor;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ReportController extends Controller
 {
-    private const LIMITE_LINHAS = 500;
+    private const POR_PAGINA = 20;
 
     public function index(): Response
     {
@@ -46,8 +50,8 @@ class ReportController extends Controller
 
         $reservas = $query
             ->orderByDesc('data')
-            ->limit(self::LIMITE_LINHAS)
-            ->get();
+            ->paginate(self::POR_PAGINA)
+            ->withQueryString();
 
         return Inertia::render('Admin/Reports/Reservas', [
             'reservas' => $reservas,
@@ -73,8 +77,8 @@ class ReportController extends Controller
 
         $utilizadores = $query
             ->orderBy('name')
-            ->limit(self::LIMITE_LINHAS)
-            ->get();
+            ->paginate(self::POR_PAGINA)
+            ->withQueryString();
 
         return Inertia::render('Admin/Reports/Utilizadores', [
             'utilizadores' => $utilizadores,
@@ -96,12 +100,216 @@ class ReportController extends Controller
 
         $pedidos = $query
             ->orderByDesc('created_at')
-            ->limit(self::LIMITE_LINHAS)
-            ->get();
+            ->paginate(self::POR_PAGINA)
+            ->withQueryString();
 
         return Inertia::render('Admin/Reports/Suporte', [
             'pedidos' => $pedidos,
             'filters' => $request->only(['estado']),
+            'geradoEm' => now()->format('d/m/Y H:i'),
+        ]);
+    }
+
+    public function ocupacao(Request $request): Response
+    {
+        Gate::authorize('viewAny', Setor::class);
+
+        $dataFim = $request->filled('data_fim')
+            ? Carbon::parse($request->input('data_fim'))
+            : now();
+
+        $dataInicio = $request->filled('data_inicio')
+            ? Carbon::parse($request->input('data_inicio'))
+            : $dataFim->copy()->subDays(13);
+
+        // Cada dia do relatório é uma query própria (mesma fórmula de
+        // DashboardMetricsService::calcularOcupacaoDoDia(), que depende
+        // do scope noIntervalo() para contar corretamente reservas que
+        // atravessam vários dias) — por isso o intervalo é limitado a
+        // 60 dias, para não gerar centenas de queries sequenciais.
+        if ($dataInicio->diffInDays($dataFim) > 59) {
+            $dataInicio = $dataFim->copy()->subDays(59);
+        }
+
+        $pisoId = $request->filled('piso_id') ? $request->integer('piso_id') : null;
+
+        $totalSecretarias = Secretaria::query()
+            ->where('ativo', true)
+            ->where('reservavel', true)
+            ->when($pisoId, fn ($query) => $query->whereHas(
+                'setor',
+                fn ($setorQuery) => $setorQuery->where('piso_id', $pisoId)
+            ))
+            ->count();
+
+        $idsEstadosAtivos = EstadoReserva::idsAtivos();
+
+        $linhas = [];
+        $dia = $dataInicio->copy();
+
+        while ($dia->lte($dataFim)) {
+            $secretariasOcupadas = Reserva::query()
+                ->noIntervalo($dia)
+                ->whereIn('estado_reserva_id', $idsEstadosAtivos)
+                ->when($pisoId, fn ($query) => $query->whereHas(
+                    'secretaria.setor',
+                    fn ($setorQuery) => $setorQuery->where('piso_id', $pisoId)
+                ))
+                ->distinct()
+                ->count('secretaria_id');
+
+            $linhas[] = [
+                'data' => $dia->toDateString(),
+                'secretariasOcupadas' => $secretariasOcupadas,
+                'totalSecretarias' => $totalSecretarias,
+                'taxaOcupacao' => $totalSecretarias > 0
+                    ? round($secretariasOcupadas / $totalSecretarias * 100, 1)
+                    : 0.0,
+            ];
+
+            $dia->addDay();
+        }
+
+        $linhas = array_reverse($linhas);
+
+        // $linhas vem de um ciclo em PHP, não de uma query — por isso a
+        // paginação é construída manualmente com o mesmo LengthAwarePaginator
+        // que o Eloquent usa por trás de ->paginate(), preservando o
+        // querystring (filtros de data/piso) nos links Anterior/Seguinte.
+        $paginaAtual = LengthAwarePaginator::resolveCurrentPage();
+        $linhasPaginadas = new LengthAwarePaginator(
+            array_slice($linhas, ($paginaAtual - 1) * self::POR_PAGINA, self::POR_PAGINA),
+            count($linhas),
+            self::POR_PAGINA,
+            $paginaAtual,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return Inertia::render('Admin/Reports/Ocupacao', [
+            'linhas' => $linhasPaginadas,
+            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(['id', 'nome']),
+            'filters' => [
+                'data_inicio' => $dataInicio->toDateString(),
+                'data_fim' => $dataFim->toDateString(),
+                'piso_id' => $pisoId,
+            ],
+            'geradoEm' => now()->format('d/m/Y H:i'),
+        ]);
+    }
+
+    public function espacos(Request $request): Response
+    {
+        Gate::authorize('viewAny', Setor::class);
+
+        $dataFim = $request->filled('data_fim')
+            ? Carbon::parse($request->input('data_fim'))
+            : now();
+
+        $dataInicio = $request->filled('data_inicio')
+            ? Carbon::parse($request->input('data_inicio'))
+            : $dataFim->copy()->subDays(29);
+
+        $pisoId = $request->filled('piso_id') ? $request->integer('piso_id') : null;
+        $setorId = $request->filled('setor_id') ? $request->integer('setor_id') : null;
+
+        // Estados "válidos" (inclui concluídas, exclui canceladas e
+        // expiradas) — mesma semântica já usada para efeitos
+        // estatísticos noutros pontos da app (ver EstadoReserva).
+        $idsEstadosValidos = EstadoReserva::idsValidos();
+
+        $construirQuery = fn () => Secretaria::query()
+            ->with(['setor.piso.edificio'])
+            ->withCount(['reservas as reservas_no_periodo' => function ($query) use ($dataInicio, $dataFim, $idsEstadosValidos) {
+                $query->whereDate('data', '>=', $dataInicio)
+                    ->whereDate('data', '<=', $dataFim)
+                    ->whereIn('estado_reserva_id', $idsEstadosValidos);
+            }])
+            ->when($pisoId, fn ($query) => $query->whereHas(
+                'setor',
+                fn ($setorQuery) => $setorQuery->where('piso_id', $pisoId)
+            ))
+            ->when($setorId, fn ($query) => $query->where('setor_id', $setorId));
+
+        // A percentagem de cada linha é sempre relativa ao total geral, não
+        // só à página atual — por isso este total é calculado à parte, antes
+        // de paginar.
+        $totalReservas = (int) $construirQuery()->get()->sum('reservas_no_periodo');
+
+        $secretarias = $construirQuery()
+            ->orderByDesc('reservas_no_periodo')
+            ->paginate(self::POR_PAGINA)
+            ->withQueryString();
+
+        $secretarias->getCollection()->transform(fn ($secretaria) => [
+            'id' => $secretaria->id,
+            'codigo' => $secretaria->codigo,
+            'setor' => $secretaria->setor?->nome,
+            'piso' => $secretaria->setor?->piso?->nome,
+            'edificio' => $secretaria->setor?->piso?->edificio?->nome,
+            'reservas' => (int) $secretaria->reservas_no_periodo,
+            'percentual' => $totalReservas > 0
+                ? round($secretaria->reservas_no_periodo / $totalReservas * 100, 1)
+                : 0.0,
+        ]);
+
+        return Inertia::render('Admin/Reports/Espacos', [
+            'linhas' => $secretarias,
+            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(['id', 'nome']),
+            'setores' => Setor::where('ativo', true)->orderBy('nome')->get(['id', 'nome']),
+            'filters' => [
+                'data_inicio' => $dataInicio->toDateString(),
+                'data_fim' => $dataFim->toDateString(),
+                'piso_id' => $pisoId,
+                'setor_id' => $setorId,
+            ],
+            'geradoEm' => now()->format('d/m/Y H:i'),
+        ]);
+    }
+
+    public function cancelamentos(Request $request): Response
+    {
+        Gate::authorize('viewAny', Reserva::class);
+
+        $idsRelevantes = EstadoReserva::query()
+            ->whereIn('codigo', ['cancelada', 'nao_compareceu'])
+            ->pluck('id');
+
+        $query = Reserva::query()
+            ->with(['user', 'secretaria.setor.piso.edificio', 'estadoReserva'])
+            ->whereIn('estado_reserva_id', $idsRelevantes);
+
+        if ($request->filled('data_inicio')) {
+            $query->whereDate('data', '>=', $request->input('data_inicio'));
+        }
+
+        if ($request->filled('data_fim')) {
+            $query->whereDate('data', '<=', $request->input('data_fim'));
+        }
+
+        if ($request->filled('estado_reserva_id') && $idsRelevantes->contains($request->integer('estado_reserva_id'))) {
+            $query->where('estado_reserva_id', $request->integer('estado_reserva_id'));
+        }
+
+        if ($request->filled('utilizador')) {
+            $termo = $request->input('utilizador');
+            $query->whereHas('user', fn ($userQuery) => $userQuery->where('name', 'like', "%{$termo}%"));
+        }
+
+        if ($request->filled('setor_id')) {
+            $setorId = $request->integer('setor_id');
+            $query->whereHas('secretaria.setor', fn ($setorQuery) => $setorQuery->where('id', $setorId));
+        }
+
+        $reservas = $query
+            ->orderByDesc('data')
+            ->paginate(self::POR_PAGINA)
+            ->withQueryString();
+
+        return Inertia::render('Admin/Reports/CancelamentosAusencias', [
+            'reservas' => $reservas,
+            'estados' => EstadoReserva::whereIn('codigo', ['cancelada', 'nao_compareceu'])->orderBy('nome')->get(['id', 'nome']),
+            'setores' => Setor::where('ativo', true)->orderBy('nome')->get(['id', 'nome']),
+            'filters' => $request->only(['data_inicio', 'data_fim', 'estado_reserva_id', 'utilizador', 'setor_id']),
             'geradoEm' => now()->format('d/m/Y H:i'),
         ]);
     }

@@ -5,19 +5,19 @@ import PrintHeader from '@/Components/Admin/PrintHeader';
 import PrintFooter from '@/Components/Admin/PrintFooter';
 import PrintButton from '@/Components/Admin/PrintButton';
 import { Head, useForm } from '@inertiajs/react';
-import { CalendarDays } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
-export default function Reservas({ reservas, estados, filters, geradoEm }) {
+export default function Ocupacao({ linhas, pisos, filters, geradoEm }) {
     const { data, setData, get } = useForm({
         data_inicio: filters.data_inicio ?? '',
         data_fim: filters.data_fim ?? '',
-        estado_reserva_id: filters.estado_reserva_id ?? '',
+        piso_id: filters.piso_id ?? '',
     });
 
     const pesquisar = (event) => {
         event.preventDefault();
 
-        get(route('admin.reports.reservas'), {
+        get(route('admin.reports.ocupacao'), {
             preserveState: true,
             preserveScroll: true,
         });
@@ -27,47 +27,33 @@ export default function Reservas({ reservas, estados, filters, geradoEm }) {
         {
             key: 'data',
             label: 'Data',
-            render: (reserva) => new Date(reserva.data).toLocaleDateString('pt-PT'),
+            render: (linha) => new Date(`${linha.data}T00:00:00`).toLocaleDateString('pt-PT'),
         },
         {
-            key: 'user',
-            label: 'Utilizador',
-            render: (reserva) => reserva.user?.name ?? '-',
+            key: 'secretariasOcupadas',
+            label: 'Secretárias Ocupadas',
+            align: 'right',
         },
         {
-            key: 'secretaria',
-            label: 'Secretária',
-            render: (reserva) => reserva.secretaria?.codigo ?? '-',
+            key: 'totalSecretarias',
+            label: 'Secretárias Totais',
+            align: 'right',
         },
         {
-            key: 'localizacao',
-            label: 'Localização',
-            render: (reserva) => {
-                const setor = reserva.secretaria?.setor;
-                return [setor?.piso?.edificio?.nome, setor?.piso?.nome, setor?.nome]
-                    .filter(Boolean)
-                    .join(' / ') || '-';
-            },
-        },
-        {
-            key: 'periodo',
-            label: 'Período',
-            render: (reserva) => reserva.periodo?.nome ?? '-',
-        },
-        {
-            key: 'estado',
-            label: 'Estado',
-            render: (reserva) => reserva.estado_reserva?.nome ?? '-',
+            key: 'taxaOcupacao',
+            label: 'Taxa de Ocupação',
+            align: 'right',
+            render: (linha) => `${`${linha.taxaOcupacao}`.replace('.', ',')}%`,
         },
     ];
 
     return (
         <DashboardLayout>
-            <Head title="Relatório de Reservas" />
+            <Head title="Relatório de Ocupação" />
 
             <PrintHeader
-                title="Relatório de Reservas"
-                subtitle={`${reservas.total} reserva${reservas.total === 1 ? '' : 's'} listada${reservas.total === 1 ? '' : 's'}`}
+                title="Relatório de Ocupação"
+                subtitle={`${linhas.total} dia${linhas.total === 1 ? '' : 's'} listado${linhas.total === 1 ? '' : 's'}`}
                 geradoEm={geradoEm}
             />
 
@@ -75,16 +61,16 @@ export default function Reservas({ reservas, estados, filters, geradoEm }) {
                 <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800 print:hidden">
                     <div className="flex items-center gap-3">
                         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
-                            <CalendarDays size={22} strokeWidth={1.9} />
+                            <TrendingUp size={22} strokeWidth={1.9} />
                         </div>
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Relatório de Reservas
+                                Relatório de Ocupação
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {reservas.total} reserva{reservas.total === 1 ? '' : 's'} encontrada{reservas.total === 1 ? '' : 's'}.
+                                {linhas.total} dia{linhas.total === 1 ? '' : 's'} encontrado{linhas.total === 1 ? '' : 's'}.
                             </p>
                         </div>
                     </div>
@@ -119,15 +105,15 @@ export default function Reservas({ reservas, estados, filters, geradoEm }) {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-slate-500">Estado</label>
+                        <label className="mb-1 block text-xs font-semibold text-slate-500">Piso</label>
                         <select
-                            value={data.estado_reserva_id}
-                            onChange={(event) => setData('estado_reserva_id', event.target.value)}
+                            value={data.piso_id}
+                            onChange={(event) => setData('piso_id', event.target.value)}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         >
                             <option value="">Todos</option>
-                            {estados.map((estado) => (
-                                <option key={estado.id} value={estado.id}>{estado.nome}</option>
+                            {pisos.map((piso) => (
+                                <option key={piso.id} value={piso.id}>{piso.nome}</option>
                             ))}
                         </select>
                     </div>
@@ -145,11 +131,12 @@ export default function Reservas({ reservas, estados, filters, geradoEm }) {
                 <div className="p-6">
                     <Table
                         columns={columns}
-                        data={reservas.data}
-                        emptyMessage="Nenhuma reserva encontrada para os filtros selecionados."
+                        data={linhas.data}
+                        keyField="data"
+                        emptyMessage="Nenhum dia encontrado para os filtros selecionados."
                     />
 
-                    <Pagination pagination={reservas} itemLabel="reservas" />
+                    <Pagination pagination={linhas} itemLabel="dias" />
                 </div>
             </section>
 

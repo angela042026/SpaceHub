@@ -44,9 +44,40 @@ class AvaliacaoController extends Controller
             ->paginate(15)
             ->withQueryString();
 
+        // Contagens por estado (independentes dos filtros aplicados acima)
+        // para os 4 cards de resumo e para o número junto de cada pill de
+        // filtro — só leitura, não interfere com a lógica de moderação.
+        $contagens = Avaliacao::query()
+            ->selectRaw('estado, COUNT(*) as total')
+            ->groupBy('estado')
+            ->pluck('total', 'estado');
+
+        $totalGeral = (int) $contagens->sum();
+        $pendentes = (int) ($contagens['pendente'] ?? 0);
+        $aprovadas = (int) ($contagens['aprovada'] ?? 0);
+        $rejeitadas = (int) ($contagens['rejeitada'] ?? 0);
+
+        $mediaAprovadas = round((float) (Avaliacao::where('estado', 'aprovada')->avg('nota') ?? 0), 1);
+
+        $taxaAprovacao = ($aprovadas + $rejeitadas) > 0
+            ? round($aprovadas / ($aprovadas + $rejeitadas) * 100, 1)
+            : 0.0;
+
         return Inertia::render('Admin/Avaliacoes/Index', [
             'avaliacoes' => AvaliacaoResource::collection($avaliacoes)->response()->getData(true),
             'filters' => $request->only(['estado', 'search']),
+            'stats' => [
+                'total' => $totalGeral,
+                'media' => $mediaAprovadas,
+                'pendentes' => $pendentes,
+                'taxaAprovacao' => $taxaAprovacao,
+                'porEstado' => [
+                    'todas' => $totalGeral,
+                    'pendente' => $pendentes,
+                    'aprovada' => $aprovadas,
+                    'rejeitada' => $rejeitadas,
+                ],
+            ],
         ]);
     }
 

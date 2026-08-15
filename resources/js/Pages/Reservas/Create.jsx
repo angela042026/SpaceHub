@@ -409,8 +409,8 @@ export default function Create({
         <DashboardLayout>
             <Head title="Nova Reserva" />
 
-            <div className="space-y-6 pb-28">
-                <div className="flex items-center gap-3">
+            <section className="dashboard-card overflow-hidden pb-28">
+                <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
                         <CalendarPlus
                             size={22}
@@ -432,7 +432,7 @@ export default function Create({
                 </div>
 
                 {Object.keys(errors).length > 0 && (
-                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
+                    <div className="mx-6 mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
                         {Object.keys(errors).length ===
                             1 ? (
                             Object.values(errors)[0]
@@ -457,7 +457,7 @@ export default function Create({
                     </div>
                 )}
 
-                <section className="dashboard-card p-6">
+                <div className="border-b border-slate-100 px-6 py-6 dark:border-slate-800">
                     <div className="mb-4 flex items-center justify-between gap-3">
                         <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
                             Filtros de pesquisa
@@ -764,9 +764,9 @@ export default function Create({
                         preferencias={preferencias}
                         onAlternarPreferencia={alternarPreferencia}
                     />
-                </section>
+                </div>
 
-                <section className="dashboard-card p-6">
+                <div className="px-6 py-6">
                     <div className="mb-5">
                         <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                             Espaços disponíveis
@@ -894,8 +894,8 @@ export default function Create({
                             )}
                         </div>
                     )}
-                </section>
-            </div>
+                </div>
+            </section>
         </DashboardLayout>
     );
 }

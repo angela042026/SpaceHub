@@ -10,16 +10,69 @@ use Inertia\Inertia;
 
 class PedidoSuporteController extends Controller
 {
-    /** Lista todos os pedidos de suporte. */
-    public function index()
+    private const POR_PAGINA = 10;
+
+    /** Lista os pedidos de suporte, com filtro por estado, pesquisa e paginação. */
+    public function index(Request $request)
     {
-        // Obtém todos os pedidos de suporte
-        $pedidos = PedidoSuporte::with('user')
+        $query = PedidoSuporte::query()->with('user');
+
+        $estado = $request->filled('estado') ? $request->input('estado') : 'todos';
+
+        if ($estado !== 'todos') {
+            $query->where('estado', $estado);
+        }
+
+        if ($request->filled('search')) {
+            $search = trim((string) $request->input('search'));
+
+            $query->where(function ($query) use ($search): void {
+                $query
+                    ->where('assunto', 'like', "%{$search}%")
+                    ->orWhereHas('user', fn ($q) => $q
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%"));
+
+                // "#SUP-024" ou "24" também encontra o pedido pelo id.
+                if (is_numeric($search)) {
+                    $query->orWhere('id', (int) $search);
+                }
+            });
+        }
+
+        $pedidos = $query
             ->latest()
-            ->get();
+            ->paginate(self::POR_PAGINA)
+            ->withQueryString();
+
+        // Contagens por estado (independentes dos filtros aplicados acima)
+        // para os 4 cards de resumo e para o número junto de cada pill de
+        // filtro — só leitura, não interfere com o fluxo de resposta.
+        $contagens = PedidoSuporte::query()
+            ->selectRaw('estado, COUNT(*) as total')
+            ->groupBy('estado')
+            ->pluck('total', 'estado');
+
+        $totalGeral = (int) $contagens->sum();
+        $abertos = (int) ($contagens['Pendente'] ?? 0);
+        $emTratamento = (int) ($contagens['Em análise'] ?? 0);
+        $resolvidos = (int) ($contagens['Resolvido'] ?? 0);
 
         return Inertia::render('Support/Index', [
             'pedidos' => $pedidos,
+            'filters' => $request->only(['estado', 'search']),
+            'stats' => [
+                'total' => $totalGeral,
+                'abertos' => $abertos,
+                'emTratamento' => $emTratamento,
+                'resolvidos' => $resolvidos,
+                'porEstado' => [
+                    'todos' => $totalGeral,
+                    'Pendente' => $abertos,
+                    'Em análise' => $emTratamento,
+                    'Resolvido' => $resolvidos,
+                ],
+            ],
         ]);
     }
 

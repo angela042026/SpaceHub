@@ -378,6 +378,15 @@ Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
 
         Route::get('/relatorios/suporte', [AdminReportController::class, 'suporte'])
             ->name('reports.suporte');
+
+        Route::get('/relatorios/ocupacao', [AdminReportController::class, 'ocupacao'])
+            ->name('reports.ocupacao');
+
+        Route::get('/relatorios/espacos', [AdminReportController::class, 'espacos'])
+            ->name('reports.espacos');
+
+        Route::get('/relatorios/cancelamentos', [AdminReportController::class, 'cancelamentos'])
+            ->name('reports.cancelamentos');
     });
 
 require __DIR__ . '/auth.php';

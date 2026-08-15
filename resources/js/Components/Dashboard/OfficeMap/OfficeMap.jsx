@@ -47,6 +47,29 @@ export default function OfficeMap({
     onSecretariaSelecionada,
     mostrarLegenda: mostrarLegendaProp,
     reservarAoSelecionar = false,
+    // Só usados pela página de Estatísticas — barra de ferramentas
+    // reduzida (sem pesquisa/filtro/rodar/zoom) e planta sem distorcer
+    // proporção. Por omissão o mapa continua exatamente como era.
+    barraSimplificada = false,
+    ajustarProporcao = false,
+    // Ícone opcional ao lado do título — só a página de Estatísticas o
+    // define, para o cabeçalho deste cartão condizer com os cartões de
+    // donut ao lado (mesma caixa turquesa). Sem esta prop o título
+    // continua a renderizar exatamente como antes.
+    iconeTitulo: IconeTitulo,
+    // Só a página "Mapa do Escritório" (única a usar este componente
+    // como página de topo, não como cartão embutido): iguala a caixa
+    // do ícone e o tamanho do título ao padrão h-11/text-xl usado no
+    // resto da app (Estatísticas, Relatórios, Avaliações, ...). Sem
+    // esta prop, o cabeçalho mantém-se no tamanho mais discreto
+    // pensado para cartões embutidos num dashboard.
+    tituloDestaque = false,
+    // Só a linha final das Estatísticas: faz o cartão do mapa esticar
+    // para preencher a mesma altura que os donuts vizinhos (CSS Grid
+    // items-stretch), com o MapCanvas a acompanhar em vez de ficar com
+    // uma altura fixa em pixels. Omitido, o mapa mantém-se exatamente
+    // como antes em todas as outras páginas.
+    preencherAltura = false,
 }) {
     const sectionRef = useRef(null);
     const dragStartRef = useRef(null);
@@ -555,20 +578,40 @@ export default function OfficeMap({
     return (
         <section
             ref={sectionRef}
-            className="dashboard-card p-4 sm:p-5"
+            className={`dashboard-card p-4 sm:p-5 ${preencherAltura ? 'flex h-full flex-col' : ''}`}
         >
             {titulo && (
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                        <h2 className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
-                            {titulo}
-                        </h2>
-
-                        {subtitulo && (
-                            <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8fa7bd]">
-                                {subtitulo}
-                            </p>
+                <div className="mb-4 flex shrink-0 flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        {IconeTitulo && (
+                            <div
+                                className={`flex shrink-0 items-center justify-center bg-teal-500/10 text-teal-500 ${
+                                    tituloDestaque ? 'h-11 w-11 rounded-2xl' : 'h-10 w-10 rounded-xl'
+                                }`}
+                            >
+                                <IconeTitulo size={tituloDestaque ? 22 : 20} strokeWidth={1.9} />
+                            </div>
                         )}
+
+                        <div>
+                            <h2
+                                className={`font-bold text-slate-900 dark:text-[#f8fafc] ${
+                                    tituloDestaque ? 'text-xl' : IconeTitulo ? 'text-sm' : 'text-base'
+                                }`}
+                            >
+                                {titulo}
+                            </h2>
+
+                            {subtitulo && (
+                                <p
+                                    className={`mt-0.5 text-slate-500 dark:text-[#8fa7bd] ${
+                                        tituloDestaque ? 'text-sm' : 'text-xs'
+                                    }`}
+                                >
+                                    {subtitulo}
+                                </p>
+                            )}
+                        </div>
                     </div>
 
                     {linkMapaCompleto && (
@@ -586,36 +629,41 @@ export default function OfficeMap({
                 </div>
             )}
 
-            <MapToolbar
-                edificios={edificios}
-                selectedEdificio={selectedEdificio}
-                setSelectedEdificio={setSelectedEdificio}
-                pisos={pisosDoEdificio}
-                selectedFloor={selectedFloor}
-                setSelectedFloor={setSelectedFloor}
-                pesquisa={pesquisa}
-                setPesquisa={setPesquisa}
-                filtro={filtro}
-                setFiltro={setFiltro}
-                filtrosAbertos={filtrosAbertos}
-                setFiltrosAbertos={setFiltrosAbertos}
-                rotacao={rotacao}
-                setRotacao={setRotacao}
-                zoom={zoom}
-                onZoom={alterarZoom}
-                onReset={reporMapa}
-                onFullscreen={alternarEcraInteiro}
-            />
+            <div className={preencherAltura ? 'shrink-0' : ''}>
+                <MapToolbar
+                    edificios={edificios}
+                    selectedEdificio={selectedEdificio}
+                    setSelectedEdificio={setSelectedEdificio}
+                    pisos={pisosDoEdificio}
+                    selectedFloor={selectedFloor}
+                    setSelectedFloor={setSelectedFloor}
+                    pesquisa={pesquisa}
+                    setPesquisa={setPesquisa}
+                    filtro={filtro}
+                    setFiltro={setFiltro}
+                    filtrosAbertos={filtrosAbertos}
+                    setFiltrosAbertos={setFiltrosAbertos}
+                    rotacao={rotacao}
+                    setRotacao={setRotacao}
+                    zoom={zoom}
+                    onZoom={alterarZoom}
+                    onReset={reporMapa}
+                    onFullscreen={alternarEcraInteiro}
+                    simples={barraSimplificada}
+                />
+            </div>
 
             <div
                 className={
                     somenteMapa
-                        ? 'mt-3'
+                        ? `mt-3 ${preencherAltura ? 'min-h-0 flex-1' : ''}`
                         : 'mt-3 grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]'
                 }
             >
                 <MapCanvas
                     tamanho={tamanhoMapa}
+                    ajustarProporcao={ajustarProporcao}
+                    preencherAltura={preencherAltura}
                     mostrarLegenda={
                         mostrarLegendaProp ?? somenteMapa
                     }
