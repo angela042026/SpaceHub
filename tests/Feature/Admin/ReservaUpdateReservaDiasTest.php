@@ -64,9 +64,9 @@ class ReservaUpdateReservaDiasTest extends TestCase
             'tipo_duracao' => 'semanal',
         ], $dono->id);
 
-        $this->assertSame(10, ReservaDia::where('reserva_id', $reserva->id)->count());
+        $this->assertSame(14, ReservaDia::where('reserva_id', $reserva->id)->count());
         $this->assertSame(
-            10,
+            14,
             ReservaDia::where('secretaria_id', $secretariaOriginal->id)->count()
         );
 
@@ -86,7 +86,7 @@ class ReservaUpdateReservaDiasTest extends TestCase
         );
 
         $this->assertSame(
-            10,
+            14,
             ReservaDia::where('secretaria_id', $secretariaNova->id)->count()
         );
     }
@@ -144,7 +144,7 @@ class ReservaUpdateReservaDiasTest extends TestCase
             )
         ));
 
-        // Reserva B: semanal, segunda a sexta, noutra secretária.
+        // Reserva B: semanal, 7 dias corridos a partir de segunda, noutra secretária.
         $reservaB = app(ReservaCriacaoService::class)->criarDiaInteiro([
             'data' => $segunda->toDateString(),
             'secretaria_id' => $secretariaOriginalDeB->id,
@@ -168,7 +168,7 @@ class ReservaUpdateReservaDiasTest extends TestCase
         $this->assertSame($secretariaOriginalDeB->id, $reservaB->secretaria_id);
 
         $this->assertSame(
-            10,
+            14,
             ReservaDia::where('reserva_id', $reservaB->id)->count()
         );
     }

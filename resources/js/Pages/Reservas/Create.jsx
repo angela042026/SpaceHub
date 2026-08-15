@@ -9,7 +9,6 @@ import {
     PREFERENCIAS,
     DURACOES,
     formatarDataPortugues,
-    dataEhFimDeSemana,
     calcularDataFim,
     proximaDataValida,
 } from '@/Components/Reservas/reservaHelpers';
@@ -94,11 +93,6 @@ export default function Create({
             ),
         [filtros.data, tipoDuracao],
     );
-
-    const inicioEmFimDeSemana =
-        reservaLonga &&
-        filtros.data &&
-        dataEhFimDeSemana(filtros.data);
 
     const descricaoDuracao =
         DURACOES[tipoDuracao] ?? DURACOES.diaria;
@@ -259,7 +253,7 @@ export default function Create({
      * lista automaticamente.
      */
     useEffect(() => {
-        if (!filtros.data || inicioEmFimDeSemana) {
+        if (!filtros.data) {
             setLugares([]);
             setErroConsultaLugares(false);
             setCarregando(false);
@@ -317,7 +311,6 @@ export default function Create({
         filtros.setor_id,
         filtros.piso_id,
         preferencias,
-        inicioEmFimDeSemana,
         tentativaConsulta,
     ]);
 
@@ -353,11 +346,7 @@ export default function Create({
             ? 'dia_inteiro'
             : periodosEscolhidos[secretaria.id];
 
-        if (
-            !escolha ||
-            aReservar ||
-            inicioEmFimDeSemana
-        ) {
+        if (!escolha || aReservar) {
             return;
         }
 
@@ -675,75 +664,64 @@ export default function Create({
 
                                         <p className="mt-0.5 text-sm text-teal-700 dark:text-teal-300">
                                             {
-                                                descricaoDuracao.diasUteis
+                                                descricaoDuracao.descricao
                                             }{' '}
-                                            dias úteis,
-                                            sempre no
+                                            Inclui sábados
+                                            e domingos.
+                                            Sempre no
                                             período Dia
                                             inteiro.
                                         </p>
                                     </div>
                                 </div>
 
-                                {inicioEmFimDeSemana ? (
-                                    <div className="px-4 py-3 text-sm font-semibold text-red-600 dark:text-red-300">
-                                        As reservas
-                                        semanais, mensais
-                                        e anuais devem
-                                        começar num dia
-                                        útil. Escolhe uma
-                                        data de segunda a
-                                        sexta-feira.
+                                <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2">
+                                    <div>
+                                        <label
+                                            htmlFor="data_inicio_visual"
+                                            className={
+                                                labelClass
+                                            }
+                                        >
+                                            De
+                                        </label>
+
+                                        <input
+                                            id="data_inicio_visual"
+                                            type="text"
+                                            value={formatarDataPortugues(
+                                                filtros.data,
+                                            )}
+                                            readOnly
+                                            className={
+                                                readOnlyFieldClass
+                                            }
+                                        />
                                     </div>
-                                ) : (
-                                    <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2">
-                                        <div>
-                                            <label
-                                                htmlFor="data_inicio_visual"
-                                                className={
-                                                    labelClass
-                                                }
-                                            >
-                                                De
-                                            </label>
 
-                                            <input
-                                                id="data_inicio_visual"
-                                                type="text"
-                                                value={formatarDataPortugues(
-                                                    filtros.data,
-                                                )}
-                                                readOnly
-                                                className={
-                                                    readOnlyFieldClass
-                                                }
-                                            />
-                                        </div>
+                                    <div>
+                                        <label
+                                            htmlFor="data_fim_visual"
+                                            className={
+                                                labelClass
+                                            }
+                                        >
+                                            Até
+                                        </label>
 
-                                        <div>
-                                            <label
-                                                htmlFor="data_fim_visual"
-                                                className={
-                                                    labelClass
-                                                }
-                                            >
-                                                Até
-                                            </label>
-
-                                            <input
-                                                id="data_fim_visual"
-                                                type="text"
-                                                value={formatarDataPortugues(
-                                                    dataFimCalculada,
-                                                )}
-                                                readOnly
-                                                className={
-                                                    readOnlyFieldClass
-                                                }
-                                            />
-                                        </div>
+                                        <input
+                                            id="data_fim_visual"
+                                            type="text"
+                                            value={formatarDataPortugues(
+                                                dataFimCalculada,
+                                            )}
+                                            readOnly
+                                            className={
+                                                readOnlyFieldClass
+                                            }
+                                        />
                                     </div>
-                                )}
+                                </div>
                             </div>
                         )}
 
@@ -772,7 +750,7 @@ export default function Create({
                             Espaços disponíveis
                         </h2>
 
-                        {filtros.data && !inicioEmFimDeSemana && (
+                        {filtros.data && (
                             <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
                                 {carregando
                                     ? 'A procurar espaços...'
@@ -789,13 +767,6 @@ export default function Create({
                         <p className="text-sm text-slate-500 dark:text-slate-400">
                             Escolhe uma data para veres
                             os lugares disponíveis.
-                        </p>
-                    ) : inicioEmFimDeSemana ? (
-                        <p className="text-sm font-medium text-red-600 dark:text-red-300">
-                            Escolhe um dia útil para
-                            consultares os lugares
-                            disponíveis para esta
-                            duração.
                         </p>
                     ) : erroConsultaLugares ? (
                         <div className="flex flex-col items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">

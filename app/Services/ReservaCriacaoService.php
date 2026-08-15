@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
  * Regras de criação de reservas (meio dia e dia inteiro).
  *
  * Extraído do ReservaController: as verificações de conflito, o cálculo
- * do intervalo em dias úteis e a criação reserva + pagamento eram
+ * do intervalo em dias corridos e a criação reserva + pagamento eram
  * duplicadas entre store() e storeDiaInteiro().
  *
  * As violações de regra são lançadas como ValidationException — o mesmo
@@ -26,23 +26,13 @@ use Illuminate\Validation\ValidationException;
 class ReservaCriacaoService
 {
     /**
-     * Dias úteis por tipo de duração.
-     */
-    private const DIAS_UTEIS_POR_DURACAO = [
-        'diaria' => 1,
-        'semanal' => 5,
-        'mensal' => 22,
-        'anual' => 264,
-    ];
-
-    /**
      * Descrição legível de cada duração, usada na mensagem de sucesso.
      */
     private const DESCRICAO_DURACAO = [
         'diaria' => 'dia inteiro',
-        'semanal' => '5 dias úteis',
-        'mensal' => '22 dias úteis',
-        'anual' => '264 dias úteis',
+        'semanal' => '7 dias consecutivos',
+        'mensal' => '1 mês de acesso contínuo',
+        'anual' => '1 ano de acesso contínuo',
     ];
 
     public function __construct(
@@ -97,8 +87,9 @@ class ReservaCriacaoService
      * Cria uma reserva de dia inteiro, numa única linha com o período
      * "Dia inteiro".
      *
-     * Durações permitidas: diária (1 dia), semanal (5 dias úteis),
-     * mensal (22) e anual (264).
+     * Durações permitidas: diária (1 dia), semanal (7 dias corridos),
+     * mensal (1 mês corrido) e anual (1 ano corrido) — todas incluem
+     * sábados, domingos e feriados.
      *
      * @param array{data:string,secretaria_id:mixed,tipo_duracao:string,observacoes?:?string} $dados
      */
@@ -106,17 +97,6 @@ class ReservaCriacaoService
     {
         $tipoDuracao = $dados['tipo_duracao'];
         $dataInicial = Carbon::parse($dados['data']);
-
-        /*
-         * As reservas de longa duração são calculadas em dias úteis,
-         * por isso não podem começar ao fim de semana.
-         */
-        if ($tipoDuracao !== 'diaria' && $dataInicial->isWeekend()) {
-            throw ValidationException::withMessages([
-                'data' =>
-                    'As reservas semanais, mensais e anuais devem começar num dia útil.',
-            ]);
-        }
 
         $dataInicio = $dataInicial->toDateString();
         $dataFim = $this->calcularDataFim($dataInicio, $tipoDuracao);
@@ -311,32 +291,27 @@ class ReservaCriacaoService
     }
 
     /**
-     * Data final do intervalo, contando apenas dias úteis. A data
-     * inicial conta como primeiro dia útil.
+     * Data final do intervalo, em dias corridos — inclui sábados,
+     * domingos e feriados, sem os saltar nem os adicionar à parte.
+     *
+     * Semanal soma 7 dias corridos ao todo (data de início inclusive).
+     * Mensal e anual somam um mês/ano de calendário e depois subtraem
+     * um dia, para lidar corretamente com mudança de mês, mudança de
+     * ano, fevereiro e anos bissextos (ex.: início a 31 de janeiro não
+     * avança para março — addMonthNoOverflow fixa-se no último dia de
+     * fevereiro).
      */
     private function calcularDataFim(
         string $dataInicio,
         string $tipoDuracao
     ): string {
-        $quantidadeDiasUteis =
-            self::DIAS_UTEIS_POR_DURACAO[$tipoDuracao] ?? 1;
-
         $dataFim = Carbon::parse($dataInicio);
 
-        if ($quantidadeDiasUteis === 1) {
-            return $dataFim->toDateString();
-        }
-
-        $diasContados = $dataFim->isWeekday() ? 1 : 0;
-
-        while ($diasContados < $quantidadeDiasUteis) {
-            $dataFim->addDay();
-
-            if ($dataFim->isWeekday()) {
-                $diasContados++;
-            }
-        }
-
-        return $dataFim->toDateString();
+        return match ($tipoDuracao) {
+            'semanal' => $dataFim->addDays(6)->toDateString(),
+            'mensal' => $dataFim->addMonthNoOverflow()->subDay()->toDateString(),
+            'anual' => $dataFim->addYearNoOverflow()->subDay()->toDateString(),
+            default => $dataFim->toDateString(),
+        };
     }
 }

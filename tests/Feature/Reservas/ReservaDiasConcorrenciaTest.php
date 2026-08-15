@@ -62,7 +62,7 @@ class ReservaDiasConcorrenciaTest extends TestCase
 
         $segunda = Carbon::today()->addDays(200)->next(Carbon::MONDAY);
 
-        // Reserva 1, pelo fluxo real: segunda a sexta.
+        // Reserva 1, pelo fluxo real: 7 dias corridos, segunda a domingo.
         app(ReservaCriacaoService::class)->criarDiaInteiro([
             'data' => $segunda->toDateString(),
             'secretaria_id' => $secretaria->id,
@@ -195,7 +195,7 @@ class ReservaDiasConcorrenciaTest extends TestCase
         ], $dono->id);
 
         $this->assertSame(
-            10, // 5 dias × 2 slots (manhã+tarde)
+            14, // 7 dias × 2 slots (manhã+tarde)
             ReservaDia::where('reserva_id', $reserva1->id)->count()
         );
 

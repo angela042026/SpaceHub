@@ -17,19 +17,19 @@ export const PREFERENCIAS = [
 export const DURACOES = {
     diaria: {
         nome: 'Diária',
-        diasUteis: 1,
+        descricao: 'Válido para o dia selecionado.',
     },
     semanal: {
         nome: 'Semanal',
-        diasUteis: 5,
+        descricao: '7 dias consecutivos.',
     },
     mensal: {
         nome: 'Mensal',
-        diasUteis: 22,
+        descricao: 'Acesso contínuo durante 1 mês.',
     },
     anual: {
         nome: 'Anual',
-        diasUteis: 264,
+        descricao: 'Acesso contínuo durante 1 ano.',
     },
 };
 
@@ -107,35 +107,72 @@ export const formatarDataPortugues = (data) => {
 };
 
 /**
- * Verificar se uma data corresponde a sábado ou domingo.
- */
-export const dataEhFimDeSemana = (data) => {
-    const dataLocal = criarDataLocal(data);
-
-    if (!dataLocal) {
-        return false;
-    }
-
-    const diaSemana = dataLocal.getDay();
-
-    return diaSemana === 0 || diaSemana === 6;
-};
-
-/**
  * Próxima data válida para uma nova reserva.
  *
- * Para a duração "Diária" (a duração padrão) não existe, no sistema,
- * nenhuma regra que impeça reservar hoje nem que exija começar num dia
- * útil — essa restrição só se aplica às durações longas (semanal,
- * mensal, anual), já verificada à parte por dataEhFimDeSemana(). Por
- * isso a próxima data válida, por omissão, é sempre hoje.
+ * Não existe, no sistema, nenhuma regra que impeça reservar hoje nem
+ * que exija começar num dia específico da semana — todos os planos
+ * (diário, semanal, mensal, anual) funcionam em qualquer dia, incluindo
+ * sábados e domingos. Por isso a próxima data válida é sempre hoje.
  */
 export const proximaDataValida = () => formatarDataInput(new Date());
 
 /**
- * Calcular a data final contando apenas dias úteis.
+ * Somar um mês de calendário a uma data sem "transbordar" para o mês
+ * seguinte quando o mês de destino é mais curto (ex.: 31 de janeiro
+ * não deve avançar para 3 de março — fica em 28/29 de fevereiro).
+ */
+const adicionarMesSemTransbordo = (data) => {
+    const dia = data.getDate();
+
+    const resultado = new Date(data);
+    resultado.setDate(1);
+    resultado.setMonth(resultado.getMonth() + 1);
+
+    const ultimoDiaDoMes = new Date(
+        resultado.getFullYear(),
+        resultado.getMonth() + 1,
+        0,
+    ).getDate();
+
+    resultado.setDate(Math.min(dia, ultimoDiaDoMes));
+
+    return resultado;
+};
+
+/**
+ * Somar um ano de calendário a uma data sem "transbordar" quando a
+ * data é 29 de fevereiro e o ano de destino não é bissexto (fica em 28
+ * de fevereiro).
+ */
+const adicionarAnoSemTransbordo = (data) => {
+    const dia = data.getDate();
+    const mes = data.getMonth();
+
+    const resultado = new Date(data);
+    resultado.setDate(1);
+    resultado.setFullYear(resultado.getFullYear() + 1);
+
+    const ultimoDiaDoMes = new Date(
+        resultado.getFullYear(),
+        mes + 1,
+        0,
+    ).getDate();
+
+    resultado.setMonth(mes);
+    resultado.setDate(Math.min(dia, ultimoDiaDoMes));
+
+    return resultado;
+};
+
+/**
+ * Calcular a data final do intervalo, em dias corridos — inclui
+ * sábados, domingos e feriados, sem os saltar nem os adicionar à
+ * parte. Mesma regra usada no backend (ReservaCriacaoService).
  *
- * A data inicial conta como primeiro dia útil.
+ * Semanal soma 7 dias corridos ao todo (data de início inclusive).
+ * Mensal e anual somam um mês/ano de calendário e depois subtraem um
+ * dia, para lidar corretamente com mudança de mês, mudança de ano,
+ * fevereiro e anos bissextos.
  */
 export const calcularDataFim = (dataInicio, tipoDuracao) => {
     if (!dataInicio) {
@@ -148,34 +185,29 @@ export const calcularDataFim = (dataInicio, tipoDuracao) => {
         return '';
     }
 
-    const quantidadeDiasUteis =
-        DURACOES[tipoDuracao]?.diasUteis ?? 1;
+    let dataFim;
 
-    if (quantidadeDiasUteis === 1) {
-        return formatarDataInput(dataAtual);
+    switch (tipoDuracao) {
+        case 'semanal':
+            dataFim = new Date(dataAtual);
+            dataFim.setDate(dataFim.getDate() + 6);
+            break;
+
+        case 'mensal':
+            dataFim = adicionarMesSemTransbordo(dataAtual);
+            dataFim.setDate(dataFim.getDate() - 1);
+            break;
+
+        case 'anual':
+            dataFim = adicionarAnoSemTransbordo(dataAtual);
+            dataFim.setDate(dataFim.getDate() - 1);
+            break;
+
+        default:
+            dataFim = dataAtual;
     }
 
-    /*
-     * As reservas longas não devem começar ao fim de semana.
-     * O backend também valida esta regra.
-     */
-    if (dataEhFimDeSemana(dataInicio)) {
-        return '';
-    }
-
-    let diasContados = 1;
-
-    while (diasContados < quantidadeDiasUteis) {
-        dataAtual.setDate(dataAtual.getDate() + 1);
-
-        const diaSemana = dataAtual.getDay();
-
-        if (diaSemana !== 0 && diaSemana !== 6) {
-            diasContados += 1;
-        }
-    }
-
-    return formatarDataInput(dataAtual);
+    return formatarDataInput(dataFim);
 };
 
 /*

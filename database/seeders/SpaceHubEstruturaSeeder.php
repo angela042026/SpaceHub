@@ -507,18 +507,18 @@ class SpaceHubEstruturaSeeder extends Seeder
         $precoAnual = null;
 
         if ($reservavel && $precoDiaInteiro !== null) {
-            // Reserva semanal: 5 dias completos, sem desconto.
-            $precoSemanal = round($precoDiaInteiro * 5, 2);
+            // Reserva semanal: 7 dias corridos, sem desconto.
+            $precoSemanal = round($precoDiaInteiro * 7, 2);
 
-            // Reserva mensal: 22 dias completos, com 10% de desconto.
+            // Reserva mensal: 30 dias corridos, com 10% de desconto.
             $precoMensal = round(
-                ($precoDiaInteiro * 22) * 0.90,
+                ($precoDiaInteiro * 30) * 0.90,
                 2
             );
 
-            // Reserva anual: 264 dias completos, com 20% de desconto.
+            // Reserva anual: 365 dias corridos, com 20% de desconto.
             $precoAnual = round(
-                ($precoDiaInteiro * 264) * 0.80,
+                ($precoDiaInteiro * 365) * 0.80,
                 2
             );
         }
