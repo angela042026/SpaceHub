@@ -140,6 +140,40 @@ class DashboardTest extends TestCase
         });
     }
 
+    /**
+     * O cartão "reserva de hoje" do dashboard usava whereDate('data', hoje)
+     * — só via reservas no primeiro dia. Reservas semanais/mensais/anuais
+     * (agora em dias corridos) deixavam de aparecer a partir do 2.º dia.
+     */
+    public function test_reserva_multidia_no_segundo_dia_ainda_aparece_no_dashboard(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $secretaria = $this->criarSecretaria();
+        $periodo = $this->criarPeriodo('08:00:00', '18:00:00');
+        $estadoPendente = $this->criarEstadoReserva('pendente');
+
+        $ontem = Carbon::today()->subDay();
+
+        Reserva::create([
+            'user_id' => $user->id,
+            'secretaria_id' => $secretaria->id,
+            'periodo_id' => $periodo->id,
+            'estado_reserva_id' => $estadoPendente->id,
+            'data' => $ontem->format('Y-m-d'),
+            'data_fim' => $ontem->copy()->addDays(6)->format('Y-m-d'),
+            'tipo_duracao' => 'semanal',
+        ]);
+
+        $response = $this->actingAs($user)->get('/dashboard');
+
+        $response->assertOk();
+        $response->assertInertia(function (Assert $page) use ($secretaria) {
+            $page->component('Dashboard/Utilizador')
+                ->where('reservaHojeUtilizador.secretaria_id', $secretaria->id)
+                ->etc();
+        });
+    }
+
     public function test_stats_basicos_aparecem_sem_reservas(): void
     {
         $user = $this->criarUsuarioComRole('Administrador');

@@ -174,6 +174,65 @@ class CheckInTest extends TestCase
         $this->assertSame('confirmada', $reserva->estadoReserva->codigo);
     }
 
+    public function test_scan_no_segundo_dia_de_uma_reserva_semanal_continua_pronta(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $secretaria = $this->criarSecretaria();
+        $periodo = $this->criarPeriodo('08:00:00', '18:00:00');
+        $estadoPendente = $this->criarEstadoReserva('pendente');
+
+        $ontem = Carbon::today()->subDay();
+
+        $reserva = Reserva::create([
+            'user_id' => $user->id,
+            'secretaria_id' => $secretaria->id,
+            'periodo_id' => $periodo->id,
+            'estado_reserva_id' => $estadoPendente->id,
+            'data' => $ontem->format('Y-m-d'),
+            'data_fim' => $ontem->copy()->addDays(6)->format('Y-m-d'),
+            'tipo_duracao' => 'semanal',
+        ]);
+
+        $this->travelTo(Carbon::today()->setTime(9, 0));
+
+        $response = $this->actingAs($user)
+            ->get(route('checkin.scan', $secretaria->qr_token));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('CheckIn/Scan')
+            ->where('status', 'pronta'));
+    }
+
+    public function test_camera_lista_reserva_multidia_no_terceiro_dia(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $secretaria = $this->criarSecretaria();
+        $periodo = $this->criarPeriodo('08:00:00', '18:00:00');
+        $estadoPendente = $this->criarEstadoReserva('pendente');
+
+        $inicio = Carbon::today()->subDays(2);
+
+        Reserva::create([
+            'user_id' => $user->id,
+            'secretaria_id' => $secretaria->id,
+            'periodo_id' => $periodo->id,
+            'estado_reserva_id' => $estadoPendente->id,
+            'data' => $inicio->format('Y-m-d'),
+            'data_fim' => $inicio->copy()->addDays(29)->format('Y-m-d'),
+            'tipo_duracao' => 'mensal',
+        ]);
+
+        $this->travelTo(Carbon::today()->setTime(9, 0));
+
+        $response = $this->actingAs($user)->get(route('checkin.camera'));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('CheckIn/Camera')
+            ->has('reservas', 1));
+    }
+
     public function test_confirm_bem_sucedido_marca_check_in(): void
     {
         $user = $this->criarUsuarioComRole('Utilizador');

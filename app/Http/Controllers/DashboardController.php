@@ -95,7 +95,7 @@ class DashboardController extends Controller
                 'user_id',
                 $request->user()->id,
             )
-            ->whereDate('data', $hoje)
+            ->noIntervalo($hoje)
             ->whereIn(
                 'estado_reserva_id',
                 $idsEstadosAtivos,

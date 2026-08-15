@@ -20,10 +20,11 @@ class CheckInController extends Controller
     /**
      * Página com leitura de câmara para ler o QR Code de uma secretária.
      *
-     * Mostra também, num resumo compacto, as reservas de hoje do
-     * utilizador ainda elegíveis para check-in (sem check-in feito) —
-     * pode haver mais do que uma, daí devolver sempre uma coleção em
-     * vez de só a primeira.
+     * Mostra também, num resumo compacto, as reservas ainda elegíveis
+     * para check-in hoje (sem check-in feito) — inclui reservas
+     * semanais/mensais/anuais em qualquer dia do seu intervalo, não só
+     * no primeiro. Pode haver mais do que uma, daí devolver sempre uma
+     * coleção em vez de só a primeira.
      */
     public function camera(): Response
     {
@@ -33,7 +34,7 @@ class CheckInController extends Controller
                 'estadoReserva',
             ])
             ->where('user_id', auth()->id())
-            ->whereDate('data', Carbon::today())
+            ->noIntervalo(Carbon::today())
             ->whereIn('estado_reserva_id', EstadoReserva::idsAtivos())
             ->whereNull('check_in_at')
             ->orderBy('periodo_id')
@@ -61,13 +62,13 @@ class CheckInController extends Controller
         $reserva = Reserva::with(['periodo', 'estadoReserva'])
             ->where('secretaria_id', $secretaria->id)
             ->where('user_id', auth()->id())
-            ->whereDate('data', $hoje)
+            ->noIntervalo($hoje)
             ->whereHas('estadoReserva', fn ($q) => $q->whereIn('codigo', EstadoReserva::codigosAtivos()))
             ->first();
 
         if (! $reserva) {
             $ocupadaPorOutro = Reserva::where('secretaria_id', $secretaria->id)
-                ->whereDate('data', $hoje)
+                ->noIntervalo($hoje)
                 ->whereHas('estadoReserva', fn ($q) => $q->whereIn('codigo', EstadoReserva::codigosAtivos()))
                 ->exists();
 
@@ -155,7 +156,22 @@ class CheckInController extends Controller
             return 'pronta';
         }
 
-        $data = $reserva->data->format('Y-m-d');
+        /*
+         * Numa reserva de vários dias, a janela de check-in é a de HOJE
+         * (não a do primeiro dia do plano) — desde que hoje esteja
+         * mesmo dentro do intervalo [data, data_fim]. Fora do
+         * intervalo (ex.: reserva futura acedida diretamente pelo ID)
+         * conta sempre como fora da janela, nunca "pronta" por coincidência
+         * de horário.
+         */
+        $hoje = Carbon::today();
+        $dataFimReserva = ($reserva->data_fim ?? $reserva->data)->copy()->startOfDay();
+
+        if ($hoje->lt($reserva->data->copy()->startOfDay()) || $hoje->gt($dataFimReserva)) {
+            return 'fora_da_janela';
+        }
+
+        $data = $hoje->format('Y-m-d');
 
         $abreJanela = Carbon::parse("{$data} {$reserva->periodo->hora_inicio->format('H:i')}")
             ->subMinutes(config('reservas.tolerancia_checkin_minutos'));
