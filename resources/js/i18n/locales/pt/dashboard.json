@@ -1,0 +1,70 @@
+{
+    "titulo": "Dashboard",
+    "funcionario": {
+        "secretariasOcupadas": "Secretárias Ocupadas",
+        "secretariasLivres": "Secretárias Livres",
+        "checkinsHoje": "Check-ins Hoje"
+    },
+    "admin": {
+        "reservasHoje": "Reservas Hoje",
+        "checkinsRealizados": "Check-ins realizados",
+        "secretariasLivres": "Secretárias Livres",
+        "ocupacaoAtual": "Ocupação Atual",
+        "todosOsPisos": "Todos os pisos",
+        "reservasExpiradas": "Reservas Expiradas",
+        "nenhumaExpirouHoje": "Nenhuma expirou hoje",
+        "cancelamentos": "Cancelamentos",
+        "nenhumCancelamentoHoje": "Nenhum cancelamento hoje",
+        "deTexto": "de"
+    },
+    "utilizador": {
+        "mapaTituloReservaHoje": "A sua secretária no mapa",
+        "mapaTituloEscolher": "Escolha a sua secretária",
+        "mapaSubtituloReservaHoje": "Localize rapidamente a {{codigo}} no {{piso}}",
+        "mapaSubtituloEscolher": "Consulte a disponibilidade em tempo real"
+    },
+    "header": {
+        "utilizadorFallback": "Utilizador",
+        "bomDia": "Bom dia",
+        "boaTarde": "Boa tarde",
+        "boaNoite": "Boa noite",
+        "abrirMenuLateral": "Abrir menu lateral",
+        "verNotificacoes": "Ver notificações",
+        "notificacoes": "Notificações",
+        "novas": "nova",
+        "novasPlural": "novas",
+        "semNotificacoes": "Sem notificações no momento.",
+        "subtitulos": {
+            "default": "Bem-vindo ao seu Dashboard.",
+            "adminReservas": "Consulte e faça a gestão de todas as reservas do SpaceHub.",
+            "qrCodes": "Faça a gestão dos espaços e recursos do SpaceHub.",
+            "editorDoMapa": "Organize a localização dos espaços no mapa.",
+            "registoDeAtividade": "Acompanhe as ações realizadas no SpaceHub.",
+            "utilizadorSemReserva": "Encontre o espaço certo para cada momento.",
+            "utilizadorComCheckin": "A sua secretária está pronta. Bom trabalho!",
+            "utilizadorSemCheckin": "A sua secretária está pronta. Faça o check-in quando chegar."
+        },
+        "notificacoesSinteticas": {
+            "cancelamentosHojeTitulo": "Cancelamentos hoje",
+            "cancelamentosHojeMensagem": "{{quantidade}} reserva(s) foram canceladas hoje.",
+            "reservasExpiradasTitulo": "Reservas expiradas",
+            "reservasExpiradasMensagem": "{{quantidade}} reserva(s) expiraram hoje sem check-in.",
+            "ocupacaoAltaTitulo": "Ocupação quase no limite",
+            "ocupacaoAltaMensagem": "A taxa de ocupação está em {{valor}}%.",
+            "secretariasEmUsoTitulo": "Secretárias em uso",
+            "secretariasEmUsoMensagem": "{{quantidade}} secretária(s) ocupada(s) agora — vale a pena verificar a limpeza depois do uso.",
+            "reservaTerminaTitulo": "A tua reserva está a terminar",
+            "reservaTerminaMensagem": "A reserva na secretária {{codigo}} termina às {{hora}}.",
+            "reservaComecaTitulo": "A tua reserva começa em breve",
+            "reservaComecaMensagem": "A reserva na secretária {{codigo}} começa às {{hora}}.",
+            "checkinConfirmadoTitulo": "Check-in confirmado",
+            "checkinConfirmadoMensagem": "Já fizeste check-in na secretária {{codigo}} para hoje.",
+            "checkinDisponivelTitulo": "Check-in disponível",
+            "checkinDisponivelMensagem": "Tens uma reserva hoje na secretária {{codigo}}. Não te esqueças do check-in!",
+            "proximaReservaTitulo": "Próxima reserva",
+            "proximaReservaMensagem": "Tens uma reserva agendada na secretária {{codigo}}.",
+            "secretariaGenerica": "a tua secretária",
+            "secretariaGenericaProxima": "uma secretária"
+        }
+    }
+}

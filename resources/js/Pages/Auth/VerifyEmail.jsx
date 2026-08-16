@@ -2,12 +2,14 @@ import AuthActions from '@/Components/Auth/AuthActions';
 import AuthCard from '@/Components/Auth/AuthCard';
 import AuthLayout from '@/Components/Auth/AuthLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     LogOut,
     MailCheck,
 } from 'lucide-react';
 
 export default function VerifyEmail({ status }) {
+    const { t } = useTranslation('auth');
     const { post, processing } = useForm({});
 
     const submit = (event) => {
@@ -20,16 +22,16 @@ export default function VerifyEmail({ status }) {
 
     return (
         <>
-            <Head title="Verificação de e-mail" />
+            <Head title={`${t('verificarEmail.titulo')} ${t('verificarEmail.tituloDestaque')}`} />
 
             <AuthLayout
-                title="Verifique o seu"
-                highlightedTitle="e-mail"
-                subtitle="Antes de continuar, confirme o endereço de e-mail associado à sua conta."
-                heroTitle="Quase terminado."
-                heroPrefix="Falta apenas"
-                heroHighlightedTitle="um passo."
-                heroDescription="Clique no link enviado para o seu e-mail para ativar a sua conta no SpaceHub."
+                title={t('verificarEmail.titulo')}
+                highlightedTitle={t('verificarEmail.tituloDestaque')}
+                subtitle={t('verificarEmail.subtitulo')}
+                heroTitle={t('verificarEmail.heroTitulo')}
+                heroPrefix={t('verificarEmail.heroPrefixo')}
+                heroHighlightedTitle={t('verificarEmail.heroTituloDestaque')}
+                heroDescription={t('verificarEmail.heroDescricao')}
             >
                 {status === 'verification-link-sent' && (
                     <output
@@ -45,8 +47,7 @@ export default function VerifyEmail({ status }) {
                             dark:text-emerald-300
                         "
                     >
-                        Foi enviado um novo link de verificação para o seu
-                        endereço de e-mail.
+                        {t('verificarEmail.linkReenviado')}
                     </output>
                 )}
 
@@ -79,17 +80,14 @@ export default function VerifyEmail({ status }) {
                             />
 
                             <p>
-                                Obrigado por se registar! Antes de começar,
-                                confirme o seu endereço de e-mail clicando no
-                                link que enviámos. Caso não o tenha recebido,
-                                pode solicitar um novo.
+                                {t('verificarEmail.aviso')}
                             </p>
                         </div>
 
                         <AuthActions
                             processing={processing}
-                            submitText="Reenviar e-mail de verificação"
-                            processingText="A enviar..."
+                            submitText={t('verificarEmail.reenviar')}
+                            processingText={t('verificarEmail.aEnviar')}
                             submitIcon={MailCheck}
                             showSecondary={false}
                         />
@@ -118,7 +116,7 @@ export default function VerifyEmail({ status }) {
                             aria-hidden="true"
                         />
 
-                        Terminar sessão
+                        {t('verificarEmail.terminarSessao')}
                     </Link>
                 </div>
             </AuthLayout>

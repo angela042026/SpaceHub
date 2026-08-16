@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import { Mail, MapPin, Phone } from 'lucide-react';
 import {
     FaFacebookF,
@@ -6,64 +7,29 @@ import {
     FaLinkedinIn,
 } from 'react-icons/fa';
 
-const quickLinks = [
-    {
-        label: 'Funcionalidades',
-        href: '#funcionalidades',
-    },
-    {
-        label: 'Como reservar',
-        href: '#como-funciona',
-    },
-    {
-        label: 'Espaços',
-        href: '#espacos',
-    },
-    {
-        label: 'Preços',
-        href: '#precos',
-    },
-    {
-        label: 'Benefícios',
-        href: '#beneficios',
-    },
-];
-
-const legalLinks = [
-    {
-        label: 'Termos de Utilização',
-        routeName: 'legal.terms',
-    },
-    {
-        label: 'Política de Privacidade',
-        routeName: 'legal.privacy',
-    },
-    {
-        label: 'Política de Cookies',
-        routeName: 'legal.cookies',
-    },
-];
-
-const socialLinks = [
-    {
-        label: 'LinkedIn',
-        href: 'https://www.linkedin.com',
-        icon: FaLinkedinIn,
-    },
-    {
-        label: 'Instagram',
-        href: 'https://www.instagram.com',
-        icon: FaInstagram,
-    },
-    {
-        label: 'Facebook',
-        href: 'https://www.facebook.com',
-        icon: FaFacebookF,
-    },
-];
-
 export default function Footer() {
+    const { t } = useTranslation('landing');
     const currentYear = new Date().getFullYear();
+
+    const quickLinks = [
+        { label: t('nav.funcionalidades'), href: '#funcionalidades' },
+        { label: t('nav.comoReservar'), href: '#como-funciona' },
+        { label: t('nav.espacos'), href: '#espacos' },
+        { label: t('nav.precos'), href: '#precos' },
+        { label: t('nav.beneficios'), href: '#beneficios' },
+    ];
+
+    const legalLinks = [
+        { label: t('footer.termosDeUtilizacao'), routeName: 'legal.terms' },
+        { label: t('footer.politicaDePrivacidade'), routeName: 'legal.privacy' },
+        { label: t('footer.politicaDeCookies'), routeName: 'legal.cookies' },
+    ];
+
+    const socialLinks = [
+        { label: 'LinkedIn', href: 'https://www.linkedin.com', icon: FaLinkedinIn },
+        { label: 'Instagram', href: 'https://www.instagram.com', icon: FaInstagram },
+        { label: 'Facebook', href: 'https://www.facebook.com', icon: FaFacebookF },
+    ];
 
     const scrollToSection = (href) => {
         const section = document.querySelector(href);
@@ -88,7 +54,7 @@ export default function Footer() {
                         <Link
                             href="/"
                             className="inline-flex items-center"
-                            aria-label="Página inicial SpaceHub"
+                            aria-label={t('nav.paginaInicial')}
                         >
                             <img
                                 src="/images/logo/logobranco.png"
@@ -98,9 +64,7 @@ export default function Footer() {
                         </Link>
 
                         <p className="mt-5 max-w-sm text-sm leading-7 text-slate-300">
-                            Uma plataforma moderna para reservar, gerir e
-                            otimizar espaços de trabalho de forma simples,
-                            segura e eficiente.
+                            {t('footer.descricao')}
                         </p>
 
                         <div className="mt-6 flex items-center gap-3">
@@ -128,7 +92,7 @@ export default function Footer() {
                     {/* Navegação */}
                     <div>
                         <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#5EEAD4]">
-                            Navegação
+                            {t('footer.navegacao')}
                         </h3>
 
                         <nav
@@ -154,7 +118,7 @@ export default function Footer() {
                     {/* Informações */}
                     <div>
                         <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#5EEAD4]">
-                            Informações
+                            {t('footer.informacoes')}
                         </h3>
 
                         <nav className="mt-5 flex flex-col gap-3">
@@ -173,7 +137,7 @@ export default function Footer() {
                     {/* Contacto */}
                     <div>
                         <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-[#5EEAD4]">
-                            Contacto
+                            {t('footer.contacto')}
                         </h3>
 
                         <div className="mt-5 space-y-4">
@@ -204,7 +168,7 @@ export default function Footer() {
                                     <MapPin size={17} />
                                 </div>
 
-                                <span>Braga, Portugal</span>
+                                <span>{t('footer.morada')}</span>
                             </div>
                         </div>
                     </div>
@@ -213,7 +177,7 @@ export default function Footer() {
                 {/* Linha inferior */}
                 <div className="py-6 text-center text-xs text-slate-400">
                     <p>
-                        © {currentYear} SpaceHub. Todos os direitos reservados.
+                        {t('footer.direitosReservados', { ano: currentYear })}
                     </p>
                 </div>
             </div>

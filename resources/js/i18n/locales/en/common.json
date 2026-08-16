@@ -1,0 +1,142 @@
+{
+    "app": {
+        "nome": "SpaceHub"
+    },
+    "acoes": {
+        "guardar": "Save",
+        "cancelar": "Cancel",
+        "confirmar": "Confirm",
+        "fechar": "Close",
+        "voltar": "Back",
+        "editar": "Edit",
+        "eliminar": "Delete",
+        "pesquisar": "Search",
+        "limparFiltros": "Clear filters",
+        "verMais": "View more",
+        "verTodas": "View all",
+        "seguinte": "Next",
+        "anterior": "Previous",
+        "enviar": "Submit",
+        "criar": "Create",
+        "atualizar": "Update",
+        "ativar": "Enable",
+        "desativar": "Disable",
+        "sim": "Yes",
+        "nao": "No"
+    },
+    "estado": {
+        "aCarregar": "Loading...",
+        "semResultados": "No results.",
+        "erro": "Something went wrong. Please try again.",
+        "sucesso": "Success"
+    },
+    "paginacao": {
+        "pagina": "Page {{atual}} of {{total}}",
+        "paginaAnterior": "Previous page",
+        "paginaSeguinte": "Next page",
+        "aMostrar": "Showing {{de}}–{{ate}} of {{total}} {{itemLabel}}",
+        "resultados": "results"
+    },
+    "idioma": {
+        "seletor": "Select language",
+        "pt": "Português",
+        "en": "English"
+    },
+    "tema": {
+        "claro": "Light mode",
+        "escuro": "Dark mode"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "reservas": "Bookings",
+        "pagamentos": "Payments",
+        "mapa": "Map",
+        "avaliacoes": "Reviews",
+        "suporte": "Support",
+        "ajuda": "Help Centre",
+        "perfil": "Profile",
+        "sair": "Log out",
+        "entrar": "Log in",
+        "registar": "Sign up"
+    },
+    "estados": {
+        "reserva": {
+            "pendente": "Pending",
+            "confirmada": "Confirmed",
+            "cancelada": "Cancelled",
+            "expirada": "Expired",
+            "concluida": "Completed",
+            "nao_compareceu": "No-show"
+        },
+        "avaliacao": {
+            "pendente": "Pending",
+            "aprovada": "Approved",
+            "rejeitada": "Rejected"
+        },
+        "pagamento": {
+            "pendente": "Pending",
+            "pago": "Paid",
+            "recusado": "Declined",
+            "reembolsado": "Refunded",
+            "cancelado": "Cancelled"
+        },
+        "metodoPagamento": {
+            "cartao": "Card",
+            "mbway": "MB Way",
+            "transferencia": "Bank transfer",
+            "paypal": "PayPal"
+        },
+        "suporte": {
+            "Pendente": "Pending",
+            "Em análise": "Under review",
+            "Resolvido": "Resolved"
+        },
+        "utilizador": {
+            "true": "Active",
+            "false": "Inactive"
+        }
+    },
+    "chat": {
+        "fecharChat": "Close support chat",
+        "abrirChat": "Open support chat",
+        "saudacao": "Hi!",
+        "comoPodemosAjudar": "How can we help?",
+        "assistenteDisponivel": "Assistant available",
+        "escolhaUmaOpcao": "Choose an option",
+        "centralDeAjuda": "Help Centre",
+        "encontreRespostasRapidas": "Find quick answers",
+        "assistenteVirtual": "Virtual assistant",
+        "respostasImediatas": "Instant answers"
+    },
+    "sidebar": {
+        "paginaInicial": "Home",
+        "dashboard": "Dashboard",
+        "reservarEspaco": "Book a Space",
+        "minhasReservas": "My Bookings",
+        "disponibilidade": "Availability",
+        "checkin": "Check-in",
+        "mapaDoEscritorio": "Office Map",
+        "historico": "History",
+        "pagamentos": "Payments",
+        "minhasAvaliacoes": "My Reviews",
+        "centralDeAjuda": "Help Centre",
+        "definicoes": "Settings",
+        "administracao": "Administration",
+        "utilizadores": "Users",
+        "edificios": "Buildings",
+        "pisos": "Floors",
+        "setores": "Sectors",
+        "secretarias": "Desks",
+        "reservas": "Bookings",
+        "qrCodes": "QR Codes",
+        "editorDoMapa": "Map Editor",
+        "registoDeAtividade": "Activity Log",
+        "estatisticas": "Statistics",
+        "relatorios": "Reports",
+        "avaliacoes": "Reviews",
+        "pedidosDeSuporte": "Support Requests",
+        "fecharMenu": "Close sidebar menu",
+        "terminarSessao": "Log out",
+        "utilizadorFallback": "User"
+    }
+}

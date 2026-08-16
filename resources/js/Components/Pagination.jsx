@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { router } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Paginação partilhada pelas listagens administrativas — antes
@@ -26,10 +27,12 @@ export default function Pagination({
     disabled = false,
     onStart,
     onFinish,
-    itemLabel = 'resultados',
+    itemLabel,
     numbered = false,
     onNavigate,
 }) {
+    const { t } = useTranslation('common');
+
     if (!pagination) {
         return null;
     }
@@ -71,19 +74,24 @@ export default function Pagination({
     return (
         <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-center text-xs text-slate-400 sm:text-left">
-                A mostrar {meta.from ?? 0}–{meta.to ?? 0} de {meta.total ?? 0} {itemLabel}
+                {t('paginacao.aMostrar', {
+                    de: meta.from ?? 0,
+                    ate: meta.to ?? 0,
+                    total: meta.total ?? 0,
+                    itemLabel: itemLabel ?? t('paginacao.resultados'),
+                })}
             </p>
 
             <div className="flex items-center gap-1.5">
                 <button
                     type="button"
-                    aria-label="Página anterior"
+                    aria-label={t('paginacao.paginaAnterior')}
                     disabled={disabled || !urlAnterior}
                     onClick={() => irParaPagina(urlAnterior)}
                     className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
                 >
                     <ChevronLeft size={16} strokeWidth={1.9} />
-                    {!numbered && 'Anterior'}
+                    {!numbered && t('acoes.anterior')}
                 </button>
 
                 {numbered ? (
@@ -116,18 +124,18 @@ export default function Pagination({
                     </div>
                 ) : (
                     <p className="whitespace-nowrap text-xs font-medium text-slate-500">
-                        Página {meta.current_page} de {meta.last_page}
+                        {t('paginacao.pagina', { atual: meta.current_page, total: meta.last_page })}
                     </p>
                 )}
 
                 <button
                     type="button"
-                    aria-label="Página seguinte"
+                    aria-label={t('paginacao.paginaSeguinte')}
                     disabled={disabled || !urlSeguinte}
                     onClick={() => irParaPagina(urlSeguinte)}
                     className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
                 >
-                    {!numbered && 'Seguinte'}
+                    {!numbered && t('acoes.seguinte')}
                     <ChevronRight size={16} strokeWidth={1.9} />
                 </button>
             </div>

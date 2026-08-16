@@ -5,6 +5,7 @@ import AuthLayout from '@/Components/Auth/AuthLayout';
 import Checkbox from '@/Components/Checkbox';
 import PasswordField from '@/Components/Auth/PasswordField';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     LogIn,
     Mail,
@@ -14,6 +15,7 @@ export default function Login({
     status,
     canResetPassword,
 }) {
+    const { t } = useTranslation('auth');
     const {
         data,
         setData,
@@ -38,16 +40,16 @@ export default function Login({
 
     return (
         <>
-            <Head title="Iniciar sessão" />
+            <Head title={t('login.entrar')} />
 
             <AuthLayout
-                title="Bem-vindo de"
-                highlightedTitle="volta!"
-                subtitle="Faça login para aceder à sua conta e gerir os seus espaços de trabalho."
-                heroTitle="Acesso seguro."
-                heroPrefix="Gestão"
-                heroHighlightedTitle="inteligente."
-                heroDescription="Os seus dados e espaços estão protegidos com a máxima segurança."
+                title={t('login.titulo')}
+                highlightedTitle={t('login.tituloDestaque')}
+                subtitle={t('login.subtitulo')}
+                heroTitle={t('login.heroTitulo')}
+                heroPrefix={t('login.heroPrefixo')}
+                heroHighlightedTitle={t('login.heroTituloDestaque')}
+                heroDescription={t('login.heroDescricao')}
             >
                 {status && (
                     <output
@@ -74,12 +76,12 @@ export default function Login({
                     <AuthCard>
                         <AuthField
                             id="email"
-                            label="E-mail"
+                            label={t('campos.email')}
                             name="email"
                             type="email"
                             icon={Mail}
                             value={data.email}
-                            placeholder="exemplo@spacehub.pt"
+                            placeholder={t('campos.emailPlaceholder')}
                             autoComplete="username"
                             autoFocus
                             error={errors.email}
@@ -93,10 +95,10 @@ export default function Login({
 
                         <PasswordField
                             id="password"
-                            label="Senha"
+                            label={t('campos.senha')}
                             name="password"
                             value={data.password}
-                            placeholder="Introduza a sua senha"
+                            placeholder={t('campos.senhaPlaceholder')}
                             autoComplete="current-password"
                             error={errors.password}
                             className="mt-5"
@@ -125,7 +127,7 @@ export default function Login({
                                             dark:text-[#5EEAD4]
                                         "
                                     >
-                                        Esqueceu a senha?
+                                        {t('login.esqueceuSenha')}
                                     </Link>
                                 </div>
                             )}
@@ -160,15 +162,15 @@ export default function Login({
                                 "
                             />
 
-                            <span>Lembrar-me</span>
+                            <span>{t('campos.lembrarMe')}</span>
                         </label>
 
                         <AuthActions
                             processing={processing}
-                            submitText="Entrar"
-                            processingText="A entrar..."
+                            submitText={t('login.entrar')}
+                            processingText={t('login.aEntrar')}
                             submitIcon={LogIn}
-                            googleText="Entrar com Google"
+                            googleText={t('login.entrarComGoogle')}
                             onGoogleClick={() => {
                                 window.location.href = route('google.redirect');
                             }}
@@ -183,7 +185,7 @@ export default function Login({
                         dark:text-slate-300
                     "
                 >
-                    Ainda não tem conta?{' '}
+                    {t('login.semConta')}{' '}
 
                     <Link
                         href={route('register')}
@@ -199,7 +201,7 @@ export default function Login({
                             dark:text-[#5EEAD4]
                         "
                     >
-                        Registe-se
+                        {t('login.registeSe')}
                     </Link>
                 </p>
             </AuthLayout>

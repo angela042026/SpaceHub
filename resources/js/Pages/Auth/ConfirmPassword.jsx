@@ -3,12 +3,14 @@ import AuthCard from '@/Components/Auth/AuthCard';
 import AuthLayout from '@/Components/Auth/AuthLayout';
 import PasswordField from '@/Components/Auth/PasswordField';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     ShieldCheck,
 } from 'lucide-react';
 
 export default function ConfirmPassword() {
+    const { t } = useTranslation('auth');
     const {
         data,
         setData,
@@ -31,16 +33,16 @@ export default function ConfirmPassword() {
 
     return (
         <>
-            <Head title="Confirmar senha" />
+            <Head title={t('confirmarSenha.confirmar')} />
 
             <AuthLayout
-                title="Confirme a sua"
-                highlightedTitle="senha"
-                subtitle="Por segurança, confirme a sua senha antes de continuar."
-                heroTitle="Área protegida."
-                heroPrefix="Acesso"
-                heroHighlightedTitle="seguro."
-                heroDescription="Esta verificação ajuda a proteger os seus dados e as ações sensíveis da sua conta."
+                title={t('confirmarSenha.titulo')}
+                highlightedTitle={t('confirmarSenha.tituloDestaque')}
+                subtitle={t('confirmarSenha.subtitulo')}
+                heroTitle={t('confirmarSenha.heroTitulo')}
+                heroPrefix={t('confirmarSenha.heroPrefixo')}
+                heroHighlightedTitle={t('confirmarSenha.heroTituloDestaque')}
+                heroDescription={t('confirmarSenha.heroDescricao')}
             >
                 <form
                     onSubmit={submit}
@@ -72,17 +74,16 @@ export default function ConfirmPassword() {
                             />
 
                             <p>
-                                Esta é uma área segura da aplicação.
-                                Confirme a sua senha para continuar.
+                                {t('confirmarSenha.aviso')}
                             </p>
                         </div>
 
                         <PasswordField
                             id="password"
-                            label="Senha"
+                            label={t('campos.senha')}
                             name="password"
                             value={data.password}
-                            placeholder="Introduza a sua senha"
+                            placeholder={t('campos.senhaPlaceholder')}
                             autoComplete="current-password"
                             error={errors.password}
                             onChange={(event) =>
@@ -95,8 +96,8 @@ export default function ConfirmPassword() {
 
                         <AuthActions
                             processing={processing}
-                            submitText="Confirmar"
-                            processingText="A confirmar..."
+                            submitText={t('confirmarSenha.confirmar')}
+                            processingText={t('confirmarSenha.aConfirmar')}
                             submitIcon={ShieldCheck}
                             showSecondary={false}
                         />
@@ -110,7 +111,7 @@ export default function ConfirmPassword() {
                         dark:text-slate-300
                     "
                 >
-                    Não pretende continuar?{' '}
+                    {t('confirmarSenha.naoPretendeContinuar')}{' '}
 
                     <Link
                         href={route('dashboard')}
@@ -132,7 +133,7 @@ export default function ConfirmPassword() {
                             aria-hidden="true"
                         />
 
-                        Voltar ao dashboard
+                        {t('confirmarSenha.voltarAoDashboard')}
                     </Link>
                 </p>
             </AuthLayout>

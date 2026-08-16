@@ -1,0 +1,296 @@
+{
+    "nav": {
+        "funcionalidades": "Funcionalidades",
+        "comoReservar": "Como reservar",
+        "espacos": "Espaços",
+        "precos": "Preços",
+        "beneficios": "Benefícios",
+        "contacto": "Contacto",
+        "abrirMenu": "Abrir menu",
+        "paginaInicial": "Página inicial SpaceHub",
+        "dashboard": "Dashboard",
+        "entrar": "Entrar"
+    },
+    "hero": {
+        "imagemAlt": "Espaço de coworking moderno da SpaceHub",
+        "tituloLinha1": "Reserve o espaço ideal",
+        "tituloLinha2": "para trabalhar",
+        "tituloDestaque": "melhor.",
+        "descricao": "Reserve secretárias, salas de reunião e espaços de coworking em segundos. Faça check-in por QR Code e acompanhe toda a ocupação em tempo real numa única plataforma.",
+        "ctaReservar": "Reservar um espaço",
+        "ctaEntrarReservar": "Entrar para reservar",
+        "ctaConhecerEspacos": "Conhecer os espaços"
+    },
+    "features": {
+        "eyebrow": "Funcionalidades",
+        "titulo": "Tudo o que precisa. Num só lugar.",
+        "descricao": "Reserve, acompanhe e administre os seus espaços de forma simples e intuitiva.",
+        "mapa": {
+            "titulo": "Mapa interativo",
+            "descricao": "Veja a disponibilidade e encontre o lugar ideal.",
+            "imagemAlt": "Mapa interativo do escritório"
+        },
+        "historico": {
+            "titulo": "Histórico e cancelamento",
+            "descricao": "Consulte reservas passadas e cancele quando precisar.",
+            "concluida": "Concluída",
+            "cancelada": "Cancelada"
+        },
+        "estatisticas": {
+            "titulo": "Estatísticas inteligentes",
+            "descricao": "Acompanhe a utilização dos espaços e tome decisões com base em dados reais.",
+            "utilizacaoMedia": "Utilização média",
+            "reservas": "Reservas",
+            "espacosAtivos": "Espaços ativos"
+        },
+        "gestao": {
+            "titulo": "Gestão centralizada",
+            "descricao": "Administre edifícios, pisos, setores, secretárias e utilizadores numa única plataforma.",
+            "edificio": "Edifício",
+            "piso": "Piso",
+            "setor": "Setor",
+            "secretaria": "Secretária",
+            "utilizadores": "Utilizadores"
+        },
+        "seguranca": {
+            "titulo": "Segurança e controlo",
+            "descricao": "Garanta a proteção dos dados e controle o acesso através de diferentes permissões.",
+            "acessoAdmin": "Acesso de administrador",
+            "acessoUtilizador": "Acesso de utilizador"
+        },
+        "suporte": {
+            "titulo": "Suporte em tempo real",
+            "descricao": "Tire dúvidas a qualquer momento através do chat.",
+            "mensagemBot": "Olá! Como podemos ajudar?",
+            "mensagemUtilizador": "Quero alterar a minha reserva.",
+            "online": "Estamos online"
+        }
+    },
+    "howItWorks": {
+        "eyebrow": "Como reservar",
+        "titulo": "Comece a trabalhar em",
+        "tituloDestaque": "poucos minutos",
+        "descricao": "Da escolha do espaço ao check-in, todo o processo foi pensado para ser rápido, intuitivo e sem complicações.",
+        "passoLabel": "Passo {{numero}}",
+        "passos": [
+            {
+                "titulo": "Escolha o espaço",
+                "descricao": "Consulte os espaços disponíveis e encontre a opção ideal para o seu dia de trabalho."
+            },
+            {
+                "titulo": "Faça a reserva",
+                "descricao": "Selecione a data, o período e confirme a sua reserva em poucos segundos."
+            },
+            {
+                "titulo": "Faça o check-in",
+                "descricao": "Utilize o QR Code para confirmar a sua chegada de forma rápida e segura."
+            },
+            {
+                "titulo": "Aproveite o espaço",
+                "descricao": "Trabalhe num ambiente confortável, moderno e preparado para si."
+            }
+        ]
+    },
+    "spaces": {
+        "eyebrow": "Os nossos espaços",
+        "titulo": "Ambientes pensados para",
+        "tituloDestaque": "trabalhar melhor",
+        "descricao": "Descubra espaços modernos, confortáveis e preparados para diferentes formas de trabalhar.",
+        "anterior": "Ver espaço anterior",
+        "seguinte": "Ver próximo espaço",
+        "verEspaco": "Ver {{titulo}}",
+        "itens": [
+            {
+                "titulo": "Espaço de trabalho",
+                "descricao": "Um ambiente moderno, confortável e preparado para promover a produtividade ao longo do dia.",
+                "categoria": "Coworking",
+                "localizacao": "Piso 1 · Setor A"
+            },
+            {
+                "titulo": "Espaço comum",
+                "descricao": "Uma área aberta e versátil para trabalhar, colaborar com a equipa e partilhar novas ideias.",
+                "categoria": "Colaboração",
+                "localizacao": "Piso 0 · Área comum"
+            },
+            {
+                "titulo": "Sala de reunião",
+                "descricao": "Salas totalmente equipadas para reuniões, apresentações e momentos de trabalho em equipa.",
+                "categoria": "Reuniões",
+                "localizacao": "Piso 2 · Setor B"
+            },
+            {
+                "titulo": "Lounge",
+                "descricao": "Um ambiente descontraído para fazer uma pausa, conversar e criar novas ligações profissionais.",
+                "categoria": "Conforto",
+                "localizacao": "Piso 0 · Lounge"
+            },
+            {
+                "titulo": "Receção",
+                "descricao": "Uma entrada moderna, profissional e acolhedora para receber utilizadores e visitantes.",
+                "categoria": "Acolhimento",
+                "localizacao": "Piso 0 · Entrada"
+            },
+            {
+                "titulo": "Escritório privado",
+                "descricao": "Mais privacidade, concentração e conforto para equipas e profissionais que precisam de foco.",
+                "categoria": "Privacidade",
+                "localizacao": "Piso 3 · Setor C"
+            },
+            {
+                "titulo": "Phone Booth",
+                "descricao": "Cabines silenciosas preparadas para chamadas, videoconferências e reuniões individuais.",
+                "categoria": "Chamadas",
+                "localizacao": "Piso 1 · Setor B"
+            },
+            {
+                "titulo": "Terraço",
+                "descricao": "Um espaço exterior agradável para trabalhar, relaxar ou fazer uma pausa durante o dia.",
+                "categoria": "Exterior",
+                "localizacao": "Piso 4 · Terraço"
+            }
+        ]
+    },
+    "pricing": {
+        "eyebrow": "Preços",
+        "tituloPrefixo": "Escolha a opção ideal para",
+        "tituloDestaque": "a sua rotina",
+        "descricao": "Utilize o SpaceHub por um período, durante alguns dias ou através de um plano de utilização regular.",
+        "periodos": {
+            "daily": "Diário",
+            "weekly": "Semanal",
+            "monthly": "Mensal",
+            "annual": "Anual"
+        },
+        "periodosDiarios": {
+            "morning": { "label": "Manhã", "horario": "08:00 – 13:00" },
+            "afternoon": { "label": "Tarde", "horario": "13:00 – 18:00" },
+            "fullDay": { "label": "Dia inteiro", "horario": "08:00 – 18:00" }
+        },
+        "planos": {
+            "dailyMorning": {
+                "titulo": "Passe diário — Manhã",
+                "descricao": "Ideal para quem precisa de um espaço durante o período da manhã.",
+                "sufixo": "/ manhã"
+            },
+            "dailyAfternoon": {
+                "titulo": "Passe diário — Tarde",
+                "descricao": "Uma opção flexível para trabalhar durante o período da tarde.",
+                "sufixo": "/ tarde"
+            },
+            "dailyFullDay": {
+                "titulo": "Passe diário — Dia inteiro",
+                "descricao": "Acesso ao espaço durante todo o horário de funcionamento.",
+                "sufixo": "/ dia"
+            },
+            "weekly": {
+                "titulo": "Plano semanal",
+                "descricao": "A partir de €45 por semana para utilização durante o dia inteiro.",
+                "sufixo": "/ semana"
+            },
+            "monthly": {
+                "titulo": "Plano mensal",
+                "descricao": "Plano mensal com 10% de desconto.",
+                "sufixo": "/ mês"
+            },
+            "annual": {
+                "titulo": "Plano anual",
+                "descricao": "Plano anual com 20% de desconto.",
+                "sufixo": "/ ano"
+            }
+        },
+        "planoSelecionado": "Plano selecionado",
+        "aPartirDe": "A partir de",
+        "equivaleAnual": "Equivale a aproximadamente €158 por mês.",
+        "incluidoTitulo": "Incluído nesta opção",
+        "incluidoDescricao": "Tudo o que precisa para trabalhar com conforto.",
+        "beneficios": [
+            "Reserva de secretárias e espaços de trabalho",
+            "Check-in rápido através de QR Code",
+            "Acesso ao mapa de disponibilidade",
+            "Gestão das reservas numa única plataforma",
+            "Cancelamento e consulta do histórico",
+            "Suporte SpaceHub"
+        ],
+        "ctaConsultarDisponibilidade": "Consultar disponibilidade",
+        "ctaCriarConta": "Criar conta",
+        "ctaReservarAgora": "Reservar agora",
+        "avisoDisponibilidade": "Pode consultar a disponibilidade antes de confirmar a reserva."
+    },
+    "benefits": {
+        "imagemAlt": "Painel do SpaceHub com reservas, ocupação e estatísticas em tempo real",
+        "eyebrow": "Benefícios",
+        "tituloLinha1": "Mais liberdade.",
+        "tituloLinha2": "Menos complicações.",
+        "descricao": "Encontre o espaço certo, consulte a disponibilidade e reserve tudo de forma simples, rápida e segura.",
+        "itens": [
+            "Encontre espaços livres em tempo real",
+            "Reserve em poucos passos",
+            "Faça check-in através de QR Code",
+            "Consulte ou cancele quando precisar"
+        ],
+        "rgpd": "Os seus dados protegidos em conformidade com o RGPD.",
+        "indicadores": {
+            "acesso": { "valor": "24h", "label": "Acesso à plataforma" },
+            "processo": { "valor": "100%", "label": "Processo digital" },
+            "dados": { "valor": "Tempo real", "label": "Dados atualizados" }
+        }
+    },
+    "testimonials": {
+        "eyebrow": "O que dizem sobre nós",
+        "titulo": "Equipas que já trabalham melhor com o SpaceHub",
+        "descricao": "Experiências que mostram como diferentes perfis podem aproveitar a plataforma no dia a dia.",
+        "itens": [
+            {
+                "citacao": "A reserva de secretárias deixou de ser um problema. Em menos de um minuto sei onde vou trabalhar amanhã.",
+                "nome": "Mariana Sousa",
+                "cargo": "Coordenadora de RH, Grupo Aurora"
+            },
+            {
+                "citacao": "O check-in por QR Code na própria secretária poupa-nos imenso tempo. Já não há filas nem confusão de manhã.",
+                "nome": "Rui Pereira",
+                "cargo": "Gestor de instalações, Nova Workspaces"
+            },
+            {
+                "citacao": "O lounge exterior é o meu espaço preferido para fazer uma pausa ou trabalhar num dia de sol. Reservo tudo pela mesma plataforma, sem complicações.",
+                "nome": "Catarina Ferreira",
+                "cargo": "Consultora, Consultora Vórtice"
+            },
+            {
+                "citacao": "O mapa em tempo real evita conflitos de sala todos os dias. Toda a gente vê a ocupação atualizada.",
+                "nome": "João Lima",
+                "cargo": "Facilities, Espaço Meridiano"
+            }
+        ]
+    },
+    "cookies": {
+        "voltarAoTopo": "Voltar ao topo",
+        "gerirCookies": "Gerir cookies",
+        "gerirPreferencias": "Gerir preferências de cookies",
+        "titulo": "Utilizamos cookies",
+        "descricao": "Cookies essenciais garantem o funcionamento da SpaceHub. Com o seu consentimento, ativamos também cookies de análise.",
+        "politicaDeCookies": "Política de Cookies",
+        "soEssenciais": "Só essenciais",
+        "aceitarTodos": "Aceitar todos",
+        "preferenciasTitulo": "Preferências de cookies",
+        "fechar": "Fechar",
+        "preferenciasDescricao": "Escolha que cookies podemos usar. Pode alterar esta decisão sempre que quiser através deste botão.",
+        "essenciaisTitulo": "Cookies essenciais",
+        "essenciaisDescricao": "Sempre ativos, necessários para o funcionamento da SpaceHub.",
+        "analiseTitulo": "Cookies de análise",
+        "analiseDescricao": "Ajudam-nos a perceber como a plataforma é utilizada.",
+        "ativarAnalise": "Ativar cookies de análise",
+        "consultarPolitica": "Consultar a Política de Cookies",
+        "guardarPreferencias": "Guardar preferências"
+    },
+    "footer": {
+        "descricao": "Uma plataforma moderna para reservar, gerir e otimizar espaços de trabalho de forma simples, segura e eficiente.",
+        "navegacao": "Navegação",
+        "informacoes": "Informações",
+        "contacto": "Contacto",
+        "termosDeUtilizacao": "Termos de Utilização",
+        "politicaDePrivacidade": "Política de Privacidade",
+        "politicaDeCookies": "Política de Cookies",
+        "morada": "Braga, Portugal",
+        "direitosReservados": "© {{ano}} SpaceHub. Todos os direitos reservados."
+    }
+}

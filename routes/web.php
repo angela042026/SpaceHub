@@ -16,6 +16,7 @@ use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\GoogleCalendarAuthController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MapaController;
 use App\Http\Controllers\NotificacaoController;
 use App\Http\Controllers\PedidoSuporteController;
@@ -39,6 +40,10 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 })->name('home');
+
+// Troca de idioma — acessível a visitantes e autenticados, é uma
+// preferência de apresentação, não uma ação que exija sessão.
+Route::post('/locale', [LocaleController::class, 'update'])->name('locale.update');
 
 // ==========================
 // Páginas legais (públicas)

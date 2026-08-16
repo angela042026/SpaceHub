@@ -1,10 +1,12 @@
 import { Link, usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     CalendarPlus,
     MapPin,
 } from 'lucide-react';
 
 export default function HeroSection() {
+    const { t } = useTranslation('landing');
     const { auth } = usePage().props;
 
     const scrollToSpaces = () => {
@@ -26,7 +28,7 @@ export default function HeroSection() {
 
                     <img
                         src="/images/landing/espaco-comum.png"
-                        alt="Espaço de coworking moderno da SpaceHub"
+                        alt={t('hero.imagemAlt')}
                         fetchpriority="high"
                         className="h-full w-full object-cover object-center"
                     />
@@ -41,19 +43,16 @@ export default function HeroSection() {
             <div className="relative mx-auto flex min-h-[720px] max-w-[1500px] items-center px-6 py-20 lg:px-10 lg:py-28">
                 <div className="max-w-3xl">
                     <h1 className="text-[32px] font-black leading-[1.02] tracking-[-0.03em] text-white sm:text-[43px] lg:text-[54px] xl:text-[58px]">
-                        Reserve o espaço ideal
+                        {t('hero.tituloLinha1')}
                         <br />
-                        para trabalhar{' '}
+                        {t('hero.tituloLinha2')}{' '}
                         <span className="text-[#14B8A6]">
-                            melhor.
+                            {t('hero.tituloDestaque')}
                         </span>
                     </h1>
 
                     <p className="mt-7 max-w-xl text-lg leading-8 text-slate-200">
-                        Reserve secretárias, salas de reunião e espaços de
-                        coworking em segundos. Faça check-in por QR Code e
-                        acompanhe toda a ocupação em tempo real numa única
-                        plataforma.
+                        {t('hero.descricao')}
                     </p>
 
                     <div className="mt-8 flex flex-wrap gap-4">
@@ -68,8 +67,8 @@ export default function HeroSection() {
                             <CalendarPlus className="h-[18px] w-[18px]" />
 
                             {auth?.user
-                                ? 'Reservar um espaço'
-                                : 'Entrar para reservar'}
+                                ? t('hero.ctaReservar')
+                                : t('hero.ctaEntrarReservar')}
                         </Link>
 
                         <button
@@ -79,7 +78,7 @@ export default function HeroSection() {
                         >
                             <MapPin className="h-[18px] w-[18px]" />
 
-                            Conhecer os espaços
+                            {t('hero.ctaConhecerEspacos')}
                         </button>
                     </div>
                 </div>

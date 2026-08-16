@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import OfficeMap from '@/Components/Dashboard/OfficeMap/OfficeMap';
@@ -14,6 +15,7 @@ export default function Funcionario({
     pisos,
     edificios,
 }) {
+    const { t } = useTranslation('dashboard');
     const [selectedFloor, setSelectedFloor] = useState(pisos?.[0]?.codigo ?? '');
     const [selectedEdificio, setSelectedEdificio] = useState(edificios?.[0]?.id ?? '');
 
@@ -21,26 +23,26 @@ export default function Funcionario({
 
     return (
         <>
-            <Head title="Dashboard" />
+            <Head title={t('titulo')} />
 
             <DashboardLayout>
                 <section className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                     <StatCard
-                        title="Secretárias Ocupadas"
+                        title={t('funcionario.secretariasOcupadas')}
                         value={secretariasOcupadas}
                         changePercent={null}
                         icon={Users}
                     />
 
                     <StatCard
-                        title="Secretárias Livres"
+                        title={t('funcionario.secretariasLivres')}
                         value={stats.mesasLivres.value}
                         changePercent={stats.mesasLivres.changePercent}
                         icon={Armchair}
                     />
 
                     <StatCard
-                        title="Check-ins Hoje"
+                        title={t('funcionario.checkinsHoje')}
                         value={stats.checkinsHoje.value}
                         changePercent={stats.checkinsHoje.changePercent}
                         icon={CheckCircle2}

@@ -1,0 +1,296 @@
+{
+    "nav": {
+        "funcionalidades": "Features",
+        "comoReservar": "How to book",
+        "espacos": "Spaces",
+        "precos": "Pricing",
+        "beneficios": "Benefits",
+        "contacto": "Contact",
+        "abrirMenu": "Open menu",
+        "paginaInicial": "SpaceHub home page",
+        "dashboard": "Dashboard",
+        "entrar": "Log in"
+    },
+    "hero": {
+        "imagemAlt": "Modern SpaceHub coworking space",
+        "tituloLinha1": "Book the perfect space",
+        "tituloLinha2": "to work",
+        "tituloDestaque": "better.",
+        "descricao": "Book desks, meeting rooms and coworking spaces in seconds. Check in with a QR Code and track occupancy in real time, all in one platform.",
+        "ctaReservar": "Book a space",
+        "ctaEntrarReservar": "Log in to book",
+        "ctaConhecerEspacos": "Explore our spaces"
+    },
+    "features": {
+        "eyebrow": "Features",
+        "titulo": "Everything you need. In one place.",
+        "descricao": "Book, track, and manage your spaces simply and intuitively.",
+        "mapa": {
+            "titulo": "Interactive map",
+            "descricao": "See availability and find the ideal spot.",
+            "imagemAlt": "Interactive office map"
+        },
+        "historico": {
+            "titulo": "History and cancellations",
+            "descricao": "Check past bookings and cancel whenever you need to.",
+            "concluida": "Completed",
+            "cancelada": "Cancelled"
+        },
+        "estatisticas": {
+            "titulo": "Smart analytics",
+            "descricao": "Track space usage and make decisions based on real data.",
+            "utilizacaoMedia": "Average usage",
+            "reservas": "Bookings",
+            "espacosAtivos": "Active spaces"
+        },
+        "gestao": {
+            "titulo": "Centralised management",
+            "descricao": "Manage buildings, floors, sectors, desks, and users in a single platform.",
+            "edificio": "Building",
+            "piso": "Floor",
+            "setor": "Sector",
+            "secretaria": "Desk",
+            "utilizadores": "Users"
+        },
+        "seguranca": {
+            "titulo": "Security and control",
+            "descricao": "Keep data protected and control access through different permission levels.",
+            "acessoAdmin": "Administrator access",
+            "acessoUtilizador": "User access"
+        },
+        "suporte": {
+            "titulo": "Real-time support",
+            "descricao": "Get answers anytime through the chat.",
+            "mensagemBot": "Hi! How can we help?",
+            "mensagemUtilizador": "I'd like to change my booking.",
+            "online": "We're online"
+        }
+    },
+    "howItWorks": {
+        "eyebrow": "How to book",
+        "titulo": "Get to work in",
+        "tituloDestaque": "just a few minutes",
+        "descricao": "From choosing a space to checking in, the whole process was designed to be fast, intuitive, and hassle-free.",
+        "passoLabel": "Step {{numero}}",
+        "passos": [
+            {
+                "titulo": "Choose a space",
+                "descricao": "Check the available spaces and find the ideal option for your workday."
+            },
+            {
+                "titulo": "Make the booking",
+                "descricao": "Select the date, the period, and confirm your booking in seconds."
+            },
+            {
+                "titulo": "Check in",
+                "descricao": "Use the QR Code to confirm your arrival quickly and securely."
+            },
+            {
+                "titulo": "Enjoy the space",
+                "descricao": "Work in a comfortable, modern environment, ready for you."
+            }
+        ]
+    },
+    "spaces": {
+        "eyebrow": "Our spaces",
+        "titulo": "Spaces designed to",
+        "tituloDestaque": "work better",
+        "descricao": "Discover modern, comfortable spaces designed for different ways of working.",
+        "anterior": "View previous space",
+        "seguinte": "View next space",
+        "verEspaco": "View {{titulo}}",
+        "itens": [
+            {
+                "titulo": "Workspace",
+                "descricao": "A modern, comfortable environment designed to boost productivity throughout the day.",
+                "categoria": "Coworking",
+                "localizacao": "Floor 1 · Sector A"
+            },
+            {
+                "titulo": "Common area",
+                "descricao": "An open, versatile space to work, collaborate with your team, and share new ideas.",
+                "categoria": "Collaboration",
+                "localizacao": "Floor 0 · Common area"
+            },
+            {
+                "titulo": "Meeting room",
+                "descricao": "Fully equipped rooms for meetings, presentations, and team work sessions.",
+                "categoria": "Meetings",
+                "localizacao": "Floor 2 · Sector B"
+            },
+            {
+                "titulo": "Lounge",
+                "descricao": "A relaxed setting to take a break, chat, and build new professional connections.",
+                "categoria": "Comfort",
+                "localizacao": "Floor 0 · Lounge"
+            },
+            {
+                "titulo": "Reception",
+                "descricao": "A modern, professional, and welcoming entrance for users and visitors.",
+                "categoria": "Welcome",
+                "localizacao": "Floor 0 · Entrance"
+            },
+            {
+                "titulo": "Private office",
+                "descricao": "More privacy, focus, and comfort for teams and professionals who need to concentrate.",
+                "categoria": "Privacy",
+                "localizacao": "Floor 3 · Sector C"
+            },
+            {
+                "titulo": "Phone Booth",
+                "descricao": "Quiet booths for calls, video conferences, and one-on-one meetings.",
+                "categoria": "Calls",
+                "localizacao": "Floor 1 · Sector B"
+            },
+            {
+                "titulo": "Terrace",
+                "descricao": "A pleasant outdoor space to work, relax, or take a break during the day.",
+                "categoria": "Outdoor",
+                "localizacao": "Floor 4 · Terrace"
+            }
+        ]
+    },
+    "pricing": {
+        "eyebrow": "Pricing",
+        "tituloPrefixo": "Choose the right option for",
+        "tituloDestaque": "your routine",
+        "descricao": "Use SpaceHub for a single period, for a few days, or through a regular usage plan.",
+        "periodos": {
+            "daily": "Daily",
+            "weekly": "Weekly",
+            "monthly": "Monthly",
+            "annual": "Annual"
+        },
+        "periodosDiarios": {
+            "morning": { "label": "Morning", "horario": "08:00 – 13:00" },
+            "afternoon": { "label": "Afternoon", "horario": "13:00 – 18:00" },
+            "fullDay": { "label": "Full day", "horario": "08:00 – 18:00" }
+        },
+        "planos": {
+            "dailyMorning": {
+                "titulo": "Daily pass — Morning",
+                "descricao": "Ideal for anyone who needs a space during the morning.",
+                "sufixo": "/ morning"
+            },
+            "dailyAfternoon": {
+                "titulo": "Daily pass — Afternoon",
+                "descricao": "A flexible option to work during the afternoon.",
+                "sufixo": "/ afternoon"
+            },
+            "dailyFullDay": {
+                "titulo": "Daily pass — Full day",
+                "descricao": "Access to the space for the entire opening hours.",
+                "sufixo": "/ day"
+            },
+            "weekly": {
+                "titulo": "Weekly plan",
+                "descricao": "From €45 per week for full-day use.",
+                "sufixo": "/ week"
+            },
+            "monthly": {
+                "titulo": "Monthly plan",
+                "descricao": "Monthly plan with a 10% discount.",
+                "sufixo": "/ month"
+            },
+            "annual": {
+                "titulo": "Annual plan",
+                "descricao": "Annual plan with a 20% discount.",
+                "sufixo": "/ year"
+            }
+        },
+        "planoSelecionado": "Selected plan",
+        "aPartirDe": "From",
+        "equivaleAnual": "Equivalent to approximately €158 per month.",
+        "incluidoTitulo": "Included in this option",
+        "incluidoDescricao": "Everything you need to work comfortably.",
+        "beneficios": [
+            "Booking of desks and workspaces",
+            "Fast check-in via QR Code",
+            "Access to the availability map",
+            "Manage your bookings in a single platform",
+            "Cancel and check your history",
+            "SpaceHub support"
+        ],
+        "ctaConsultarDisponibilidade": "Check availability",
+        "ctaCriarConta": "Create account",
+        "ctaReservarAgora": "Book now",
+        "avisoDisponibilidade": "You can check availability before confirming your booking."
+    },
+    "benefits": {
+        "imagemAlt": "SpaceHub dashboard with real-time bookings, occupancy, and statistics",
+        "eyebrow": "Benefits",
+        "tituloLinha1": "More freedom.",
+        "tituloLinha2": "Less hassle.",
+        "descricao": "Find the right space, check availability, and book it all simply, quickly, and securely.",
+        "itens": [
+            "Find available spaces in real time",
+            "Book in just a few steps",
+            "Check in with a QR Code",
+            "Check or cancel whenever you need to"
+        ],
+        "rgpd": "Your data protected in compliance with GDPR.",
+        "indicadores": {
+            "acesso": { "valor": "24h", "label": "Platform access" },
+            "processo": { "valor": "100%", "label": "Digital process" },
+            "dados": { "valor": "Real time", "label": "Up-to-date data" }
+        }
+    },
+    "testimonials": {
+        "eyebrow": "What people say about us",
+        "titulo": "Teams already working better with SpaceHub",
+        "descricao": "Real experiences showing how different people make the most of the platform every day.",
+        "itens": [
+            {
+                "citacao": "Booking desks stopped being a problem. In under a minute I know where I'll be working tomorrow.",
+                "nome": "Mariana Sousa",
+                "cargo": "HR Coordinator, Grupo Aurora"
+            },
+            {
+                "citacao": "QR Code check-in at the desk itself saves us a huge amount of time. No more queues or confusion in the morning.",
+                "nome": "Rui Pereira",
+                "cargo": "Facilities Manager, Nova Workspaces"
+            },
+            {
+                "citacao": "The outdoor lounge is my favourite spot for a break or to work on a sunny day. I book everything through the same platform, no hassle.",
+                "nome": "Catarina Ferreira",
+                "cargo": "Consultant, Consultora Vórtice"
+            },
+            {
+                "citacao": "The real-time map avoids room conflicts every day. Everyone sees up-to-date occupancy.",
+                "nome": "João Lima",
+                "cargo": "Facilities, Espaço Meridiano"
+            }
+        ]
+    },
+    "cookies": {
+        "voltarAoTopo": "Back to top",
+        "gerirCookies": "Manage cookies",
+        "gerirPreferencias": "Manage cookie preferences",
+        "titulo": "We use cookies",
+        "descricao": "Essential cookies keep SpaceHub running. With your consent, we also enable analytics cookies.",
+        "politicaDeCookies": "Cookie Policy",
+        "soEssenciais": "Essential only",
+        "aceitarTodos": "Accept all",
+        "preferenciasTitulo": "Cookie preferences",
+        "fechar": "Close",
+        "preferenciasDescricao": "Choose which cookies we can use. You can change this choice anytime through this button.",
+        "essenciaisTitulo": "Essential cookies",
+        "essenciaisDescricao": "Always active, required for SpaceHub to work.",
+        "analiseTitulo": "Analytics cookies",
+        "analiseDescricao": "Help us understand how the platform is used.",
+        "ativarAnalise": "Enable analytics cookies",
+        "consultarPolitica": "View the Cookie Policy",
+        "guardarPreferencias": "Save preferences"
+    },
+    "footer": {
+        "descricao": "A modern platform to book, manage, and optimise workspaces simply, securely, and efficiently.",
+        "navegacao": "Navigation",
+        "informacoes": "Information",
+        "contacto": "Contact",
+        "termosDeUtilizacao": "Terms of Use",
+        "politicaDePrivacidade": "Privacy Policy",
+        "politicaDeCookies": "Cookie Policy",
+        "morada": "Braga, Portugal",
+        "direitosReservados": "© {{ano}} SpaceHub. All rights reserved."
+    }
+}

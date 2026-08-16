@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Lock, X } from 'lucide-react';
 import { loadAnalytics } from '@/Lib/analytics';
 import { COOKIE_CONSENT_KEY } from '@/Lib/cookieConsent';
 
 export default function CookiePreferencesModal({ onClose }) {
+    const { t } = useTranslation('landing');
     const [analyticsEnabled, setAnalyticsEnabled] = useState(
         () => localStorage.getItem(COOKIE_CONSENT_KEY) === 'accepted',
     );
@@ -56,13 +58,13 @@ export default function CookiePreferencesModal({ onClose }) {
                         id="cookie-preferences-title"
                         className="text-lg font-bold text-[#071A33]"
                     >
-                        Preferências de cookies
+                        {t('cookies.preferenciasTitulo')}
                     </h2>
 
                     <button
                         type="button"
                         onClick={onClose}
-                        aria-label="Fechar"
+                        aria-label={t('cookies.fechar')}
                         className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
                     >
                         <X size={18} />
@@ -70,19 +72,17 @@ export default function CookiePreferencesModal({ onClose }) {
                 </div>
 
                 <p className="mt-2 text-sm leading-6 text-slate-500">
-                    Escolha que cookies podemos usar. Pode alterar esta
-                    decisão sempre que quiser através deste botão.
+                    {t('cookies.preferenciasDescricao')}
                 </p>
 
                 <div className="mt-5 space-y-3">
                     <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
                         <div>
                             <p className="text-sm font-semibold text-[#071A33]">
-                                Cookies essenciais
+                                {t('cookies.essenciaisTitulo')}
                             </p>
                             <p className="text-xs text-slate-500">
-                                Sempre ativos, necessários para o
-                                funcionamento da SpaceHub.
+                                {t('cookies.essenciaisDescricao')}
                             </p>
                         </div>
 
@@ -103,11 +103,10 @@ export default function CookiePreferencesModal({ onClose }) {
                     <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 px-4 py-3">
                         <div>
                             <p className="text-sm font-semibold text-[#071A33]">
-                                Cookies de análise
+                                {t('cookies.analiseTitulo')}
                             </p>
                             <p className="text-xs text-slate-500">
-                                Ajudam-nos a perceber como a plataforma é
-                                utilizada.
+                                {t('cookies.analiseDescricao')}
                             </p>
                         </div>
 
@@ -115,7 +114,7 @@ export default function CookiePreferencesModal({ onClose }) {
                             type="button"
                             role="switch"
                             aria-checked={analyticsEnabled}
-                            aria-label="Ativar cookies de análise"
+                            aria-label={t('cookies.ativarAnalise')}
                             onClick={() =>
                                 setAnalyticsEnabled(
                                     (atual) => !atual,
@@ -142,7 +141,7 @@ export default function CookiePreferencesModal({ onClose }) {
                     href={route('legal.cookies')}
                     className="mt-4 inline-block text-xs font-semibold text-[#0F766E] underline-offset-4 hover:underline"
                 >
-                    Consultar a Política de Cookies
+                    {t('cookies.consultarPolitica')}
                 </a>
 
                 <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
@@ -151,7 +150,7 @@ export default function CookiePreferencesModal({ onClose }) {
                         onClick={() => guardar('rejected')}
                         className="h-11 flex-1 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-[#071A33] transition hover:bg-slate-50"
                     >
-                        Só essenciais
+                        {t('cookies.soEssenciais')}
                     </button>
 
                     <button
@@ -165,7 +164,7 @@ export default function CookiePreferencesModal({ onClose }) {
                         }
                         className="h-11 flex-1 rounded-xl border border-[#14B8A6]/40 bg-[#EAFBF8] px-4 text-sm font-semibold text-[#0F766E] transition hover:bg-[#14B8A6]/15"
                     >
-                        Guardar preferências
+                        {t('cookies.guardarPreferencias')}
                     </button>
 
                     <button
@@ -173,7 +172,7 @@ export default function CookiePreferencesModal({ onClose }) {
                         onClick={() => guardar('accepted')}
                         className="h-11 flex-1 rounded-xl bg-[#14B8A6] px-4 text-sm font-bold text-[#03172B] shadow-lg shadow-[#14B8A6]/25 transition hover:bg-[#0d9488]"
                     >
-                        Aceitar todos
+                        {t('cookies.aceitarTodos')}
                     </button>
                 </div>
             </div>

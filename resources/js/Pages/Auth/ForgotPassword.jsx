@@ -3,6 +3,7 @@ import AuthCard from '@/Components/Auth/AuthCard';
 import AuthField from '@/Components/Auth/AuthField';
 import AuthLayout from '@/Components/Auth/AuthLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     Mail,
@@ -10,6 +11,7 @@ import {
 } from 'lucide-react';
 
 export default function ForgotPassword({ status }) {
+    const { t } = useTranslation('auth');
     const {
         data,
         setData,
@@ -30,16 +32,16 @@ export default function ForgotPassword({ status }) {
 
     return (
         <>
-            <Head title="Recuperar senha" />
+            <Head title={`${t('recuperarSenha.titulo')} ${t('recuperarSenha.tituloDestaque')}`} />
 
             <AuthLayout
-                title="Recupere a sua"
-                highlightedTitle="senha"
-                subtitle="Introduza o seu e-mail e enviaremos um link para definir uma nova senha."
-                heroTitle="Recupere o acesso."
-                heroPrefix="De forma"
-                heroHighlightedTitle="segura."
-                heroDescription="Enviaremos um link de recuperação para o endereço associado à sua conta."
+                title={t('recuperarSenha.titulo')}
+                highlightedTitle={t('recuperarSenha.tituloDestaque')}
+                subtitle={t('recuperarSenha.subtitulo')}
+                heroTitle={t('recuperarSenha.heroTitulo')}
+                heroPrefix={t('recuperarSenha.heroPrefixo')}
+                heroHighlightedTitle={t('recuperarSenha.heroTituloDestaque')}
+                heroDescription={t('recuperarSenha.heroDescricao')}
             >
                 {status && (
                     <output
@@ -77,19 +79,17 @@ export default function ForgotPassword({ status }) {
                                 dark:text-slate-300
                             "
                         >
-                            Esqueceu a sua senha? Não há problema.
-                            Indique o seu e-mail e enviaremos um link
-                            para criar uma nova.
+                            {t('recuperarSenha.aviso')}
                         </div>
 
                         <AuthField
                             id="email"
-                            label="E-mail"
+                            label={t('campos.email')}
                             name="email"
                             type="email"
                             icon={Mail}
                             value={data.email}
-                            placeholder="exemplo@spacehub.pt"
+                            placeholder={t('campos.emailPlaceholder')}
                             autoComplete="username"
                             autoFocus
                             error={errors.email}
@@ -103,8 +103,8 @@ export default function ForgotPassword({ status }) {
 
                         <AuthActions
                             processing={processing}
-                            submitText="Enviar link de recuperação"
-                            processingText="A enviar..."
+                            submitText={t('recuperarSenha.enviarLink')}
+                            processingText={t('recuperarSenha.aEnviar')}
                             submitIcon={Send}
                             showSecondary={false}
                         />
@@ -118,7 +118,7 @@ export default function ForgotPassword({ status }) {
                         dark:text-slate-300
                     "
                 >
-                    Lembrou-se da senha?{' '}
+                    {t('recuperarSenha.lembrouSeDaSenha')}{' '}
 
                     <Link
                         href={route('login')}
@@ -140,7 +140,7 @@ export default function ForgotPassword({ status }) {
                             aria-hidden="true"
                         />
 
-                        Voltar ao login
+                        {t('recuperarSenha.voltarAoLogin')}
                     </Link>
                 </p>
             </AuthLayout>

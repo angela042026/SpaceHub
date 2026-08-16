@@ -1,44 +1,9 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Star } from 'lucide-react';
-
-const testimonials = [
-    {
-        quote: 'A reserva de secretárias deixou de ser um problema. Em menos de um minuto sei onde vou trabalhar amanhã.',
-        name: 'Mariana Sousa',
-        role: 'Coordenadora de RH, Grupo Aurora',
-        initials: 'MS',
-        color: '#14B8A6',
-        photo: 'https://randomuser.me/api/portraits/women/44.jpg',
-    },
-    {
-        quote: 'O check-in por QR Code na própria secretária poupa-nos imenso tempo. Já não há filas nem confusão de manhã.',
-        name: 'Rui Pereira',
-        role: 'Gestor de instalações, Nova Workspaces',
-        initials: 'RP',
-        color: '#0F766E',
-        photo: 'https://randomuser.me/api/portraits/men/32.jpg',
-    },
-    {
-        quote: 'O lounge exterior é o meu espaço preferido para fazer uma pausa ou trabalhar num dia de sol. Reservo tudo pela mesma plataforma, sem complicações.',
-        name: 'Catarina Ferreira',
-        role: 'Consultora, Consultora Vórtice',
-        initials: 'CF',
-        color: '#03172B',
-        photo: 'https://randomuser.me/api/portraits/women/68.jpg',
-    },
-    {
-        quote: 'O mapa em tempo real evita conflitos de sala todos os dias. Toda a gente vê a ocupação atualizada.',
-        name: 'João Lima',
-        role: 'Facilities, Espaço Meridiano',
-        initials: 'JL',
-        color: '#2DD4BF',
-        photo: 'https://i.pravatar.cc/150?u=joao-lima-spacehub',
-    },
-];
 
 // Triplicado para garantir preenchimento em qualquer largura de ecrã.
 // A keyframe marquee deve ir de 0 a -33.333% (ver tailwind.config.js).
-const cards = [...testimonials, ...testimonials, ...testimonials];
 
 function Avatar({ photo, initials, color, name }) {
     const [failed, setFailed] = useState(false);
@@ -65,7 +30,25 @@ function Avatar({ photo, initials, color, name }) {
     );
 }
 
+const testimonialMeta = [
+    { initials: 'MS', color: '#14B8A6', photo: 'https://randomuser.me/api/portraits/women/44.jpg' },
+    { initials: 'RP', color: '#0F766E', photo: 'https://randomuser.me/api/portraits/men/32.jpg' },
+    { initials: 'CF', color: '#03172B', photo: 'https://randomuser.me/api/portraits/women/68.jpg' },
+    { initials: 'JL', color: '#2DD4BF', photo: 'https://i.pravatar.cc/150?u=joao-lima-spacehub' },
+];
+
 export default function TestimonialsSection() {
+    const { t } = useTranslation('landing');
+
+    const testimonials = t('testimonials.itens', { returnObjects: true }).map((item, indice) => ({
+        quote: item.citacao,
+        name: item.nome,
+        role: item.cargo,
+        ...testimonialMeta[indice],
+    }));
+
+    const cards = [...testimonials, ...testimonials, ...testimonials];
+
     return (
         <section
             id="testemunhos"
@@ -73,16 +56,15 @@ export default function TestimonialsSection() {
         >
             <div className="mx-auto max-w-3xl px-6 text-center">
                 <span className="text-sm font-bold uppercase tracking-[0.2em] text-[#14B8A6]">
-                    O que dizem sobre nós
+                    {t('testimonials.eyebrow')}
                 </span>
 
                 <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.04em] text-[#071A33] sm:text-5xl">
-                    Equipas que já trabalham melhor com o SpaceHub
+                    {t('testimonials.titulo')}
                 </h2>
 
                 <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600">
-                    Experiências que mostram como diferentes perfis podem
-                    aproveitar a plataforma no dia a dia.
+                    {t('testimonials.descricao')}
                 </p>
             </div>
 

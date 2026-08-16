@@ -1,27 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
-    ChevronDown,
-    Globe2,
     LogIn,
     Menu,
     X,
 } from 'lucide-react';
-
-const navigation = [
-    { label: 'Funcionalidades', href: '#funcionalidades' },
-    { label: 'Como reservar', href: '#como-funciona' },
-    { label: 'Espaços', href: '#espacos' },
-    { label: 'Preços', href: '#precos' },
-    { label: 'Benefícios', href: '#beneficios' },
-    { label: 'Contacto', href: '#contacto' },
-];
+import LanguageSwitcher from '@/Components/LanguageSwitcher';
 
 export default function Navbar() {
+    const { t } = useTranslation('landing');
     const { auth } = usePage().props;
 
+    const navigation = [
+        { label: t('nav.funcionalidades'), href: '#funcionalidades' },
+        { label: t('nav.comoReservar'), href: '#como-funciona' },
+        { label: t('nav.espacos'), href: '#espacos' },
+        { label: t('nav.precos'), href: '#precos' },
+        { label: t('nav.beneficios'), href: '#beneficios' },
+        { label: t('nav.contacto'), href: '#contacto' },
+    ];
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isLanguageOpen, setIsLanguageOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -63,7 +63,7 @@ export default function Navbar() {
                 <Link
                     href="/"
                     className="flex shrink-0 items-center gap-3"
-                    aria-label="Página inicial SpaceHub"
+                    aria-label={t('nav.paginaInicial')}
                 >
                     <img
                         src="/images/logo/logobranco.png"
@@ -91,48 +91,7 @@ export default function Navbar() {
                 </nav>
 
                 <div className="hidden items-center gap-3 lg:flex">
-                    <div className="relative">
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setIsLanguageOpen(
-                                    (value) => !value,
-                                )
-                            }
-                            className="flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition hover:border-[#14B8A6]/50 hover:bg-white/10"
-                        >
-                            <Globe2 size={17} />
-
-                            <span>PT</span>
-
-                            <ChevronDown
-                                size={15}
-                                className={`transition-transform ${
-                                    isLanguageOpen
-                                        ? 'rotate-180'
-                                        : ''
-                                }`}
-                            />
-                        </button>
-
-                        {isLanguageOpen && (
-                            <div className="absolute right-0 top-14 w-40 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 shadow-2xl">
-                                <button
-                                    type="button"
-                                    className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-[#14B8A6]/10 hover:text-[#0F766E]"
-                                >
-                                    Português
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className="flex w-full items-center px-4 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-[#14B8A6]/10 hover:text-[#0F766E]"
-                                >
-                                    English
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                    <LanguageSwitcher variant="dark" />
 
                     <Link
                         href={
@@ -146,8 +105,8 @@ export default function Navbar() {
 
                         <span>
                             {auth?.user
-                                ? 'Dashboard'
-                                : 'Entrar'}
+                                ? t('nav.dashboard')
+                                : t('nav.entrar')}
                         </span>
                     </Link>
                 </div>
@@ -157,7 +116,7 @@ export default function Navbar() {
                     onClick={() =>
                         setIsMenuOpen((value) => !value)
                     }
-                    aria-label="Abrir menu"
+                    aria-label={t('nav.abrirMenu')}
                     className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 bg-white/5 text-white transition hover:border-[#14B8A6]/50 hover:bg-white/10 hover:text-[#14B8A6] lg:hidden"
                 >
                     {isMenuOpen ? (
@@ -187,13 +146,7 @@ export default function Navbar() {
                     </nav>
 
                     <div className="mt-4">
-                        <button
-                            type="button"
-                            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 text-sm font-medium text-white transition hover:border-[#14B8A6]/50 hover:text-[#14B8A6]"
-                        >
-                            <Globe2 size={18} />
-                            PT
-                        </button>
+                        <LanguageSwitcher variant="dark" compact />
                     </div>
 
                     <Link
@@ -207,8 +160,8 @@ export default function Navbar() {
                         <LogIn size={17} />
 
                         {auth?.user
-                            ? 'Dashboard'
-                            : 'Entrar'}
+                            ? t('nav.dashboard')
+                            : t('nav.entrar')}
                     </Link>
                 </div>
             )}

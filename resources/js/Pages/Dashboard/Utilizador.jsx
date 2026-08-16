@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import OfficeMap from '@/Components/Dashboard/OfficeMap/OfficeMap';
@@ -19,6 +20,8 @@ export default function Utilizador({
     toleranciaCheckinMinutos,
     atividadePessoal,
 }) {
+    const { t } = useTranslation('dashboard');
+
     // Todas as secretárias de todos os pisos, cada uma já com o seu
     // piso e setor "pendurados" — para calcular livres por piso e
     // encontrar a secretária completa por trás da reserva de hoje, sem
@@ -148,7 +151,7 @@ export default function Utilizador({
 
     return (
         <>
-            <Head title="Dashboard" />
+            <Head title={t('titulo')} />
 
             <DashboardLayout>
                 <div className="mx-auto w-full max-w-[1560px]">
@@ -192,13 +195,16 @@ export default function Utilizador({
                             pisos={pisos}
                             titulo={
                                 deskEhReservaHoje
-                                    ? 'A sua secretária no mapa'
-                                    : 'Escolha a sua secretária'
+                                    ? t('utilizador.mapaTituloReservaHoje')
+                                    : t('utilizador.mapaTituloEscolher')
                             }
                             subtitulo={
                                 deskEhReservaHoje
-                                    ? `Localize rapidamente a ${secretariaSelecionada.codigo} no ${secretariaSelecionada.piso?.nome}`
-                                    : 'Consulte a disponibilidade em tempo real'
+                                    ? t('utilizador.mapaSubtituloReservaHoje', {
+                                          codigo: secretariaSelecionada.codigo,
+                                          piso: secretariaSelecionada.piso?.nome,
+                                      })
+                                    : t('utilizador.mapaSubtituloEscolher')
                             }
                             linkMapaCompleto
                             secretariaFocoId={secretariaFocoId}

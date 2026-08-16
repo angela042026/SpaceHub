@@ -1,0 +1,70 @@
+{
+    "titulo": "Dashboard",
+    "funcionario": {
+        "secretariasOcupadas": "Occupied Desks",
+        "secretariasLivres": "Available Desks",
+        "checkinsHoje": "Check-ins Today"
+    },
+    "admin": {
+        "reservasHoje": "Bookings Today",
+        "checkinsRealizados": "Check-ins completed",
+        "secretariasLivres": "Available Desks",
+        "ocupacaoAtual": "Current Occupancy",
+        "todosOsPisos": "All floors",
+        "reservasExpiradas": "Expired Bookings",
+        "nenhumaExpirouHoje": "None expired today",
+        "cancelamentos": "Cancellations",
+        "nenhumCancelamentoHoje": "No cancellations today",
+        "deTexto": "of"
+    },
+    "utilizador": {
+        "mapaTituloReservaHoje": "Your desk on the map",
+        "mapaTituloEscolher": "Choose your desk",
+        "mapaSubtituloReservaHoje": "Quickly find {{codigo}} on {{piso}}",
+        "mapaSubtituloEscolher": "Check real-time availability"
+    },
+    "header": {
+        "utilizadorFallback": "User",
+        "bomDia": "Good morning",
+        "boaTarde": "Good afternoon",
+        "boaNoite": "Good evening",
+        "abrirMenuLateral": "Open sidebar menu",
+        "verNotificacoes": "View notifications",
+        "notificacoes": "Notifications",
+        "novas": "new",
+        "novasPlural": "new",
+        "semNotificacoes": "No notifications right now.",
+        "subtitulos": {
+            "default": "Welcome to your Dashboard.",
+            "adminReservas": "View and manage all SpaceHub bookings.",
+            "qrCodes": "Manage SpaceHub's spaces and resources.",
+            "editorDoMapa": "Organise the layout of spaces on the map.",
+            "registoDeAtividade": "Track actions taken across SpaceHub.",
+            "utilizadorSemReserva": "Find the right space for every moment.",
+            "utilizadorComCheckin": "Your desk is ready. Have a great day at work!",
+            "utilizadorSemCheckin": "Your desk is ready. Check in when you arrive."
+        },
+        "notificacoesSinteticas": {
+            "cancelamentosHojeTitulo": "Cancellations today",
+            "cancelamentosHojeMensagem": "{{quantidade}} booking(s) were cancelled today.",
+            "reservasExpiradasTitulo": "Expired bookings",
+            "reservasExpiradasMensagem": "{{quantidade}} booking(s) expired today without check-in.",
+            "ocupacaoAltaTitulo": "Occupancy nearing capacity",
+            "ocupacaoAltaMensagem": "The occupancy rate is at {{valor}}%.",
+            "secretariasEmUsoTitulo": "Desks in use",
+            "secretariasEmUsoMensagem": "{{quantidade}} desk(s) currently occupied — worth checking they're clean after use.",
+            "reservaTerminaTitulo": "Your booking is ending soon",
+            "reservaTerminaMensagem": "The booking at desk {{codigo}} ends at {{hora}}.",
+            "reservaComecaTitulo": "Your booking starts soon",
+            "reservaComecaMensagem": "The booking at desk {{codigo}} starts at {{hora}}.",
+            "checkinConfirmadoTitulo": "Check-in confirmed",
+            "checkinConfirmadoMensagem": "You've already checked in at desk {{codigo}} for today.",
+            "checkinDisponivelTitulo": "Check-in available",
+            "checkinDisponivelMensagem": "You have a booking today at desk {{codigo}}. Don't forget to check in!",
+            "proximaReservaTitulo": "Upcoming booking",
+            "proximaReservaMensagem": "You have a booking scheduled at desk {{codigo}}.",
+            "secretariaGenerica": "your desk",
+            "secretariaGenericaProxima": "a desk"
+        }
+    }
+}

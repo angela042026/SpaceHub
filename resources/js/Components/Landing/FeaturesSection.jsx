@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Armchair,
     BarChart3,
@@ -14,21 +15,7 @@ import {
     Users,
 } from 'lucide-react';
 
-const historico = [
-    { data: '12 Mai 2024', hora: '09:00 – 12:00', estado: 'Concluída' },
-    { data: '8 Mai 2024', hora: '14:00 – 17:00', estado: 'Cancelada' },
-    { data: '2 Mai 2024', hora: '09:00 – 11:00', estado: 'Concluída' },
-];
-
-const gestaoFluxo = [
-    { label: 'Edifício', icon: Building2 },
-    { label: 'Piso', icon: Layers },
-    { label: 'Setor', icon: LayoutGrid },
-    { label: 'Secretária', icon: Armchair },
-    { label: 'Utilizadores', icon: Users },
-];
-
-const acessos = ['Acesso de administrador', 'Acesso de utilizador'];
+const gestaoFluxoIcons = [Building2, Layers, LayoutGrid, Armchair, Users];
 
 // Uma onda por cartão (viewBox 400x170) em vez de um retângulo com
 // cantos arredondados — o fundo tem de se misturar com o cartão, não
@@ -99,6 +86,27 @@ function CardFeature({ indice, icon: Icon, title, description, children }) {
 }
 
 export default function FeaturesSection() {
+    const { t } = useTranslation('landing');
+
+    const historico = [
+        { data: '12 Mai 2024', hora: '09:00 \u2013 12:00', estado: t('features.historico.concluida') },
+        { data: '8 Mai 2024', hora: '14:00 \u2013 17:00', estado: t('features.historico.cancelada') },
+        { data: '2 Mai 2024', hora: '09:00 \u2013 11:00', estado: t('features.historico.concluida') },
+    ];
+
+    const gestaoFluxo = [
+        t('features.gestao.edificio'),
+        t('features.gestao.piso'),
+        t('features.gestao.setor'),
+        t('features.gestao.secretaria'),
+        t('features.gestao.utilizadores'),
+    ].map((label, indice) => ({ label, icon: gestaoFluxoIcons[indice] }));
+
+    const acessos = [
+        t('features.seguranca.acessoAdmin'),
+        t('features.seguranca.acessoUtilizador'),
+    ];
+
     return (
         <section
             id="funcionalidades"
@@ -107,16 +115,15 @@ export default function FeaturesSection() {
             <div className="mx-auto w-full max-w-[1320px]">
                 <div className="mx-auto max-w-4xl text-center">
                     <span className="text-sm font-bold uppercase tracking-[0.2em] text-[#14B8A6]">
-                        Funcionalidades
+                        {t('features.eyebrow')}
                     </span>
 
                     <h2 className="mt-3 text-4xl font-black leading-tight tracking-[-0.04em] text-[#071A33] sm:text-5xl lg:whitespace-nowrap">
-                        Tudo o que precisa. Num só lugar.
+                        {t('features.titulo')}
                     </h2>
 
                     <p className="mx-auto mt-[10px] max-w-2xl text-base leading-8 text-slate-600">
-                        Reserve, acompanhe e administre os seus espaços de
-                        forma simples e intuitiva.
+                        {t('features.descricao')}
                     </p>
                 </div>
 
@@ -124,13 +131,13 @@ export default function FeaturesSection() {
                     <CardFeature
                         indice={0}
                         icon={Map}
-                        title="Mapa interativo"
-                        description="Veja a disponibilidade e encontre o lugar ideal."
+                        title={t('features.mapa.titulo')}
+                        description={t('features.mapa.descricao')}
                     >
                         <div className="absolute inset-3 z-10 overflow-hidden rounded-[14px] shadow-[0_6px_16px_rgba(15,42,61,0.15)]">
                             <img
                                 src="/images/maps/Piso0.png"
-                                alt="Mapa interativo do escritório"
+                                alt={t('features.mapa.imagemAlt')}
                                 loading="lazy"
                                 className="h-full w-full object-cover object-center"
                             />
@@ -153,8 +160,8 @@ export default function FeaturesSection() {
                     <CardFeature
                         indice={1}
                         icon={History}
-                        title="Histórico e cancelamento"
-                        description="Consulte reservas passadas e cancele quando precisar."
+                        title={t('features.historico.titulo')}
+                        description={t('features.historico.descricao')}
                     >
                         <div className="relative z-10 flex h-full flex-col justify-center gap-2 px-4">
                             {historico.map((item) => (
@@ -174,7 +181,7 @@ export default function FeaturesSection() {
 
                                     <span
                                         className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold ${
-                                            item.estado === 'Concluída'
+                                            item.estado === t('features.historico.concluida')
                                                 ? 'bg-emerald-100/70 text-emerald-600'
                                                 : 'bg-red-100/70 text-red-500'
                                         }`}
@@ -189,14 +196,14 @@ export default function FeaturesSection() {
                     <CardFeature
                         indice={2}
                         icon={BarChart3}
-                        title="Estatísticas inteligentes"
-                        description="Acompanhe a utilização dos espaços e tome decisões com base em dados reais."
+                        title={t('features.estatisticas.titulo')}
+                        description={t('features.estatisticas.descricao')}
                     >
                         <div className="relative z-10 flex h-full flex-col justify-center gap-2 px-4">
                             <div className="grid grid-cols-3 gap-2">
                                 <div>
                                     <p className="text-[9px] font-semibold text-slate-400">
-                                        Utilização média
+                                        {t('features.estatisticas.utilizacaoMedia')}
                                     </p>
                                     <p className="mt-0.5 text-sm font-black text-[#071A33]">
                                         72%
@@ -205,7 +212,7 @@ export default function FeaturesSection() {
 
                                 <div>
                                     <p className="text-[9px] font-semibold text-slate-400">
-                                        Reservas
+                                        {t('features.estatisticas.reservas')}
                                     </p>
                                     <p className="mt-0.5 text-sm font-black text-[#071A33]">
                                         1.248
@@ -214,7 +221,7 @@ export default function FeaturesSection() {
 
                                 <div>
                                     <p className="text-[9px] font-semibold text-slate-400">
-                                        Espaços ativos
+                                        {t('features.estatisticas.espacosAtivos')}
                                     </p>
                                     <p className="mt-0.5 text-sm font-black text-[#071A33]">
                                         83
@@ -242,8 +249,8 @@ export default function FeaturesSection() {
                     <CardFeature
                         indice={0}
                         icon={Building2}
-                        title="Gestão centralizada"
-                        description="Administre edifícios, pisos, setores, secretárias e utilizadores numa única plataforma."
+                        title={t('features.gestao.titulo')}
+                        description={t('features.gestao.descricao')}
                     >
                         <div className="relative z-10 flex h-full items-center justify-center gap-1 px-2">
                             {gestaoFluxo.map((item, indice) => (
@@ -273,8 +280,8 @@ export default function FeaturesSection() {
                     <CardFeature
                         indice={1}
                         icon={ShieldCheck}
-                        title="Segurança e controlo"
-                        description="Garanta a proteção dos dados e controle o acesso através de diferentes permissões."
+                        title={t('features.seguranca.titulo')}
+                        description={t('features.seguranca.descricao')}
                     >
                         <div className="relative z-10 flex h-full items-center gap-3 px-4">
                             <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-[#071A33] text-[#14B8A6]">
@@ -303,8 +310,8 @@ export default function FeaturesSection() {
                     <CardFeature
                         indice={2}
                         icon={MessageSquare}
-                        title="Suporte em tempo real"
-                        description="Tire dúvidas a qualquer momento através do chat."
+                        title={t('features.suporte.titulo')}
+                        description={t('features.suporte.descricao')}
                     >
                         <div className="relative z-10 flex h-full flex-col justify-center gap-1.5 px-4">
                             <div className="flex items-end gap-1.5">
@@ -313,20 +320,20 @@ export default function FeaturesSection() {
                                 </span>
 
                                 <div className="rounded-xl rounded-bl-sm bg-white px-2.5 py-1 text-[9px] font-medium text-slate-700 shadow-sm">
-                                    Olá! Como podemos ajudar?
+                                    {t('features.suporte.mensagemBot')}
                                 </div>
                             </div>
 
                             <div className="flex justify-end">
                                 <div className="rounded-xl rounded-br-sm bg-[#14B8A6] px-2.5 py-1 text-[9px] font-medium text-white shadow-sm">
-                                    Quero alterar a minha reserva.
+                                    {t('features.suporte.mensagemUtilizador')}
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-1.5">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                                 <span className="text-[9px] font-bold text-emerald-600">
-                                    Estamos online
+                                    {t('features.suporte.online')}
                                 </span>
                             </div>
                         </div>
