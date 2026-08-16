@@ -35,7 +35,15 @@ const AVALIACAO_ESTADO_LABEL = {
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
-export default function Index({ reservas, setores, pisos, edificios, filters, secretariasFavoritas = [], googleCalendarConectado = false }) {
+export default function Index({
+    reservas,
+    setores,
+    pisos,
+    edificios,
+    filters,
+    secretariasFavoritas = [],
+    googleCalendarConectado = false,
+}) {
     // Estrela de "secretária favorita" — marca a secretária (não a
     // reserva), otimista no clique e revertida se o pedido falhar.
     const [favoritas, setFavoritas] = useState(

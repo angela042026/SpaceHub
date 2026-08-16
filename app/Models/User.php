@@ -67,6 +67,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Se o utilizador já autorizou o acesso ao Google Calendar — sabemos
+     * pelo refresh_token, que só existe depois dessa autorização (ao
+     * contrário do login com Google, que nunca o pede).
+     */
+    public function googleCalendarConectado(): bool
+    {
+        return $this->google_calendar_refresh_token !== null;
+    }
+
+    /**
      * "fotografia" guarda ou um caminho relativo do disco "public" (upload
      * feito pelo próprio utilizador) ou já uma URL completa (ex.: avatar
      * de demonstração gerado externamente) — devolve como está nesse

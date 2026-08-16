@@ -1,218 +1,711 @@
-# Documento Mestre do Projeto — SpaceHub
+Documento Mestre do Projeto — SpaceHub
 
-**Versão:** 2.1
-**Estado:** Revisão final e preparação da entrega
-**Framework:** Laravel 12 + Sanctum + Inertia.js + React + Tailwind CSS
-**Base de dados:** MySQL
-**Testes automatizados:** 154 testes aprovados
-**Comunicação em tempo real:** Laravel Reverb e Laravel Echo
-**Funcionalidades principais:** Gestão de espaços, reservas, pagamentos, Help Center, QR Code, dashboard e mapa interativo
+Versão: 3.0Estado: Consolidação, testes finais e preparação da entregaBackend: Laravel 12Frontend: React + Inertia.js + Tailwind CSSBase de dados: MySQLAutenticação: Laravel Sanctum + autenticação web + Single Sign-OnTempo real: Laravel Reverb + Laravel EchoTestes: última contagem documentada de 154 testes aprovados; confirmar na versão final
 
+1. Finalidade do documento
 
----
-
-# 1. Finalidade deste Documento
-
-Este documento funciona como resumo técnico e contexto permanente do projeto SpaceHub.
+Este documento funciona como contexto técnico e funcional permanente do projeto SpaceHub.
 
 Deve ser utilizado para:
 
-- contextualizar novas conversas sobre o projeto;
-- preservar as decisões técnicas já tomadas;
-- evitar alterações incompatíveis com a arquitetura existente;
-- acompanhar o estado atual do desenvolvimento;
-- registar funcionalidades, integrações e convenções;
-- orientar os passos finais até à entrega.
+contextualizar novas conversas sobre o projeto;
 
-Este documento não substitui a documentação funcional e técnica existente na pasta `docs`.
+preservar decisões funcionais e arquiteturais;
 
----
+evitar alterações incompatíveis com a estrutura existente;
 
-# 2. Objetivo do Projeto
+acompanhar o estado atual da aplicação;
 
-O SpaceHub é uma aplicação web para gestão de espaços de trabalho colaborativos e reserva de secretárias.
+registar convenções de desenvolvimento;
 
-O sistema permite:
+orientar correções, testes e preparação da entrega;
 
-- gerir edifícios;
-- gerir pisos;
-- gerir setores;
-- gerir secretárias;
-- gerir utilizadores;
-- controlar acessos através de papéis;
-- consultar secretárias livres e ocupadas;
-- efetuar reservas por data e período;
-- cancelar reservas elegíveis;
-- realizar check-in através de QR Code;
-- consultar estatísticas e dashboards;
-- visualizar mapas interativos dos espaços;
-- reportar problemas e pedidos de suporte;
-- consultar FAQs e conteúdos de ajuda;
-- carregar fotografias de utilizadores;
-- carregar plantas dos pisos.
+complementar a documentação existente na pasta docs.
 
-* associar pagamentos às reservas;
-* acompanhar o estado dos pagamentos;
-* simular a confirmação e o cancelamento de pagamentos;
-* consultar o histórico de pagamentos;
-* disponibilizar comunicação em tempo real;
-* atualizar o mapa e outros componentes através de eventos;
-* executar tarefas automáticas através do Scheduler do Laravel;
-* expirar automaticamente reservas sem check-in dentro do prazo definido.
+Este documento não substitui os capítulos detalhados de requisitos, casos de uso, base de dados, arquitetura, API e dicionário de dados.
 
+2. Objetivo do projeto
 
----
+O SpaceHub é uma aplicação web destinada à gestão e reserva de postos de trabalho em espaços colaborativos.
 
-# 3. Decisões Funcionais Principais
+A plataforma permite:
 
-## 3.1 Edifício substitui Localidade
+gerir utilizadores e permissões;
 
-A entidade inicialmente designada por `Localidade` foi substituída por `Edificio`.
+gerir edifícios, pisos, setores e secretárias;
 
-A hierarquia final dos espaços é:
+consultar a disponibilidade dos espaços;
 
-```text
+visualizar plantas e mapas interativos;
+
+criar reservas de diferentes durações;
+
+editar ou cancelar reservas elegíveis;
+
+efetuar check-in através de QR Code;
+
+gerir pagamentos simulados;
+
+consultar dashboards e estatísticas;
+
+receber notificações;
+
+comunicar através de chat em tempo real;
+
+avaliar reservas e espaços;
+
+consultar FAQs e submeter pedidos de suporte.
+
+O projeto foi desenvolvido em contexto académico, com foco em:
+
+arquitetura MVC;
+
+desenvolvimento full-stack;
+
+segurança;
+
+bases de dados;
+
+regras de negócio;
+
+APIs REST;
+
+testes automatizados;
+
+trabalho colaborativo com Git e GitHub.
+
+3. Tecnologias utilizadas
+
+3.1 Backend
+
+Laravel 12;
+
+PHP;
+
+Eloquent ORM;
+
+Laravel Sanctum;
+
+Form Requests;
+
+API Resources;
+
+Policies;
+
+Gates;
+
+Middleware;
+
+Services;
+
+Events;
+
+Notifications;
+
+Broadcasting;
+
+Scheduler;
+
+Commands Artisan;
+
+Storage;
+
+PHPUnit.
+
+3.2 Frontend
+
+React;
+
+Inertia.js;
+
+Tailwind CSS;
+
+Vite;
+
+Recharts;
+
+Laravel Echo;
+
+bibliotecas de QR Code;
+
+leitor de QR Code com acesso à câmara.
+
+3.3 Persistência e infraestrutura
+
+MySQL;
+
+migrations;
+
+seeders;
+
+factories;
+
+sessões em base de dados, quando configuradas;
+
+cache;
+
+filas, quando configuradas;
+
+Laravel Reverb para WebSockets.
+
+3.4 Colaboração e controlo de versões
+
+Git;
+
+GitHub;
+
+branches de funcionalidade;
+
+Pull Requests;
+
+merge commits;
+
+preservação da autoria dos commits.
+
+4. Arquitetura geral
+
+O SpaceHub utiliza uma arquitetura em camadas baseada no padrão Model-View-Controller.
+
+4.1 Interface web
+
+A interface web utiliza React e Inertia.js.
+
+Fluxo principal:
+
+Utilizador
+    ↓
+Página ou componente React
+    ↓
+Pedido Inertia / HTTP
+    ↓
+Rota web
+    ↓
+Middleware
+    ↓
+Controller
+    ↓
+Form Request / Policy / Service
+    ↓
+Model / Eloquent
+    ↓
+MySQL
+    ↓
+Resposta Inertia ou redirecionamento
+    ↓
+Interface atualizada
+
+4.2 API REST
+
+A API utiliza respostas JSON e autenticação através de Laravel Sanctum.
+
+Fluxo principal:
+
+Cliente
+    ↓
+Pedido HTTP / JSON
+    ↓
+Rota API
+    ↓
+auth:sanctum / active / role
+    ↓
+Form Request
+    ↓
+Policy / Gate
+    ↓
+Controller / Service
+    ↓
+Model / Eloquent
+    ↓
+MySQL
+    ↓
+API Resource
+    ↓
+Resposta JSON
+
+4.3 Comunicação em tempo real
+
+Alteração no backend
+    ↓
+Event
+    ↓
+Broadcasting
+    ↓
+Laravel Reverb
+    ↓
+Laravel Echo
+    ↓
+Componente React
+
+Esta comunicação é utilizada no mapa, notificações, chat e outros componentes que necessitam de atualização dinâmica.
+
+5. Estrutura principal do projeto
+
+app/
+├── Console/
+├── Events/
+├── Http/
+│   ├── Controllers/
+│   │   └── Api/
+│   ├── Middleware/
+│   ├── Requests/
+│   └── Resources/
+├── Models/
+├── Notifications/
+├── Policies/
+├── Providers/
+└── Services/
+
+database/
+├── factories/
+├── migrations/
+└── seeders/
+
+resources/
+├── js/
+│   ├── Components/
+│   ├── Layouts/
+│   ├── Pages/
+│   ├── app.jsx
+│   └── bootstrap.js
+└── views/
+
+routes/
+├── api.php
+├── channels.php
+└── web.php
+
+tests/
+├── Feature/
+└── Unit/
+
+docs/
+├── 01-Requisitos.md
+├── 02-CasosDeUso.md
+├── 03-ModeloBaseDados.md
+├── 04-Arquitetura.md
+├── 05-API.md
+├── 06-EvolucaoProjeto.md
+├── 07-DicionarioDados.md
+└── 08-DocumentoMestre.md
+
+A estrutura real pode incluir diretórios adicionais, desde que mantenha a separação de responsabilidades.
+
+6. Decisões funcionais consolidadas
+
+6.1 Edifício substitui Localidade
+
+A entidade inicialmente designada por Localidade foi substituída por Edificio.
+
+Hierarquia final:
+
 Edifício
-    ↓
-Piso
-    ↓
-Setor
-    ↓
-Secretária
-```
+└── Piso
+    └── Setor
+        └── Secretária
 
-Não deve ser criado um novo módulo de Localidades.
+Regras:
 
-Qualquer migration antiga de localidades deve ser considerada código legado e não deve ser utilizada na versão final.
+não criar um novo módulo de Localidades;
 
----
+migrations antigas de localidades são consideradas legado;
 
-## 3.2 Eliminação lógica
+toda a lógica deve utilizar a hierarquia atual.
 
-As principais entidades não são eliminadas fisicamente.
-
-É utilizado o campo:
-
-```text
-ativo
-```
-
-para ativar ou desativar:
-
-- utilizadores;
-- edifícios;
-- pisos;
-- setores;
-- secretárias.
-
-Não devem ser adicionados métodos `destroy()` sem uma decisão explícita de alteração desta regra.
-
----
-
-## 3.3 Papéis fixos
+6.2 Papéis fixos
 
 Os papéis existentes são:
 
-- Administrador;
-- Gestor;
-- Colaborador;
-- Utilizador.
+Administrador;
+
+Gestor;
+
+Colaborador;
+
+Utilizador.
 
 Os papéis são criados através de seeders.
 
 Não existe CRUD de papéis.
 
----
+6.3 Ativação e desativação lógica
 
-## 3.4 Estados das reservas
+As entidades principais utilizam o campo:
 
-Os estados implementados são:
+ativo
 
-- `pendente`;
-- `confirmada`;
-- `cancelada`;
-- `expirada`.
+Esta regra aplica-se, entre outras, a:
 
-O estado `concluida` não está implementado.
+utilizadores;
 
-Não deve ser adicionado sem definir previamente:
+edifícios;
 
-- quando ocorre a transição;
-- qual o processo responsável;
-- impacto no dashboard;
-- impacto nas estatísticas;
-- testes necessários.
+pisos;
 
-## 3.5 Pagamentos associados às reservas
+setores;
 
-O SpaceHub inclui um módulo de pagamentos associado ao processo de reserva.
+secretárias;
+
+FAQs.
+
+A desativação:
+
+preserva o histórico;
+
+impede novas operações;
+
+evita perda de relações;
+
+permite reativação futura.
+
+Não devem ser adicionadas eliminações físicas sem análise prévia do impacto.
+
+6.4 Estados das reservas
+
+Estados implementados:
+
+pendente;
+
+confirmada;
+
+cancelada;
+
+expirada.
+
+O estado concluida não está implementado.
+
+Não deve ser acrescentado sem definir:
+
+momento da transição;
+
+processo responsável;
+
+impacto no dashboard;
+
+impacto nas avaliações;
+
+impacto nas estatísticas;
+
+testes necessários.
+
+6.5 Períodos e durações
+
+Os períodos existentes são:
+
+Manhã;
+
+Tarde;
+
+Dia inteiro.
+
+As durações existentes são:
+
+diária;
+
+semanal;
+
+mensal;
+
+anual.
+
+Semanal, mensal e anual não são períodos.
+
+As reservas longas:
+
+utilizam sempre o período Dia inteiro;
+
+possuem tipo_duracao;
+
+possuem data_fim;
+
+geram uma única reserva;
+
+geram um único pagamento.
+
+6.6 Preços
+
+Os preços são armazenados nos setores.
+
+Campos principais:
+
+preco_meio_dia
+preco_dia_inteiro
+preco_semanal
+preco_mensal
+preco_anual
+
+Regras atuais:
+
+semanal: cinco dias úteis;
+
+mensal: vinte e dois dias úteis e desconto de 10%;
+
+anual: duzentos e sessenta e quatro dias úteis e desconto de 20%.
+
+Os períodos não armazenam preços.
+
+6.7 Pagamentos simulados
 
 Cada pagamento:
 
-* pertence a uma reserva;
-* possui um valor;
-* possui um método de pagamento;
-* possui um estado;
-* possui uma referência única;
-* pode ser confirmado ou cancelado;
-* mantém a data da confirmação, quando aplicável.
+pertence a uma reserva;
 
-Os estados previstos para os pagamentos são:
+possui valor;
 
-* `pendente`;
-* `pago`;
-* `cancelado`.
+possui referência única;
 
-Os métodos de pagamento são tratados de forma simulada no contexto académico do projeto, não existindo movimentação financeira real.
+possui estado;
 
-A integração com fornecedores externos de pagamentos poderá ser realizada numa evolução futura.
+pode possuir método;
 
+pode ser confirmado ou cancelado;
 
----
+mantém as datas relevantes do ciclo de vida.
 
-# 4. Arquitetura Geral
+Estados principais:
 
-O SpaceHub utiliza Laravel no backend e React com Inertia.js no frontend.
+pendente;
 
-## 4.1 Backend
+pago;
 
-O backend utiliza:
+cancelado.
 
-- Laravel 12;
-- PHP 8;
-- Eloquent ORM;
-- Laravel Sanctum;
-- Form Requests;
-- API Resources;
-- Policies;
-- Gates;
-- Middleware;
-- Events;
-- Broadcasting;
-- Storage;
-- PHPUnit.
+Métodos suportados:
 
----
+Cartão;
 
-## 4.2 Frontend
+MB Way;
 
-O frontend utiliza:
+Transferência Bancária;
 
-- React;
-- Inertia.js;
-- Tailwind CSS;
-- Vite;
-- Recharts;
-- Simple QR Code;
-- html5-qrcode;
-- Laravel Echo;
-- Laravel Reverb.
+PayPal.
 
----
+O sistema não movimenta dinheiro real.
 
-## 4.3 Base de dados
+6.8 Single Sign-On
 
-```text
+O Single Sign-On já se encontra implementado.
+
+Não deve voltar a ser listado como funcionalidade pendente.
+
+7. Autenticação e autorização
+
+7.1 Funcionalidades
+
+registo;
+
+login;
+
+logout;
+
+recuperação de palavra-passe;
+
+redefinição de palavra-passe;
+
+alteração de palavra-passe;
+
+gestão do perfil;
+
+Single Sign-On;
+
+consulta do utilizador autenticado;
+
+bloqueio de contas inativas.
+
+7.2 Autenticação web
+
+As páginas privadas utilizam autenticação baseada em sessão:
+
+auth
+
+7.3 Autenticação da API
+
+As rotas privadas utilizam:
+
+auth:sanctum
+
+7.4 Middleware
+
+Principais mecanismos:
+
+auth;
+
+auth:sanctum;
+
+active;
+
+role;
+
+proteção CSRF.
+
+7.5 Policies
+
+Principais Policies:
+
+UserPolicy;
+
+EdificioPolicy;
+
+PisoPolicy;
+
+SetorPolicy;
+
+SecretariaPolicy;
+
+ReservaPolicy;
+
+PagamentoPolicy;
+
+Policies associadas a avaliações e suporte.
+
+As Policies devem considerar:
+
+papel;
+
+propriedade do recurso;
+
+estado da entidade;
+
+utilizador ativo;
+
+regras específicas da operação.
+
+8. Organização do backend
+
+8.1 Controllers
+
+Os Controllers devem:
+
+receber pedidos;
+
+coordenar operações;
+
+chamar Policies;
+
+receber dados validados;
+
+chamar Services;
+
+carregar relações;
+
+devolver páginas Inertia;
+
+devolver Resources ou JSON;
+
+emitir mensagens e eventos.
+
+Os Controllers não devem concentrar lógica de negócio complexa.
+
+8.2 Form Requests
+
+Os CRUDs utilizam classes:
+
+StoreXXXXXRequest
+UpdateXXXXXRequest
+
+Exemplos:
+
+StoreUserRequest;
+
+UpdateUserRequest;
+
+StoreEdificioRequest;
+
+UpdateEdificioRequest;
+
+StorePisoRequest;
+
+UpdatePisoRequest;
+
+StoreSetorRequest;
+
+UpdateSetorRequest;
+
+StoreSecretariaRequest;
+
+UpdateSecretariaRequest;
+
+StoreReservaRequest;
+
+UpdateReservaRequest.
+
+8.3 Resources
+
+Os endpoints API devem utilizar Resources quando aplicável.
+
+Exemplos:
+
+UserResource;
+
+EdificioResource;
+
+PisoResource;
+
+SetorResource;
+
+SecretariaResource;
+
+ReservaResource;
+
+PagamentoResource.
+
+Evitar a exposição direta de Models em respostas JSON.
+
+8.4 Services
+
+Os Services são utilizados para regras de negócio reutilizáveis.
+
+O PagamentoService é responsável, entre outras operações, por:
+
+calcular preços;
+
+criar pagamentos;
+
+gerar referências;
+
+confirmar pagamentos;
+
+cancelar pagamentos;
+
+manter coerência entre reserva e pagamento.
+
+Outros módulos podem utilizar Services para:
+
+reservas;
+
+disponibilidade;
+
+dashboard;
+
+notificações;
+
+relatórios.
+
+8.5 Route Model Binding
+
+Preferir:
+
+public function show(User $user)
+
+Evitar queries repetidas como:
+
+$user = User::findOrFail($id);
+
+quando o Route Model Binding for adequado.
+
+8.6 Palavras-passe
+
+Utilizar:
+
+Hash::make($password)
+
+ou o cast:
+
+'password' => 'hashed'
+
+Nunca armazenar palavras-passe em texto simples.
+
+9. Entidades principais
+
 Role
 User
 Edificio
@@ -223,1499 +716,1113 @@ Periodo
 EstadoReserva
 Reserva
 Pagamento
+Avaliacao
 Faq
 PedidoSuporte
-```
-
-A estrutura principal das relações é:
-
-```text
-Role
-  ↓
-User
-  ↓
-Reserva
-  ↓
-Pagamento
-```
-
-```text
-Edificio
-  ↓
-Piso
-  ↓
-Setor
-  ↓
-Secretaria
-  ↓
-Reserva
-```
-
-Existem ainda tabelas técnicas do Laravel, nomeadamente:
-
-* `sessions`;
-* `password_reset_tokens`;
-* `personal_access_tokens`;
-* `cache`;
-* `cache_locks`;
-* `jobs`;
-* `job_batches`;
-* `failed_jobs`.
-
-
-# 5. Organização do Backend
-
-## 5.1 API
-
-Os Controllers da API encontram-se em:
-
-```text
-app/Http/Controllers/Api
-```
-
-O padrão preferencial dos CRUD é:
-
-```text
-Route
-    ↓
-Controller
-    ↓
-Form Request
-    ↓
-Policy / Gate
-    ↓
-Model
-    ↓
-Resource
-    ↓
-JSON
-```
-
----
-
-## 5.2 Aplicação Web
-
-Os Controllers das páginas web encontram-se em:
-
-```text
-app/Http/Controllers
-```
-
-O fluxo principal é:
-
-```text
-Route Web
-    ↓
-Controller
-    ↓
-Model ou Service
-    ↓
-Inertia
-    ↓
-React
-```
-
----
 
-## 5.3 Models
+Existem também estruturas associadas a:
 
-Os Models representam as entidades persistentes e utilizam relações Eloquent.
+notificações;
 
-Exemplos:
+chat;
 
-```php
-public function edificio(): BelongsTo
-{
-    return $this->belongsTo(Edificio::class);
-}
-```
+tokens;
 
-```php
-public function pisos(): HasMany
-{
-    return $this->hasMany(Piso::class);
-}
-```
+sessões;
 
-Devem ser preferidas relações Eloquent em vez de queries manuais repetidas.
+cache;
 
----
+filas.
 
-## 5.4 Form Requests
+Os nomes e campos exatos das tabelas de avaliações, notificações e chat devem ser confirmados através das migrations.
 
-A validação dos CRUD deve ser realizada em:
+10. Gestão de utilizadores
 
-```text
-StoreXXXXXRequest
-UpdateXXXXXRequest
-```
-StorePagamentoRequest
-UpdatePagamentoRequest
+Funcionalidades implementadas:
 
-Exemplos:
+listar;
 
-```text
-StoreUserRequest
-UpdateUserRequest
-StoreEdificioRequest
-UpdateEdificioRequest
-StorePisoRequest
-UpdatePisoRequest
-StoreSetorRequest
-UpdateSetorRequest
-StoreSecretariaRequest
-UpdateSecretariaRequest
-StoreReservaRequest
-UpdateReservaRequest
-```
+consultar;
 
-Nos endpoints de autenticação, o `AuthController` utiliza validação direta por se tratar de operações específicas e não de CRUD administrativo.
+criar;
 
----
+atualizar;
 
-## 5.5 Resources
+pesquisar;
 
-Os endpoints da API devem devolver Resources.
+filtrar;
 
-Exemplos:
+ordenar;
 
-```text
-UserResource
-EdificioResource
-PisoResource
-SetorResource
-SecretariaResource
-ReservaResource
-PagamentoResource
-```
+paginar;
 
-Deve ser evitada a exposição direta de Models em respostas JSON.
+alterar papel;
 
----
+ativar ou desativar;
 
-## 5.6 Route Model Binding
+carregar fotografia;
 
-Deve ser utilizado Route Model Binding.
+substituir fotografia;
 
-Correto:
+editar o próprio perfil;
 
-```php
-public function show(User $user): UserResource
-```
+alterar palavra-passe.
 
-Evitar:
+Regras:
 
-```php
-public function show(int $id)
-{
-    $user = User::findOrFail($id);
-}
-```
+apenas o Administrador gere utilizadores;
 
----
+um Administrador não deve desativar a própria conta;
 
-## 5.7 Passwords
+a desativação preserva o histórico;
 
-As passwords devem ser sempre protegidas por hashing.
+a fotografia deve ser validada;
 
-Utilizar:
+o email deve ser único.
 
-```php
-Hash::make($password)
-```
+Armazenamento das fotografias:
 
-O Model `User` também utiliza o cast:
-
-```php
-'password' => 'hashed'
-```
-
-Nunca guardar passwords em texto simples.
-
-## 5.8 Services
-
-As regras de negócio que envolvem mais do que uma operação ou entidade podem ser organizadas em Services.
-
-Este padrão é particularmente útil em operações como:
-
-* criação de reservas;
-* confirmação de pagamentos;
-* cancelamento de pagamentos;
-* expiração automática de reservas;
-* atualização de estatísticas;
-* emissão de eventos em tempo real.
-
-A utilização de Services evita que os Controllers concentrem demasiadas responsabilidades e facilita a reutilização e o teste da lógica de negócio.
-
-
----
-
-# 6. Autenticação
-
-A API utiliza Laravel Sanctum.
-
-Endpoints implementados:
-
-- registo;
-- login;
-- logout;
-- consulta do utilizador autenticado;
-- pedido de recuperação de password;
-- redefinição de password.
-
-Rotas principais:
-
-```text
-POST /api/register
-POST /api/login
-POST /api/logout
-GET  /api/me
-POST /api/forgot-password
-POST /api/reset-password
-```
-
-As rotas privadas da API utilizam:
-
-```text
-auth:sanctum
-```
-
-As páginas privadas da aplicação web utilizam:
-
-```text
-auth
-```
-
-Utilizadores inativos:
-
-- não podem iniciar sessão;
-- são bloqueados nas Policies;
-- não podem executar operações protegidas.
-
-Após uma redefinição de password, os tokens Sanctum antigos são revogados.
-
----
-
-# 7. Autorização
-
-A autorização é realizada através de:
-
-- Policies;
-- Gates;
-- Middleware de papéis.
-
-Existe um middleware personalizado:
-
-```text
-RoleMiddleware
-```
-
-Alias registado:
-
-```text
-role
-```
-
-Exemplo de utilização:
-
-```php
-Route::middleware([
-    'auth:sanctum',
-    'role:Administrador',
-]);
-```
-
-Nos Controllers da API é utilizado:
-
-```php
-Gate::authorize(...)
-```
-
-Policies principais:
-
-```text
-UserPolicy
-EdificioPolicy
-PisoPolicy
-SetorPolicy
-SecretariaPolicy
-ReservaPolicy
-```
-
-A `ReservaPolicy` bloqueia globalmente utilizadores inativos através do método `before()`.
-
----
-
-# 8. Gestão de Espaços
-
-A gestão dos espaços segue a hierarquia:
-
-```text
-Edifício
-    ↓
-Piso
-    ↓
-Setor
-    ↓
-Secretária
-```
-
-## 8.1 Edifícios
-
-Funcionalidades:
-
-- listar;
-- consultar;
-- criar;
-- atualizar;
-- pesquisar;
-- filtrar;
-- ordenar;
-- paginar;
-- ativar ou desativar.
-
----
-
-## 8.2 Pisos
-
-Funcionalidades:
-
-- listar;
-- consultar;
-- criar;
-- atualizar;
-- pesquisar;
-- filtrar;
-- ordenar;
-- paginar;
-- ativar ou desativar;
-- carregar uma planta;
-- substituir a planta existente.
-
-As plantas são armazenadas em:
-
-```text
-storage/app/public/pisos/plantas
-```
-
----
-
-## 8.3 Setores
-
-Funcionalidades:
-
-- listar;
-- consultar;
-- criar;
-- atualizar;
-- pesquisar;
-- filtrar;
-- ordenar;
-- paginar;
-- ativar ou desativar;
-- configurar tipo;
-- configurar capacidade;
-- configurar reservabilidade;
-- posicionar no editor de mapa.
-
----
-
-## 8.4 Secretárias
-
-Funcionalidades:
-
-- listar;
-- consultar;
-- criar;
-- atualizar;
-- filtrar;
-- ordenar;
-- paginar;
-- ativar ou desativar;
-- configurar características;
-- configurar posição;
-- gerar QR Code único.
-
-Características disponíveis:
-
-- monitor;
-- dock USB;
-- junto à janela;
-- ergonómica;
-- reservável;
-- ativa.
-
----
-
-# 9. Gestão de Utilizadores
-
-Funcionalidades:
-
-- listar utilizadores;
-- consultar utilizador;
-- criar utilizador;
-- atualizar utilizador;
-- pesquisar;
-- filtrar;
-- ordenar;
-- paginar;
-- alterar papel;
-- ativar ou desativar;
-- carregar fotografia;
-- substituir fotografia.
-
-As fotografias são armazenadas em:
-
-```text
 storage/app/public/utilizadores/fotografias
-```
 
-Formatos permitidos:
+11. Gestão de espaços
 
-- JPG;
-- JPEG;
-- PNG;
-- WebP.
+11.1 Edifícios
 
-Tamanho máximo:
+listar;
 
-```text
-2 MB
-```
+consultar;
 
-Um Administrador não pode desativar a própria conta.
+criar;
 
----
+atualizar;
 
-# 10. Reservas
+pesquisar;
 
-O módulo de reservas suporta:
+filtrar;
 
-- criação de reservas;
-- consulta de reservas;
-- atualização;
-- cancelamento;
-- consulta de disponibilidade;
-- validação de duplicações;
-- validação de regras de negócio;
-- atualização do mapa.
-* associação de pagamentos;
-* consulta do pagamento associado;
-* expiração automática de reservas pendentes;
-* execução de tarefas agendadas;
-* emissão de eventos após alterações relevantes.
+ordenar;
 
-## 10.1 Regras principais
+paginar;
 
-Uma secretária apenas pode possuir uma reserva ativa para a mesma data e período.
+ativar ou desativar.
 
-Um utilizador apenas pode possuir uma reserva para a mesma data e período.
+11.2 Pisos
 
-Apenas secretárias:
+listar;
 
-- ativas;
-- reserváveis;
-- disponíveis
+consultar;
 
-podem receber reservas.
+criar;
 
-Não podem ser atualizadas reservas:
+atualizar;
 
-- canceladas;
-- expiradas;
-- com check-in efetuado.
+pesquisar;
 
-Não podem ser canceladas reservas:
+filtrar;
 
-- já canceladas;
-- confirmadas;
-- expiradas;
-- com check-in.
+ordenar;
 
-O utilizador comum apenas pode cancelar reservas próprias, futuras e elegíveis.
+paginar;
 
----
+ativar ou desativar;
 
-## 10.2 Períodos
+carregar planta;
 
-Os períodos implementados são:
+substituir planta.
 
-- Manhã;
-- Tarde.
+Armazenamento:
 
----
+storage/app/public/pisos/plantas
 
-## 10.3 Disponibilidade
+11.3 Setores
+
+listar;
+
+consultar;
+
+criar;
+
+atualizar;
+
+pesquisar;
+
+filtrar;
+
+ordenar;
+
+paginar;
+
+ativar ou desativar;
+
+configurar reservabilidade;
+
+definir preços;
+
+posicionar no mapa.
+
+11.4 Secretárias
+
+listar;
+
+consultar;
+
+criar;
+
+atualizar;
+
+filtrar;
+
+ordenar;
+
+paginar;
+
+ativar ou desativar;
+
+configurar posição;
+
+configurar características;
+
+gerar QR Code.
+
+Características principais:
+
+monitor;
+
+dock USB;
+
+junto à janela;
+
+ergonómica;
+
+reservável;
+
+ativa.
+
+12. Reservas
+
+12.1 Funcionalidades
+
+consulta de disponibilidade;
+
+criação;
+
+atualização;
+
+cancelamento;
+
+histórico;
+
+estados;
+
+reservas diárias;
+
+reservas semanais;
+
+reservas mensais;
+
+reservas anuais;
+
+cálculo automático da data final;
+
+validação de conflitos;
+
+check-in;
+
+expiração automática;
+
+integração com pagamentos;
+
+atualização do mapa;
+
+emissão de eventos.
+
+12.2 Regras principais
+
+Uma reserva só pode ser criada quando:
+
+o utilizador está ativo;
+
+a secretária existe;
+
+a secretária está ativa;
+
+a secretária é reservável;
+
+o setor está ativo e reservável;
+
+o período é válido;
+
+a duração é válida;
+
+não existe conflito com outra reserva;
+
+não existe conflito com outra reserva do utilizador.
+
+As reservas canceladas, expiradas ou com check-in não podem ser alteradas de forma incompatível com o estado atual.
+
+12.3 Disponibilidade
 
 A disponibilidade considera:
 
-- data;
-- período;
-- estado da secretária;
-- atributo reservável;
-- reservas ativas existentes.
+data inicial;
 
-## 10.4 Expiração automática
+data final;
 
-As reservas pendentes podem ser automaticamente marcadas como expiradas quando o utilizador não realiza o check-in dentro do prazo estabelecido.
+duração;
 
-A aplicação utiliza um comando Artisan específico para identificar e atualizar reservas expiradas.
+período;
 
-Exemplo:
+estado da secretária;
 
-```bash
-php artisan reservas:cancelar-expiradas
-```
+estado do setor;
 
-O comando é executado periodicamente através do Scheduler do Laravel.
+reservabilidade;
 
-Esta automatização evita que reservas abandonadas continuem a bloquear secretárias que poderiam ser utilizadas por outros utilizadores.
+reservas existentes em todo o intervalo.
 
-## 10.5 Integração com pagamentos
+12.4 Tarefas automáticas
 
-Uma reserva pode originar um pagamento quando a utilização do espaço estiver sujeita a cobrança.
+O Scheduler pode executar:
 
-O pagamento mantém informação sobre:
+expiração de reservas sem check-in;
 
-* a reserva associada;
-* o valor;
-* o método escolhido;
-* o estado;
-* a referência;
-* a data de confirmação.
+cancelamento de reservas com pagamento pendente;
 
-No contexto académico, o pagamento é simulado e não comunica com instituições bancárias ou fornecedores externos.
+atualização de estados;
 
+libertação de secretárias;
 
----
+notificações associadas.
 
-# 11. Pagamentos
+13. Pagamentos
 
-O módulo de pagamentos permite associar uma operação financeira simulada a uma reserva.
+13.1 Funcionalidades
 
-Funcionalidades implementadas:
+criação automática;
 
-* criação de pagamentos;
-* associação do pagamento a uma reserva;
-* geração de referência única;
-* consulta do estado do pagamento;
-* confirmação de pagamentos;
-* cancelamento de pagamentos;
-* consulta do histórico;
-* validação das transições de estado;
-* apresentação da informação no frontend;
-* controlo de acesso às operações.
+associação à reserva;
 
-## 11.1 Estados dos pagamentos
+cálculo do valor;
 
-Os estados utilizados são:
+referência única;
 
-* `pendente`;
-* `pago`;
-* `cancelado`.
+consulta;
 
-Um pagamento é inicialmente criado com o estado `pendente`.
+histórico;
 
-Após confirmação, passa para o estado `pago`.
+confirmação;
 
-Quando é cancelado, passa para o estado `cancelado`.
+cancelamento;
 
-## 11.2 Regras de negócio
+seleção do método;
 
-As principais regras são:
+atualização da reserva;
 
-* cada pagamento pertence obrigatoriamente a uma reserva;
-* uma reserva não deve possuir pagamentos duplicados;
-* o valor deve ser igual ou superior a zero;
-* a referência deve ser única;
-* apenas pagamentos pendentes podem ser confirmados;
-* apenas pagamentos elegíveis podem ser cancelados;
-* pagamentos pagos ou cancelados não devem regressar ao estado pendente;
-* um utilizador apenas pode consultar pagamentos associados às suas próprias reservas, exceto quando possui permissões administrativas.
+autorização;
 
-## 11.3 Natureza académica
+testes.
 
-O sistema de pagamentos foi implementado como uma simulação funcional.
+13.2 Fluxo
 
-Não existe comunicação com:
+Reserva criada
+    ↓
+PagamentoService
+    ↓
+Cálculo do valor
+    ↓
+Pagamento pendente
+    ↓
+Escolha do método
+    ↓
+Confirmação simulada
+    ↓
+Pagamento pago
+    ↓
+Reserva atualizada
 
-* bancos;
-* redes de cartões;
-* MB Way;
-* gateways de pagamento;
-* serviços financeiros externos.
+13.3 Natureza académica
 
-Uma integração real com Stripe, PayPal, Ifthenpay, Eupago ou outro fornecedor deverá ser considerada trabalho futuro.
+Não existe integração real com:
 
+bancos;
 
-# 12. QR Code e Check-in
+redes de cartões;
 
-Cada secretária possui um `qr_token` único.
+MB Way;
 
-O QR Code permite iniciar o processo de check-in.
+PayPal;
+
+gateways externos.
+
+Uma integração real permanece como evolução futura.
+
+14. QR Code e check-in
+
+Cada secretária possui um qr_token único.
 
 Durante o check-in são validados:
 
-- utilizador autenticado;
-- propriedade da reserva;
-- data;
-- período;
-- secretária;
-- QR Code;
-- estado da reserva;
-- inexistência de cancelamento.
+utilizador autenticado;
 
-Após check-in:
+propriedade da reserva;
 
-- é preenchido `check_in_at`;
-- a reserva passa ao estado `confirmada`;
-- o mapa é atualizado.
+data;
 
-Tecnologias utilizadas:
+período;
 
-- Simple QR Code;
-- html5-qrcode.
+duração;
 
----
+secretária;
 
-# 13. Dashboard, Estatísticas e Mapa
+token;
+
+estado da reserva;
+
+inexistência de cancelamento.
+
+Após o check-in:
+
+é preenchido check_in_at;
+
+a reserva passa a confirmada;
+
+o mapa é atualizado;
+
+podem ser emitidos eventos e notificações.
+
+15. Dashboard, estatísticas e mapa
 
 Funcionalidades implementadas:
 
-- dashboard;
-- estatísticas;
-- taxa de ocupação;
-- reservas por período;
-- reservas por estado;
-- reservas por edifício;
-- mapa interativo;
-- editor gráfico dos setores;
-- atualização do mapa em tempo real.
+dashboard;
 
-O evento utilizado para atualização do mapa é:
+cartões de indicadores;
 
-```text
+próximas reservas;
+
+taxa de ocupação;
+
+reservas por período;
+
+reservas por estado;
+
+reservas por edifício;
+
+informação financeira autorizada;
+
+mapa interativo;
+
+editor gráfico;
+
+atualização em tempo real;
+
+cache;
+
+consultas agregadas.
+
+Evento utilizado na atualização do mapa:
+
 MapaAtualizado
-```
 
-Tecnologias utilizadas:
-
-- React;
-- Inertia.js;
-- Recharts;
-- Broadcasting;
-- Laravel Echo;
-- Laravel Reverb.
-
----
-
-# 14. Help Center e Suporte
-
-# Help Center e Suporte
-
-O SpaceHub disponibiliza uma área de apoio aos utilizadores.
+16. Avaliações
 
 Funcionalidades implementadas:
 
-* consulta do Help Center;
-* consulta de perguntas frequentes;
-* organização das FAQs por categorias;
-* apresentação apenas de conteúdos ativos;
-* submissão de pedidos de suporte;
-* reporte de problemas e avarias;
-* acompanhamento do estado dos pedidos;
-* resposta administrativa;
-* associação dos pedidos ao utilizador autenticado.
+avaliação de reservas elegíveis;
 
-Entidades principais:
+classificação;
 
-```text
-Faq
-PedidoSuporte
-```
+comentário;
 
-Controllers principais:
+moderação;
 
-```text
-FaqController
-PedidoSuporteController
-```
+cálculo da média por setor;
 
-Seeder associado:
+autorização;
 
-```text
-FaqSeeder
-```
+notificações associadas.
 
-Os pedidos de suporte podem passar por diferentes estados, nomeadamente:
+Regras:
 
-* aberto;
-* em tratamento;
-* resolvido;
-* fechado.
+uma reserva apenas pode ser avaliada quando elegível;
 
-O módulo permite centralizar pedidos de ajuda e reduzir a necessidade de comunicação externa para problemas relacionados com a utilização da plataforma ou dos espaços.
+não devem existir avaliações duplicadas para a mesma reserva;
 
+a moderação depende das permissões;
 
-# 15. Sistema de Chat e WebSockets
+a média deve ser calculada a partir dos dados reais.
 
-Foi integrada uma funcionalidade experimental de comunicação em tempo real.
+17. Notificações
 
-Componentes integrados:
+O sistema inclui notificações persistentes e, quando aplicável, notificações por email.
 
-- Laravel Reverb;
-- Laravel Echo;
-- Broadcasting;
-- ChatController;
-- evento `EnviarMensagem`;
-- página React `TesteChat`;
-- configuração de WebSockets.
+Podem ser geradas por:
 
-Esta integração teve origem na branch:
+criação de reserva;
 
-```text
-feature/update-eduardo
-```
+alteração de reserva;
 
-Fluxo de integração utilizado:
+cancelamento;
 
-```text
-feature/update-eduardo
-        ↓
-integration/update-eduardo
-        ↓
-Pull Request
-        ↓
-Create a merge commit
-        ↓
-main
-```
+expiração;
 
-A autoria dos commits foi preservada.
+pagamento;
 
-Não foi utilizado:
+check-in;
 
-- rebase;
-- Squash and merge;
-- alteração do histórico da branch do c# Testes
+avaliação;
 
-O projeto utiliza PHPUnit para testes automatizados.
+pedido de suporte.
 
-Situação atual:
+As notificações podem possuir estado de leitura.
 
-```text
-154 testes aprovados
-```
+18. Chat e comunicação em tempo real
 
-Os testes cobrem:
+O chat utiliza:
 
-* autenticação;
-* registo;
-* login;
-* logout;
-* recuperação de password;
-* redefinição de password;
-* revogação de tokens;
-* autorização;
-* Policies;
-* Gates;
-* Middleware;
-* bloqueio de utilizadores inativos;
-* gestão de utilizadores;
-* gestão de edifícios;
-* gestão de pisos;
-* gestão de setores;
-* gestão de secretárias;
-* reservas;
-* disponibilidade;
-* atualização de reservas;
-* cancelamento;
-* estados das reservas;
-* expiração automática;
-* check-in;
-* QR Code;
-* pagamentos;
-* estados dos pagamentos;
-* confirmação de pagamentos;
-* cancelamento de pagamentos;
-* dashboard;
-* estatísticas;
-* mapa interativo;
-* atualização em tempo real;
-* Help Center;
-* FAQs;
-* pedidos de suporte;
-* uploads;
-* substituição segura de ficheiros;
-* pesquisa;
-* filtros;
-* ordenação;
-* paginação;
-* validação;
-* integridade das relações;
-* regras de negócio;
-* performance de queries.
+Laravel Reverb;
 
-Comando principal:
+Laravel Echo;
 
-```bash
-php artisan test
-```
+Broadcasting;
 
-Antes de uma integração ou entrega devem ser executados:
+Events;
 
-```bash
-php artisan optimize:clear
-composer dump-autoload
-npm.cmd run build
-php artisan test
-php artisan route:list
-```
+canais autenticados;
 
-No Windows PowerShell deve ser utilizado:
+persistência de mensagens, de acordo com as tabelas existentes.
 
-```bash
-npm.cmd run build
-```
+Fluxo:
 
-caso a execução de `npm.ps1` esteja bloqueada pela política do sistema.
+Utilizador envia mensagem
+    ↓
+Controller
+    ↓
+Validação e autorização
+    ↓
+Persistência
+    ↓
+Evento
+    ↓
+Reverb
+    ↓
+Echo
+    ↓
+Participantes autorizados
 
-A aprovação dos 154 testes demonstra que as principais funcionalidades e regras de autorização permanecem estáveis após a integração dos diferentes módulos.
-olaborador.
+19. Help Center
 
----
+O Help Center inclui:
 
-# 16. Testes
+FAQs;
 
-# Testes
+categorias;
 
-O projeto utiliza PHPUnit para testes automatizados.
+conteúdos ativos;
 
-Situação atual:
+pesquisa;
 
-```text
-154 testes aprovados
-```
+pedidos de suporte;
 
-Os testes cobrem:
+reporte de problemas;
 
-* autenticação;
-* registo;
-* login;
-* logout;
-* recuperação de password;
-* redefinição de password;
-* revogação de tokens;
-* autorização;
-* Policies;
-* Gates;
-* Middleware;
-* bloqueio de utilizadores inativos;
-* gestão de utilizadores;
-* gestão de edifícios;
-* gestão de pisos;
-* gestão de setores;
-* gestão de secretárias;
-* reservas;
-* disponibilidade;
-* atualização de reservas;
-* cancelamento;
-* estados das reservas;
-* expiração automática;
-* check-in;
-* QR Code;
-* pagamentos;
-* estados dos pagamentos;
-* confirmação de pagamentos;
-* cancelamento de pagamentos;
-* dashboard;
-* estatísticas;
-* mapa interativo;
-* atualização em tempo real;
-* Help Center;
-* FAQs;
-* pedidos de suporte;
-* uploads;
-* substituição segura de ficheiros;
-* pesquisa;
-* filtros;
-* ordenação;
-* paginação;
-* validação;
-* integridade das relações;
-* regras de negócio;
-* performance de queries.
+acompanhamento do estado;
 
-Comando principal:
+resposta administrativa;
 
-```bash
-php artisan test
-```
+associação ao utilizador autenticado.
 
-Antes de uma integração ou entrega devem ser executados:
+Estados de suporte podem incluir:
 
-```bash
-php artisan optimize:clear
-composer dump-autoload
-npm.cmd run build
-php artisan test
-php artisan route:list
-```
+aberto;
 
-No Windows PowerShell deve ser utilizado:
+em tratamento;
 
-```bash
-npm.cmd run build
-```
+resolvido;
 
-caso a execução de `npm.ps1` esteja bloqueada pela política do sistema.
+fechado.
 
-A aprovação dos 154 testes demonstra que as principais funcionalidades e regras de autorização permanecem estáveis após a integração dos diferentes módulos.
+Os nomes finais devem corresponder ao Model e à migration.
 
+20. Uploads
 
-# 17. Rotas da API
+Uploads principais:
 
-# Rotas da API
+Fotografias
 
-A API encontra-se organizada por grupos funcionais e protegida através de autenticação, middleware e Policies.
+storage/app/public/utilizadores/fotografias
+
+Plantas
+
+storage/app/public/pisos/plantas
+
+Link público:
+
+php artisan storage:link
+
+Regras:
+
+validar tipo MIME;
+
+validar extensão;
+
+validar tamanho;
+
+gerar nomes seguros;
+
+substituir o ficheiro anterior;
+
+remover ficheiros órfãos em caso de falha;
+
+guardar apenas o caminho relativo na base de dados.
+
+21. API
 
 Grupos principais:
 
-* autenticação;
-* utilizadores;
-* edifícios;
-* pisos;
-* setores;
-* secretárias;
-* reservas;
-* disponibilidade;
-* pagamentos;
-* Help Center;
-* pedidos de suporte;
-* ações de ativação e desativação;
-* cancelamentos;
-* operações administrativas.
+autenticação;
 
-O número total de rotas deve ser atualizado após a execução de:
+utilizadores;
 
-```bash
+edifícios;
+
+pisos;
+
+setores;
+
+secretárias;
+
+reservas;
+
+disponibilidade;
+
+pagamentos;
+
+operações administrativas.
+
+As funcionalidades web não devem ser automaticamente documentadas como endpoints API.
+
+Confirmar as rotas reais com:
+
 php artisan route:list --path=api
-```
 
-As atualizações normais utilizam preferencialmente `PUT`.
+Operações normais de atualização utilizam preferencialmente:
 
-As operações específicas, como ativação, cancelamento ou confirmação, utilizam `PATCH` ou `POST`, consoante a semântica definida na rota.
+PUT
 
-As funcionalidades de dashboard, mapa, QR Code, check-in, Help Center e comunicação em tempo real também podem utilizar rotas web específicas, não pertencendo obrigatoriamente ao prefixo `/api`.
+Operações específicas podem utilizar:
 
-As atualizações normais utilizam `PUT`.
-
-Exemplos:
-
-```text
-PUT /api/users/{user}
-PUT /api/edificios/{edificio}
-PUT /api/pisos/{piso}
-PUT /api/setores/{setor}
-PUT /api/secretarias/{secretaria}
-PUT /api/reservas/{reserva}
-```
-
-As operações especiais utilizam `PATCH`.
+PATCH
 
 Exemplos:
 
-```text
 PATCH /api/users/{user}/toggle-ativo
-PATCH /api/edificios/{edificio}/toggle-ativo
-PATCH /api/pisos/{piso}/toggle-ativo
-PATCH /api/setores/{setor}/toggle-ativo
-PATCH /api/secretarias/{secretaria}/toggle-ativo
 PATCH /api/reservas/{reserva}/cancelar
-```
+PATCH /api/pagamentos/{pagamento}/confirmar
 
-Existe atualmente uma rota técnica:
+Rotas técnicas de teste devem ser removidas antes da entrega, caso já não sejam necessárias.
 
-```text
-GET /api/admin/teste
-```
+22. Seeders e dados iniciais
 
-php artisan route:list --path=api
+Seeders principais conhecidos:
 
-Esta rota deve ser revista antes da entrega final e removida caso já não seja necessária.
+RoleSeeder;
 
-As funcionalidades de dashboard, mapa, QR Code e check-in utilizam rotas web específicas e não pertencem necessariamente ao grupo `/api`.
+PeriodoSeeder;
 
----
+EstadoReservaSeeder;
 
-# 18. Seeders
+SpaceHubEstruturaSeeder;
 
-Seeders principais:
+UserSeeder;
 
-```text
-RoleSeeder
-PeriodoSeeder
-EstadoReservaSeeder
-UserSeeder
-SpaceHubEstruturaSeeder
-ReservaSeeder
-FaqSeeder
-```
+ReservaSeeder;
 
-O projeto deve funcionar após:
+FaqSeeder.
 
-```bash
+Podem existir seeders adicionais para pagamentos, avaliações ou outros módulos.
+
+A lista final deve ser confirmada em:
+
+database/seeders
+
+O projeto deve ser testado num ambiente de desenvolvimento com:
+
 php artisan migrate:fresh --seed
-```
 
-Estados criados pelo `EstadoReservaSeeder`:
+Este comando apaga os dados e só deve ser utilizado num ambiente em que essa operação seja segura.
 
-```text
-RoleSeeder
-PeriodoSeeder
-EstadoReservaSeeder
-UserSeeder
-SpaceHubEstruturaSeeder
-ReservaSeeder
-FaqSeeder
-PagamentoSeeder
-```
+23. Testes automatizados
 
----
+O projeto utiliza PHPUnit.
 
-# 19. Uploads
+Áreas cobertas:
 
-Uploads implementados:
+registo;
 
-## Fotografia dos utilizadores
+login;
 
-Diretório:
+logout;
 
-```text
-storage/app/public/utilizadores/fotografias
-```
+recuperação de palavra-passe;
 
-## Planta dos pisos
+autenticação da API;
 
-Diretório:
+utilizadores inativos;
 
-```text
-storage/app/public/pisos/plantas
-```
+middleware;
 
-O link público é criado através de:
+Policies;
 
-```bash
-php artisan storage:link
-```
+Gates;
 
-Os ficheiros antigos são removidos quando ocorre substituição bem-sucedida.
+gestão de utilizadores;
 
-Se a gravação na base de dados falhar, o novo ficheiro é eliminado para evitar ficheiros órfãos.
+gestão de espaços;
 
----
+uploads;
 
-# 20. Documentação Técnica
+reservas;
 
-A pasta `docs` contém:
+reservas longas;
 
-```text
-01-Requisitos.md
-02-CasosDeUso.md
-03-ModeloBaseDados.md
-04-Arquitetura.md
-05-API.md
-06-EvolucaoProjeto.md
-07-DicionarioDados.md
-08-DocumentoMestre.md
-```
+disponibilidade;
 
-Finalidade dos documentos:
+conflitos;
 
-| Documento | Finalidade |
-|-----------|------------|
-| 01 — Requisitos | Requisitos funcionais, não funcionais e regras de negócio |
-| 02 — Casos de Uso | Interações entre atores e sistema |
-| 03 — Modelo da Base de Dados | Entidades, relações e decisões de modelação |
-| 04 — Arquitetura | Estrutura técnica da aplicação |
-| 05 — API | Endpoints, autenticação e respostas |
-| 06 — Evolução do Projeto | Desenvolvimento e trabalho futuro |
-| 07 — Dicionário de Dados | Tabelas e campos da base de dados |
-| 08 — Documento Mestre | Contexto permanente e decisões consolidadas |
+cancelamento;
 
-A documentação deve ser atualizada sempre que existirem alterações estruturais relevantes.
+expiração;
 
----
+QR Code;
 
-# 21. Git e Integração
+check-in;
 
-O fluxo utilizado é:
+pagamentos;
 
-```text
-Branch de funcionalidade
-        ↓
-Commit
-        ↓
-Push
-        ↓
-Pull Request
-        ↓
-Create a merge commit
-        ↓
-main
-```
+avaliações;
 
-Este fluxo permite:
+notificações;
 
-- preservar autoria;
-- manter o histórico completo;
-- associar alterações a Pull Requests;
-- facilitar revisão;
-- evitar perda de commits.
+dashboard;
 
-Não apagar branches antes da validação.
+mapa;
 
-Evitar `Squash and merge` quando for necessário preservar a autoria individual.
+Help Center;
 
----
+filtros;
 
-# 22. Integrações Realizadas
+pesquisa;
 
-## Pull Request 1
+ordenação;
 
-Funcionalidades:
+paginação;
 
-- Dashboard;
-- Estatísticas;
-- QR Code;
-- Check-in;
-- Mapa Interativo.
+Services;
 
----
+regras de negócio.
 
-## Pull Request 2
+A última contagem registada na documentação foi:
 
-Funcionalidades:
+154 testes aprovados
 
-- histórico de reservas;
-- funcionalidades adicionais do módulo de reservas.
+Como foram posteriormente integrados novos commits, a contagem final deve ser confirmada com:
 
----
+php artisan test
 
-## Pull Request 3
+24. Processo de validação
 
-Funcionalidades:
+Depois de atualizar a branch main:
 
-- Help Center;
-- FAQs;
-- sistema de pedidos de suporte.
-
----
-
-## Integração de julho de 2026
-
-Branch:
-
-```text
-feature/update-eduardo
-```
-
-Funcionalidades:
-
-- Laravel Reverb;
-- Laravel Echo;
-- Broadcasting;
-- sistema de chat;
-- WebSockets.
-
-Validação executada na integração:
-
-```bash
+composer install
+npm.cmd install
 php artisan optimize:clear
-composer dump-autoload
-npm install
+php artisan migrate
 npm.cmd run build
 php artisan test
 php artisan route:list
-```
 
----
+Para executar a aplicação:
 
-# 23. Estado das Sprints
+php artisan serve
 
-## Sprint 1 — Base de Dados
+Frontend em desenvolvimento:
 
-Estado:
+npm.cmd run dev
 
-```text
-Concluída
-```
+Tempo real:
 
-Inclui:
+php artisan reverb:start
 
-- migrations;
-- Models;
-- relações;
-- seeders;
-- documentação inicial.
+Scheduler, quando necessário:
 
----
+php artisan schedule:work
 
-## Sprint 2 — Autenticação
+Não utilizar migrate:fresh numa base de dados com dados que devam ser preservados.
 
-Estado:
+25. Git e integração
 
-```text
-Concluída
-```
+Fluxo utilizado:
 
-Inclui:
+Branch de funcionalidade
+    ↓
+Commit
+    ↓
+Push
+    ↓
+Pull Request
+    ↓
+Revisão e testes
+    ↓
+Create a merge commit
+    ↓
+main
 
-- registo;
-- login;
-- logout;
-- consulta do utilizador autenticado;
-- Laravel Sanctum.
+Regras:
 
----
+preservar a autoria;
 
-## Sprint 3 — Recuperação de Password
+evitar squash quando a autoria individual deve ser mantida;
 
-Estado:
+testar antes do merge;
 
-```text
-Concluída
-```
+atualizar a main após a integração;
 
-Inclui:
+não alterar o histórico das branches dos colegas;
 
-- pedido de recuperação;
-- redefinição de password;
-- revogação dos tokens antigos.
+resolver conflitos numa branch de integração quando necessário.
 
----
+Atualização da main:
 
-## Sprint 4 — Gestão de Utilizadores
+git switch main
+git fetch origin --prune
+git pull --ff-only origin main
 
-Estado:
+26. Estado atual
 
-```text
-Concluída
-```
+26.1 Concluído
 
-Inclui:
+backend Laravel;
 
-- listagem;
-- criação;
-- atualização;
-- ativação e desativação;
-- papéis;
-- fotografia;
-- pesquisa;
-- filtros;
-- ordenação;
-- paginação.
+frontend React com Inertia.js;
 
----
+autenticação;
 
-## Sprint 5 — Gestão de Espaços
+Single Sign-On;
 
-Estado:
+recuperação de palavra-passe;
 
-```text
-Concluída
-```
+perfis;
 
-Inclui:
+utilizadores ativos e inativos;
 
-- edifícios;
-- pisos;
-- setores;
-- secretárias;
-- plantas;
-- mapa;
-- QR Codes.
+gestão de utilizadores;
 
----
+papéis;
 
-## Sprint 6 — Reservas
+Policies;
 
-Estado:
+middleware;
 
-```text
-Concluída
-```
+gestão de edifícios;
 
-Inclui:
+gestão de pisos;
 
-- criação;
-- atualização;
-- consulta;
-- disponibilidade;
-- cancelamento;
-- regras de negócio;
-- check-in.
+gestão de setores;
 
----
+gestão de secretárias;
 
-## Sprint 7 — Funcionalidades Avançadas
+uploads;
 
-Estado:
+mapa;
 
-```text
-Integrada
-```
+editor gráfico;
 
-Inclui:
+QR Codes;
 
-- dashboard;
-- estatísticas;
-- QR Code;
-- check-in;
-- mapa interativo;
-- editor gráfico;
-- Help Center;
-- FAQs;
-- pedidos de suporte;
-- atualização em tempo real.
+reservas;
 
-## Sprint 8 — Pagamentos e Consolidação Final
+reservas longas;
 
-Estado:
+disponibilidade;
 
-```text
-Concluída
-```
+histórico;
 
-Inclui:
+edição;
 
-* criação do módulo de pagamentos;
-* associação entre pagamentos e reservas;
-* estados dos pagamentos;
-* referências únicas;
-* confirmação e cancelamento;
-* interface de pagamentos;
-* validação das regras de negócio;
-* autorização;
-* testes automatizados;
-* atualização da API;
-* atualização da documentação;
-* revisão de arquitetura;
-* revisão do modelo de dados;
-* preparação da entrega final.
+cancelamento;
 
+check-in;
 
----
+expiração automática;
 
-# 24. Estado Atual
+pagamentos simulados;
 
-C# Estado Atual
+dashboard;
 
-Concluído:
+estatísticas;
 
-* backend Laravel;
-* frontend React com Inertia.js;
-* autenticação;
-* recuperação de password;
-* autorização;
-* Policies;
-* Middleware;
-* gestão de utilizadores;
-* gestão de edifícios;
-* gestão de pisos;
-* gestão de setores;
-* gestão de secretárias;
-* reservas;
-* disponibilidade;
-* cancelamento;
-* QR Code;
-* check-in;
-* expiração automática de reservas;
-* pagamentos simulados;
-* dashboard;
-* estatísticas;
-* mapa interativo;
-* editor gráfico;
-* uploads;
-* Help Center;
-* FAQs;
-* pedidos de suporte;
-* comunicação em tempo real;
-* Laravel Reverb;
-* Laravel Echo;
-* testes automatizados;
-* revisão de Models;
-* revisão de Form Requests;
-* revisão de Resources;
-* revisão de Policies;
-* revisão de Controllers;
-* revisão das regras de negócio;
-* atualização da documentação técnica.
+avaliações;
 
-Situação de validação:
+notificações;
 
-```text
-154 testes aprovados
-```
+chat;
 
-Em curso:
+Help Center;
 
-* atualização final do README;
-* revisão visual do frontend;
-* verificação do número final de rotas;
-* limpeza de rotas técnicas;
-* remoção de código temporário;
-* revisão da consistência documental;
-* preparação da apresentação;
-* preparação da entrega.
+FAQs;
 
-Trabalho futuro:
+pedidos de suporte;
 
-* integração com um fornecedor real de pagamentos;
-* auditoria persistente em base de dados;
-* notificações por email e em tempo real;
-* integração com Google Calendar;
-* integração com Microsoft Outlook;
-* aplicação mobile;
-* estatísticas avançadas;
-* Single Sign-On;
-* gestão avançada de mensagens;
-* Inteligência Artificial para previsão de ocupação;
-* eventual estado `concluida` com ciclo de vida formal;
-* integração com sistemas externos de controlo de acessos.
+comunicação em tempo real;
 
+testes automatizados;
 
-# 25. Regras de Continuidade
+documentação técnica.
+
+26.2 Fase atual
+
+A fase atual é dedicada a:
+
+pequenos ajustes;
+
+correções;
+
+testes manuais;
+
+execução da suíte completa;
+
+revisão das permissões;
+
+validação do frontend;
+
+validação da responsividade;
+
+atualização do README;
+
+revisão da documentação;
+
+preparação da apresentação;
+
+preparação da entrega.
+
+Não devem ser iniciados grandes módulos nesta fase, salvo requisito obrigatório.
+
+27. Trabalho futuro
+
+As próximas funcionalidades possíveis são:
+
+27.1 Comunicados e mensagem do dia
+
+título;
+
+conteúdo;
+
+prioridade;
+
+validade;
+
+público-alvo;
+
+confirmação de leitura.
+
+27.2 Exportação e relatórios
+
+comprovativos em PDF;
+
+relatórios de reservas;
+
+relatórios de pagamentos;
+
+exportação Excel;
+
+estatísticas exportáveis.
+
+27.3 Dashboard financeiro avançado
+
+receitas por período;
+
+pagamentos pendentes;
+
+distribuição por método;
+
+comparação mensal.
+
+27.4 Integração com calendários
+
+Google Calendar;
+
+Microsoft Outlook.
+
+27.5 Aplicação móvel
+
+Android;
+
+iOS;
+
+reservas;
+
+notificações;
+
+check-in;
+
+pagamentos;
+
+chat.
+
+27.6 Previsão de ocupação
+
+Primeira fase:
+
+análise estatística do histórico;
+
+previsão por dia;
+
+previsão por período;
+
+previsão por edifício;
+
+identificação das áreas mais utilizadas.
+
+Evolução posterior:
+
+Inteligência Artificial;
+
+recomendação de secretárias;
+
+otimização da ocupação.
+
+27.7 Auditoria administrativa
+
+utilizador responsável;
+
+ação;
+
+entidade;
+
+valor anterior;
+
+valor novo;
+
+data e hora;
+
+endereço IP, quando adequado.
+
+27.8 Pagamentos reais
+
+Stripe;
+
+PayPal;
+
+MB Way;
+
+Multibanco;
+
+webhooks;
+
+requisitos adicionais de segurança.
+
+27.9 Melhorias no Help Center
+
+anexos;
+
+categorias;
+
+atribuição de responsáveis;
+
+histórico de respostas;
+
+métricas de resolução.
+
+O Single Sign-On, as notificações e as avaliações já estão implementados e não devem aparecer como funcionalidades pendentes.
+
+28. Regras de continuidade
 
 Ao continuar o projeto:
 
-- não alterar a arquitetura sem explicar o impacto;
-- não renomear ficheiros, classes, métodos ou rotas sem necessidade;
-- não efetuar refactors automáticos globais;
-- manter compatibilidade com os testes existentes;
-- utilizar Route Model Binding;
-- utilizar Form Requests nos CRUDs;
-- utilizar Resources na API;
-- utilizar Policies e Gates;
-- preservar a desativação lógica;
-- não criar CRUD de papéis;
-- não recriar a entidade Localidade;
-- não adicionar o estado `concluida` sem definir o ciclo de vida;
-- executar os testes após cada bloco;
-- fornecer ficheiros completos quando forem necessárias alterações;
-- confirmar nomes reais das rotas, campos e estados antes de documentar;
-- evitar funcionalidades novas durante a fase final, salvo requisito obrigatório.
+não alterar a arquitetura sem explicar o impacto;
 
----
+não refatorar globalmente sem aprovação;
 
-# 25. Estado Técnico Resumido
+não renomear classes, ficheiros, métodos ou rotas sem necessidade;
 
-# Estado Técnico Resumido
+manter compatibilidade com os testes;
 
-```text
+fornecer ficheiros completos quando forem alterados;
+
+utilizar Route Model Binding;
+
+utilizar Form Requests;
+
+utilizar Resources na API;
+
+utilizar Policies e Gates;
+
+preservar a desativação lógica;
+
+não criar CRUD de papéis;
+
+não recriar Localidade;
+
+não adicionar concluida sem definir o ciclo de vida;
+
+confirmar nomes reais das rotas e campos;
+
+executar testes após cada alteração;
+
+evitar novas funcionalidades durante a fase final;
+
+manter os preços nos setores;
+
+manter reservas longas num único registo;
+
+manter um pagamento por reserva.
+
+29. Documentação técnica
+
+Documento
+
+Finalidade
+
+01-Requisitos.md
+
+Requisitos e regras de negócio
+
+02-CasosDeUso.md
+
+Interações entre atores e sistema
+
+03-ModeloBaseDados.md
+
+Entidades, relações e decisões de modelação
+
+04-Arquitetura.md
+
+Estrutura técnica da aplicação
+
+05-API.md
+
+Endpoints, autenticação e respostas
+
+06-EvolucaoProjeto.md
+
+Evolução e trabalho futuro
+
+07-DicionarioDados.md
+
+Tabelas e campos
+
+08-DocumentoMestre.md
+
+Contexto consolidado e regras de continuidade
+
+A documentação deve ser atualizada sempre que existirem alterações estruturais relevantes.
+
+30. Estado técnico resumido
+
 Backend:
 Laravel 12
-PHP 8
+PHP
 Laravel Sanctum
 Eloquent ORM
 Policies
@@ -1725,6 +1832,7 @@ Form Requests
 Resources
 Services
 Events
+Notifications
 Broadcasting
 Scheduler
 Commands Artisan
@@ -1735,57 +1843,75 @@ Inertia.js
 Tailwind CSS
 Vite
 Recharts
-html5-qrcode
 Laravel Echo
+QR Code
 
 Tempo real:
 Laravel Reverb
 Broadcasting
 MapaAtualizado
-EnviarMensagem
+Chat
+Notificações
 
 Base de dados:
 MySQL
 
-Entidades principais:
-Role
-User
-Edificio
-Piso
-Setor
-Secretaria
-Periodo
-EstadoReserva
-Reserva
-Pagamento
-Faq
-PedidoSuporte
-
-Uploads:
-Fotografias dos utilizadores
-Plantas dos pisos
-
-Funcionalidades:
-Gestão de utilizadores
-Gestão de espaços
+Módulos:
+Autenticação
+Single Sign-On
+Utilizadores
+Espaços
 Reservas
-Disponibilidade
+Reservas longas
+Pagamentos
 QR Code
 Check-in
-Pagamentos simulados
 Dashboard
-Estatísticas
-Mapa interativo
+Mapa
+Avaliações
+Notificações
+Chat
 Help Center
-Pedidos de suporte
-Chat e comunicação em tempo real
 
 Testes:
-154 testes aprovados
+Última contagem documentada de 154 testes aprovados
+Contagem final a confirmar com php artisan test
 
-API:
-Número final de rotas a confirmar com php artisan route:list --path=api
+Estado:
+Projeto integrado e em fase de correções, validação e preparação da entrega
 
-Estado geral:
-Projeto estável, testado, documentado e em preparação para a entrega final.
-```
+31. Considerações finais
+
+O SpaceHub evoluiu de uma estrutura inicial de autenticação e gestão de espaços para uma plataforma completa de gestão e reserva de postos de trabalho.
+
+A aplicação integra:
+
+segurança;
+
+gestão de utilizadores;
+
+gestão hierárquica dos espaços;
+
+reservas de curta e longa duração;
+
+pagamentos simulados;
+
+check-in;
+
+mapas;
+
+dashboards;
+
+avaliações;
+
+notificações;
+
+chat;
+
+suporte ao utilizador;
+
+comunicação em tempo real.
+
+A arquitetura mantém a lógica e a segurança no backend, utiliza React e Inertia.js na interface e garante persistência através de MySQL e Eloquent.
+
+O projeto encontra-se na fase final, devendo as próximas alterações concentrar-se em correções, testes, documentação e preparação da apresentação e entrega.
