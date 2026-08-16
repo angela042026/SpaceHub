@@ -10,7 +10,7 @@ use App\Services\ActivityLogger;
 use App\Services\DashboardMetricsService;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -89,13 +89,15 @@ class CheckInController extends Controller
     }
 
     /**
-     * Confirma o check-in de uma reserva (via scan de QR Code ou botão manual no dashboard).
+     * Confirma o check-in de uma reserva — via QR Code (obrigatório para
+     * Utilizador/Colaborador) ou manualmente (só Administrador/Gestor,
+     * sempre registado como tal no Registo de Atividade).
      */
-    public function confirm(Reserva $reserva): RedirectResponse
+    public function confirm(Request $request, Reserva $reserva): RedirectResponse
     {
         Gate::authorize('gerirPropria', $reserva);
 
-        $reserva->load(['periodo', 'estadoReserva']);
+        $reserva->load(['periodo', 'estadoReserva', 'secretaria']);
 
         if (! in_array($reserva->estadoReserva?->codigo, EstadoReserva::codigosAtivos(), true)) {
             return back()->withErrors(['reserva' => 'Esta reserva já não está ativa.']);
@@ -115,6 +117,26 @@ class CheckInController extends Controller
             return back()->withErrors(['reserva' => 'Fora da janela horária permitida para check-in.']);
         }
 
+        $utilizador = $request->user();
+        $ehStaff = $utilizador->isAdministrador() || $utilizador->isGestor();
+        $qrToken = $request->input('qr_token');
+        $viaQr = $qrToken !== null && $qrToken === $reserva->secretaria?->qr_token;
+
+        /*
+         * Utilizador/Colaborador têm de provar que leram o QR físico da
+         * secretária — sem isto, bastava conhecer o ID da própria
+         * reserva para confirmar o check-in a partir de qualquer lugar,
+         * sem alguma vez ter estado no escritório (ver QR-PROVA na
+         * auditoria). Administrador/Gestor mantêm a opção de confirmar
+         * sem QR (ex.: câmara indisponível, ajudar um visitante), mas
+         * essa exceção fica sempre marcada como manual no registo.
+         */
+        if (! $ehStaff && ! $viaQr) {
+            return back()->withErrors([
+                'reserva' => 'É necessário ler o QR Code da secretária para confirmar o check-in.',
+            ]);
+        }
+
         $reserva->update([
             'check_in_at' => now(),
         ]);
@@ -122,14 +144,16 @@ class CheckInController extends Controller
         $reserva->loadMissing('secretaria.setor');
 
         ActivityLogger::log(
-            Auth::user(),
+            $utilizador,
             'checkin_efetuado',
             sprintf(
-                '%s · %s',
+                '%s · %s%s',
                 $reserva->secretaria?->setor?->nome ?? '-',
-                $reserva->secretaria?->codigo ?? '-'
+                $reserva->secretaria?->codigo ?? '-',
+                $viaQr ? '' : ' (check-in manual, sem QR)'
             ),
-            $reserva
+            $reserva,
+            ['via' => $viaQr ? 'qr' : 'manual']
         );
 
         broadcast(new MapaAtualizado());

@@ -28,6 +28,9 @@ class User extends Authenticatable
         'ativo',
         'fotografia',
         'email_verified_at',
+        'google_calendar_access_token',
+        'google_calendar_refresh_token',
+        'google_calendar_token_expira_em',
     ];
 
     protected $appends = [
@@ -57,6 +60,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'ativo' => 'boolean',
             'role_id' => 'integer',
+            'google_calendar_access_token' => 'encrypted',
+            'google_calendar_refresh_token' => 'encrypted',
+            'google_calendar_token_expira_em' => 'datetime',
         ];
     }
 
@@ -129,5 +135,15 @@ class User extends Authenticatable
     public function isGestor(): bool
     {
         return $this->hasRole(RoleName::Gestor);
+    }
+
+    /**
+     * Se o utilizador já autorizou o SpaceHub a criar eventos no seu
+     * Google Calendar — o refresh_token só existe depois dessa
+     * autorização e mantém-se mesmo quando o access_token expira.
+     */
+    public function googleCalendarConectado(): bool
+    {
+        return $this->google_calendar_refresh_token !== null;
     }
 }

@@ -26,3 +26,10 @@ Schedule::command('pagamentos:cancelar-pendentes-expirados')
 Schedule::command('reservas:marcar-concluidas')
     ->everyFifteenMinutes()
     ->withoutOverlapping();
+
+// Liberta, dia a dia, reservas confirmadas sem check-in dentro da
+// tolerância — mesma cadência de reservas:cancelar-expiradas, porque
+// também depende de uma janela de tolerância sensível ao minuto.
+Schedule::command('reservas:liberar-nao-comparecimentos')
+    ->everyMinute()
+    ->withoutOverlapping();

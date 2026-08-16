@@ -38,6 +38,7 @@ class ReservaCriacaoService
     public function __construct(
         private ReservaDisponibilidadeService $disponibilidade,
         private PagamentoService $pagamentos,
+        private GoogleCalendarService $googleCalendar,
     ) {
     }
 
@@ -240,6 +241,8 @@ class ReservaCriacaoService
                 $reserva->load(['secretaria', 'periodo'])
             )
         );
+
+        $this->googleCalendar->sincronizarReserva($reserva);
 
         return $reserva;
     }

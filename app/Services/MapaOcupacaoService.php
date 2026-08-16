@@ -18,9 +18,22 @@ class MapaOcupacaoService
 
         $idsEstadosAtivos = EstadoReserva::idsAtivos();
 
+        // Exclui reservas cujo dia de hoje tenha sido especificamente
+        // libertado por falta de check-in (ver LiberarReservasSemCheckIn,
+        // que apaga a linha de reserva_dias do dia libertado) — os
+        // restantes dias de uma reserva de vários dias continuam ativos
+        // normalmente, só hoje fica livre no mapa. Sem nenhuma linha
+        // registada (dados antigos) conta sempre como ocupado.
         $reservasAtivasHoje = Reserva::query()
             ->noIntervalo($hoje)
             ->whereIn('estado_reserva_id', $idsEstadosAtivos)
+            ->where(function ($query) use ($hoje) {
+                $query
+                    ->whereDoesntHave('diasOcupados')
+                    ->orWhereHas('diasOcupados', function ($query) use ($hoje) {
+                        $query->whereDate('dia', $hoje);
+                    });
+            })
             ->with('periodo')
             ->get()
             ->groupBy('secretaria_id');

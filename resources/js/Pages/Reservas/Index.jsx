@@ -17,8 +17,10 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
 import { ESTADO_RESERVA, badge } from '@/utils/estados';
-import { podeCancelarReserva } from '@/Components/Reservas/reservaHelpers';
+import { ESTADOS_SEM_CANCELAMENTO, podeCancelarReserva } from '@/Components/Reservas/reservaHelpers';
 import LocalizacaoEspaco from '@/Components/Reservas/LocalizacaoEspaco';
+import { linkGoogleCalendar } from '@/utils/calendario';
+import GoogleCalendarIcon from '@/Components/GoogleCalendarIcon';
 
 /*
  * Texto corrido, não um badge: entra a seguir a "Avaliação " numa frase.
@@ -33,7 +35,7 @@ const AVALIACAO_ESTADO_LABEL = {
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
-export default function Index({ reservas, setores, pisos, edificios, filters, secretariasFavoritas = [] }) {
+export default function Index({ reservas, setores, pisos, edificios, filters, secretariasFavoritas = [], googleCalendarConectado = false }) {
     // Estrela de "secretária favorita" — marca a secretária (não a
     // reserva), otimista no clique e revertida se o pedido falhar.
     const [favoritas, setFavoritas] = useState(
@@ -281,7 +283,15 @@ export default function Index({ reservas, setores, pisos, edificios, filters, se
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                            {reservas.data.map((reserva) => (
+                            {reservas.data.map((reserva) => {
+                                const emVigor = !ESTADOS_SEM_CANCELAMENTO.includes(
+                                    reserva.estado_reserva?.codigo,
+                                );
+                                const linkCalendario = emVigor
+                                    ? linkGoogleCalendar(reserva)
+                                    : null;
+
+                                return (
                                 <div
                                     key={reserva.id}
                                     className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
@@ -362,6 +372,23 @@ export default function Index({ reservas, setores, pisos, edificios, filters, se
                                             {new Date(reserva.data).toLocaleDateString('pt-PT')} · {reserva.periodo?.nome ?? '-'}
                                         </p>
 
+                                        {emVigor && googleCalendarConectado ? (
+                                            <p className="mt-1.5 inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-teal-600 dark:text-teal-400">
+                                                <GoogleCalendarIcon size={26} />
+                                                Sincronizado com o Google Calendar
+                                            </p>
+                                        ) : linkCalendario && (
+                                            <a
+                                                href={linkCalendario}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="mt-1.5 inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-teal-600 transition hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300"
+                                            >
+                                                <GoogleCalendarIcon size={26} />
+                                                Adicionar ao Google Calendar
+                                            </a>
+                                        )}
+
                                         <div className="mt-auto pt-4">
                                             {reserva.estado_reserva?.codigo === 'pendente' ? (
                                                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -437,7 +464,8 @@ export default function Index({ reservas, setores, pisos, edificios, filters, se
                                         </div>
                                     </div>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
 

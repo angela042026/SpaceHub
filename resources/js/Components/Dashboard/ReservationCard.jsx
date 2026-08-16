@@ -160,7 +160,9 @@ export default function ReservationCard({
     const [aConfirmarCancelamento, setAConfirmarCancelamento] =
         useState(false);
 
-    const { errors } = usePage().props;
+    const { errors, auth } = usePage().props;
+    const papel = auth?.user?.role?.nome;
+    const ehStaff = papel === 'Administrador' || papel === 'Gestor';
 
     const checkin = useCheckinCountdown(
         reserva,
@@ -242,6 +244,19 @@ export default function ReservationCard({
     const podeCancelar = podeCancelarReserva(reserva);
 
     function fazerCheckIn() {
+        /*
+         * Só Administrador/Gestor podem confirmar sem QR — o backend
+         * exige qr_token para os restantes (ver QR-PROVA na
+         * auditoria), por isso um Utilizador/Colaborador é antes
+         * encaminhado para o leitor de câmara, onde a leitura do QR
+         * físico fornece o token automaticamente.
+         */
+        if (!ehStaff) {
+            router.visit(route('checkin.camera'));
+
+            return;
+        }
+
         setProcessing(true);
         router.post(
             route('checkin.confirm', reserva.id),
@@ -366,7 +381,7 @@ export default function ReservationCard({
                                     size={18}
                                     strokeWidth={2}
                                 />
-                                Fazer Check-in
+                                {ehStaff ? 'Fazer Check-in' : 'Ler QR para Check-in'}
                             </>
                         )}
                     </button>

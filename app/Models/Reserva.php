@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Reserva extends Model
@@ -25,6 +26,7 @@ class Reserva extends Model
         'check_in_at',
         'cancelada_at',
         'observacoes',
+        'google_event_id',
     ];
 
     protected function casts(): array
@@ -75,6 +77,16 @@ class Reserva extends Model
     public function avaliacao(): HasOne
     {
         return $this->hasOne(Avaliacao::class);
+    }
+
+    /**
+     * Linhas de dia+slot ocupado (ver ReservaDia) — os dias que já
+     * foram libertados por falta de check-in (ver
+     * LiberarReservasSemCheckIn) deixam de ter linha aqui.
+     */
+    public function diasOcupados(): HasMany
+    {
+        return $this->hasMany(ReservaDia::class);
     }
 
     /**
