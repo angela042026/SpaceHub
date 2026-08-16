@@ -78,6 +78,29 @@ class PedidoSuporteTest extends TestCase
             );
     }
 
+    /**
+     * Antes limitava-se a get() sem qualquer limite — um utilizador
+     * com muitos pedidos ao longo do tempo fazia o payload desta
+     * página crescer sem controlo.
+     */
+    public function test_o_formulario_limita_aos_20_pedidos_mais_recentes(): void
+    {
+        $user = $this->criarComRole('Utilizador');
+
+        for ($i = 1; $i <= 25; $i++) {
+            $this->criarPedido($user, "Pedido {$i}");
+        }
+
+        $this->actingAs($user)
+            ->get(route('support.create'))
+            ->assertOk()
+            ->assertInertia(
+                fn (Assert $page) => $page
+                    ->component('Support/Create')
+                    ->has('meusPedidos', 20)
+            );
+    }
+
     public function test_utilizador_normal_nao_acede_a_lista_de_pedidos(): void
     {
         $user = $this->criarComRole('Utilizador');

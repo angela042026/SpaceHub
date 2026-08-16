@@ -16,6 +16,15 @@ class ReservaSeeder extends Seeder
 {
     public function run(PagamentoService $pagamentoService): void
     {
+        // As reservas de exemplo pertencem às contas de demonstração
+        // que UserSeeder só cria em local/testing (ver o mesmo gate
+        // lá) — sem isto, `migrate --seed` num ambiente com APP_ENV
+        // diferente falhava a meio com RuntimeException, depois de já
+        // ter criado roles/períodos/estados/estrutura física.
+        if (! app()->environment(['local', 'testing'])) {
+            return;
+        }
+
         $utilizador = User::where('email', 'utilizador@spacehub.pt')->first();
         $admin = User::where('email', 'admin@spacehub.pt')->first();
 

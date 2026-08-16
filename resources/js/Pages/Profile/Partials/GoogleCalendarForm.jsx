@@ -1,13 +1,12 @@
 import { Link } from '@inertiajs/react';
-import { CalendarPlus } from 'lucide-react';
-import GoogleCalendarIcon from '@/Components/GoogleCalendarIcon';
+import { Calendar, CalendarPlus } from 'lucide-react';
 
 export default function GoogleCalendarForm({ conectado }) {
     return (
         <section className="dashboard-card overflow-hidden">
             <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-                    <GoogleCalendarIcon size={34} />
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
+                    <Calendar size={22} strokeWidth={1.9} />
                 </div>
 
                 <div>

@@ -32,9 +32,13 @@ class RoleMiddleware
         }
 
         if (! $user->ativo) {
-            return response()->json([
-                'message' => 'Utilizador inativo.',
-            ], 403);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Utilizador inativo.',
+                ], 403);
+            }
+
+            abort(403, 'Utilizador inativo.');
         }
 
         $rolesPermitidas = array_map(
@@ -46,9 +50,13 @@ class RoleMiddleware
             ->contains(fn (RoleName $role) => $user->hasRole($role));
 
         if (! $temPermissao) {
-            return response()->json([
-                'message' => 'Não tem permissão para aceder a este recurso.',
-            ], 403);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Não tem permissão para aceder a este recurso.',
+                ], 403);
+            }
+
+            abort(403, 'Não tem permissão para aceder a este recurso.');
         }
 
         return $next($request);

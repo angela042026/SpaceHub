@@ -115,9 +115,13 @@ class PedidoSuporteController extends Controller
     /**Apresenta o formulário de contacto. */
     public function create()
     {
-        // Pedidos anteriores do próprio utilizador, para ver o estado/resposta
+        // Pedidos anteriores do próprio utilizador, para ver o estado/resposta.
+        // Limitado aos 20 mais recentes — sem isto, o payload desta página
+        // crescia sem limite para um utilizador com muitos pedidos ao
+        // longo do tempo.
         $meusPedidos = PedidoSuporte::where('user_id', Auth::id())
             ->latest()
+            ->take(20)
             ->get();
 
         return Inertia::render('Support/Create', [

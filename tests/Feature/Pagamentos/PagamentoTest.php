@@ -483,6 +483,89 @@ class PagamentoTest extends TestCase
         );
     }
 
+    /**
+     * A regra de confirmacao_transferencia estava dentro de um
+     * comentário PHP mal fechado e nunca chegava a ser validada no
+     * backend — só a UI impedia submeter sem marcar a checkbox.
+     */
+    public function test_confirmacao_por_transferencia_exige_confirmacao_das_instrucoes(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $pagamento = $this->criarPagamento($user);
+
+        $response = $this->actingAs($user)->patch(
+            route('pagamentos.confirmar', $pagamento),
+            [
+                'metodo_pagamento' => 'transferencia',
+            ]
+        );
+
+        $response->assertSessionHasErrors('confirmacao_transferencia');
+
+        $this->assertSame('pendente', $pagamento->fresh()->estado);
+    }
+
+    public function test_confirmacao_por_transferencia_com_confirmacao_e_aceite(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $pagamento = $this->criarPagamento($user);
+
+        $response = $this->actingAs($user)->patch(
+            route('pagamentos.confirmar', $pagamento),
+            [
+                'metodo_pagamento' => 'transferencia',
+                'confirmacao_transferencia' => true,
+            ]
+        );
+
+        $response->assertSessionDoesntHaveErrors();
+        $this->assertSame('pago', $pagamento->fresh()->estado);
+    }
+
+    public function test_confirmacao_por_cartao_rejeita_validade_ja_expirada(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $pagamento = $this->criarPagamento($user);
+
+        $mesPassado = now()->subMonths(2);
+
+        $response = $this->actingAs($user)->patch(
+            route('pagamentos.confirmar', $pagamento),
+            [
+                'metodo_pagamento' => 'cartao',
+                'nome_titular' => 'Maria Silva',
+                'numero_cartao' => '4111111111111111',
+                'validade_cartao' => $mesPassado->format('m/y'),
+                'cvv' => '123',
+            ]
+        );
+
+        $response->assertSessionHasErrors('validade_cartao');
+        $this->assertSame('pendente', $pagamento->fresh()->estado);
+    }
+
+    public function test_confirmacao_por_cartao_aceita_validade_futura(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $pagamento = $this->criarPagamento($user);
+
+        $mesFuturo = now()->addYear();
+
+        $response = $this->actingAs($user)->patch(
+            route('pagamentos.confirmar', $pagamento),
+            [
+                'metodo_pagamento' => 'cartao',
+                'nome_titular' => 'Maria Silva',
+                'numero_cartao' => '4111111111111111',
+                'validade_cartao' => $mesFuturo->format('m/y'),
+                'cvv' => '123',
+            ]
+        );
+
+        $response->assertSessionDoesntHaveErrors();
+        $this->assertSame('pago', $pagamento->fresh()->estado);
+    }
+
     public function test_confirmacao_exige_metodo_de_pagamento(): void
     {
         $user = $this->criarUsuarioComRole('Utilizador');

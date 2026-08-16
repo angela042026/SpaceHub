@@ -8,7 +8,7 @@ Aplicação web desenvolvida em **Laravel 12**, **React** e **Inertia.js** para 
 
 ![Laravel](https://img.shields.io/badge/Laravel-12-red?logo=laravel)
 ![PHP](https://img.shields.io/badge/PHP-8-blue?logo=php)
-![React](https://img.shields.io/badge/React-19-61dafb?logo=react)
+![React](https://img.shields.io/badge/React-18-61dafb?logo=react)
 ![Inertia.js](https://img.shields.io/badge/Inertia.js-SPA-purple)
 ![MySQL](https://img.shields.io/badge/MySQL-Database-blue?logo=mysql)
 ![Sanctum](https://img.shields.io/badge/Auth-Sanctum-success)
@@ -311,7 +311,7 @@ A segurança da aplicação inclui:
 | --------------- | ---------------------------------------- |
 | Laravel 12      | Backend                                  |
 | PHP 8           | Linguagem de backend                     |
-| React 19        | Frontend                                 |
+| React 18        | Frontend                                 |
 | Inertia.js      | Comunicação entre Laravel e React        |
 | Tailwind CSS    | Interface                                |
 | MySQL           | Base de dados                            |

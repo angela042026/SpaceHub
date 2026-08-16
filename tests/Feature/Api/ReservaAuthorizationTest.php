@@ -5,6 +5,7 @@ namespace Tests\Feature\Api;
 use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Models\Role;
 use App\Models\Secretaria;
 use App\Models\User;
@@ -163,6 +164,58 @@ class ReservaAuthorizationTest extends TestCase
             'id' => $reserva->id,
             'observacoes' => 'Reserva atualizada pelo proprietário.',
         ]);
+    }
+
+    /**
+     * O update() da API não regenerava reserva_dias — as linhas
+     * antigas continuavam a "bloquear" a secretária original e o novo
+     * intervalo ficava sem a proteção anti-concorrência desta tabela.
+     */
+    public function test_atualizar_reserva_via_api_sincroniza_reserva_dias(): void
+    {
+        $user = $this->createUser($this->utilizadorRole);
+        $reserva = $this->createReservaFor($user);
+
+        $secretariaNova = Secretaria::query()
+            ->where('ativo', true)
+            ->where('id', '!=', $reserva->secretaria_id)
+            ->firstOrFail();
+
+        // Simula o estado que a criação real deixaria: linhas de
+        // reserva_dias já existentes para a secretária/data originais.
+        ReservaDia::insert([
+            [
+                'reserva_id' => $reserva->id,
+                'secretaria_id' => $reserva->secretaria_id,
+                'user_id' => $user->id,
+                'dia' => $reserva->data->format('Y-m-d'),
+                'slot' => 'manha',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $this->putJson("/api/reservas/{$reserva->id}", [
+            'secretaria_id' => $secretariaNova->id,
+            'periodo_id' => $reserva->periodo_id,
+            'data' => $reserva->data->format('Y-m-d'),
+        ])->assertOk();
+
+        $this->assertSame(
+            0,
+            ReservaDia::where('secretaria_id', $reserva->secretaria_id)->count(),
+            'As linhas antigas de reserva_dias deveriam ter sido removidas.'
+        );
+
+        $this->assertGreaterThan(
+            0,
+            ReservaDia::where('reserva_id', $reserva->id)
+                ->where('secretaria_id', $secretariaNova->id)
+                ->count(),
+            'Deveriam existir novas linhas de reserva_dias para a secretária atualizada.'
+        );
     }
 
     public function test_user_cannot_update_other_users_reserva(): void

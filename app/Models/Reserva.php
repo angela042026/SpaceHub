@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
+use Database\Factories\ReservaFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Reserva extends Model
 {
+    /** @use HasFactory<ReservaFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'secretaria_id',

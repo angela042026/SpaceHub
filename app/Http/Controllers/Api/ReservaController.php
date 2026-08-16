@@ -234,6 +234,35 @@ class ReservaController extends Controller
                     'observacoes' => $dados['observacoes'] ?? $reservaBloqueada->observacoes,
                 ]);
 
+                // Sem isto, reserva_dias ficava dessincronizada depois
+                // de uma edição via API: as linhas antigas continuavam a
+                // "bloquear" dias que já não pertencem à reserva, e o
+                // novo intervalo ficava sem a proteção anti-concorrência
+                // desta tabela — mesmo padrão já usado no fluxo web/admin
+                // (ver ReservaController::update()).
+                ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
+
+                $periodoAtualizado = Periodo::findOrFail($periodoId);
+
+                $diasOcupados = $this->disponibilidade->gerarDiasOcupados(
+                    $reservaBloqueada->data->format('Y-m-d'),
+                    ($reservaBloqueada->data_fim ?? $reservaBloqueada->data)->format('Y-m-d'),
+                    $periodoAtualizado->nome
+                );
+
+                ReservaDia::insert(array_map(
+                    fn (array $dia) => [
+                        'reserva_id' => $reservaBloqueada->id,
+                        'secretaria_id' => $reservaBloqueada->secretaria_id,
+                        'user_id' => $reservaBloqueada->user_id,
+                        'dia' => $dia['dia'],
+                        'slot' => $dia['slot'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                    $diasOcupados
+                ));
+
                 if ($alterouDadosComPreco) {
                     $pagamentoService->atualizarValorParaReserva($reservaBloqueada);
                 }

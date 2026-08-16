@@ -125,4 +125,47 @@ class ReportControllerTest extends TestCase
             ->has('reservas', 1)
             ->where('reservas.0.id', $dentroDoFiltro->id));
     }
+
+    /**
+     * Antes, uma data mal formada ia direta para Carbon::parse() ou
+     * whereDate() e podia rebentar com erro 500 em vez de devolver uma
+     * mensagem de validação.
+     */
+    public function test_relatorio_rejeita_data_mal_formada(): void
+    {
+        $admin = $this->userWithRole('Administrador');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.reservas', ['data_inicio' => 'não-é-uma-data']))
+            ->assertSessionHasErrors('data_inicio');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.ocupacao', ['data_inicio' => 'não-é-uma-data']))
+            ->assertSessionHasErrors('data_inicio');
+    }
+
+    public function test_relatorio_rejeita_intervalo_de_datas_invertido(): void
+    {
+        $admin = $this->userWithRole('Administrador');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.reservas', [
+                'data_inicio' => '2026-06-01',
+                'data_fim' => '2026-01-01',
+            ]))
+            ->assertSessionHasErrors('data_fim');
+    }
+
+    public function test_relatorio_rejeita_id_de_filtro_inexistente(): void
+    {
+        $admin = $this->userWithRole('Administrador');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.reservas', ['estado_reserva_id' => 999999]))
+            ->assertSessionHasErrors('estado_reserva_id');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.espacos', ['piso_id' => 999999]))
+            ->assertSessionHasErrors('piso_id');
+    }
 }

@@ -175,6 +175,27 @@ class UserController extends Controller
         Gate::authorize('update', $user);
 
         $dados = $request->validated();
+
+        /*
+         * Um Administrador não pode retirar a própria role
+         * administrativa — mesmo espírito da proteção já existente em
+         * toggleAtivo() contra autodesativação. Sem isto, um
+         * Administrador que se edite a si próprio (ex.: por engano) e
+         * mude a role fica sem acesso à área administrativa, sem aviso
+         * nem forma de reverter sem intervenção direta na base de dados.
+         */
+        if (
+            $user->id === $request->user()->id
+            && $user->isAdministrador()
+            && isset($dados['role_id'])
+            && Role::find($dados['role_id'])?->nome !== 'Administrador'
+        ) {
+            return redirect()
+                ->back()
+                ->withErrors(['role_id' => 'Não pode retirar a si próprio a role de Administrador.'])
+                ->withInput();
+        }
+
         $fotografiaAntiga = $user->fotografia;
         $novaFotografia = null;
 

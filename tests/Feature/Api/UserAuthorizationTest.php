@@ -50,6 +50,44 @@ class UserAuthorizationTest extends TestCase
             ->assertUnauthorized();
     }
 
+    /**
+     * UserPolicy::update() só verificava isAdministrador(), nunca se o
+     * alvo era o próprio ator — um Administrador conseguia mudar a
+     * própria role e perder acesso à área administrativa sem aviso.
+     */
+    public function test_administrator_cannot_demote_own_role(): void
+    {
+        $admin = $this->createUser($this->administradorRole);
+
+        Sanctum::actingAs($admin);
+
+        $this->putJson("/api/users/{$admin->id}", [
+            'role_id' => $this->utilizadorRole->id,
+        ])->assertStatus(422);
+
+        $this->assertSame(
+            $this->administradorRole->id,
+            $admin->fresh()->role_id
+        );
+    }
+
+    public function test_administrator_can_demote_another_administrator(): void
+    {
+        $admin = $this->createUser($this->administradorRole);
+        $outroAdmin = $this->createUser($this->administradorRole);
+
+        Sanctum::actingAs($admin);
+
+        $this->putJson("/api/users/{$outroAdmin->id}", [
+            'role_id' => $this->utilizadorRole->id,
+        ])->assertOk();
+
+        $this->assertSame(
+            $this->utilizadorRole->id,
+            $outroAdmin->fresh()->role_id
+        );
+    }
+
     public function test_administrator_can_manage_users(): void
     {
         $admin = $this->createUser($this->administradorRole);

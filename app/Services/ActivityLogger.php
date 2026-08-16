@@ -73,6 +73,10 @@ class ActivityLogger
             'subject_type' => $entidade?->getMorphClass(),
             'subject_id' => $entidade?->getKey(),
             'metadata' => $metadata,
+            // Só faz sentido para ações de um utilizador real — um
+            // comando agendado (sem pedido HTTP associado) não tem IP
+            // de cliente para registar.
+            'ip_address' => $ator !== null ? request()->ip() : null,
             'result' => $resultado ?? ($ator === null ? self::RESULTADO_AUTOMATICO : self::RESULTADO_SUCESSO),
         ]);
     }

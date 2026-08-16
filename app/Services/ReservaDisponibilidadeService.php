@@ -472,15 +472,30 @@ class ReservaDisponibilidadeService
     /**
      * Anexa a cada secretária o mapa periodo_id => disponível (bool),
      * considerando os períodos em conflito com cada período reservado.
+     *
+     * periodosEmConflito($periodoId) só depende do período, nunca da
+     * secretária — antes era recalculado (2 queries próprias) para
+     * cada combinação secretária × período, o que gerava até
+     * N secretárias × M períodos × 2 queries extra por pedido neste
+     * endpoint (o mais chamado da app, a cada alteração de filtro em
+     * "Nova Reserva"). Calculado agora uma única vez por período, fora
+     * do loop de secretárias, e reutilizado.
      */
     private function anexarDisponibilidadePorPeriodo(
         Collection $secretarias,
         Collection $periodos,
         Collection $periodosReservadosPorSecretaria
     ) {
+        $conflitosPorPeriodo = $periodos->mapWithKeys(
+            fn ($periodo) => [
+                $periodo->id => $this->periodosEmConflito((int) $periodo->id),
+            ]
+        );
+
         return $secretarias->map(function ($secretaria) use (
             $periodos,
-            $periodosReservadosPorSecretaria
+            $periodosReservadosPorSecretaria,
+            $conflitosPorPeriodo
         ) {
             $reservados = $periodosReservadosPorSecretaria->get(
                 $secretaria->id,
@@ -488,12 +503,8 @@ class ReservaDisponibilidadeService
             );
 
             $secretaria->periodos_disponiveis = $periodos->mapWithKeys(
-                function ($periodo) use ($reservados) {
-                    $periodosConflito = $this->periodosEmConflito(
-                        (int) $periodo->id
-                    );
-
-                    $disponivel = collect($periodosConflito)
+                function ($periodo) use ($reservados, $conflitosPorPeriodo) {
+                    $disponivel = collect($conflitosPorPeriodo->get($periodo->id, []))
                         ->intersect($reservados)
                         ->isEmpty();
 

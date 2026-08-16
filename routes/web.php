@@ -273,9 +273,6 @@ Route::middleware(['auth', 'active', 'role:Administrador'])
 
         Route::get('/atividade', [AdminAtividadeController::class, 'index'])
             ->name('atividade.index');
-
-        Route::get('/atividade/exportar', [AdminAtividadeController::class, 'export'])
-            ->name('atividade.export');
     });
 
 // Gestão de espaços: acessível a Administrador e Gestor (ver *Policy::before()).

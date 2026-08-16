@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -156,6 +157,20 @@ class UserController extends Controller
         Gate::authorize('update', $user);
 
         $dados = $request->validated();
+
+        /*
+         * Um Administrador não pode retirar a própria role
+         * administrativa — mesmo padrão já usado em toggleAtivo()
+         * contra autodesativação (ver Admin\UserController::update()).
+         */
+        if (
+            $user->id === $request->user()->id
+            && $user->isAdministrador()
+            && isset($dados['role_id'])
+            && Role::find($dados['role_id'])?->nome !== 'Administrador'
+        ) {
+            abort(422, 'Não pode retirar a si próprio a role de Administrador.');
+        }
 
         $roleAnterior = $user->role_id;
         $fotografiaAntiga = $user->fotografia;
