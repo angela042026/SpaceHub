@@ -236,6 +236,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'show'])
             ->name('support.show');
 
+        Route::patch('/suporte/pedidos/{id}/em-analise', [PedidoSuporteController::class, 'marcarEmAnalise'])
+            ->name('support.emAnalise');
+
         Route::patch('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'update'])
             ->name('support.update');
     });

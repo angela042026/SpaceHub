@@ -6,6 +6,7 @@ use App\Models\Edificio;
 use App\Models\Reserva;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Feature\Concerns\CriaEstruturaEspacial;
@@ -15,6 +16,18 @@ class DashboardTest extends TestCase
 {
     use RefreshDatabase;
     use CriaEstruturaEspacial;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // EstatisticasService::obterEstatisticas() usa Cache::remember()
+        // e o CACHE_STORE=array dos testes persiste entre métodos da
+        // mesma classe — sem isto, um teste anterior que já visitou o
+        // /dashboard deixa uma resposta em cache com dados de outro
+        // cenário, e este teste lê esse resultado desatualizado.
+        Cache::flush();
+    }
 
     private function criarSetorComSecretarias(int $quantidade): array
     {
@@ -280,27 +293,43 @@ class DashboardTest extends TestCase
         });
     }
 
-    public function test_estatisticas_respeitam_filtro_periodo(): void
+    /**
+     * O card "Destaques do período" tem o seu próprio toggle (30
+     * dias/90 dias/Ano, ver StatisticsPanel/destaques()) e é isso que
+     * controla `estatisticas` — o `?periodo=` do próprio /dashboard
+     * não tem nenhum controlo na interface ligado a ele (o único que
+     * existia, StatisticsPanel.jsx, não é importado em nenhuma
+     * página) e serve só para o valor ser ecoado de volta no payload.
+     * `estatisticas` é sempre calculado com a janela fixa de 30 dias
+     * (DashboardController::index()), por isso diasComMaiorOcupacao
+     * não muda com o `?periodo=`, só com a janela dos 30 dias.
+     */
+    public function test_estatisticas_usam_janela_fixa_de_30_dias_independente_do_periodo(): void
     {
         $user = $this->criarUsuarioComRole('Administrador');
         $periodo = $this->criarPeriodo();
-        $pendente = $this->criarEstadoReserva('pendente');
+        // calcularEstatisticas() só conta reservas "confirmada" (mesmo
+        // critério do gráfico Reservas por Piso) — "pendente" nunca
+        // aparece em diasComMaiorOcupacao.
+        $confirmada = $this->criarEstadoReserva('confirmada');
         $secretaria = $this->criarSecretaria();
 
         Reserva::create([
             'user_id' => $user->id,
             'secretaria_id' => $secretaria->id,
             'periodo_id' => $periodo->id,
-            'estado_reserva_id' => $pendente->id,
+            'estado_reserva_id' => $confirmada->id,
             'data' => Carbon::today()->format('Y-m-d'),
         ]);
 
+        // Fora da janela fixa de 30 dias — nunca deve entrar em
+        // diasComMaiorOcupacao, com nenhum valor de periodo.
         Reserva::create([
             'user_id' => $user->id,
             'secretaria_id' => $secretaria->id,
             'periodo_id' => $periodo->id,
-            'estado_reserva_id' => $pendente->id,
-            'data' => Carbon::today()->subWeeks(2)->format('Y-m-d'),
+            'estado_reserva_id' => $confirmada->id,
+            'data' => Carbon::today()->subDays(40)->format('Y-m-d'),
         ]);
 
         $respostaSemana = $this->actingAs($user)
@@ -310,6 +339,7 @@ class DashboardTest extends TestCase
         $respostaSemana->assertInertia(
             fn (Assert $page) => $page
                 ->component('Dashboard/Admin')
+                ->where('periodo', 'semana')
                 ->has('estatisticas.diasComMaiorOcupacao', 1)
                 ->etc()
         );
@@ -321,7 +351,8 @@ class DashboardTest extends TestCase
         $respostaGeral->assertInertia(
             fn (Assert $page) => $page
                 ->component('Dashboard/Admin')
-                ->has('estatisticas.diasComMaiorOcupacao', 2)
+                ->where('periodo', 'geral')
+                ->has('estatisticas.diasComMaiorOcupacao', 1)
                 ->etc()
         );
     }

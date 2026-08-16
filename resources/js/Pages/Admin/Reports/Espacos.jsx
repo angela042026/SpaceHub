@@ -45,8 +45,8 @@ export default function Espacos({ linhas, pisos, setores, filters, geradoEm }) {
             render: (linha) => linha.edificio ?? '-',
         },
         {
-            key: 'reservas',
-            label: 'Reservas',
+            key: 'diasOcupados',
+            label: 'Dias Ocupados',
             align: 'right',
         },
         {

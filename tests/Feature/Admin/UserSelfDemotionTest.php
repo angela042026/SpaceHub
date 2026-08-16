@@ -33,7 +33,10 @@ class UserSelfDemotionTest extends TestCase
     public function test_administrador_nao_consegue_retirar_a_propria_role(): void
     {
         $admin = $this->criarUtilizadorComRole('Administrador');
-        $roleUtilizador = Role::where('nome', 'Utilizador')->firstOrFail();
+        $roleUtilizador = Role::firstOrCreate(
+            ['nome' => 'Utilizador'],
+            ['descricao' => 'Utilizador']
+        );
 
         $response = $this->actingAs($admin)->put(
             route('admin.users.update', $admin),
@@ -52,7 +55,10 @@ class UserSelfDemotionTest extends TestCase
     {
         $admin = $this->criarUtilizadorComRole('Administrador');
         $outroAdmin = $this->criarUtilizadorComRole('Administrador');
-        $roleUtilizador = Role::where('nome', 'Utilizador')->firstOrFail();
+        $roleUtilizador = Role::firstOrCreate(
+            ['nome' => 'Utilizador'],
+            ['descricao' => 'Utilizador']
+        );
 
         $response = $this->actingAs($admin)->put(
             route('admin.users.update', $outroAdmin),

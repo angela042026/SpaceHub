@@ -15,17 +15,26 @@ class CheckInTest extends TestCase
     use RefreshDatabase;
     use CriaEstruturaEspacial;
 
+    /**
+     * Confirmada por omissão: a maioria dos testes deste ficheiro
+     * exercita o fluxo de check-in em si (janela horária, QR, estado
+     * já feito), que só é alcançável a partir de "confirmada" —
+     * "pendente" devolve sempre 'pendente_pagamento' antes de a
+     * lógica de janela sequer correr (ver
+     * CheckInController::statusDaReserva()). Quem precisar de
+     * "pendente" especificamente deve construir a Reserva à parte.
+     */
     private function criarReservaHoje(User $user, string $horaInicio = '08:00:00', string $horaFim = '13:00:00'): Reserva
     {
         $secretaria = $this->criarSecretaria();
         $periodo = $this->criarPeriodo($horaInicio, $horaFim);
-        $estadoPendente = $this->criarEstadoReserva('pendente');
+        $estadoConfirmada = $this->criarEstadoReserva('confirmada');
 
         return Reserva::create([
             'user_id' => $user->id,
             'secretaria_id' => $secretaria->id,
             'periodo_id' => $periodo->id,
-            'estado_reserva_id' => $estadoPendente->id,
+            'estado_reserva_id' => $estadoConfirmada->id,
             'data' => Carbon::today()->format('Y-m-d'),
         ]);
     }
@@ -151,7 +160,6 @@ class CheckInTest extends TestCase
     {
         $user = $this->criarUsuarioComRole('Utilizador');
         $reserva = $this->criarReservaHoje($user);
-        $this->criarEstadoReserva('confirmada');
 
         $this->travelTo(Carbon::today()->setTime(8, 15));
 
@@ -184,7 +192,7 @@ class CheckInTest extends TestCase
         $user = $this->criarUsuarioComRole('Utilizador');
         $secretaria = $this->criarSecretaria();
         $periodo = $this->criarPeriodo('08:00:00', '18:00:00');
-        $estadoPendente = $this->criarEstadoReserva('pendente');
+        $estadoConfirmada = $this->criarEstadoReserva('confirmada');
 
         $ontem = Carbon::today()->subDay();
 
@@ -192,7 +200,7 @@ class CheckInTest extends TestCase
             'user_id' => $user->id,
             'secretaria_id' => $secretaria->id,
             'periodo_id' => $periodo->id,
-            'estado_reserva_id' => $estadoPendente->id,
+            'estado_reserva_id' => $estadoConfirmada->id,
             'data' => $ontem->format('Y-m-d'),
             'data_fim' => $ontem->copy()->addDays(6)->format('Y-m-d'),
             'tipo_duracao' => 'semanal',
@@ -242,7 +250,6 @@ class CheckInTest extends TestCase
     {
         $user = $this->criarUsuarioComRole('Utilizador');
         $reserva = $this->criarReservaHoje($user);
-        $this->criarEstadoReserva('confirmada');
 
         $this->travelTo(Carbon::today()->setTime(8, 15));
 
@@ -268,7 +275,6 @@ class CheckInTest extends TestCase
     {
         $user = $this->criarUsuarioComRole('Utilizador');
         $reserva = $this->criarReservaHoje($user);
-        $this->criarEstadoReserva('confirmada');
 
         $this->travelTo(Carbon::today()->setTime(8, 15));
 
@@ -284,7 +290,6 @@ class CheckInTest extends TestCase
         $user = $this->criarUsuarioComRole('Utilizador');
         $reserva = $this->criarReservaHoje($user);
         $outraSecretaria = $this->criarSecretaria();
-        $this->criarEstadoReserva('confirmada');
 
         $this->travelTo(Carbon::today()->setTime(8, 15));
 
@@ -310,7 +315,6 @@ class CheckInTest extends TestCase
     {
         $gestor = $this->criarUsuarioComRole('Gestor');
         $reserva = $this->criarReservaHoje($gestor);
-        $this->criarEstadoReserva('confirmada');
 
         $this->travelTo(Carbon::today()->setTime(8, 15));
 
@@ -358,7 +362,6 @@ class CheckInTest extends TestCase
     {
         $user = $this->criarUsuarioComRole('Utilizador');
         $reserva = $this->criarReservaHoje($user);
-        $this->criarEstadoReserva('confirmada');
 
         $this->travelTo(Carbon::today()->setTime(8, 15));
 

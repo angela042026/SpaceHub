@@ -16,6 +16,7 @@ use App\Notifications\ReservaCanceladaNotification;
 use App\Services\ActivityLogger;
 use App\Services\PagamentoService;
 use App\Services\ReservaDisponibilidadeService;
+use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -159,11 +160,22 @@ class ReservaController extends Controller
 
         $periodosConflito = $this->disponibilidade->periodosEmConflito($periodoId);
 
-        if ($this->disponibilidade->existeReservaAtivaNaData(
+        // RES-03: preserva o número de dias original ao mudar só a data de
+        // início — sem isto, data_fim ficava parada no valor antigo e a
+        // duração de uma reserva de vários dias mudava silenciosamente (ou
+        // ficava invertida, se a nova data de início passasse a antiga
+        // data_fim).
+        $duracaoDias = $reserva->data->diffInDays(
+            $reserva->data_fim ?? $reserva->data
+        );
+        $novaDataFim = Carbon::parse($data)->addDays($duracaoDias)->toDateString();
+
+        if ($this->disponibilidade->existeReservaAtivaNoIntervalo(
             'secretaria_id',
             $secretariaId,
             $periodosConflito,
             $data,
+            $novaDataFim,
             $reserva->id
         )) {
             return back()
@@ -173,11 +185,12 @@ class ReservaController extends Controller
                 ->withInput();
         }
 
-        if ($this->disponibilidade->existeReservaAtivaNaData(
+        if ($this->disponibilidade->existeReservaAtivaNoIntervalo(
             'user_id',
             (int) $reserva->user_id,
             $periodosConflito,
             $data,
+            $novaDataFim,
             $reserva->id
         )) {
             return back()
@@ -195,6 +208,7 @@ class ReservaController extends Controller
             DB::transaction(function () use (
                 $reserva,
                 $data,
+                $novaDataFim,
                 $periodoId,
                 $secretariaId,
                 $dados,
@@ -207,17 +221,18 @@ class ReservaController extends Controller
 
                 $reservaBloqueada->update([
                     'data' => $data,
+                    'data_fim' => $novaDataFim,
                     'periodo_id' => $periodoId,
                     'secretaria_id' => $secretariaId,
                     'observacoes' => $dados['observacoes'] ?? $reservaBloqueada->observacoes,
                 ]);
 
-                // Este update() não mexe em data_fim, só em data — por
-                // isso o intervalo ocupado em reserva_dias é sempre
-                // regenerado a partir da data nova até à data_fim que já
-                // lá estava. Sem isto, as linhas antigas (secretária/dia
-                // anteriores) ficavam paradas e as novas nunca ficavam
-                // protegidas pela constraint.
+                // data_fim já foi recalculada acima (RES-03) para manter a
+                // mesma duração da reserva original — o intervalo ocupado
+                // em reserva_dias é sempre regenerado a partir da data
+                // nova até essa data_fim nova. Sem isto, as linhas antigas
+                // (secretária/dia anteriores) ficavam paradas e as novas
+                // nunca ficavam protegidas pela constraint.
                 ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
 
                 $periodoAtualizado = Periodo::findOrFail($periodoId);

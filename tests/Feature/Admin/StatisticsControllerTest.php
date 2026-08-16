@@ -55,16 +55,22 @@ class StatisticsControllerTest extends TestCase
         $admin = $this->userWithRole('Administrador');
 
         $response = $this->actingAs($admin)->get(
-            route('admin.statistics.index', ['periodo' => 'semana'])
+            route('admin.statistics.index', ['periodo' => '90dias'])
         );
 
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Statistics/Index')
-            ->where('periodo', 'semana'));
+            ->where('periodo', '90dias'));
     }
 
-    public function test_periodo_invalido_cai_para_geral(): void
+    /**
+     * PERIODOS_ACEITES é só ['7dias','30dias','90dias','ano'] desde o
+     * redesign do dashboard de Estatísticas — 'semana'/'mes'/'geral'
+     * (do antigo EstatisticasService::obterEstatisticas()) já não são
+     * períodos válidos aqui; um período inválido cai para '30dias'.
+     */
+    public function test_periodo_invalido_cai_para_30dias(): void
     {
         $admin = $this->userWithRole('Administrador');
 
@@ -75,6 +81,6 @@ class StatisticsControllerTest extends TestCase
         $response->assertOk();
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Statistics/Index')
-            ->where('periodo', 'geral'));
+            ->where('periodo', '30dias'));
     }
 }
