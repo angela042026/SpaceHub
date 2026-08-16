@@ -94,6 +94,11 @@
         "utilizador": {
             "true": "Active",
             "false": "Inactive"
+        },
+        "periodo": {
+            "manha": "Morning",
+            "tarde": "Afternoon",
+            "diaInteiro": "Full day"
         }
     },
     "chat": {

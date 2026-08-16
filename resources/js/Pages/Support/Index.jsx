@@ -13,23 +13,27 @@ import {
     Wrench,
 } from 'lucide-react';
 import { useState } from 'react';
-import { ESTADO_SUPORTE, badge } from '@/utils/estados';
-
-// Rótulos de filtro em português corrente ("Abertos", "Em tratamento")
-// mapeados para os valores reais guardados na coluna estado
-// ('Pendente', 'Em análise', 'Resolvido' — ver PedidoSuporte/migração).
-const FILTROS_ESTADO = [
-    { valor: 'todos', label: 'Todos' },
-    { valor: 'Pendente', label: 'Abertos' },
-    { valor: 'Em análise', label: 'Em tratamento' },
-    { valor: 'Resolvido', label: 'Resolvidos' },
-];
+import { useTranslation } from 'react-i18next';
+import { ESTADO_SUPORTE, badge, etiqueta } from '@/utils/estados';
 
 function formatarIdentificador(id) {
     return `#SUP-${String(id).padStart(3, '0')}`;
 }
 
 export default function Index({ pedidos, filters, stats }) {
+    const { t, i18n } = useTranslation('suporte');
+    const { t: tc } = useTranslation('common');
+
+    // Rótulos de filtro mapeados para os valores reais guardados na
+    // coluna estado ('Pendente', 'Em análise', 'Resolvido' — ver
+    // PedidoSuporte/migração).
+    const FILTROS_ESTADO = [
+        { valor: 'todos', label: t('index.filtros.todos') },
+        { valor: 'Pendente', label: t('index.filtros.abertos') },
+        { valor: 'Em análise', label: t('index.filtros.emTratamento') },
+        { valor: 'Resolvido', label: t('index.filtros.resolvidos') },
+    ];
+
     const [searchValue, setSearchValue] = useState(filters.search ?? '');
     const [carregando, setCarregando] = useState(false);
 
@@ -70,7 +74,7 @@ export default function Index({ pedidos, filters, stats }) {
     const columns = [
         {
             key: 'id',
-            label: 'Pedido',
+            label: t('index.colunaPedido'),
             render: (pedido) => (
                 <span className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-400">
                     {formatarIdentificador(pedido.id)}
@@ -79,7 +83,7 @@ export default function Index({ pedidos, filters, stats }) {
         },
         {
             key: 'utilizador',
-            label: 'Utilizador',
+            label: t('index.colunaUtilizador'),
             render: (pedido) => (
                 <div>
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
@@ -94,7 +98,7 @@ export default function Index({ pedidos, filters, stats }) {
         },
         {
             key: 'assunto',
-            label: 'Assunto',
+            label: t('index.colunaAssunto'),
             render: (pedido) => (
                 <p className="max-w-[220px] truncate" title={pedido.assunto}>
                     {pedido.assunto}
@@ -103,36 +107,36 @@ export default function Index({ pedidos, filters, stats }) {
         },
         {
             key: 'data',
-            label: 'Data',
+            label: t('index.colunaData'),
             render: (pedido) => (
                 <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {new Date(pedido.created_at).toLocaleDateString('pt-PT')}
+                    {new Date(pedido.created_at).toLocaleDateString(i18n.language === 'en' ? 'en-GB' : 'pt-PT')}
                 </span>
             ),
         },
         {
             key: 'estado',
-            label: 'Estado',
+            label: t('index.colunaEstado'),
             render: (pedido) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
                         badge(ESTADO_SUPORTE, pedido.estado)
                     }`}
                 >
-                    {pedido.estado}
+                    {etiqueta(ESTADO_SUPORTE, pedido.estado, pedido.estado, tc)}
                 </span>
             ),
         },
         {
             key: 'acoes',
-            label: 'Ações',
+            label: t('index.colunaAcoes'),
             align: 'right',
             render: (pedido) => (
                 <div className="flex justify-end">
                     <Link
                         href={route('support.show', pedido.id)}
-                        title="Ver pedido"
-                        aria-label="Ver pedido"
+                        title={t('index.verPedido')}
+                        aria-label={t('index.verPedido')}
                         className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-600 dark:border-slate-700 dark:hover:bg-teal-500/10"
                     >
                         <Eye size={16} strokeWidth={1.9} />
@@ -144,7 +148,7 @@ export default function Index({ pedidos, filters, stats }) {
 
     return (
         <DashboardLayout>
-            <Head title="Pedidos de Suporte" />
+            <Head title={t('index.tituloPagina')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -154,11 +158,11 @@ export default function Index({ pedidos, filters, stats }) {
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Pedidos de Suporte
+                            {t('index.titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Acompanhe e gira os pedidos de suporte dos utilizadores.
+                            {t('index.subtitulo')}
                         </p>
                     </div>
                 </div>
@@ -176,7 +180,7 @@ export default function Index({ pedidos, filters, stats }) {
                             </div>
 
                             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Total de Pedidos
+                                {t('index.totalDePedidos')}
                             </span>
                         </div>
 
@@ -192,7 +196,7 @@ export default function Index({ pedidos, filters, stats }) {
                             </div>
 
                             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Abertos
+                                {t('index.abertos')}
                             </span>
                         </div>
 
@@ -208,7 +212,7 @@ export default function Index({ pedidos, filters, stats }) {
                             </div>
 
                             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Em Tratamento
+                                {t('index.emTratamento')}
                             </span>
                         </div>
 
@@ -224,7 +228,7 @@ export default function Index({ pedidos, filters, stats }) {
                             </div>
 
                             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Resolvidos
+                                {t('index.resolvidos')}
                             </span>
                         </div>
 
@@ -273,7 +277,7 @@ export default function Index({ pedidos, filters, stats }) {
                             type="text"
                             value={searchValue}
                             onChange={(event) => setSearchValue(event.target.value)}
-                            placeholder="Pesquisar pedidos…"
+                            placeholder={t('index.pesquisarPlaceholder')}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                     </form>
@@ -283,7 +287,7 @@ export default function Index({ pedidos, filters, stats }) {
                     <LoadingOverlay show={carregando} />
 
                     <p className="mb-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                        {pedidos.total} pedido{pedidos.total === 1 ? '' : 's'} encontrado{pedidos.total === 1 ? '' : 's'}
+                        {t('index.pedidoEncontrado', { count: pedidos.total })}
                     </p>
 
                     <Table
@@ -293,21 +297,21 @@ export default function Index({ pedidos, filters, stats }) {
                             stats.total === 0 ? (
                                 <div className="flex flex-col items-center gap-1.5">
                                     <p className="font-semibold text-slate-600 dark:text-slate-300">
-                                        Nenhum pedido de suporte
+                                        {t('index.nenhumPedidoSuporte')}
                                     </p>
 
                                     <p className="text-sm text-slate-400">
-                                        Os pedidos enviados pelos utilizadores aparecerão aqui.
+                                        {t('index.pedidosApareceraoAqui')}
                                     </p>
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center gap-1.5">
                                     <p className="font-semibold text-slate-600 dark:text-slate-300">
-                                        Nenhum pedido encontrado
+                                        {t('index.nenhumPedidoEncontrado')}
                                     </p>
 
                                     <p className="text-sm text-slate-400">
-                                        Experimente alterar os filtros ou a pesquisa.
+                                        {t('index.experimenteAlterarFiltros')}
                                     </p>
 
                                     {filtrosAtivos && (
@@ -316,7 +320,7 @@ export default function Index({ pedidos, filters, stats }) {
                                             onClick={limparFiltros}
                                             className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                                         >
-                                            Limpar filtros
+                                            {t('index.limparFiltros')}
                                         </button>
                                     )}
                                 </div>
@@ -331,7 +335,7 @@ export default function Index({ pedidos, filters, stats }) {
                         onFinish={() => setCarregando(false)}
                         numbered
                         onNavigate={irParaPagina}
-                        itemLabel="pedidos"
+                        itemLabel={t('index.itemLabelPedidos')}
                     />
                 </div>
             </section>

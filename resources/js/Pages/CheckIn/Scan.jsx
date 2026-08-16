@@ -1,50 +1,29 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
-const STATUS_INFO = {
-    pronta: {
-        label: 'Pronto para check-in',
-        badgeClass: 'bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400',
-        message: 'Confirma a tua presença nesta secretária.',
-    },
-    ja_check_in: {
-        label: 'Check-in já efetuado',
-        badgeClass: 'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-300',
-        message: 'Já confirmaste esta reserva hoje.',
-    },
-    pendente_pagamento: {
-        label: 'Pendente de pagamento',
-        badgeClass: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400',
-        message: 'Conclui o pagamento desta reserva para poderes fazer o check-in.',
-    },
-    fora_da_janela: {
-        label: 'Fora da janela horária',
-        badgeClass: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400',
-        message: 'O check-in só está disponível perto do início do período reservado.',
-    },
-    sem_reserva: {
-        label: 'Sem reserva',
-        badgeClass: 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400',
-        message: 'Não tens nenhuma reserva ativa para esta secretária hoje.',
-    },
-    ocupada_por_outro: {
-        label: 'Ocupada por outro utilizador',
-        badgeClass: 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400',
-        message: 'Esta secretária já está reservada por outra pessoa hoje.',
-    },
-    indisponivel: {
-        label: 'Secretária indisponível',
-        badgeClass: 'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-300',
-        message: 'Esta secretária não está disponível para reserva.',
-    },
+const BADGE_CLASS = {
+    pronta: 'bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400',
+    ja_check_in: 'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-300',
+    pendente_pagamento: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400',
+    fora_da_janela: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400',
+    sem_reserva: 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400',
+    ocupada_por_outro: 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400',
+    indisponivel: 'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-300',
 };
 
 export default function Scan({ secretaria, reserva, status }) {
+    const { t } = useTranslation('qrcode');
     const [processing, setProcessing] = useState(false);
     const { errors } = usePage().props;
-    const info = STATUS_INFO[status] ?? STATUS_INFO.sem_reserva;
+    const estadoChave = BADGE_CLASS[status] ? status : 'sem_reserva';
+    const info = {
+        badgeClass: BADGE_CLASS[estadoChave],
+        label: t(`scan.estados.${estadoChave}.label`),
+        message: t(`scan.estados.${estadoChave}.mensagem`),
+    };
 
     function confirmar() {
         setProcessing(true);
@@ -57,7 +36,7 @@ export default function Scan({ secretaria, reserva, status }) {
 
     return (
         <>
-            <Head title={`Check-in · ${secretaria.codigo}`} />
+            <Head title={t('scan.tituloPagina', { codigo: secretaria.codigo })} />
 
             <DashboardLayout>
                 <div className="mx-auto max-w-lg py-6">
@@ -101,7 +80,7 @@ export default function Scan({ secretaria, reserva, status }) {
                                 disabled={processing}
                                 className="btn-accent mt-6 w-full"
                             >
-                                {processing ? 'A confirmar...' : 'Confirmar Check-in'}
+                                {processing ? t('scan.aConfirmar') : t('scan.confirmarCheckin')}
                             </button>
                         )}
                     </div>

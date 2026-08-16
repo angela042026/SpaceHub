@@ -143,6 +143,29 @@ export const ESTADO_UTILIZADOR = {
     },
 };
 
+/**
+ * Nome do período (coluna `nome` da tabela `periodos` — "Manhã",
+ * "Tarde", "Dia inteiro"). Ao contrário dos outros mapas, a chave de
+ * tradução é o próprio texto em português, porque a tabela não tem um
+ * `codigo` estável separado do nome apresentado.
+ */
+export const PERIODO_LABEL = {
+    Manhã: 'estados.periodo.manha',
+    Tarde: 'estados.periodo.tarde',
+    'Dia inteiro': 'estados.periodo.diaInteiro',
+};
+
+/** Traduz o nome de um período, devolvendo o valor original se for desconhecido. */
+export const etiquetaPeriodo = (nome, t) => {
+    const chaveTraducao = PERIODO_LABEL[nome];
+
+    if (!chaveTraducao) {
+        return nome;
+    }
+
+    return (t ?? i18n.t.bind(i18n))(chaveTraducao);
+};
+
 /** Classes do badge de um estado, ou a cor neutra se for desconhecido. */
 export const badge = (mapa, chave) => mapa[chave]?.badge ?? BADGE_NEUTRO;
 

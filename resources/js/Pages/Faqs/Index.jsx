@@ -3,6 +3,7 @@ import AuthHeader from '@/Components/Auth/AuthHeader';
 import AuthFooter from '@/Components/Auth/AuthFooter';
 import useTheme from '@/Hooks/useTheme';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     HelpCircle,
     Search,
@@ -24,14 +25,15 @@ import { Fragment, useState } from 'react';
 
 // Ordem lógica do percurso do utilizador: conhecer o SpaceHub -> escolher
 // um espaço -> reservar -> pagar -> fazer check-in -> gerir a conta.
-// "chave" tem de corresponder exatamente à coluna `categoria` na BD.
+// "chave" tem de corresponder exatamente à coluna `categoria` na BD — o
+// "labelChave" é a chave de tradução (independente do texto persistido).
 const CATEGORIAS = [
-    { chave: 'Sobre o SpaceHub', label: 'Sobre o SpaceHub', slug: 'sobre', Icone: Info },
-    { chave: 'Espaços e disponibilidade', label: 'Espaços', slug: 'espacos', Icone: Building2 },
-    { chave: 'Reservas', label: 'Reservas', slug: 'reservas', Icone: CalendarDays },
-    { chave: 'Pagamentos', label: 'Pagamentos', slug: 'pagamentos', Icone: CreditCard },
-    { chave: 'Check-in', label: 'Check-in', slug: 'checkin', Icone: QrCode },
-    { chave: 'Conta', label: 'Conta', slug: 'conta', Icone: UserRound },
+    { chave: 'Sobre o SpaceHub', labelChave: 'sobre', slug: 'sobre', Icone: Info },
+    { chave: 'Espaços e disponibilidade', labelChave: 'espacos', slug: 'espacos', Icone: Building2 },
+    { chave: 'Reservas', labelChave: 'reservas', slug: 'reservas', Icone: CalendarDays },
+    { chave: 'Pagamentos', labelChave: 'pagamentos', slug: 'pagamentos', Icone: CreditCard },
+    { chave: 'Check-in', labelChave: 'checkin', slug: 'checkin', Icone: QrCode },
+    { chave: 'Conta', labelChave: 'conta', slug: 'conta', Icone: UserRound },
 ];
 
 function escaparRegex(texto) {
@@ -61,6 +63,7 @@ function destacarTermo(texto, termo) {
 }
 
 export default function Index({ faqs }) {
+    const { t } = useTranslation('suporte');
     const { auth } = usePage().props;
     const estaAutenticado = Boolean(auth?.user);
     const { theme, toggleTheme } = useTheme();
@@ -123,11 +126,11 @@ export default function Index({ faqs }) {
 
                 <div>
                     <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                        Central de ajuda
+                        {t('faqs.titulo')}
                     </h1>
 
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Encontre respostas rápidas às perguntas mais frequentes sobre a utilização do SpaceHub.
+                        {t('faqs.subtitulo')}
                     </p>
                 </div>
             </div>
@@ -143,7 +146,7 @@ export default function Index({ faqs }) {
 
                     <input
                         type="text"
-                        placeholder="Pesquisar uma pergunta..."
+                        placeholder={t('faqs.pesquisarPlaceholder')}
                         value={pesquisa}
                         onChange={(e) => setPesquisa(e.target.value)}
                         className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-11 text-sm text-slate-700 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -153,7 +156,7 @@ export default function Index({ faqs }) {
                         <button
                             type="button"
                             onClick={() => setPesquisa('')}
-                            aria-label="Limpar pesquisa"
+                            aria-label={t('faqs.limparPesquisa')}
                             className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 dark:hover:bg-slate-700 dark:hover:text-slate-200"
                         >
                             <X size={16} strokeWidth={1.9} />
@@ -181,7 +184,7 @@ export default function Index({ faqs }) {
                                 }`}
                             >
                                 <categoria.Icone size={14} strokeWidth={1.9} />
-                                {categoria.label}
+                                {t(`faqs.categorias.${categoria.labelChave}`)}
                             </button>
                         );
                     })}
@@ -193,7 +196,7 @@ export default function Index({ faqs }) {
                         <Search size={28} strokeWidth={1.6} className="text-slate-300 dark:text-slate-600" />
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Não encontrámos nenhuma resposta para a sua pesquisa.
+                            {t('faqs.semResultados')}
                         </p>
 
                         <button
@@ -201,7 +204,7 @@ export default function Index({ faqs }) {
                             onClick={() => setPesquisa('')}
                             className="text-sm font-semibold text-teal-600 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 dark:text-teal-400"
                         >
-                            Limpar pesquisa
+                            {t('faqs.limparPesquisa')}
                         </button>
                     </div>
                 ) : (
@@ -215,7 +218,7 @@ export default function Index({ faqs }) {
                                 <categoria.Icone size={18} strokeWidth={1.9} className="text-teal-500" />
 
                                 <h4 className="text-lg font-bold text-teal-600 dark:text-teal-400">
-                                    {categoria.chave}
+                                    {t(`faqs.categorias.${categoria.labelChave}`)}
                                 </h4>
                             </div>
 
@@ -294,33 +297,33 @@ export default function Index({ faqs }) {
                             {estaAutenticado ? (
                                 <div>
                                     <h3 className="mb-1 text-xl font-bold text-slate-900 dark:text-white">
-                                        Ainda precisa de ajuda?
+                                        {t('faqs.aindaPrecisaDeAjuda')}
                                     </h3>
                                     <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                                        A nossa equipa está disponível para o ajudar sempre que precisar.
+                                        {t('faqs.equipaDisponivel')}
                                     </p>
                                     <Link
                                         href={route('support.create')}
                                         className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2.5 text-xs font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:bg-teal-600 dark:hover:bg-teal-500 dark:focus-visible:ring-offset-slate-900"
                                     >
-                                        Contactar Suporte
+                                        {t('faqs.contactarSuporte')}
                                         <ArrowRight size={14} strokeWidth={2} />
                                     </Link>
                                 </div>
                             ) : (
                                 <div>
                                     <h3 className="mb-1 text-xl font-bold text-slate-900 dark:text-white">
-                                        Entre na sua conta para continuar
+                                        {t('faqs.entrarNaContaTitulo')}
                                     </h3>
                                     <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                                        Para contactar o suporte ou aceder às restantes funcionalidades, inicie sessão na sua conta SpaceHub.
+                                        {t('faqs.entrarNaContaTexto')}
                                     </p>
                                     <Link
                                         href={route('login')}
                                         className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2.5 text-xs font-medium text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:bg-teal-600 dark:hover:bg-teal-500 dark:focus-visible:ring-offset-slate-900"
                                     >
                                         <LogIn size={14} strokeWidth={2} />
-                                        Entrar
+                                        {t('faqs.entrar')}
                                     </Link>
                                 </div>
                             )}
@@ -334,10 +337,10 @@ export default function Index({ faqs }) {
                                     <Mail size={18} />
                                 </div>
                                 <h4 className="mb-1 text-xs font-bold text-slate-900 dark:text-white">
-                                    Resposta rápida
+                                    {t('faqs.respostaRapida')}
                                 </h4>
                                 <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-                                    Respondemos o mais rápido possível.
+                                    {t('faqs.respostaRapidaTexto')}
                                 </p>
                             </div>
 
@@ -347,10 +350,10 @@ export default function Index({ faqs }) {
                                     <MessageCircleMore size={18} />
                                 </div>
                                 <h4 className="mb-1 text-xs font-bold text-slate-900 dark:text-white">
-                                    Apoio personalizado
+                                    {t('faqs.apoioPersonalizado')}
                                 </h4>
                                 <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-                                    Ajudamos a resolver qualquer questão.
+                                    {t('faqs.apoioPersonalizadoTexto')}
                                 </p>
                             </div>
 
@@ -360,10 +363,10 @@ export default function Index({ faqs }) {
                                     <ShieldCheck size={18} />
                                 </div>
                                 <h4 className="mb-1 text-xs font-bold text-slate-900 dark:text-white">
-                                    Seguro e confiável
+                                    {t('faqs.seguroConfiavel')}
                                 </h4>
                                 <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
-                                    Os seus dados estão sempre protegidos.
+                                    {t('faqs.seguroConfiavelTexto')}
                                 </p>
                             </div>
                         </div>
@@ -376,7 +379,7 @@ export default function Index({ faqs }) {
 
     return (
         <>
-            <Head title="Central de ajuda" />
+            <Head title={t('faqs.tituloPagina')} />
 
             {estaAutenticado ? (
                 <DashboardLayout>{conteudo}</DashboardLayout>

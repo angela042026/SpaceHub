@@ -1,17 +1,19 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Map as MapIcon } from 'lucide-react';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import OfficeMap from '@/Components/Dashboard/OfficeMap/OfficeMap';
 
 export default function Index({ pisos, edificios }) {
+    const { t } = useTranslation('mapa');
     const [selectedFloor, setSelectedFloor] = useState(pisos?.[0]?.codigo ?? '');
     const [selectedEdificio, setSelectedEdificio] = useState(edificios?.[0]?.id ?? '');
 
     return (
         <>
-            <Head title="Mapa do Escritório" />
+            <Head title={t('tituloPagina')} />
 
             <DashboardLayout>
                 <OfficeMap
@@ -21,8 +23,8 @@ export default function Index({ pisos, edificios }) {
                     tamanhoMapa="grande"
                     iconeTitulo={MapIcon}
                     tituloDestaque
-                    titulo="Mapa do escritório"
-                    subtitulo="Selecione um piso e clique numa área para consultar as secretárias disponíveis."
+                    titulo={t('titulo')}
+                    subtitulo={t('subtitulo')}
                     selectedFloor={selectedFloor}
                     setSelectedFloor={setSelectedFloor}
                     selectedEdificio={selectedEdificio}

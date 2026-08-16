@@ -1,1 +1,93 @@
-{}
+{
+    "scan": {
+        "tituloPagina": "Check-in · {{codigo}}",
+        "confirmarCheckin": "Confirmar Check-in",
+        "aConfirmar": "A confirmar...",
+        "estados": {
+            "pronta": {
+                "label": "Pronto para check-in",
+                "mensagem": "Confirma a tua presença nesta secretária."
+            },
+            "ja_check_in": {
+                "label": "Check-in já efetuado",
+                "mensagem": "Já confirmaste esta reserva hoje."
+            },
+            "pendente_pagamento": {
+                "label": "Pendente de pagamento",
+                "mensagem": "Conclui o pagamento desta reserva para poderes fazer o check-in."
+            },
+            "fora_da_janela": {
+                "label": "Fora da janela horária",
+                "mensagem": "O check-in só está disponível perto do início do período reservado."
+            },
+            "sem_reserva": {
+                "label": "Sem reserva",
+                "mensagem": "Não tens nenhuma reserva ativa para esta secretária hoje."
+            },
+            "ocupada_por_outro": {
+                "label": "Ocupada por outro utilizador",
+                "mensagem": "Esta secretária já está reservada por outra pessoa hoje."
+            },
+            "indisponivel": {
+                "label": "Secretária indisponível",
+                "mensagem": "Esta secretária não está disponível para reserva."
+            }
+        }
+    },
+    "camera": {
+        "tituloPagina": "Check-in",
+        "subtitulo": "Confirme a sua chegada",
+        "reserva": "Reserva",
+        "hoje": "Hoje, {{data}}",
+        "resumoStatus": {
+            "pronta": "Dentro do horário",
+            "ja_check_in": "Check-in confirmado",
+            "pendente_pagamento": "Pagamento pendente",
+            "fora_da_janela": "Fora do horário"
+        },
+        "guiaRapido": "Guia rápido",
+        "comoFazerCheckin": "Como fazer o check-in",
+        "passos": {
+            "1": { "titulo": "1. Encontre a secretária", "descricao": "Dirija-se à secretária indicada na sua reserva e localize o QR Code afixado." },
+            "2": { "titulo": "2. Autorize a câmara", "descricao": "Clique em iniciar leitura e permita o acesso à câmara do dispositivo." },
+            "3": { "titulo": "3. Leia o QR Code", "descricao": "Mantenha o código enquadrado na área de leitura durante alguns segundos." },
+            "4": { "titulo": "4. Check-in confirmado", "descricao": "O sistema valida a reserva e confirma automaticamente a sua chegada." }
+        },
+        "validacaoReserva": "Validação da reserva",
+        "validacaoReservaTexto": "O check-in só será aceite na secretária correta e dentro do horário permitido.",
+        "lerQrCode": "Ler QR Code",
+        "utilizeCamaraOuImagem": "Utilize a câmara ou selecione uma imagem.",
+        "camaraAtiva": "Câmara ativa",
+        "semReservaTitulo": "Nenhuma reserva disponível para check-in",
+        "semReservaTexto": "Consulta as tuas reservas ou reserva um espaço para realizar o check-in.",
+        "prontoParaComecar": "Pronto para começar?",
+        "aponteCamara": "Aponte a câmara para o QR Code da secretária.",
+        "aPedirAcessoCamara": "A pedir acesso à câmara...",
+        "navegadorVaiPedirAutorizacao": "O navegador vai pedir a tua autorização.",
+        "aValidarCodigo": "A validar o código...",
+        "aConfirmarReserva": "Estamos a confirmar a tua reserva.",
+        "qrLidoComSucesso": "QR Code lido com sucesso",
+        "qrLidoAValidar": "QR Code lido com sucesso. Estamos a validar a sua reserva...",
+        "mantenhaQrEnquadrado": "Mantenha o QR Code enquadrado dentro da moldura. A deteção é automática.",
+        "pararLeitura": "Parar leitura",
+        "iniciarLeitura": "Iniciar leitura",
+        "selecionarImagem": "Selecionar imagem",
+        "selecionarImagemAriaLabel": "Selecionar imagem com QR Code",
+        "verMinhasReservas": "Ver minhas reservas",
+        "reservarEspaco": "Reservar espaço",
+        "camaraApenasDuranteLeitura": "A câmara só será utilizada durante a leitura.",
+        "qrInvalidoAviso": "Este código não é um QR Code de check-in do SpaceHub. Confirma que estás a ler o código afixado na secretária correta.",
+        "erros": {
+            "acessoRecusadoTitulo": "Acesso à câmara recusado",
+            "acessoRecusadoMensagem": "Autoriza o acesso à câmara nas definições do navegador e tenta novamente, ou seleciona uma imagem com o QR Code.",
+            "semCamaraTitulo": "Nenhuma câmara encontrada",
+            "semCamaraMensagem": "Não foi detetada nenhuma câmara neste dispositivo. Podes selecionar uma imagem com o QR Code em alternativa.",
+            "erroGenericoTitulo": "Não foi possível iniciar a câmara",
+            "erroGenericoMensagem": "Ocorreu um problema ao aceder à câmara. Tenta novamente ou seleciona uma imagem com o QR Code.",
+            "codigoInvalidoTitulo": "Código QR inválido",
+            "codigoInvalidoMensagem": "Este código não é um QR Code de check-in do SpaceHub. Confirma que estás a ler o código afixado na secretária correta.",
+            "leituraFicheiroTitulo": "Não foi possível ler o código",
+            "leituraFicheiroMensagem": "Não foi encontrado nenhum QR Code válido nesta imagem. Tenta outra fotografia."
+        }
+    }
+}

@@ -1,6 +1,8 @@
 import { AlertCircle, ImageOff } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatarDataPortugues } from './reservaHelpers';
+import { etiquetaPeriodo } from '@/utils/estados';
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
 import LocalizacaoEspaco from './LocalizacaoEspaco';
 
@@ -25,6 +27,8 @@ export default function LugarCard({
     dataInicio,
     dataFimCalculada,
 }) {
+    const { t, i18n } = useTranslation('reservas');
+
     const diaInteiroDisponivel =
         periodosReserva.length > 1 &&
         periodosReserva.every(
@@ -106,7 +110,7 @@ export default function LugarCard({
                 <div
                     ref={grupoPeriodosRef}
                     role="group"
-                    aria-label="Períodos disponíveis"
+                    aria-label={t('lugarCard.periodosDisponiveis')}
                     tabIndex={-1}
                     className="mt-4 flex gap-2 outline-none"
                 >
@@ -126,8 +130,8 @@ export default function LugarCard({
                                     aria-pressed={selecionado}
                                     aria-label={
                                         disponivel
-                                            ? periodo.nome
-                                            : `${periodo.nome} — indisponível`
+                                            ? etiquetaPeriodo(periodo.nome, i18n.t)
+                                            : t('lugarCard.indisponivel', { periodo: etiquetaPeriodo(periodo.nome, i18n.t) })
                                     }
                                     onClick={() =>
                                         onEscolherPeriodo(
@@ -143,7 +147,7 @@ export default function LugarCard({
                                                 : 'border-slate-100 bg-slate-50 text-slate-300 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-600'
                                     }`}
                                 >
-                                    {periodo.nome}
+                                    {etiquetaPeriodo(periodo.nome, i18n.t)}
                                 </button>
                             );
                         })}
@@ -154,8 +158,8 @@ export default function LugarCard({
                         aria-pressed={periodoEscolhido === 'dia_inteiro'}
                         aria-label={
                             diaInteiroDisponivel
-                                ? 'Dia inteiro'
-                                : 'Dia inteiro — indisponível'
+                                ? t('lugarCard.diaInteiro')
+                                : t('lugarCard.diaInteiroIndisponivel')
                         }
                         onClick={() =>
                             onEscolherPeriodo(secretaria.id, 'dia_inteiro')
@@ -168,7 +172,7 @@ export default function LugarCard({
                                     : 'border-slate-100 bg-slate-50 text-slate-300 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-600'
                         }`}
                     >
-                        Dia inteiro
+                        {t('lugarCard.diaInteiro')}
                     </button>
                 </div>
 
@@ -182,7 +186,7 @@ export default function LugarCard({
                             strokeWidth={2}
                             className="shrink-0"
                         />
-                        Selecione um período antes de reservar.
+                        {t('lugarCard.selecionePeriodo')}
                     </div>
                 ) : (
                     <button
@@ -192,14 +196,13 @@ export default function LugarCard({
                         className="mt-3 h-11 w-full rounded-xl bg-teal-500 px-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-80 disabled:hover:translate-y-0 disabled:hover:shadow-sm dark:focus-visible:ring-offset-slate-900"
                     >
                         {emReserva
-                            ? 'A reservar...'
+                            ? t('lugarCard.aReservar')
                             : reservaLonga
-                                ? `Reservar de ${formatarDataPortugues(
-                                    dataInicio,
-                                )} a ${formatarDataPortugues(
-                                    dataFimCalculada,
-                                )}`
-                                : 'Reservar'}
+                                ? t('lugarCard.reservarDeAte', {
+                                    inicio: formatarDataPortugues(dataInicio, i18n.language),
+                                    fim: formatarDataPortugues(dataFimCalculada, i18n.language),
+                                })
+                                : t('lugarCard.reservar')}
                     </button>
                 )}
             </div>

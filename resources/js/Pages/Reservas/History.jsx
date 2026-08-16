@@ -4,6 +4,7 @@ import Modal from '@/Components/Modal';
 import LocalizacaoEspaco from '@/Components/Reservas/LocalizacaoEspaco';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowRight,
     CalendarDays,
@@ -13,9 +14,12 @@ import {
     History as HistoryIcon,
     X,
 } from 'lucide-react';
-import { ESTADO_RESERVA, badge } from '@/utils/estados';
+import { ESTADO_RESERVA, badge, etiqueta, etiquetaPeriodo } from '@/utils/estados';
+import { formatarData, formatarDataHora } from '@/utils/formatadores';
 
 export default function History({ reservas }) {
+    const { t, i18n } = useTranslation('reservas');
+    const { t: tc } = useTranslation('common');
     const [reservaSelecionada, setReservaSelecionada] = useState(null);
 
     const irParaPagina = (url) => {
@@ -29,17 +33,17 @@ export default function History({ reservas }) {
     const columns = [
         {
             key: 'data',
-            label: 'Data',
-            render: (reserva) => new Date(reserva.data).toLocaleDateString('pt-PT'),
+            label: t('colunas.data'),
+            render: (reserva) => formatarData(reserva.data, i18n.language),
         },
         {
             key: 'periodo',
-            label: 'Período',
-            render: (reserva) => reserva.periodo?.nome ?? '-',
+            label: t('colunas.periodo'),
+            render: (reserva) => etiquetaPeriodo(reserva.periodo?.nome, tc) ?? '-',
         },
         {
             key: 'espaco',
-            label: 'Espaço',
+            label: t('colunas.espaco'),
             render: (reserva) => (
                 <div>
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
@@ -56,7 +60,7 @@ export default function History({ reservas }) {
         },
         {
             key: 'estado',
-            label: 'Estado',
+            label: t('colunas.estado'),
             render: (reserva) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${badge(
@@ -64,7 +68,7 @@ export default function History({ reservas }) {
                         reserva.estado_reserva?.codigo,
                     )}`}
                 >
-                    {reserva.estado_reserva?.nome ?? '-'}
+                    {etiqueta(ESTADO_RESERVA, reserva.estado_reserva?.codigo, '-', tc)}
                 </span>
             ),
         },
@@ -72,7 +76,7 @@ export default function History({ reservas }) {
 
     return (
         <DashboardLayout>
-            <Head title="Histórico de Reservas" />
+            <Head title={t('historico.tituloPagina')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
@@ -83,11 +87,11 @@ export default function History({ reservas }) {
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Histórico de Reservas
+                                {t('historico.tituloPagina')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Consulte as suas {reservas.total} reserva{reservas.total === 1 ? '' : 's'} anterior{reservas.total === 1 ? '' : 'es'}.
+                                {t('historico.descricao', { count: reservas.total })}
                             </p>
                         </div>
                     </div>
@@ -96,7 +100,7 @@ export default function History({ reservas }) {
                         href={route('reservas.index')}
                         className="inline-flex items-center gap-1.5 self-start rounded-lg border border-teal-200 bg-teal-50/60 px-3 py-2 text-xs font-bold text-teal-700 transition hover:border-teal-300 hover:bg-teal-50 dark:border-teal-400/20 dark:bg-teal-400/5 dark:text-teal-400 dark:hover:bg-teal-400/10 sm:self-auto"
                     >
-                        Ver reservas atuais
+                        {t('historico.verReservasAtuais')}
                         <ArrowRight size={14} strokeWidth={2.2} />
                     </Link>
                 </div>
@@ -105,14 +109,14 @@ export default function History({ reservas }) {
                     <Table
                         columns={columns}
                         data={reservas.data}
-                        emptyMessage="Ainda não existem reservas no histórico."
+                        emptyMessage={t('historico.semReservas')}
                         onRowClick={(reserva) => setReservaSelecionada(reserva)}
                     />
 
                     {reservas.last_page > 1 && (
                         <div className="mt-5 flex items-center justify-between">
                             <p className="text-xs text-slate-400">
-                                Página {reservas.current_page} de {reservas.last_page}
+                                {tc('paginacao.pagina', { atual: reservas.current_page, total: reservas.last_page })}
                             </p>
 
                             <div className="flex gap-2">
@@ -158,7 +162,7 @@ export default function History({ reservas }) {
                             <button
                                 type="button"
                                 onClick={() => setReservaSelecionada(null)}
-                                aria-label="Fechar"
+                                aria-label={t('historico.fechar')}
                                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-800"
                             >
                                 <X size={16} strokeWidth={2} />
@@ -168,20 +172,16 @@ export default function History({ reservas }) {
                         <div className="mt-5 space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
                             <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-300">
                                 <CalendarDays size={16} strokeWidth={1.9} className="shrink-0 text-slate-400" />
-                                {new Date(reservaSelecionada.data).toLocaleDateString('pt-PT', {
-                                    day: '2-digit',
-                                    month: 'long',
-                                    year: 'numeric',
-                                })}
+                                {formatarData(reservaSelecionada.data, i18n.language, { month: 'long' })}
                             </div>
 
                             <div className="flex items-center gap-2.5 text-sm text-slate-600 dark:text-slate-300">
                                 <Clock size={16} strokeWidth={1.9} className="shrink-0 text-slate-400" />
-                                {reservaSelecionada.periodo?.nome ?? '-'}
+                                {etiquetaPeriodo(reservaSelecionada.periodo?.nome, tc) ?? '-'}
                             </div>
 
                             <div className="flex items-center justify-between pt-1">
-                                <span className="text-sm text-slate-500 dark:text-slate-400">Estado</span>
+                                <span className="text-sm text-slate-500 dark:text-slate-400">{t('colunas.estado')}</span>
 
                                 <span
                                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${badge(
@@ -189,20 +189,15 @@ export default function History({ reservas }) {
                                         reservaSelecionada.estado_reserva?.codigo,
                                     )}`}
                                 >
-                                    {reservaSelecionada.estado_reserva?.nome ?? '-'}
+                                    {etiqueta(ESTADO_RESERVA, reservaSelecionada.estado_reserva?.codigo, '-', tc)}
                                 </span>
                             </div>
 
                             {reservaSelecionada.check_in_at && (
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm text-slate-500 dark:text-slate-400">Check-in</span>
+                                    <span className="text-sm text-slate-500 dark:text-slate-400">{t('historico.checkin')}</span>
                                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                        {new Date(reservaSelecionada.check_in_at).toLocaleString('pt-PT', {
-                                            day: '2-digit',
-                                            month: '2-digit',
-                                            hour: '2-digit',
-                                            minute: '2-digit',
-                                        })}
+                                        {formatarDataHora(reservaSelecionada.check_in_at, i18n.language)}
                                     </span>
                                 </div>
                             )}

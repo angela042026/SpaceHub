@@ -11,9 +11,12 @@ import {
     Wrench,
 } from 'lucide-react';
 import { useState } from 'react';
-import { ESTADO_SUPORTE, badge } from '@/utils/estados';
+import { useTranslation } from 'react-i18next';
+import { ESTADO_SUPORTE, badge, etiqueta } from '@/utils/estados';
 
 export default function Show({ pedido }) {
+    const { t, i18n } = useTranslation('suporte');
+    const { t: tc } = useTranslation('common');
 
     const [aConfirmar, setAConfirmar] = useState(false);
     const [aMarcarEmAnalise, setAMarcarEmAnalise] = useState(false);
@@ -42,7 +45,7 @@ export default function Show({ pedido }) {
 
     return (
         <DashboardLayout>
-            <Head title="Pedido de Suporte" />
+            <Head title={t('show.tituloPagina')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -51,7 +54,7 @@ export default function Show({ pedido }) {
                         className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-slate-400 transition hover:text-teal-600 dark:text-slate-500 dark:hover:text-teal-400"
                     >
                         <ArrowLeft size={13} strokeWidth={2} />
-                        Pedidos de Suporte
+                        {t('show.voltar')}
                     </Link>
 
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -62,11 +65,14 @@ export default function Show({ pedido }) {
 
                             <div>
                                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                    Pedido de Suporte #{pedido.id}
+                                    {t('show.tituloPedido', { id: pedido.id })}
                                 </h1>
 
                                 <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                                    {pedido.assunto} · Enviado em {new Date(pedido.created_at).toLocaleDateString('pt-PT')}
+                                    {t('show.enviadoEm', {
+                                        assunto: pedido.assunto,
+                                        data: new Date(pedido.created_at).toLocaleDateString(i18n.language === 'en' ? 'en-GB' : 'pt-PT'),
+                                    })}
                                 </p>
                             </div>
                         </div>
@@ -77,7 +83,7 @@ export default function Show({ pedido }) {
                             }`}
                         >
                             {resolvido && <Check size={13} strokeWidth={2.5} />}
-                            {pedido.estado}
+                            {etiqueta(ESTADO_SUPORTE, pedido.estado, pedido.estado, tc)}
                         </span>
                     </div>
                 </div>
@@ -85,7 +91,7 @@ export default function Show({ pedido }) {
                 <div className="grid grid-cols-1 gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:grid-cols-3">
                     <div className="min-w-0">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                            Utilizador
+                            {t('show.utilizador')}
                         </p>
 
                         <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
@@ -95,7 +101,7 @@ export default function Show({ pedido }) {
 
                     <div className="min-w-0">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                            Email
+                            {t('show.email')}
                         </p>
 
                         <p className="mt-1 break-words text-sm font-semibold text-slate-800 dark:text-slate-100">
@@ -105,11 +111,11 @@ export default function Show({ pedido }) {
 
                     <div className="min-w-0">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                            Data
+                            {t('show.data')}
                         </p>
 
                         <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                            {new Date(pedido.created_at).toLocaleDateString('pt-PT')}
+                            {new Date(pedido.created_at).toLocaleDateString(i18n.language === 'en' ? 'en-GB' : 'pt-PT')}
                         </p>
                     </div>
                 </div>
@@ -119,7 +125,7 @@ export default function Show({ pedido }) {
                         <MessageSquare size={15} strokeWidth={1.9} />
 
                         <p className="text-xs font-bold uppercase tracking-wide">
-                            Mensagem do utilizador
+                            {t('show.mensagemUtilizador')}
                         </p>
                     </div>
 
@@ -139,7 +145,7 @@ export default function Show({ pedido }) {
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-blue-400 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:text-slate-300"
                         >
                             <Wrench size={15} strokeWidth={1.9} />
-                            {aMarcarEmAnalise ? 'A marcar...' : 'Marcar como Em Análise'}
+                            {aMarcarEmAnalise ? t('show.aMarcar') : t('show.marcarEmAnalise')}
                         </button>
                     </div>
                 )}
@@ -152,7 +158,7 @@ export default function Show({ pedido }) {
                                     <CornerDownRight size={15} strokeWidth={1.9} />
 
                                     <p className="text-xs font-bold uppercase tracking-wide">
-                                        Resposta do suporte
+                                        {t('show.respostaSuporte')}
                                     </p>
                                 </div>
 
@@ -164,7 +170,7 @@ export default function Show({ pedido }) {
                             </>
                         ) : (
                             <p className="text-sm text-slate-400">
-                                Nenhuma resposta registada.
+                                {t('show.nenhumaResposta')}
                             </p>
                         )
                     ) : (
@@ -174,7 +180,7 @@ export default function Show({ pedido }) {
                                 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-400"
                             >
                                 <CornerDownRight size={15} strokeWidth={1.9} />
-                                Resposta do suporte
+                                {t('show.respostaSuporte')}
                             </label>
 
                             <textarea
@@ -182,7 +188,7 @@ export default function Show({ pedido }) {
                                 rows={4}
                                 value={data.resposta}
                                 onChange={(e) => setData('resposta', e.target.value)}
-                                placeholder="Escreve a resposta para o utilizador..."
+                                placeholder={t('show.respostaPlaceholder')}
                                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                             />
 
@@ -199,7 +205,7 @@ export default function Show({ pedido }) {
                                     onClick={() => setAConfirmar(true)}
                                     className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                                 >
-                                    Enviar Resposta e Marcar como Resolvido
+                                    {t('show.enviarResposta')}
                                 </button>
                             </div>
                         </>
@@ -216,11 +222,11 @@ export default function Show({ pedido }) {
 
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                Enviar esta resposta e marcar como resolvido?
+                                {t('show.confirmarTitulo')}
                             </h2>
 
                             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                {pedido.user.name} vai receber a tua resposta e o pedido "{pedido.assunto}" passa a aparecer como resolvido. Esta ação não pode ser desfeita.
+                                {t('show.confirmarTexto', { nome: pedido.user.name, assunto: pedido.assunto })}
                             </p>
                         </div>
                     </div>
@@ -231,7 +237,7 @@ export default function Show({ pedido }) {
                             onClick={() => setAConfirmar(false)}
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
-                            Cancelar
+                            {t('show.cancelar')}
                         </button>
 
                         <button
@@ -240,7 +246,7 @@ export default function Show({ pedido }) {
                             disabled={processing}
                             className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {processing ? 'A enviar...' : 'Enviar Resposta'}
+                            {processing ? t('show.aEnviar') : t('show.enviarRespostaBotao')}
                         </button>
                     </div>
                 </div>

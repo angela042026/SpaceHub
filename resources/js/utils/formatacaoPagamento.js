@@ -4,8 +4,8 @@
  * Comprovativo e Pagar.
  */
 
-export const formatarValorEuro = (valor) =>
-    new Intl.NumberFormat('pt-PT', {
+export const formatarValorEuro = (valor, locale = 'pt') =>
+    new Intl.NumberFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
         style: 'currency',
         currency: 'EUR',
     }).format(Number(valor ?? 0));
@@ -57,7 +57,7 @@ export const encurtarReferencia = (referencia, limite = 14) => {
  * Intl dão ano com 2 dígitos e vírgula como separador em pt-PT, que não
  * é o formato usado nas páginas de Pagamentos.
  */
-export const formatarDataHora = (valor) => {
+export const formatarDataHora = (valor, locale = 'pt') => {
     if (!valor) {
         return '-';
     }
@@ -68,13 +68,15 @@ export const formatarDataHora = (valor) => {
         return formatarDataCurta(valor);
     }
 
-    const dataFormatada = new Intl.DateTimeFormat('pt-PT', {
+    const localeIntl = locale === 'en' ? 'en-GB' : 'pt-PT';
+
+    const dataFormatada = new Intl.DateTimeFormat(localeIntl, {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
     }).format(data);
 
-    const horaFormatada = new Intl.DateTimeFormat('pt-PT', {
+    const horaFormatada = new Intl.DateTimeFormat(localeIntl, {
         hour: '2-digit',
         minute: '2-digit',
     }).format(data);

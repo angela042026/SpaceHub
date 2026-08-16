@@ -1,4 +1,5 @@
 import { MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Linha de localização partilhada pelos cartões de espaço em "Reservar
@@ -11,6 +12,7 @@ export default function LocalizacaoEspaco({
     className = '',
     iconeClassName = 'text-slate-400 dark:text-slate-500',
 }) {
+    const { t } = useTranslation('reservas');
     const nomeEdificio = secretaria?.setor?.piso?.edificio?.nome;
     const numeroPiso = secretaria?.setor?.piso?.numero;
 
@@ -30,7 +32,7 @@ export default function LocalizacaoEspaco({
 
             <span className="min-w-0 flex-1 truncate">
                 {nomeEdificio ?? '-'}
-                {numeroPiso != null && ` · Piso ${numeroPiso}`}
+                {numeroPiso != null && ` · ${t('localizacao.piso', { numero: numeroPiso })}`}
             </span>
         </p>
     );

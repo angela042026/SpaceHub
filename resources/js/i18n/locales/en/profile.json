@@ -1,1 +1,52 @@
-{}
+{
+    "tituloPagina": "Settings",
+    "informacaoPerfil": {
+        "titulo": "Profile Information",
+        "subtitulo": "Update your name and email address.",
+        "trocarFotografia": "Change photo",
+        "alterarFotografia": "Change photo",
+        "nome": "Name",
+        "email": "Email",
+        "emailNaoVerificado": "Your email address hasn't been verified yet.",
+        "clicaAquiParaReenviar": "Click here to resend the verification email.",
+        "linkVerificacaoEnviado": "A new verification link has been sent to your email.",
+        "guardado": "Saved.",
+        "aGuardar": "Saving...",
+        "guardarAlteracoes": "Save changes"
+    },
+    "googleCalendar": {
+        "titulo": "Google Calendar",
+        "subtitulo": "Automatically sync your bookings with Google Calendar.",
+        "ligado": "Connected",
+        "naoLigado": "Not connected",
+        "descricaoLigado": "Your bookings are added automatically.",
+        "descricaoNaoLigado": "You haven't connected your Google Calendar yet.",
+        "desligar": "Disconnect",
+        "conectar": "Connect Google Calendar"
+    },
+    "alterarPassword": {
+        "titulo": "Change password",
+        "subtitulo": "Use a long, unique password to keep your account secure.",
+        "atual": "Current password",
+        "nova": "New password",
+        "confirmar": "Confirm password",
+        "minimoCaracteres": "Minimum of 8 characters.",
+        "naoCoincidem": "The passwords don't match.",
+        "mostrarPassword": "Show password",
+        "ocultarPassword": "Hide password",
+        "guardado": "Saved.",
+        "aAtualizar": "Updating...",
+        "atualizar": "Update password"
+    },
+    "eliminarConta": {
+        "titulo": "Delete account",
+        "subtitulo": "Once deleted, all account data will be permanently erased.",
+        "botao": "Delete account",
+        "confirmarTitulo": "Are you sure you want to delete your account?",
+        "confirmarTexto": "This action is permanent and irreversible. Enter your password to confirm you want to delete the account.",
+        "passwordPlaceholder": "Password",
+        "cancelar": "Cancel",
+        "aEliminar": "Deleting...",
+        "confirmarBotao": "Delete account"
+    }
+}

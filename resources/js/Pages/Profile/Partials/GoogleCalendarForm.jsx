@@ -1,8 +1,11 @@
 import { Link } from '@inertiajs/react';
 import { CalendarPlus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import GoogleCalendarIcon from '@/Components/GoogleCalendarIcon';
 
 export default function GoogleCalendarForm({ conectado }) {
+    const { t } = useTranslation('profile');
+
     return (
         <section className="dashboard-card overflow-hidden">
             <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -16,7 +19,7 @@ export default function GoogleCalendarForm({ conectado }) {
                     </h2>
 
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Sincroniza automaticamente as tuas reservas com o Google Calendar.
+                        {t('googleCalendar.subtitulo')}
                     </p>
                 </div>
             </div>
@@ -26,19 +29,19 @@ export default function GoogleCalendarForm({ conectado }) {
                     {conectado ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1 text-xs font-bold text-teal-700 dark:bg-teal-500/10 dark:text-teal-400">
                             <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
-                            Ligado
+                            {t('googleCalendar.ligado')}
                         </span>
                     ) : (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                             <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-                            Não ligado
+                            {t('googleCalendar.naoLigado')}
                         </span>
                     )}
 
                     <p className="text-sm text-slate-500 dark:text-slate-400">
                         {conectado
-                            ? 'As tuas reservas são adicionadas automaticamente.'
-                            : 'Ainda não ligaste o teu Google Calendar.'}
+                            ? t('googleCalendar.descricaoLigado')
+                            : t('googleCalendar.descricaoNaoLigado')}
                     </p>
                 </div>
 
@@ -49,7 +52,7 @@ export default function GoogleCalendarForm({ conectado }) {
                         as="button"
                         className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
                     >
-                        Desligar
+                        {t('googleCalendar.desligar')}
                     </Link>
                 ) : (
                     // Navegação normal de página (não <Link> do Inertia):
@@ -61,7 +64,7 @@ export default function GoogleCalendarForm({ conectado }) {
                         className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
                     >
                         <CalendarPlus size={18} strokeWidth={2} />
-                        Conectar Google Calendar
+                        {t('googleCalendar.conectar')}
                     </a>
                 )}
             </div>

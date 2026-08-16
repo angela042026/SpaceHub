@@ -1,6 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     AlertTriangle,
     CalendarClock,
@@ -15,6 +16,7 @@ import {
 import Modal from '@/Components/Modal';
 import LocalizacaoEspaco from '@/Components/Reservas/LocalizacaoEspaco';
 import { formatarDataPortugues, proximaDataValida } from '@/Components/Reservas/reservaHelpers';
+import { etiquetaPeriodo } from '@/utils/estados';
 import { RESERVA_ALTERACAO_BAR_VISIBILITY_EVENT } from '@/Lib/reservaAlteracaoBar';
 
 const QUANTIDADE_POR_PAGINA = 12;
@@ -63,10 +65,12 @@ function nomeEspaco(secretaria) {
 }
 
 function PillPeriodo({ disponivel }) {
+    const { t } = useTranslation('reservas');
+
     return disponivel ? (
         <span className="inline-flex items-center gap-1 rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700 dark:bg-teal-400/10 dark:text-teal-300">
             <CheckCircle2 size={13} strokeWidth={2} />
-            Livre
+            {t('disponibilidade.livre')}
         </span>
     ) : (
         <span className="inline-flex h-6 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-400 dark:bg-slate-800 dark:text-slate-500">
@@ -76,13 +80,15 @@ function PillPeriodo({ disponivel }) {
 }
 
 function PillPeriodoRotulada({ nome, disponivel }) {
+    const { t } = useTranslation('reservas');
+
     return (
         <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-100 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-500 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-400">
             {nome}
             {disponivel ? (
                 <span className="inline-flex items-center gap-1 text-teal-600 dark:text-teal-400">
                     <CheckCircle2 size={12} strokeWidth={2} />
-                    Livre
+                    {t('disponibilidade.livre')}
                 </span>
             ) : (
                 <span className="text-slate-400 dark:text-slate-500">—</span>
@@ -92,6 +98,9 @@ function PillPeriodoRotulada({ nome, disponivel }) {
 }
 
 export default function Availability({ periodos, pisos, setores, edificios, filters }) {
+    const { t, i18n } = useTranslation('reservas');
+    const { t: tc } = useTranslation('common');
+
     const periodosMeioDia = periodos.filter((periodo) => periodo.nome !== 'Dia inteiro');
     const periodoDiaInteiro = periodos.find((periodo) => periodo.nome === 'Dia inteiro');
     const periodoManha = periodosMeioDia.find((periodo) => periodo.nome === 'Manhã');
@@ -380,7 +389,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
 
     return (
         <DashboardLayout>
-            <Head title="Consultar Disponibilidade" />
+            <Head title={t('disponibilidade.tituloPagina')} />
 
             <div className="pb-28">
                 <section className="dashboard-card overflow-hidden">
@@ -392,11 +401,11 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
 
                             <div>
                                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                    Consultar Disponibilidade
+                                    {t('disponibilidade.tituloPagina')}
                                 </h1>
 
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Vê que lugares estão livres antes de fazeres a reserva.
+                                    {t('disponibilidade.subtitulo')}
                                 </p>
                             </div>
                         </div>
@@ -407,14 +416,14 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                 onClick={limparFiltros}
                                 className="self-start text-sm font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900 sm:self-auto"
                             >
-                                Limpar filtros
+                                {t('disponibilidade.limparFiltros')}
                             </button>
                         )}
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
                         <div>
-                            <label htmlFor="pesquisa" className={labelClass}>Pesquisar</label>
+                            <label htmlFor="pesquisa" className={labelClass}>{t('disponibilidade.pesquisar')}</label>
                             <div className="relative">
                                 <Search
                                     size={16}
@@ -427,8 +436,8 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                     type="text"
                                     value={pesquisa}
                                     onChange={(e) => setPesquisa(e.target.value)}
-                                    placeholder="Pesquisar por nome ou código…"
-                                    aria-label="Pesquisar por nome ou código do espaço"
+                                    placeholder={t('disponibilidade.pesquisarPlaceholder')}
+                                    aria-label={t('disponibilidade.pesquisarAriaLabel')}
                                     className={`${fieldClass} pl-9 ${pesquisa ? 'pr-9' : ''}`}
                                 />
 
@@ -436,7 +445,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                     <button
                                         type="button"
                                         onClick={() => setPesquisa('')}
-                                        aria-label="Limpar pesquisa"
+                                        aria-label={t('disponibilidade.limparPesquisa')}
                                         className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                                     >
                                         <X size={14} strokeWidth={2} />
@@ -446,7 +455,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                         </div>
 
                         <div>
-                            <label htmlFor="data" className={labelClass}>Data</label>
+                            <label htmlFor="data" className={labelClass}>{t('disponibilidade.data')}</label>
                             <input
                                 id="data"
                                 type="date"
@@ -457,36 +466,36 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                         </div>
 
                         <div>
-                            <label htmlFor="periodo_id" className={labelClass}>Período</label>
+                            <label htmlFor="periodo_id" className={labelClass}>{t('disponibilidade.periodo')}</label>
                             <select
                                 id="periodo_id"
                                 value={filtros.periodo_id}
                                 onChange={(e) => setFiltros((atual) => ({ ...atual, periodo_id: e.target.value }))}
                                 className={fieldClass}
                             >
-                                <option value="">Todos os períodos</option>
+                                <option value="">{t('disponibilidade.todosOsPeriodos')}</option>
 
                                 {periodosMeioDia.map((periodo) => (
                                     <option key={periodo.id} value={periodo.id}>
-                                        {periodo.nome}
+                                        {etiquetaPeriodo(periodo.nome, tc)}
                                     </option>
                                 ))}
 
                                 {periodoDiaInteiro && (
-                                    <option value="dia_inteiro">{periodoDiaInteiro.nome}</option>
+                                    <option value="dia_inteiro">{etiquetaPeriodo(periodoDiaInteiro.nome, tc)}</option>
                                 )}
                             </select>
                         </div>
 
                         <div>
-                            <label htmlFor="edificio_id" className={labelClass}>Edifício</label>
+                            <label htmlFor="edificio_id" className={labelClass}>{t('disponibilidade.edificio')}</label>
                             <select
                                 id="edificio_id"
                                 value={filtros.edificio_id}
                                 onChange={(e) => setFiltros((atual) => ({ ...atual, edificio_id: e.target.value }))}
                                 className={fieldClass}
                             >
-                                <option value="">Todos os edifícios</option>
+                                <option value="">{t('disponibilidade.todosOsEdificios')}</option>
 
                                 {edificios.map((edificio) => (
                                     <option key={edificio.id} value={edificio.id}>
@@ -497,14 +506,14 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                         </div>
 
                         <div>
-                            <label htmlFor="piso_id" className={labelClass}>Piso</label>
+                            <label htmlFor="piso_id" className={labelClass}>{t('disponibilidade.piso')}</label>
                             <select
                                 id="piso_id"
                                 value={filtros.piso_id}
                                 onChange={(e) => setFiltros((atual) => ({ ...atual, piso_id: e.target.value }))}
                                 className={fieldClass}
                             >
-                                <option value="">Todos os pisos</option>
+                                <option value="">{t('disponibilidade.todosOsPisos')}</option>
 
                                 {pisosFiltrados.map((piso) => (
                                     <option key={piso.id} value={piso.id}>
@@ -515,14 +524,14 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                         </div>
 
                         <div>
-                            <label htmlFor="setor_id" className={labelClass}>Categoria</label>
+                            <label htmlFor="setor_id" className={labelClass}>{t('disponibilidade.categoria')}</label>
                             <select
                                 id="setor_id"
                                 value={filtros.setor_id}
                                 onChange={(e) => setFiltros((atual) => ({ ...atual, setor_id: e.target.value }))}
                                 className={fieldClass}
                             >
-                                <option value="">Todas as categorias</option>
+                                <option value="">{t('disponibilidade.todasAsCategorias')}</option>
 
                                 {setoresFiltrados.map((setor) => (
                                     <option key={setor.id} value={setor.id}>
@@ -537,21 +546,24 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                         <div className="mb-5 flex flex-col gap-4 rounded-2xl border border-slate-100 bg-slate-50/70 px-5 py-4 dark:border-slate-800 dark:bg-slate-800/40 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                                    Disponibilidade para {formatarDataPortugues(filtros.data)}
+                                    {t('disponibilidade.disponibilidadePara', { data: formatarDataPortugues(filtros.data, i18n.language) })}
                                 </h2>
 
                                 <p className="mt-0.5 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                                     {mostrarSkeleton ? (
-                                        'A carregar...'
+                                        t('disponibilidade.aCarregar')
                                     ) : (
                                         <>
-                                            {lugaresListados.length} espaço{lugaresListados.length === 1 ? '' : 's'}{' '}
-                                            disponíve{lugaresListados.length === 1 ? 'l' : 'is'}{' '}
-                                            {edificioSelecionado ? `em ${edificioSelecionado.nome}` : 'em todos os edifícios'}
+                                            {t('disponibilidade.espacoDisponivelEm', {
+                                                count: lugaresListados.length,
+                                                local: edificioSelecionado
+                                                    ? t('disponibilidade.emEdificio', { edificio: edificioSelecionado.nome })
+                                                    : t('disponibilidade.emTodosOsEdificios'),
+                                            })}
                                             {aAtualizar && (
                                                 <span className="inline-flex items-center gap-1 text-xs font-medium text-teal-600 dark:text-teal-400">
                                                     <RotateCcw size={12} strokeWidth={2} className="animate-spin" />
-                                                    a atualizar
+                                                    {t('disponibilidade.aAtualizar')}
                                                 </span>
                                             )}
                                         </>
@@ -566,7 +578,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                             <Sun size={16} strokeWidth={1.9} />
                                         </span>
                                         <div>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">{periodoManha.nome}</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{etiquetaPeriodo(periodoManha.nome, tc)}</p>
                                             <p className="text-base font-bold text-slate-900 dark:text-white">{contagemManha}</p>
                                         </div>
                                     </div>
@@ -578,7 +590,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                             <Sunset size={16} strokeWidth={1.9} />
                                         </span>
                                         <div>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">{periodoTarde.nome}</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{etiquetaPeriodo(periodoTarde.nome, tc)}</p>
                                             <p className="text-base font-bold text-slate-900 dark:text-white">{contagemTarde}</p>
                                         </div>
                                     </div>
@@ -590,7 +602,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                             <CalendarClock size={16} strokeWidth={1.9} />
                                         </span>
                                         <div>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">{periodoDiaInteiro.nome}</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{etiquetaPeriodo(periodoDiaInteiro.nome, tc)}</p>
                                             <p className="text-base font-bold text-slate-900 dark:text-white">{contagemDiaInteiro}</p>
                                         </div>
                                     </div>
@@ -602,7 +614,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                             <div className="flex flex-col items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
                                 <div className="flex items-start gap-2">
                                     <AlertTriangle size={18} strokeWidth={1.9} className="mt-0.5 shrink-0" />
-                                    <span>Não foi possível carregar os espaços.</span>
+                                    <span>{t('disponibilidade.erroCarregarEspacos')}</span>
                                 </div>
 
                                 <button
@@ -611,7 +623,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                     className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-400/30 dark:text-red-300 dark:hover:bg-red-400/10"
                                 >
                                     <RotateCcw size={14} strokeWidth={2} />
-                                    Tentar novamente
+                                    {t('disponibilidade.tentarNovamente')}
                                 </button>
                             </div>
                         ) : mostrarSkeleton ? (
@@ -653,11 +665,11 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                 <Inbox size={28} strokeWidth={1.6} className="mb-1 text-slate-300 dark:text-slate-600" />
 
                                 <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
-                                    Nenhum espaço encontrado
+                                    {t('disponibilidade.nenhumEspacoEncontrado')}
                                 </p>
 
                                 <p className="text-sm text-slate-400 dark:text-slate-500">
-                                    Experimente alterar ou limpar os filtros.
+                                    {t('disponibilidade.experimenteAlterarFiltros')}
                                 </p>
 
                                 <button
@@ -665,7 +677,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                     onClick={limparFiltros}
                                     className="mt-1 text-xs font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900"
                                 >
-                                    Limpar filtros
+                                    {t('disponibilidade.limparFiltros')}
                                 </button>
                             </div>
                         ) : (
@@ -674,12 +686,12 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                     <table className="w-full border-collapse text-sm">
                                         <thead className="sticky top-0 z-10 bg-white dark:bg-slate-900">
                                             <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:border-slate-800">
-                                                <th className="py-2 pr-4 font-semibold">Espaço</th>
-                                                <th className="py-2 pr-4 font-semibold">Localização</th>
-                                                <th className="py-2 pr-4 text-center font-semibold">Manhã</th>
-                                                <th className="py-2 pr-4 text-center font-semibold">Tarde</th>
-                                                <th className="py-2 pr-4 text-center font-semibold">Dia inteiro</th>
-                                                <th className="py-2 pl-4 text-right font-semibold">Ação</th>
+                                                <th className="py-2 pr-4 font-semibold">{t('disponibilidade.colunaEspaco')}</th>
+                                                <th className="py-2 pr-4 font-semibold">{t('disponibilidade.colunaLocalizacao')}</th>
+                                                <th className="py-2 pr-4 text-center font-semibold">{tc('estados.periodo.manha')}</th>
+                                                <th className="py-2 pr-4 text-center font-semibold">{tc('estados.periodo.tarde')}</th>
+                                                <th className="py-2 pr-4 text-center font-semibold">{tc('estados.periodo.diaInteiro')}</th>
+                                                <th className="py-2 pl-4 text-right font-semibold">{t('disponibilidade.colunaAcao')}</th>
                                             </tr>
                                         </thead>
 
@@ -734,17 +746,17 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                                                 href={construirLinkReservar(secretaria)}
                                                                 className={botaoReservarDesktopClass}
                                                             >
-                                                                Reservar
+                                                                {t('disponibilidade.reservar')}
                                                             </Link>
                                                         ) : (
                                                             <button
                                                                 type="button"
                                                                 onClick={() => setSecretariaParaEscolherPeriodo(secretaria)}
                                                                 aria-haspopup="dialog"
-                                                                aria-label={`Reservar ${nomeEspaco(secretaria)} — escolher período`}
+                                                                aria-label={t('disponibilidade.reservarAriaLabel', { espaco: nomeEspaco(secretaria) })}
                                                                 className={botaoReservarDesktopClass}
                                                             >
-                                                                Reservar
+                                                                {t('disponibilidade.reservar')}
                                                             </button>
                                                         )}
                                                     </td>
@@ -774,21 +786,21 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                             <div className="mt-3 flex flex-wrap items-center gap-2">
                                                 {periodoManha && (
                                                     <PillPeriodoRotulada
-                                                        nome={periodoManha.nome}
+                                                        nome={etiquetaPeriodo(periodoManha.nome, tc)}
                                                         disponivel={Boolean(secretaria.periodos_disponiveis[periodoManha.id])}
                                                     />
                                                 )}
 
                                                 {periodoTarde && (
                                                     <PillPeriodoRotulada
-                                                        nome={periodoTarde.nome}
+                                                        nome={etiquetaPeriodo(periodoTarde.nome, tc)}
                                                         disponivel={Boolean(secretaria.periodos_disponiveis[periodoTarde.id])}
                                                     />
                                                 )}
 
                                                 {periodoDiaInteiro && (
                                                     <PillPeriodoRotulada
-                                                        nome={periodoDiaInteiro.nome}
+                                                        nome={etiquetaPeriodo(periodoDiaInteiro.nome, tc)}
                                                         disponivel={periodosMeioDia.every(
                                                             (periodo) => secretaria.periodos_disponiveis[periodo.id],
                                                         )}
@@ -801,17 +813,17 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                                     href={construirLinkReservar(secretaria)}
                                                     className={botaoReservarMobileClass}
                                                 >
-                                                    Reservar
+                                                    {t('disponibilidade.reservar')}
                                                 </Link>
                                             ) : (
                                                 <button
                                                     type="button"
                                                     onClick={() => setSecretariaParaEscolherPeriodo(secretaria)}
                                                     aria-haspopup="dialog"
-                                                    aria-label={`Reservar ${nomeEspaco(secretaria)} — escolher período`}
+                                                    aria-label={t('disponibilidade.reservarAriaLabel', { espaco: nomeEspaco(secretaria) })}
                                                     className={botaoReservarMobileClass}
                                                 >
-                                                    Reservar
+                                                    {t('disponibilidade.reservar')}
                                                 </button>
                                             )}
                                         </div>
@@ -823,20 +835,24 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-50 text-teal-600 dark:bg-teal-400/10 dark:text-teal-300">
                                             <CheckCircle2 size={12} strokeWidth={2.2} />
                                         </span>
-                                        <span className="font-semibold text-slate-700 dark:text-slate-200">Livre</span>
-                                        <span className="text-slate-400 dark:text-slate-500">Espaço disponível</span>
+                                        <span className="font-semibold text-slate-700 dark:text-slate-200">{t('disponibilidade.livre')}</span>
+                                        <span className="text-slate-400 dark:text-slate-500">{t('disponibilidade.espacoDisponivelLegenda')}</span>
                                     </span>
 
                                     <span className="inline-flex items-center gap-2">
                                         <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">—</span>
-                                        <span className="font-semibold text-slate-700 dark:text-slate-200">Ocupado</span>
-                                        <span className="text-slate-400 dark:text-slate-500">Espaço não disponível</span>
+                                        <span className="font-semibold text-slate-700 dark:text-slate-200">{t('disponibilidade.ocupado')}</span>
+                                        <span className="text-slate-400 dark:text-slate-500">{t('disponibilidade.espacoNaoDisponivelLegenda')}</span>
                                     </span>
                                 </div>
 
                                 <div className="mt-6 flex flex-col items-center gap-3">
                                     <p className="text-xs text-slate-400 dark:text-slate-500">
-                                        A mostrar {lugaresPaginados.length} de {lugaresListados.length} espaço{lugaresListados.length === 1 ? '' : 's'}
+                                        {t('disponibilidade.aMostrarDe', {
+                                            count: lugaresListados.length,
+                                            mostrados: lugaresPaginados.length,
+                                            total: lugaresListados.length,
+                                        })}
                                     </p>
 
                                     {existemMaisLugares && (
@@ -847,7 +863,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                             }
                                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-teal-500/50 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:border-slate-700 dark:text-slate-300 dark:hover:text-teal-400 dark:focus-visible:ring-offset-slate-900"
                                         >
-                                            Carregar mais espaços
+                                            {t('disponibilidade.carregarMaisEspacos')}
                                         </button>
                                     )}
                                 </div>
@@ -866,7 +882,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                     <div className="flex items-start justify-between gap-3">
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                Escolha o período
+                                {t('disponibilidade.modalEscolherPeriodo.titulo')}
                             </h2>
 
                             {secretariaParaEscolherPeriodo && (
@@ -879,7 +895,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                         <button
                             type="button"
                             onClick={() => setSecretariaParaEscolherPeriodo(null)}
-                            aria-label="Fechar"
+                            aria-label={t('disponibilidade.modalEscolherPeriodo.fechar')}
                             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                         >
                             <X size={16} strokeWidth={2} />
@@ -893,7 +909,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                 href={construirLinkReservar(secretariaParaEscolherPeriodo, opcao.valor)}
                                 className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors duration-150 hover:border-teal-500 hover:bg-teal-50 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:border-slate-700 dark:text-slate-200 dark:hover:border-teal-400 dark:hover:bg-teal-400/10 dark:hover:text-teal-300 dark:focus-visible:ring-offset-slate-900"
                             >
-                                {opcao.nome}
+                                {etiquetaPeriodo(opcao.nome, tc)}
                             </Link>
                         ))}
                     </div>

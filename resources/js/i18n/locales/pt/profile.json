@@ -1,1 +1,52 @@
-{}
+{
+    "tituloPagina": "Definições",
+    "informacaoPerfil": {
+        "titulo": "Dados do Perfil",
+        "subtitulo": "Atualiza o teu nome e endereço de email.",
+        "trocarFotografia": "Trocar fotografia",
+        "alterarFotografia": "Alterar fotografia",
+        "nome": "Nome",
+        "email": "Email",
+        "emailNaoVerificado": "O teu endereço de email ainda não foi verificado.",
+        "clicaAquiParaReenviar": "Clica aqui para reenviar o email de verificação.",
+        "linkVerificacaoEnviado": "Foi enviado um novo link de verificação para o teu email.",
+        "guardado": "Guardado.",
+        "aGuardar": "A guardar...",
+        "guardarAlteracoes": "Guardar alterações"
+    },
+    "googleCalendar": {
+        "titulo": "Google Calendar",
+        "subtitulo": "Sincroniza automaticamente as tuas reservas com o Google Calendar.",
+        "ligado": "Ligado",
+        "naoLigado": "Não ligado",
+        "descricaoLigado": "As tuas reservas são adicionadas automaticamente.",
+        "descricaoNaoLigado": "Ainda não ligaste o teu Google Calendar.",
+        "desligar": "Desligar",
+        "conectar": "Conectar Google Calendar"
+    },
+    "alterarPassword": {
+        "titulo": "Alterar palavra-passe",
+        "subtitulo": "Utiliza uma palavra-passe longa e única para manter a conta segura.",
+        "atual": "Palavra-passe atual",
+        "nova": "Nova palavra-passe",
+        "confirmar": "Confirmar palavra-passe",
+        "minimoCaracteres": "Mínimo de 8 caracteres.",
+        "naoCoincidem": "As palavras-passe não coincidem.",
+        "mostrarPassword": "Mostrar palavra-passe",
+        "ocultarPassword": "Ocultar palavra-passe",
+        "guardado": "Guardado.",
+        "aAtualizar": "A atualizar...",
+        "atualizar": "Atualizar palavra-passe"
+    },
+    "eliminarConta": {
+        "titulo": "Eliminar conta",
+        "subtitulo": "Depois de eliminada, todos os dados da conta serão apagados permanentemente.",
+        "botao": "Eliminar conta",
+        "confirmarTitulo": "Tens a certeza que queres eliminar a tua conta?",
+        "confirmarTexto": "Esta ação é permanente e irreversível. Introduz a tua palavra-passe para confirmar que queres eliminar a conta.",
+        "passwordPlaceholder": "Palavra-passe",
+        "cancelar": "Cancelar",
+        "aEliminar": "A eliminar...",
+        "confirmarBotao": "Eliminar conta"
+    }
+}
