@@ -7,6 +7,7 @@ use App\Models\EstadoReserva;
 use App\Models\PedidoSuporte;
 use App\Models\Piso;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Models\Role;
 use App\Models\Secretaria;
 use App\Models\Setor;
@@ -15,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,14 +26,20 @@ class ReportController extends Controller
 
     public function index(): Response
     {
-        Gate::authorize('viewAny', Setor::class);
+        $this->autorizarAcessoRelatorios();
 
         return Inertia::render('Admin/Reports/Index');
     }
 
     public function reservas(Request $request): Response
     {
-        Gate::authorize('viewAny', Reserva::class);
+        $this->autorizarAcessoRelatorios();
+
+        $this->validarIntervaloDeDatas($request);
+
+        $request->validate([
+            'estado_reserva_id' => ['sometimes', 'nullable', 'integer', 'exists:estado_reservas,id'],
+        ]);
 
         $query = Reserva::query()
             ->with(['user', 'secretaria.setor.piso.edificio', 'periodo', 'estadoReserva']);
@@ -65,6 +73,10 @@ class ReportController extends Controller
     {
         Gate::authorize('viewAny', User::class);
 
+        $request->validate([
+            'role_id' => ['sometimes', 'nullable', 'integer', 'exists:roles,id'],
+        ]);
+
         $query = User::query()->with('role');
 
         if ($request->filled('role_id')) {
@@ -90,7 +102,7 @@ class ReportController extends Controller
 
     public function suporte(Request $request): Response
     {
-        Gate::authorize('viewAny', Setor::class);
+        $this->autorizarAcessoRelatorios();
 
         $query = PedidoSuporte::query()->with('user');
 
@@ -112,7 +124,13 @@ class ReportController extends Controller
 
     public function ocupacao(Request $request): Response
     {
-        Gate::authorize('viewAny', Setor::class);
+        $this->autorizarAcessoRelatorios();
+
+        $this->validarIntervaloDeDatas($request);
+
+        $request->validate([
+            'piso_id' => ['sometimes', 'nullable', 'integer', 'exists:pisos,id'],
+        ]);
 
         $dataFim = $request->filled('data_fim')
             ? Carbon::parse($request->input('data_fim'))
@@ -199,7 +217,14 @@ class ReportController extends Controller
 
     public function espacos(Request $request): Response
     {
-        Gate::authorize('viewAny', Setor::class);
+        $this->autorizarAcessoRelatorios();
+
+        $this->validarIntervaloDeDatas($request);
+
+        $request->validate([
+            'piso_id' => ['sometimes', 'nullable', 'integer', 'exists:pisos,id'],
+            'setor_id' => ['sometimes', 'nullable', 'integer', 'exists:setores,id'],
+        ]);
 
         $dataFim = $request->filled('data_fim')
             ? Carbon::parse($request->input('data_fim'))
@@ -212,48 +237,70 @@ class ReportController extends Controller
         $pisoId = $request->filled('piso_id') ? $request->integer('piso_id') : null;
         $setorId = $request->filled('setor_id') ? $request->integer('setor_id') : null;
 
-        // Estados "válidos" (inclui concluídas, exclui canceladas e
-        // expiradas) — mesma semântica já usada para efeitos
-        // estatísticos noutros pontos da app (ver EstadoReserva).
-        $idsEstadosValidos = EstadoReserva::idsValidos();
+        // REL-03: mede ocupação real (dias efetivamente ocupados no
+        // período), não número de reservas — uma reserva anual conta
+        // até 365 dias aqui, não 1. reserva_dias já é a fonte exata
+        // disto: fica sempre com uma linha por dia+slot genuinamente
+        // ocupado (pendente/confirmada/concluída/não compareceu), e
+        // perde a linha quando o dia é cancelado/expirado ou libertado
+        // por falta de check-in (ver LiberarReservasSemCheckIn) — por
+        // isso não precisa de filtrar por estado aqui, ao contrário do
+        // withCount em Reserva que este substituiu.
+        $diasOcupadosPorSecretaria = ReservaDia::query()
+            ->whereDate('dia', '>=', $dataInicio)
+            ->whereDate('dia', '<=', $dataFim)
+            ->selectRaw('secretaria_id, COUNT(DISTINCT dia) as total')
+            ->groupBy('secretaria_id')
+            ->get()
+            ->keyBy('secretaria_id');
 
-        $construirQuery = fn () => Secretaria::query()
+        $secretarias = Secretaria::query()
             ->with(['setor.piso.edificio'])
-            ->withCount(['reservas as reservas_no_periodo' => function ($query) use ($dataInicio, $dataFim, $idsEstadosValidos) {
-                $query->whereDate('data', '>=', $dataInicio)
-                    ->whereDate('data', '<=', $dataFim)
-                    ->whereIn('estado_reserva_id', $idsEstadosValidos);
-            }])
             ->when($pisoId, fn ($query) => $query->whereHas(
                 'setor',
                 fn ($setorQuery) => $setorQuery->where('piso_id', $pisoId)
             ))
-            ->when($setorId, fn ($query) => $query->where('setor_id', $setorId));
+            ->when($setorId, fn ($query) => $query->where('setor_id', $setorId))
+            ->get()
+            ->map(fn ($secretaria) => [
+                'id' => $secretaria->id,
+                'codigo' => $secretaria->codigo,
+                'setor' => $secretaria->setor?->nome,
+                'piso' => $secretaria->setor?->piso?->nome,
+                'edificio' => $secretaria->setor?->piso?->edificio?->nome,
+                'diasOcupados' => (int) ($diasOcupadosPorSecretaria->get($secretaria->id)->total ?? 0),
+            ])
+            ->sortByDesc('diasOcupados')
+            ->values();
 
         // A percentagem de cada linha é sempre relativa ao total geral, não
         // só à página atual — por isso este total é calculado à parte, antes
         // de paginar.
-        $totalReservas = (int) $construirQuery()->get()->sum('reservas_no_periodo');
+        $totalDiasOcupados = (int) $secretarias->sum('diasOcupados');
 
-        $secretarias = $construirQuery()
-            ->orderByDesc('reservas_no_periodo')
-            ->paginate(self::POR_PAGINA)
-            ->withQueryString();
+        $linhas = $secretarias
+            ->map(fn (array $linha) => [
+                ...$linha,
+                'percentual' => $totalDiasOcupados > 0
+                    ? round($linha['diasOcupados'] / $totalDiasOcupados * 100, 1)
+                    : 0.0,
+            ])
+            ->all();
 
-        $secretarias->getCollection()->transform(fn ($secretaria) => [
-            'id' => $secretaria->id,
-            'codigo' => $secretaria->codigo,
-            'setor' => $secretaria->setor?->nome,
-            'piso' => $secretaria->setor?->piso?->nome,
-            'edificio' => $secretaria->setor?->piso?->edificio?->nome,
-            'reservas' => (int) $secretaria->reservas_no_periodo,
-            'percentual' => $totalReservas > 0
-                ? round($secretaria->reservas_no_periodo / $totalReservas * 100, 1)
-                : 0.0,
-        ]);
+        // $linhas vem de uma Collection agregada em PHP, não de uma query
+        // paginável diretamente — mesmo padrão de paginação manual já
+        // usado em ocupacao().
+        $paginaAtual = LengthAwarePaginator::resolveCurrentPage();
+        $linhasPaginadas = new LengthAwarePaginator(
+            array_slice($linhas, ($paginaAtual - 1) * self::POR_PAGINA, self::POR_PAGINA),
+            count($linhas),
+            self::POR_PAGINA,
+            $paginaAtual,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return Inertia::render('Admin/Reports/Espacos', [
-            'linhas' => $secretarias,
+            'linhas' => $linhasPaginadas,
             'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(['id', 'nome']),
             'setores' => Setor::where('ativo', true)->orderBy('nome')->get(['id', 'nome']),
             'filters' => [
@@ -268,7 +315,14 @@ class ReportController extends Controller
 
     public function cancelamentos(Request $request): Response
     {
-        Gate::authorize('viewAny', Reserva::class);
+        $this->autorizarAcessoRelatorios();
+
+        $this->validarIntervaloDeDatas($request);
+
+        $request->validate([
+            'estado_reserva_id' => ['sometimes', 'nullable', 'integer', 'exists:estado_reservas,id'],
+            'setor_id' => ['sometimes', 'nullable', 'integer', 'exists:setores,id'],
+        ]);
 
         $idsRelevantes = EstadoReserva::query()
             ->whereIn('codigo', ['cancelada', 'nao_compareceu'])
@@ -312,5 +366,47 @@ class ReportController extends Controller
             'filters' => $request->only(['data_inicio', 'data_fim', 'estado_reserva_id', 'utilizador', 'setor_id']),
             'geradoEm' => now()->format('d/m/Y H:i'),
         ]);
+    }
+
+    /**
+     * Valida o par data_inicio/data_fim usado pelos relatórios de
+     * intervalo — sem isto, uma data mal formada (ex.: "abc") rebentava
+     * com `Carbon::parse()` (erro 500 em vez de mensagem de validação),
+     * e um intervalo invertido (data_fim antes de data_inicio) não era
+     * rejeitado, só produzia um resultado vazio sem explicação.
+     */
+    private function validarIntervaloDeDatas(Request $request): void
+    {
+        $request->validate([
+            'data_inicio' => ['nullable', 'date'],
+            'data_fim' => ['nullable', 'date'],
+        ]);
+
+        if (
+            $request->filled('data_inicio')
+            && $request->filled('data_fim')
+            && Carbon::parse($request->input('data_inicio'))->gt(Carbon::parse($request->input('data_fim')))
+        ) {
+            throw ValidationException::withMessages([
+                'data_fim' => 'A data final não pode ser anterior à data inicial.',
+            ]);
+        }
+    }
+
+    /**
+     * Restringe o acesso aos relatórios (exceto "Utilizadores", que tem
+     * a sua própria autorização mais restrita) a Administrador ou
+     * Gestor.
+     *
+     * `SetorPolicy::viewAny()` devolve sempre true — não serve para
+     * isto. Reaproveita-se `create` (já restrita a Administrador via
+     * `before()`, ou Gestor via `isGestor()`), o mesmo padrão já usado
+     * em `SecretariaQrCodeController`/`SetorMapaController` para o
+     * mesmo tipo de verificação "é Administrador ou Gestor", em vez de
+     * reimplementar a regra outra vez.
+     */
+    private function autorizarAcessoRelatorios(): void
+    {
+        Gate::authorize('create', Setor::class);
     }
 }

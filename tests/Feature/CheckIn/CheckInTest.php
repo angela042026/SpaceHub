@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\CheckIn;
 
+use App\Models\ActivityLog;
 use App\Models\Reserva;
 use App\Models\User;
 use Carbon\Carbon;
@@ -14,17 +15,26 @@ class CheckInTest extends TestCase
     use RefreshDatabase;
     use CriaEstruturaEspacial;
 
+    /**
+     * Confirmada por omissão: a maioria dos testes deste ficheiro
+     * exercita o fluxo de check-in em si (janela horária, QR, estado
+     * já feito), que só é alcançável a partir de "confirmada" —
+     * "pendente" devolve sempre 'pendente_pagamento' antes de a
+     * lógica de janela sequer correr (ver
+     * CheckInController::statusDaReserva()). Quem precisar de
+     * "pendente" especificamente deve construir a Reserva à parte.
+     */
     private function criarReservaHoje(User $user, string $horaInicio = '08:00:00', string $horaFim = '13:00:00'): Reserva
     {
         $secretaria = $this->criarSecretaria();
         $periodo = $this->criarPeriodo($horaInicio, $horaFim);
-        $estadoPendente = $this->criarEstadoReserva('pendente');
+        $estadoConfirmada = $this->criarEstadoReserva('confirmada');
 
         return Reserva::create([
             'user_id' => $user->id,
             'secretaria_id' => $secretaria->id,
             'periodo_id' => $periodo->id,
-            'estado_reserva_id' => $estadoPendente->id,
+            'estado_reserva_id' => $estadoConfirmada->id,
             'data' => Carbon::today()->format('Y-m-d'),
         ]);
     }
@@ -150,12 +160,13 @@ class CheckInTest extends TestCase
     {
         $user = $this->criarUsuarioComRole('Utilizador');
         $reserva = $this->criarReservaHoje($user);
-        $this->criarEstadoReserva('confirmada');
 
         $this->travelTo(Carbon::today()->setTime(8, 15));
 
         // Primeiro check-in, bem sucedido.
-        $this->actingAs($user)->post(route('checkin.confirm', $reserva->id));
+        $this->actingAs($user)->post(route('checkin.confirm', $reserva->id), [
+            'qr_token' => $reserva->secretaria->qr_token,
+        ]);
 
         $primeiroCheckIn = $reserva->fresh()->check_in_at;
         $this->assertNotNull($primeiroCheckIn);
@@ -165,7 +176,9 @@ class CheckInTest extends TestCase
         // carregou de novo no botão do dashboard — não deve alterar
         // nada nem reenviar a confirmação.
         $response = $this->actingAs($user)
-            ->post(route('checkin.confirm', $reserva->id));
+            ->post(route('checkin.confirm', $reserva->id), [
+                'qr_token' => $reserva->secretaria->qr_token,
+            ]);
 
         $response->assertSessionHasErrors('reserva');
 
@@ -174,16 +187,76 @@ class CheckInTest extends TestCase
         $this->assertSame('confirmada', $reserva->estadoReserva->codigo);
     }
 
+    public function test_scan_no_segundo_dia_de_uma_reserva_semanal_continua_pronta(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $secretaria = $this->criarSecretaria();
+        $periodo = $this->criarPeriodo('08:00:00', '18:00:00');
+        $estadoConfirmada = $this->criarEstadoReserva('confirmada');
+
+        $ontem = Carbon::today()->subDay();
+
+        $reserva = Reserva::create([
+            'user_id' => $user->id,
+            'secretaria_id' => $secretaria->id,
+            'periodo_id' => $periodo->id,
+            'estado_reserva_id' => $estadoConfirmada->id,
+            'data' => $ontem->format('Y-m-d'),
+            'data_fim' => $ontem->copy()->addDays(6)->format('Y-m-d'),
+            'tipo_duracao' => 'semanal',
+        ]);
+
+        $this->travelTo(Carbon::today()->setTime(9, 0));
+
+        $response = $this->actingAs($user)
+            ->get(route('checkin.scan', $secretaria->qr_token));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('CheckIn/Scan')
+            ->where('status', 'pronta'));
+    }
+
+    public function test_camera_lista_reserva_multidia_no_terceiro_dia(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $secretaria = $this->criarSecretaria();
+        $periodo = $this->criarPeriodo('08:00:00', '18:00:00');
+        $estadoPendente = $this->criarEstadoReserva('pendente');
+
+        $inicio = Carbon::today()->subDays(2);
+
+        Reserva::create([
+            'user_id' => $user->id,
+            'secretaria_id' => $secretaria->id,
+            'periodo_id' => $periodo->id,
+            'estado_reserva_id' => $estadoPendente->id,
+            'data' => $inicio->format('Y-m-d'),
+            'data_fim' => $inicio->copy()->addDays(29)->format('Y-m-d'),
+            'tipo_duracao' => 'mensal',
+        ]);
+
+        $this->travelTo(Carbon::today()->setTime(9, 0));
+
+        $response = $this->actingAs($user)->get(route('checkin.camera'));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('CheckIn/Camera')
+            ->has('reservas', 1));
+    }
+
     public function test_confirm_bem_sucedido_marca_check_in(): void
     {
         $user = $this->criarUsuarioComRole('Utilizador');
         $reserva = $this->criarReservaHoje($user);
-        $this->criarEstadoReserva('confirmada');
 
         $this->travelTo(Carbon::today()->setTime(8, 15));
 
         $response = $this->actingAs($user)
-            ->post(route('checkin.confirm', $reserva->id));
+            ->post(route('checkin.confirm', $reserva->id), [
+                'qr_token' => $reserva->secretaria->qr_token,
+            ]);
 
         $response->assertRedirect();
         $response->assertSessionHas('success');
@@ -191,5 +264,115 @@ class CheckInTest extends TestCase
         $reserva->refresh();
         $this->assertNotNull($reserva->check_in_at);
         $this->assertSame('confirmada', $reserva->estadoReserva->codigo);
+    }
+
+    /**
+     * QR-PROVA: um Utilizador comum tem de provar que leu o QR físico
+     * da secretária — sem token (ou com um token de outra secretária)
+     * o check-in é rejeitado, mesmo estando dentro da janela horária.
+     */
+    public function test_confirm_de_utilizador_comum_sem_qr_token_e_rejeitado(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $reserva = $this->criarReservaHoje($user);
+
+        $this->travelTo(Carbon::today()->setTime(8, 15));
+
+        $response = $this->actingAs($user)
+            ->post(route('checkin.confirm', $reserva->id));
+
+        $response->assertSessionHasErrors('reserva');
+        $this->assertNull($reserva->fresh()->check_in_at);
+    }
+
+    public function test_confirm_de_utilizador_comum_com_qr_token_de_outra_secretaria_e_rejeitado(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $reserva = $this->criarReservaHoje($user);
+        $outraSecretaria = $this->criarSecretaria();
+
+        $this->travelTo(Carbon::today()->setTime(8, 15));
+
+        $response = $this->actingAs($user)
+            ->post(route('checkin.confirm', $reserva->id), [
+                'qr_token' => $outraSecretaria->qr_token,
+            ]);
+
+        $response->assertSessionHasErrors('reserva');
+        $this->assertNull($reserva->fresh()->check_in_at);
+    }
+
+    /**
+     * Gestor/Administrador podem continuar a confirmar manualmente
+     * (sem QR) a sua própria reserva — mas a ocorrência fica marcada
+     * como manual no Registo de Atividade, para se conseguir
+     * distinguir de um check-in real feito no local. A restrição de
+     * só se poder fazer check-in da própria reserva (gerirPropria)
+     * mantém-se igual para todos os papéis — o QR-PROVA não altera
+     * isso, só acrescenta a exigência do QR para quem não é staff.
+     */
+    public function test_confirm_manual_por_gestor_e_aceite_e_fica_registado_como_manual(): void
+    {
+        $gestor = $this->criarUsuarioComRole('Gestor');
+        $reserva = $this->criarReservaHoje($gestor);
+
+        $this->travelTo(Carbon::today()->setTime(8, 15));
+
+        $response = $this->actingAs($gestor)
+            ->post(route('checkin.confirm', $reserva->id));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $reserva->refresh();
+        $this->assertNotNull($reserva->check_in_at);
+
+        $this->assertDatabaseHas('activity_logs', [
+            'actor_id' => $gestor->id,
+            'action' => 'checkin_efetuado',
+        ]);
+
+        $registo = ActivityLog::where('action', 'checkin_efetuado')
+            ->where('actor_id', $gestor->id)
+            ->firstOrFail();
+
+        $this->assertSame('manual', $registo->metadata['via'] ?? null);
+    }
+
+    /**
+     * QR-PROVA não altera gerirPropria: nem Gestor nem Administrador
+     * podem fazer check-in em nome de outro utilizador, com ou sem QR.
+     */
+    public function test_gestor_nao_pode_fazer_checkin_da_reserva_de_outro(): void
+    {
+        $dono = $this->criarUsuarioComRole('Utilizador');
+        $gestor = $this->criarUsuarioComRole('Gestor');
+        $reserva = $this->criarReservaHoje($dono);
+
+        $this->travelTo(Carbon::today()->setTime(8, 15));
+
+        $response = $this->actingAs($gestor)
+            ->post(route('checkin.confirm', $reserva->id));
+
+        $response->assertForbidden();
+        $this->assertNull($reserva->fresh()->check_in_at);
+    }
+
+    public function test_confirm_via_qr_fica_registado_como_qr(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $reserva = $this->criarReservaHoje($user);
+
+        $this->travelTo(Carbon::today()->setTime(8, 15));
+
+        $this->actingAs($user)->post(route('checkin.confirm', $reserva->id), [
+            'qr_token' => $reserva->secretaria->qr_token,
+        ]);
+
+        $registo = ActivityLog::where('action', 'checkin_efetuado')
+            ->where('actor_id', $user->id)
+            ->firstOrFail();
+
+        $this->assertSame('qr', $registo->metadata['via'] ?? null);
     }
 }

@@ -5,9 +5,12 @@ namespace Tests\Feature\Api;
 use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Models\Role;
 use App\Models\Secretaria;
 use App\Models\User;
+use App\Services\ReservaCriacaoService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -163,6 +166,94 @@ class ReservaAuthorizationTest extends TestCase
             'id' => $reserva->id,
             'observacoes' => 'Reserva atualizada pelo proprietário.',
         ]);
+    }
+
+    /**
+     * O update() da API não regenerava reserva_dias — as linhas
+     * antigas continuavam a "bloquear" a secretária original e o novo
+     * intervalo ficava sem a proteção anti-concorrência desta tabela.
+     */
+    public function test_atualizar_reserva_via_api_sincroniza_reserva_dias(): void
+    {
+        $user = $this->createUser($this->utilizadorRole);
+        $reserva = $this->createReservaFor($user);
+
+        $secretariaNova = Secretaria::query()
+            ->where('ativo', true)
+            ->where('id', '!=', $reserva->secretaria_id)
+            ->firstOrFail();
+
+        // Simula o estado que a criação real deixaria: linhas de
+        // reserva_dias já existentes para a secretária/data originais.
+        ReservaDia::insert([
+            [
+                'reserva_id' => $reserva->id,
+                'secretaria_id' => $reserva->secretaria_id,
+                'user_id' => $user->id,
+                'dia' => $reserva->data->format('Y-m-d'),
+                'slot' => 'manha',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $this->putJson("/api/reservas/{$reserva->id}", [
+            'secretaria_id' => $secretariaNova->id,
+            'periodo_id' => $reserva->periodo_id,
+            'data' => $reserva->data->format('Y-m-d'),
+        ])->assertOk();
+
+        $this->assertSame(
+            0,
+            ReservaDia::where('secretaria_id', $reserva->secretaria_id)->count(),
+            'As linhas antigas de reserva_dias deveriam ter sido removidas.'
+        );
+
+        $this->assertGreaterThan(
+            0,
+            ReservaDia::where('reserva_id', $reserva->id)
+                ->where('secretaria_id', $secretariaNova->id)
+                ->count(),
+            'Deveriam existir novas linhas de reserva_dias para a secretária atualizada.'
+        );
+    }
+
+    /**
+     * RES-03: mudar só a data de início de uma reserva semanal via API
+     * desloca data_fim na mesma medida, preservando a duração original.
+     */
+    public function test_atualizar_data_de_reserva_semanal_via_api_recalcula_data_fim(): void
+    {
+        $user = $this->createUser($this->utilizadorRole);
+        $secretaria = Secretaria::query()->where('ativo', true)->firstOrFail();
+        $secretaria->setor->update(['preco_semanal' => 40.00]);
+
+        $segunda = Carbon::today()->addDays(200)->next(Carbon::MONDAY);
+        $novaSegunda = $segunda->copy()->addWeek();
+
+        $reserva = app(ReservaCriacaoService::class)->criarDiaInteiro([
+            'data' => $segunda->toDateString(),
+            'secretaria_id' => $secretaria->id,
+            'tipo_duracao' => 'semanal',
+        ], $user->id);
+
+        Sanctum::actingAs($user);
+
+        $this->putJson("/api/reservas/{$reserva->id}", [
+            'data' => $novaSegunda->toDateString(),
+            'periodo_id' => $reserva->periodo_id,
+            'secretaria_id' => $secretaria->id,
+        ])->assertOk();
+
+        $reserva->refresh();
+        $this->assertSame($novaSegunda->toDateString(), $reserva->data->toDateString());
+        $this->assertSame(
+            $novaSegunda->copy()->addDays(6)->toDateString(),
+            $reserva->data_fim->toDateString()
+        );
+        $this->assertSame(14, ReservaDia::where('reserva_id', $reserva->id)->count());
     }
 
     public function test_user_cannot_update_other_users_reserva(): void

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Avaliacao;
+use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Piso;
 use App\Models\Reserva;
@@ -226,6 +227,12 @@ class ReservaDisponibilidadeService
         return Reserva::where($coluna, $valor)
             ->whereIn('periodo_id', $periodosConflito)
             ->whereNull('cancelada_at')
+            // Reservas já concluídas ou não compareceu (ver
+            // MarcarReservasConcluidas / LiberarReservasSemCheckIn) nunca
+            // bloqueiam novas reservas — cancelada_at sozinho não chega
+            // para as excluir, porque essas duas transições deliberadamente
+            // não mexem em cancelada_at.
+            ->whereIn('estado_reserva_id', EstadoReserva::idsAtivos())
             ->whereDate('data', '<=', $dataFim)
             ->where(function ($query) use ($dataInicio) {
                 $query
@@ -234,6 +241,23 @@ class ReservaDisponibilidadeService
                         $queryAntiga
                             ->whereNull('data_fim')
                             ->whereDate('data', '>=', $dataInicio);
+                    });
+            })
+            // Uma reserva só bloqueia [dataInicio, dataFim] se ainda tiver,
+            // dentro desse intervalo, pelo menos um dia com linha em
+            // reserva_dias — sem nenhum registo (dados antigos, nunca
+            // teve reserva_dias) conta sempre como ocupado, por segurança.
+            // Um dia libertado por falta de check-in (ver
+            // LiberarReservasSemCheckIn) tem a sua linha apagada, o que é
+            // o que permite reservá-lo de novo sem abrir os restantes dias
+            // da mesma reserva a outra pessoa.
+            ->where(function ($query) use ($dataInicio, $dataFim) {
+                $query
+                    ->whereDoesntHave('diasOcupados')
+                    ->orWhereHas('diasOcupados', function ($query) use ($dataInicio, $dataFim) {
+                        $query
+                            ->whereDate('dia', '>=', $dataInicio)
+                            ->whereDate('dia', '<=', $dataFim);
                     });
             })
             ->when(
@@ -356,16 +380,31 @@ class ReservaDisponibilidadeService
      * aparecer livre de terça a sexta. As reservas antigas não têm
      * data_fim e valem apenas para o próprio dia.
      *
-     * "Ocupar" é definido por cancelada_at ser NULL, que é exatamente o
-     * critério das colunas virtuais do índice único em reservas — assim a
-     * disponibilidade mostrada nunca contradiz o que a base de dados
-     * aceita gravar.
+     * "Ocupar" é definido por cancelada_at ser NULL e o estado continuar
+     * ativo (pendente/confirmada) — concluída/não compareceu nunca conta
+     * como ocupação, mesmo sem cancelada_at preenchido (ver
+     * MarcarReservasConcluidas / LiberarReservasSemCheckIn).
+     *
+     * Além disso, só conta como ocupado se ainda existir uma linha em
+     * reserva_dias para $data — um dia libertado por falta de check-in
+     * (ver LiberarReservasSemCheckIn) tem a sua linha apagada, o que
+     * liberta esse dia específico sem afetar os restantes dias da mesma
+     * reserva. Sem nenhuma linha registada (dados antigos) conta sempre
+     * como ocupado, por segurança.
      */
     private function reservasQueOcupam(string $data)
     {
         return Reserva::query()
             ->whereNull('cancelada_at')
-            ->noIntervalo($data);
+            ->whereIn('estado_reserva_id', EstadoReserva::idsAtivos())
+            ->noIntervalo($data)
+            ->where(function ($query) use ($data) {
+                $query
+                    ->whereDoesntHave('diasOcupados')
+                    ->orWhereHas('diasOcupados', function ($query) use ($data) {
+                        $query->whereDate('dia', $data);
+                    });
+            });
     }
 
     /**
@@ -472,15 +511,30 @@ class ReservaDisponibilidadeService
     /**
      * Anexa a cada secretária o mapa periodo_id => disponível (bool),
      * considerando os períodos em conflito com cada período reservado.
+     *
+     * periodosEmConflito($periodoId) só depende do período, nunca da
+     * secretária — antes era recalculado (2 queries próprias) para
+     * cada combinação secretária × período, o que gerava até
+     * N secretárias × M períodos × 2 queries extra por pedido neste
+     * endpoint (o mais chamado da app, a cada alteração de filtro em
+     * "Nova Reserva"). Calculado agora uma única vez por período, fora
+     * do loop de secretárias, e reutilizado.
      */
     private function anexarDisponibilidadePorPeriodo(
         Collection $secretarias,
         Collection $periodos,
         Collection $periodosReservadosPorSecretaria
     ) {
+        $conflitosPorPeriodo = $periodos->mapWithKeys(
+            fn ($periodo) => [
+                $periodo->id => $this->periodosEmConflito((int) $periodo->id),
+            ]
+        );
+
         return $secretarias->map(function ($secretaria) use (
             $periodos,
-            $periodosReservadosPorSecretaria
+            $periodosReservadosPorSecretaria,
+            $conflitosPorPeriodo
         ) {
             $reservados = $periodosReservadosPorSecretaria->get(
                 $secretaria->id,
@@ -488,12 +542,8 @@ class ReservaDisponibilidadeService
             );
 
             $secretaria->periodos_disponiveis = $periodos->mapWithKeys(
-                function ($periodo) use ($reservados) {
-                    $periodosConflito = $this->periodosEmConflito(
-                        (int) $periodo->id
-                    );
-
-                    $disponivel = collect($periodosConflito)
+                function ($periodo) use ($reservados, $conflitosPorPeriodo) {
+                    $disponivel = collect($conflitosPorPeriodo->get($periodo->id, []))
                         ->intersect($reservados)
                         ->isEmpty();
 

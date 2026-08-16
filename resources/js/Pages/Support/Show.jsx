@@ -1,6 +1,6 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Modal from '@/Components/Modal';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import {
     ArrowLeft,
     Check,
@@ -8,6 +8,7 @@ import {
     CornerDownRight,
     LifeBuoy,
     MessageSquare,
+    Wrench,
 } from 'lucide-react';
 import { useState } from 'react';
 import { ESTADO_SUPORTE, badge } from '@/utils/estados';
@@ -15,16 +16,27 @@ import { ESTADO_SUPORTE, badge } from '@/utils/estados';
 export default function Show({ pedido }) {
 
     const [aConfirmar, setAConfirmar] = useState(false);
+    const [aMarcarEmAnalise, setAMarcarEmAnalise] = useState(false);
     const { data, setData, patch, processing, errors } = useForm({
         resposta: pedido.resposta ?? '',
     });
 
     const resolvido = pedido.estado === 'Resolvido';
+    const pendente = pedido.estado === 'Pendente';
 
     const marcarResolvido = () => {
         patch(route('support.update', pedido.id), {
             preserveScroll: true,
             onFinish: () => setAConfirmar(false),
+        });
+    };
+
+    const marcarEmAnalise = () => {
+        setAMarcarEmAnalise(true);
+
+        router.patch(route('support.emAnalise', pedido.id), {}, {
+            preserveScroll: true,
+            onFinish: () => setAMarcarEmAnalise(false),
         });
     };
 
@@ -117,6 +129,20 @@ export default function Show({ pedido }) {
                         </p>
                     </div>
                 </div>
+
+                {pendente && (
+                    <div className="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+                        <button
+                            type="button"
+                            onClick={marcarEmAnalise}
+                            disabled={aMarcarEmAnalise}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-blue-400 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:text-slate-300"
+                        >
+                            <Wrench size={15} strokeWidth={1.9} />
+                            {aMarcarEmAnalise ? 'A marcar...' : 'Marcar como Em Análise'}
+                        </button>
+                    </div>
+                )}
 
                 <div className="px-6 py-5">
                     {resolvido ? (

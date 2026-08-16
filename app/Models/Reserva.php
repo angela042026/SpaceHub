@@ -2,13 +2,19 @@
 
 namespace App\Models;
 
+use Database\Factories\ReservaFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Reserva extends Model
 {
+    /** @use HasFactory<ReservaFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
         'secretaria_id',
@@ -71,6 +77,16 @@ class Reserva extends Model
     public function avaliacao(): HasOne
     {
         return $this->hasOne(Avaliacao::class);
+    }
+
+    /**
+     * Linhas de dia+slot ocupado (ver ReservaDia) — os dias que já
+     * foram libertados por falta de check-in (ver
+     * LiberarReservasSemCheckIn) deixam de ter linha aqui.
+     */
+    public function diasOcupados(): HasMany
+    {
+        return $this->hasMany(ReservaDia::class);
     }
 
     /**

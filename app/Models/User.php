@@ -146,4 +146,14 @@ class User extends Authenticatable
     {
         return $this->hasRole(RoleName::Gestor);
     }
+
+    /**
+     * Se o utilizador já autorizou o SpaceHub a criar eventos no seu
+     * Google Calendar — o refresh_token só existe depois dessa
+     * autorização e mantém-se mesmo quando o access_token expira.
+     */
+    public function googleCalendarConectado(): bool
+    {
+        return $this->google_calendar_refresh_token !== null;
+    }
 }

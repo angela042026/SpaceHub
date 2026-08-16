@@ -279,9 +279,15 @@ class EstatisticasService
      * período escolhido — nada hardcoded.
      *
      * Ao contrário de obterEstatisticas() (mantido intacto para não
-     * quebrar nada que já dependa dele), este método não filtra por
-     * estado "confirmada" — cada secção decide a sua própria regra
-     * (reservas_por_estado mostra todos os estados de propósito).
+     * quebrar nada que já dependa dele), este método não filtra só por
+     * "confirmada" — usa EstadoReserva::idsValidos() (pendente,
+     * confirmada, concluída, não compareceu), o mesmo critério já usado
+     * para estatísticas noutros pontos (ver
+     * DashboardMetricsService::calcularStats()), para não inflacionar
+     * os indicadores com reservas canceladas/expiradas que nunca chegaram
+     * a acontecer. Exceção deliberada: reservas_por_estado mostra TODOS
+     * os estados, incluindo cancelada/expirada — o objetivo desse cartão
+     * é precisamente mostrar essa distribuição.
      */
     public function obterDashboard(string $periodo, ?int $edificioId = null): array
     {
@@ -310,6 +316,11 @@ class EstatisticasService
 
         $confirmadaId = EstadoReserva::idPorCodigo('confirmada');
 
+        // STAT-03: canceladas/expiradas nunca contam nos indicadores —
+        // só reservas_por_estado (mais abaixo) mostra todos os estados,
+        // de propósito.
+        $idsEstadosValidos = EstadoReserva::idsValidos();
+
         $variacaoPercentual = function (int|float $atual, int|float $anterior): ?float {
             if ($anterior == 0) {
                 return null;
@@ -332,6 +343,7 @@ class EstatisticasService
         $brutoPorDiaEPeriodo = Reserva::query()
             ->whereDate('data', '>=', $inicio)
             ->whereDate('data', '<=', $hoje)
+            ->whereIn('estado_reserva_id', $idsEstadosValidos)
             ->selectRaw(
                 'data, periodo_id, COUNT(*) as total, SUM(CASE WHEN estado_reserva_id = ? THEN 1 ELSE 0 END) as confirmadas',
                 [$confirmadaId]
@@ -373,24 +385,28 @@ class EstatisticasService
         $totalReservasAnterior = Reserva::query()
             ->whereDate('data', '>=', $inicioAnterior)
             ->whereDate('data', '<=', $fimAnterior)
+            ->whereIn('estado_reserva_id', $idsEstadosValidos)
             ->count();
 
         // --- KPI 2: utilizadores ativos (distintos) ---
         $utilizadoresAtivosAtual = Reserva::query()
             ->whereDate('data', '>=', $inicio)
             ->whereDate('data', '<=', $hoje)
+            ->whereIn('estado_reserva_id', $idsEstadosValidos)
             ->distinct()
             ->count('user_id');
 
         $utilizadoresAtivosAnterior = Reserva::query()
             ->whereDate('data', '>=', $inicioAnterior)
             ->whereDate('data', '<=', $fimAnterior)
+            ->whereIn('estado_reserva_id', $idsEstadosValidos)
             ->distinct()
             ->count('user_id');
 
         $utilizadoresPorDia = Reserva::query()
             ->whereDate('data', '>=', $inicio)
             ->whereDate('data', '<=', $hoje)
+            ->whereIn('estado_reserva_id', $idsEstadosValidos)
             ->selectRaw('data, COUNT(DISTINCT user_id) as total')
             ->groupBy('data')
             ->get()
@@ -411,6 +427,7 @@ class EstatisticasService
         $contarPorPeriodo = fn (Carbon $ini, Carbon $fim) => Reserva::query()
             ->whereDate('data', '>=', $ini)
             ->whereDate('data', '<=', $fim)
+            ->whereIn('estado_reserva_id', $idsEstadosValidos)
             ->selectRaw('periodo_id, COUNT(*) as total')
             ->groupBy('periodo_id')
             ->get()
@@ -461,6 +478,7 @@ class EstatisticasService
             ->join('pisos', 'setores.piso_id', '=', 'pisos.id')
             ->whereDate('reservas.data', '>=', $inicio)
             ->whereDate('reservas.data', '<=', $hoje)
+            ->whereIn('reservas.estado_reserva_id', $idsEstadosValidos)
             ->when($edificioId, fn (Builder $q) => $q->where('pisos.edificio_id', $edificioId))
             ->selectRaw('pisos.id, pisos.nome, COUNT(reservas.id) as total')
             ->groupBy('pisos.id', 'pisos.nome')
@@ -487,6 +505,7 @@ class EstatisticasService
             ->join('pisos', 'setores.piso_id', '=', 'pisos.id')
             ->whereDate('reservas.data', '>=', $inicio)
             ->whereDate('reservas.data', '<=', $hoje)
+            ->whereIn('reservas.estado_reserva_id', $idsEstadosValidos)
             ->selectRaw('setores.id, setores.nome, pisos.id as piso_id, pisos.nome as piso_nome, pisos.numero as piso_numero, COUNT(reservas.id) as total')
             ->groupBy('setores.id', 'setores.nome', 'pisos.id', 'pisos.nome', 'pisos.numero')
             ->orderByDesc('total')
@@ -511,6 +530,7 @@ class EstatisticasService
             ->join('users', 'users.id', '=', 'reservas.user_id')
             ->whereDate('reservas.data', '>=', $inicio)
             ->whereDate('reservas.data', '<=', $hoje)
+            ->whereIn('reservas.estado_reserva_id', $idsEstadosValidos)
             ->selectRaw('users.id, users.name, COUNT(reservas.id) as total')
             ->groupBy('users.id', 'users.name')
             ->orderByDesc('total')
@@ -523,8 +543,11 @@ class EstatisticasService
             ])
             ->values();
 
-        // --- Reservas por estado (todos os estados reais, com 0 quando
-        // não houver nenhuma no período — nunca inventa estados novos) ---
+        // --- Reservas por estado (exceção deliberada ao filtro de
+        // $idsEstadosValidos usado no resto deste método — aqui o
+        // objetivo é mostrar TODOS os estados reais, incluindo
+        // cancelada/expirada, com 0 quando não houver nenhuma no
+        // período — nunca inventa estados novos) ---
         $estados = EstadoReserva::query()->get(['id', 'codigo', 'nome']);
 
         $contagemEstados = Reserva::query()

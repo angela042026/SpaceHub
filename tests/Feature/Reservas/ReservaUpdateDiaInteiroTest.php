@@ -6,6 +6,7 @@ use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\ReservaDia;
 use App\Models\Secretaria;
+use App\Services\ReservaCriacaoService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CriaEstruturaEspacial;
@@ -148,5 +149,49 @@ class ReservaUpdateDiaInteiroTest extends TestCase
             2,
             ReservaDia::where('secretaria_id', $secretariaNova->id)->count()
         );
+    }
+
+    /**
+     * RES-03: mudar só a data de início de uma reserva semanal (via
+     * fluxo web, "As Minhas Reservas") desloca data_fim na mesma
+     * medida, preservando a duração original.
+     */
+    public function test_mudar_data_de_inicio_de_reserva_semanal_recalcula_data_fim(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $secretaria = $this->criarSecretariaComPreco();
+        $secretaria->setor->update(['preco_semanal' => 40.00]);
+        $this->criarPeriodoDiaInteiro();
+        $this->criarPeriodo();
+        $this->criarEstadoReserva('pendente');
+
+        $segunda = Carbon::today()->addDays(200)->next(Carbon::MONDAY);
+        $novaSegunda = $segunda->copy()->addWeek();
+
+        $reserva = app(ReservaCriacaoService::class)->criarDiaInteiro([
+            'data' => $segunda->toDateString(),
+            'secretaria_id' => $secretaria->id,
+            'tipo_duracao' => 'semanal',
+        ], $user->id);
+
+        $response = $this->actingAs($user)->put(
+            route('reservas.update', $reserva),
+            [
+                'data' => $novaSegunda->toDateString(),
+                'periodo_id' => $reserva->periodo_id,
+                'secretaria_id' => $secretaria->id,
+            ]
+        );
+
+        $response->assertRedirect(route('reservas.index'));
+        $response->assertSessionDoesntHaveErrors();
+
+        $reserva->refresh();
+        $this->assertSame($novaSegunda->toDateString(), $reserva->data->toDateString());
+        $this->assertSame(
+            $novaSegunda->copy()->addDays(6)->toDateString(),
+            $reserva->data_fim->toDateString()
+        );
+        $this->assertSame(14, ReservaDia::where('reserva_id', $reserva->id)->count());
     }
 }

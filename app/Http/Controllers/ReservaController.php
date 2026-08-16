@@ -16,6 +16,7 @@ use App\Services\GoogleCalendarService;
 use App\Services\PagamentoService;
 use App\Services\ReservaCriacaoService;
 use App\Services\ReservaDisponibilidadeService;
+use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -266,6 +267,8 @@ class ReservaController extends Controller
         );
         $googleCalendar->removerEvento($reserva->fresh(['user']));
 
+        $googleCalendar->removerEvento($reserva->fresh(['user']));
+
         return redirect()
             ->route('reservas.index')
             ->with(
@@ -340,11 +343,24 @@ class ReservaController extends Controller
             (int) $dadosValidados['periodo_id']
         );
 
-        if ($this->disponibilidade->existeReservaAtivaNaData(
+        // RES-03: preserva o número de dias original ao mudar só a data de
+        // início — sem isto, data_fim ficava parada no valor antigo e a
+        // duração de uma reserva de vários dias mudava silenciosamente (ou
+        // ficava invertida, se a nova data de início passasse a antiga
+        // data_fim).
+        $duracaoDias = $reserva->data->diffInDays(
+            $reserva->data_fim ?? $reserva->data
+        );
+        $novaDataFim = Carbon::parse($dadosValidados['data'])
+            ->addDays($duracaoDias)
+            ->toDateString();
+
+        if ($this->disponibilidade->existeReservaAtivaNoIntervalo(
             'secretaria_id',
             (int) $dadosValidados['secretaria_id'],
             $periodosConflito,
             $dadosValidados['data'],
+            $novaDataFim,
             $reserva->id
         )) {
             return back()
@@ -355,11 +371,12 @@ class ReservaController extends Controller
                 ->withInput();
         }
 
-        if ($this->disponibilidade->existeReservaAtivaNaData(
+        if ($this->disponibilidade->existeReservaAtivaNoIntervalo(
             'user_id',
             (int) Auth::id(),
             $periodosConflito,
             $dadosValidados['data'],
+            $novaDataFim,
             $reserva->id
         )) {
             return back()
@@ -381,6 +398,7 @@ class ReservaController extends Controller
             DB::transaction(function () use (
                 $reserva,
                 $dadosValidados,
+                $novaDataFim,
                 $alterouDadosComPreco,
                 $pagamentoService
             ) {
@@ -390,16 +408,17 @@ class ReservaController extends Controller
 
                 $reservaBloqueada->update([
                     'data' => $dadosValidados['data'],
+                    'data_fim' => $novaDataFim,
                     'periodo_id' => $dadosValidados['periodo_id'],
                     'secretaria_id' => $dadosValidados['secretaria_id'],
                     'observacoes' =>
                     $dadosValidados['observacoes'] ?? null,
                 ]);
 
-                // Este update() não mexe em data_fim, só em data — por
-                // isso o intervalo ocupado em reserva_dias é sempre
-                // regenerado a partir da data nova até à data_fim que já
-                // lá estava (ver o mesmo padrão em
+                // data_fim já foi recalculada acima (RES-03) para manter a
+                // mesma duração da reserva original — o intervalo ocupado
+                // em reserva_dias é sempre regenerado a partir da data
+                // nova até essa data_fim nova (ver o mesmo padrão em
                 // Admin\ReservaController::update()).
                 ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
 

@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AtividadeController extends Controller
 {
@@ -53,51 +52,8 @@ class AtividadeController extends Controller
     }
 
     /**
-     * Exporta os mesmos registos filtrados em CSV (UTF-8 com BOM, para o
-     * Excel no Windows não trocar os acentos). Não inclui IP nem
-     * metadados — só os campos já apresentados na tabela.
-     */
-    public function export(Request $request): StreamedResponse
-    {
-        Gate::authorize('viewAny', ActivityLog::class);
-
-        $registos = $this->queryFiltrada($request)
-            ->orderByDesc('created_at')
-            ->get();
-
-        $rotulosAcoes = $this->opcoesAcoes()->pluck('label', 'codigo');
-        $rotulosResultados = $this->opcoesResultados();
-
-        $nomeFicheiro = 'registo-atividade-' . now()->format('Y-m-d-His') . '.csv';
-
-        return response()->streamDownload(function () use ($registos, $rotulosAcoes, $rotulosResultados) {
-            echo "\xEF\xBB\xBF";
-
-            $saida = fopen('php://output', 'w');
-
-            fputcsv($saida, ['Data e hora', 'Utilizador', 'Email', 'Ação', 'Descrição', 'Resultado']);
-
-            foreach ($registos as $registo) {
-                fputcsv($saida, [
-                    $registo->created_at->format('d/m/Y H:i'),
-                    $registo->actor_name ?? 'Sistema',
-                    $registo->actor_email ?? '',
-                    $rotulosAcoes[$registo->action] ?? $registo->action,
-                    $registo->description,
-                    $rotulosResultados[$registo->result] ?? $registo->result,
-                ]);
-            }
-
-            fclose($saida);
-        }, $nomeFicheiro, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-        ]);
-    }
-
-    /**
-     * Query com pesquisa + filtros aplicados, partilhada por index() e
-     * export() — nenhum dos dois carrega os registos todos em memória
-     * antes de filtrar.
+     * Query com pesquisa + filtros aplicados, usada por index() — não
+     * carrega os registos todos em memória antes de filtrar.
      */
     private function queryFiltrada(Request $request): Builder
     {
@@ -147,19 +103,5 @@ class AtividadeController extends Controller
         return collect(self::PERIODOS)->map(
             fn (string $label, string $codigo) => ['codigo' => $codigo, 'label' => $label]
         )->values();
-    }
-
-    /**
-     * Rótulos em português dos valores de "result" — únicos badges
-     * apresentados na coluna Resultado.
-     */
-    private function opcoesResultados(): array
-    {
-        return [
-            ActivityLogger::RESULTADO_SUCESSO => 'Sucesso',
-            ActivityLogger::RESULTADO_CANCELADA => 'Cancelada',
-            ActivityLogger::RESULTADO_AUTOMATICO => 'Automático',
-            ActivityLogger::RESULTADO_ERRO => 'Erro',
-        ];
     }
 }

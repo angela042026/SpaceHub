@@ -30,7 +30,10 @@ class StatisticsController extends Controller
 
     public function index(Request $request): Response
     {
-        Gate::authorize('viewAny', Setor::class);
+        // 'viewAny' de SetorPolicy devolve sempre true — 'create' é que
+        // está restrita a Administrador/Gestor (ver o mesmo padrão,
+        // mais detalhado, em ReportController::autorizarAcessoRelatorios()).
+        Gate::authorize('create', Setor::class);
 
         $periodo = $request->input('periodo', '30dias');
 

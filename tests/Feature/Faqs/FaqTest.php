@@ -31,10 +31,18 @@ class FaqTest extends TestCase
         ]);
     }
 
-    public function test_visitante_e_redirecionado_para_o_login(): void
+    /**
+     * A Central de Ajuda é deliberadamente pública (ver comentário em
+     * routes/web.php) — funciona com ou sem sessão iniciada, para que
+     * um visitante consiga consultar as FAQs antes de criar conta.
+     */
+    public function test_visitante_acede_as_faqs_sem_sessao_iniciada(): void
     {
         $this->get(route('faqs.index'))
-            ->assertRedirect(route('login'));
+            ->assertOk()
+            ->assertInertia(
+                fn (Assert $page) => $page->component('Faqs/Index')
+            );
     }
 
     public function test_a_pagina_agrupa_as_faqs_por_categoria(): void

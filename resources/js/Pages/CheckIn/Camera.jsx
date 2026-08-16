@@ -325,7 +325,7 @@ export default function Camera({ reservas }) {
         ? RESUMO_STATUS[reservaSelecionada.status]
         : null;
     const dataFormatada = reservaSelecionada
-        ? new Date(reservaSelecionada.data).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })
+        ? new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })
         : null;
 
     return (

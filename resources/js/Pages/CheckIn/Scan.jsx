@@ -50,7 +50,7 @@ export default function Scan({ secretaria, reserva, status }) {
         setProcessing(true);
         router.post(
             route('checkin.confirm', reserva.id),
-            {},
+            { qr_token: secretaria.qr_token },
             { preserveScroll: true, onFinish: () => setProcessing(false) },
         );
     }

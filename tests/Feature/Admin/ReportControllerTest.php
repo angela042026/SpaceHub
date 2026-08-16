@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Reserva;
+use App\Models\ReservaDia;
 use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -120,9 +121,108 @@ class ReportControllerTest extends TestCase
 
         // Só a reserva de março deve sobreviver ao filtro — se a de
         // maio também aparecesse, a contagem já não seria 1.
+        // "reservas" é o paginador inteiro (data/current_page/total/...),
+        // por isso a contagem de itens está em "reservas.data", não em
+        // "reservas" diretamente — sem o ".data" a asserção contava as
+        // chaves do próprio paginador (13), não o número de reservas.
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Admin/Reports/Reservas')
-            ->has('reservas', 1)
-            ->where('reservas.0.id', $dentroDoFiltro->id));
+            ->has('reservas.data', 1)
+            ->where('reservas.data.0.id', $dentroDoFiltro->id));
+    }
+
+    /**
+     * Antes, uma data mal formada ia direta para Carbon::parse() ou
+     * whereDate() e podia rebentar com erro 500 em vez de devolver uma
+     * mensagem de validação.
+     */
+    public function test_relatorio_rejeita_data_mal_formada(): void
+    {
+        $admin = $this->userWithRole('Administrador');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.reservas', ['data_inicio' => 'não-é-uma-data']))
+            ->assertSessionHasErrors('data_inicio');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.ocupacao', ['data_inicio' => 'não-é-uma-data']))
+            ->assertSessionHasErrors('data_inicio');
+    }
+
+    public function test_relatorio_rejeita_intervalo_de_datas_invertido(): void
+    {
+        $admin = $this->userWithRole('Administrador');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.reservas', [
+                'data_inicio' => '2026-06-01',
+                'data_fim' => '2026-01-01',
+            ]))
+            ->assertSessionHasErrors('data_fim');
+    }
+
+    public function test_relatorio_rejeita_id_de_filtro_inexistente(): void
+    {
+        $admin = $this->userWithRole('Administrador');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.reservas', ['estado_reserva_id' => 999999]))
+            ->assertSessionHasErrors('estado_reserva_id');
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.espacos', ['piso_id' => 999999]))
+            ->assertSessionHasErrors('piso_id');
+    }
+
+    /**
+     * REL-03: o Relatório de Espaços mede ocupação real (dias
+     * efetivamente ocupados em reserva_dias), não número de reservas —
+     * uma reserva de 5 dias corridos conta como 5, não 1.
+     */
+    public function test_relatorio_de_espacos_conta_dias_ocupados_nao_reservas(): void
+    {
+        $admin = $this->userWithRole('Administrador');
+
+        $secretaria = $this->criarSecretaria();
+        $periodo = $this->criarPeriodo();
+        $estado = $this->criarEstadoReserva('confirmada');
+        $dono = $this->criarUsuarioComRole('Utilizador');
+
+        $inicio = '2026-03-10';
+        $fim = '2026-03-14';
+
+        $reserva = Reserva::create([
+            'user_id' => $dono->id,
+            'secretaria_id' => $secretaria->id,
+            'periodo_id' => $periodo->id,
+            'estado_reserva_id' => $estado->id,
+            'data' => $inicio,
+            'data_fim' => $fim,
+            'tipo_duracao' => 'semanal',
+        ]);
+
+        foreach (['2026-03-10', '2026-03-11', '2026-03-12', '2026-03-13', '2026-03-14'] as $dia) {
+            ReservaDia::create([
+                'reserva_id' => $reserva->id,
+                'secretaria_id' => $secretaria->id,
+                'user_id' => $dono->id,
+                'dia' => $dia,
+                'slot' => 'manha',
+            ]);
+        }
+
+        $response = $this->actingAs($admin)->get(
+            route('admin.reports.espacos', [
+                'data_inicio' => $inicio,
+                'data_fim' => $fim,
+            ])
+        );
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Reports/Espacos')
+            ->has('linhas.data', 1)
+            ->where('linhas.data.0.id', $secretaria->id)
+            ->where('linhas.data.0.diasOcupados', 5));
     }
 }

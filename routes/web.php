@@ -236,6 +236,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::get('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'show'])
             ->name('support.show');
 
+        Route::patch('/suporte/pedidos/{id}/em-analise', [PedidoSuporteController::class, 'marcarEmAnalise'])
+            ->name('support.emAnalise');
+
         Route::patch('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'update'])
             ->name('support.update');
     });
@@ -286,9 +289,6 @@ Route::middleware(['auth', 'active', 'role:Administrador'])
 
         Route::get('/atividade', [AdminAtividadeController::class, 'index'])
             ->name('atividade.index');
-
-        Route::get('/atividade/exportar', [AdminAtividadeController::class, 'export'])
-            ->name('atividade.export');
     });
 
 // Gestão de espaços: acessível a Administrador e Gestor (ver *Policy::before()).

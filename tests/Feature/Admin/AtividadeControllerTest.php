@@ -51,10 +51,6 @@ class AtividadeControllerTest extends TestCase
             $this->actingAs($user)
                 ->get(route('admin.atividade.index'))
                 ->assertForbidden();
-
-            $this->actingAs($user)
-                ->get(route('admin.atividade.export'))
-                ->assertForbidden();
         }
     }
 
@@ -112,26 +108,6 @@ class AtividadeControllerTest extends TestCase
             ));
     }
 
-    public function test_exportacao_respeita_filtros(): void
-    {
-        $admin = $this->userWithRole('Administrador');
-
-        ActivityLogger::log($admin, 'espaco_criado', 'Setor Visivel · Piso 1');
-        ActivityLogger::log($admin, 'utilizador_criado', 'Utilizador Escondido · escondido@spacehub.pt');
-
-        $response = $this->actingAs($admin)->get(
-            route('admin.atividade.export', ['acao' => 'espaco_criado', 'periodo' => 'tudo'])
-        );
-
-        $response->assertOk();
-        $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
-
-        $conteudo = $response->streamedContent();
-
-        $this->assertStringContainsString('Setor Visivel', $conteudo);
-        $this->assertStringNotContainsString('Utilizador Escondido', $conteudo);
-    }
-
     public function test_atividade_e_registada_uma_unica_vez(): void
     {
         $admin = $this->userWithRole('Administrador');
@@ -157,9 +133,32 @@ class AtividadeControllerTest extends TestCase
         $this->assertNull($registo->actor_id);
         $this->assertSame('Sistema', $registo->actor_name);
         $this->assertSame(ActivityLogger::RESULTADO_AUTOMATICO, $registo->result);
+        $this->assertNull($registo->ip_address);
     }
 
-    public function test_dados_sensiveis_nao_aparecem_na_pagina_nem_no_csv(): void
+    /**
+     * ip_address existia na migration e no $fillable do model, mas
+     * ActivityLogger::log() nunca a preenchia — ficava sempre null
+     * para qualquer ação, mesmo as de utilizadores reais.
+     */
+    public function test_acao_de_utilizador_regista_o_ip(): void
+    {
+        $admin = $this->userWithRole('Administrador');
+        $setor = $this->criarSecretaria()->setor;
+
+        $this->actingAs($admin)
+            ->from('/')
+            ->withServerVariables(['REMOTE_ADDR' => '203.0.113.10'])
+            ->patch(route('admin.setores.toggleAtivo', $setor))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('activity_logs', [
+            'actor_id' => $admin->id,
+            'ip_address' => '203.0.113.10',
+        ]);
+    }
+
+    public function test_dados_sensiveis_nao_aparecem_na_pagina(): void
     {
         $admin = $this->userWithRole('Administrador');
         $role = Role::where('nome', 'Utilizador')->firstOrFail();
@@ -181,9 +180,6 @@ class AtividadeControllerTest extends TestCase
 
         $pagina = $this->actingAs($admin)->get(route('admin.atividade.index', ['periodo' => 'tudo']));
         $pagina->assertDontSee($senhaEmClaro);
-
-        $csv = $this->actingAs($admin)->get(route('admin.atividade.export', ['periodo' => 'tudo']));
-        $this->assertStringNotContainsString($senhaEmClaro, $csv->streamedContent());
     }
 
     public function test_historico_pessoal_dos_utilizadores_continua_funcional(): void

@@ -19,6 +19,7 @@ use App\Services\PagamentoService;
 use App\Services\ReservaCriacaoService;
 use App\Services\ReservaDisponibilidadeService;
 use App\Notifications\ReservaCanceladaNotification;
+use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -185,11 +186,22 @@ class ReservaController extends Controller
         $periodosConflito = $this->disponibilidade
             ->periodosEmConflito($periodoId);
 
-        if ($this->disponibilidade->existeReservaAtivaNaData(
+        // RES-03: preserva o número de dias original ao mudar só a data de
+        // início — sem isto, data_fim ficava parada no valor antigo e a
+        // duração de uma reserva de vários dias mudava silenciosamente (ou
+        // ficava invertida, se a nova data de início passasse a antiga
+        // data_fim).
+        $duracaoDias = $reserva->data->diffInDays(
+            $reserva->data_fim ?? $reserva->data
+        );
+        $novaDataFim = Carbon::parse($data)->addDays($duracaoDias)->toDateString();
+
+        if ($this->disponibilidade->existeReservaAtivaNoIntervalo(
             'secretaria_id',
             $secretariaId,
             $periodosConflito,
             $data,
+            $novaDataFim,
             $reserva->id
         )) {
             return response()->json([
@@ -197,11 +209,12 @@ class ReservaController extends Controller
             ], 422);
         }
 
-        if ($this->disponibilidade->existeReservaAtivaNaData(
+        if ($this->disponibilidade->existeReservaAtivaNoIntervalo(
             'user_id',
             (int) $reserva->user_id,
             $periodosConflito,
             $data,
+            $novaDataFim,
             $reserva->id
         )) {
             return response()->json([
@@ -218,6 +231,7 @@ class ReservaController extends Controller
                 $reserva,
                 $dados,
                 $data,
+                $novaDataFim,
                 $periodoId,
                 $secretariaId,
                 $alterouDadosComPreco,
@@ -229,10 +243,42 @@ class ReservaController extends Controller
 
                 $reservaBloqueada->update([
                     'data' => $data,
+                    'data_fim' => $novaDataFim,
                     'periodo_id' => $periodoId,
                     'secretaria_id' => $secretariaId,
                     'observacoes' => $dados['observacoes'] ?? $reservaBloqueada->observacoes,
                 ]);
+
+                // Sem isto, reserva_dias ficava dessincronizada depois
+                // de uma edição via API: as linhas antigas continuavam a
+                // "bloquear" dias que já não pertencem à reserva, e o
+                // novo intervalo ficava sem a proteção anti-concorrência
+                // desta tabela — mesmo padrão já usado no fluxo web/admin
+                // (ver ReservaController::update()). data_fim já foi
+                // recalculada acima (RES-03) para manter a mesma duração
+                // da reserva original.
+                ReservaDia::where('reserva_id', $reservaBloqueada->id)->delete();
+
+                $periodoAtualizado = Periodo::findOrFail($periodoId);
+
+                $diasOcupados = $this->disponibilidade->gerarDiasOcupados(
+                    $reservaBloqueada->data->format('Y-m-d'),
+                    ($reservaBloqueada->data_fim ?? $reservaBloqueada->data)->format('Y-m-d'),
+                    $periodoAtualizado->nome
+                );
+
+                ReservaDia::insert(array_map(
+                    fn (array $dia) => [
+                        'reserva_id' => $reservaBloqueada->id,
+                        'secretaria_id' => $reservaBloqueada->secretaria_id,
+                        'user_id' => $reservaBloqueada->user_id,
+                        'dia' => $dia['dia'],
+                        'slot' => $dia['slot'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ],
+                    $diasOcupados
+                ));
 
                 if ($alterouDadosComPreco) {
                     $pagamentoService->atualizarValorParaReserva($reservaBloqueada);

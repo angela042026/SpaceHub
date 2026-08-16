@@ -88,6 +88,29 @@ class PedidoSuporteController extends Controller
         ]);
     }
 
+    /**
+     * Marca um pedido pendente como "Em análise" — passo intermédio
+     * opcional antes de responder, para sinalizar aos outros
+     * admins/gestores que já está a ser tratado. Não exige resposta
+     * (essa continua a acontecer só em update(), ao resolver).
+     */
+    public function marcarEmAnalise(string $id)
+    {
+        $pedido = PedidoSuporte::findOrFail($id);
+
+        if ($pedido->estado !== 'Pendente') {
+            return redirect()
+                ->back()
+                ->with('error', 'Só pedidos pendentes podem ser marcados como em análise.');
+        }
+
+        $pedido->update(['estado' => 'Em análise']);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Pedido marcado como em análise.');
+    }
+
     /** Regista a resposta do admin/gestor e marca o pedido como resolvido. */
     public function update(Request $request, string $id)
     {
@@ -115,9 +138,13 @@ class PedidoSuporteController extends Controller
     /**Apresenta o formulário de contacto. */
     public function create()
     {
-        // Pedidos anteriores do próprio utilizador, para ver o estado/resposta
+        // Pedidos anteriores do próprio utilizador, para ver o estado/resposta.
+        // Limitado aos 20 mais recentes — sem isto, o payload desta página
+        // crescia sem limite para um utilizador com muitos pedidos ao
+        // longo do tempo.
         $meusPedidos = PedidoSuporte::where('user_id', Auth::id())
             ->latest()
+            ->take(20)
             ->get();
 
         return Inertia::render('Support/Create', [

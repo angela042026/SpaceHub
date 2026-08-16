@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pagamento;
 use App\Services\ActivityLogger;
 use App\Services\PagamentoService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -190,6 +191,18 @@ class PagamentoController extends Controller
                 'required_if:metodo_pagamento,cartao',
                 'nullable',
                 'regex:/^(0[1-9]|1[0-2])\/[0-9]{2}$/',
+                function ($attribute, $value, $fail) {
+                    if (! $value || ! preg_match('/^(0[1-9]|1[0-2])\/([0-9]{2})$/', $value, $partes)) {
+                        return;
+                    }
+
+                    $fimDoMesDeValidade = Carbon::createFromDate(2000 + (int) $partes[2], (int) $partes[1], 1)
+                        ->endOfMonth();
+
+                    if ($fimDoMesDeValidade->isPast()) {
+                        $fail('O cartão indicado já expirou.');
+                    }
+                },
             ],
 
             'cvv' => [
@@ -208,11 +221,14 @@ class PagamentoController extends Controller
             ],
 
             /*
-         'confirmacao_transferencia' => [
-    'exclude_unless:metodo_pagamento,transferencia',
-    'required',
-    'accepted',
-],
+             * Confirmação de transferência bancária.
+             */
+            'confirmacao_transferencia' => [
+                'exclude_unless:metodo_pagamento,transferencia',
+                'required',
+                'accepted',
+            ],
+
             /*
              * Dados do PayPal.
              */
@@ -259,7 +275,7 @@ class PagamentoController extends Controller
             'telefone_mbway.regex' =>
             'Introduz um número de telemóvel português válido.',
 
-            'confirmacao_transferencia.required_if' =>
+            'confirmacao_transferencia.required' =>
             'Confirma que compreendeste as instruções da transferência.',
 
             'confirmacao_transferencia.accepted' =>

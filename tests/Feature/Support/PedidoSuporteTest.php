@@ -78,6 +78,29 @@ class PedidoSuporteTest extends TestCase
             );
     }
 
+    /**
+     * Antes limitava-se a get() sem qualquer limite — um utilizador
+     * com muitos pedidos ao longo do tempo fazia o payload desta
+     * página crescer sem controlo.
+     */
+    public function test_o_formulario_limita_aos_20_pedidos_mais_recentes(): void
+    {
+        $user = $this->criarComRole('Utilizador');
+
+        for ($i = 1; $i <= 25; $i++) {
+            $this->criarPedido($user, "Pedido {$i}");
+        }
+
+        $this->actingAs($user)
+            ->get(route('support.create'))
+            ->assertOk()
+            ->assertInertia(
+                fn (Assert $page) => $page
+                    ->component('Support/Create')
+                    ->has('meusPedidos', 20)
+            );
+    }
+
     public function test_utilizador_normal_nao_acede_a_lista_de_pedidos(): void
     {
         $user = $this->criarComRole('Utilizador');
@@ -113,9 +136,11 @@ class PedidoSuporteTest extends TestCase
             ->get(route('support.index'))
             ->assertOk()
             ->assertInertia(
+                // "pedidos" é o paginador inteiro — a contagem de itens
+                // está em "pedidos.data", não em "pedidos" diretamente.
                 fn (Assert $page) => $page
                     ->component('Support/Index')
-                    ->has('pedidos', 2)
+                    ->has('pedidos.data', 2)
             );
     }
 
@@ -155,6 +180,70 @@ class PedidoSuporteTest extends TestCase
         $this->assertDatabaseHas('pedido_suportes', [
             'id' => $pedido->id,
             'estado' => 'Pendente',
+        ]);
+    }
+
+    /**
+     * SUP-01: pedidos pendentes podem ser marcados como "Em análise",
+     * um passo intermédio opcional antes de responder.
+     */
+    public function test_administrador_marca_pedido_pendente_como_em_analise(): void
+    {
+        $pedido = $this->criarPedido($this->criarComRole('Utilizador'), 'Assunto');
+
+        $this->actingAs($this->criarComRole('Administrador'))
+            ->patch(route('support.emAnalise', $pedido->id))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('pedido_suportes', [
+            'id' => $pedido->id,
+            'estado' => 'Em análise',
+        ]);
+    }
+
+    public function test_nao_e_possivel_marcar_como_em_analise_um_pedido_ja_resolvido(): void
+    {
+        $pedido = $this->criarPedido($this->criarComRole('Utilizador'), 'Assunto');
+        $pedido->update(['estado' => 'Resolvido']);
+
+        $this->actingAs($this->criarComRole('Administrador'))
+            ->patch(route('support.emAnalise', $pedido->id))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('pedido_suportes', [
+            'id' => $pedido->id,
+            'estado' => 'Resolvido',
+        ]);
+    }
+
+    public function test_utilizador_normal_nao_pode_marcar_em_analise(): void
+    {
+        $pedido = $this->criarPedido($this->criarComRole('Utilizador'), 'Assunto');
+
+        $this->actingAs($this->criarComRole('Utilizador'))
+            ->patch(route('support.emAnalise', $pedido->id))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('pedido_suportes', [
+            'id' => $pedido->id,
+            'estado' => 'Pendente',
+        ]);
+    }
+
+    public function test_responder_resolve_pedido_que_estava_em_analise(): void
+    {
+        $pedido = $this->criarPedido($this->criarComRole('Utilizador'), 'Assunto');
+        $pedido->update(['estado' => 'Em análise']);
+
+        $this->actingAs($this->criarComRole('Administrador'))
+            ->patch(route('support.update', $pedido->id), [
+                'resposta' => 'Resposta depois de analisar o pedido.',
+            ])
+            ->assertRedirect(route('support.index'));
+
+        $this->assertDatabaseHas('pedido_suportes', [
+            'id' => $pedido->id,
+            'estado' => 'Resolvido',
         ]);
     }
 
