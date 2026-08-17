@@ -8,6 +8,7 @@ import {
     Volume2,
     Zap,
 } from 'lucide-react';
+import i18n from '@/i18n';
 
 export const MIN_ZOOM = 0.85;
 export const MAX_ZOOM = 2.4;
@@ -18,21 +19,26 @@ export function limitarZoom(valor) {
 }
 
 // Comodidades filtráveis da secretária — chave (coluna booleana no
-// backend), rótulo a mostrar e ícone. Usado no marcador expandido e no
-// painel de detalhe da secretária selecionada.
+// backend), chave de tradução (namespace "dashboard") e ícone. Usado no
+// marcador expandido e no painel de detalhe da secretária selecionada.
 export const COMODIDADES = [
-    ['ergonomica', 'Ergonómica', Armchair],
-    ['monitor', 'Monitor', Monitor],
-    ['dock_usb', 'Dock USB', Usb],
-    ['hdmi', 'HDMI', Zap],
-    ['junto_janela', 'Janela', Grid2x2],
-    ['luz_natural', 'Luz natural', Sun],
-    ['zona_silenciosa', 'Silenciosa', Volume2],
-    ['proximo_copa', 'Copa', Coffee],
+    ['ergonomica', 'officeMap.comodidades.ergonomica', Armchair],
+    ['monitor', 'officeMap.comodidades.monitor', Monitor],
+    ['dock_usb', 'officeMap.comodidades.dockUsb', Usb],
+    ['hdmi', 'officeMap.comodidades.hdmi', Zap],
+    ['junto_janela', 'officeMap.comodidades.juntoJanela', Grid2x2],
+    ['luz_natural', 'officeMap.comodidades.luzNatural', Sun],
+    ['zona_silenciosa', 'officeMap.comodidades.zonaSilenciosa', Volume2],
+    ['proximo_copa', 'officeMap.comodidades.proximoCopa', Coffee],
 ];
 
+/** Traduz o rótulo de uma comodidade (ver COMODIDADES acima). */
+export const traduzirComodidade = (chaveTraducao, t) =>
+    (t ?? i18n.t.bind(i18n))(chaveTraducao);
+
 // Cores de destaque (anel/texto/barra) por estado, usadas nos marcadores em
-// forma de pin e na timeline de disponibilidade.
+// forma de pin e na timeline de disponibilidade. `label` guarda a chave de
+// tradução (namespace "dashboard"), não o texto em si.
 export const ESTADO_VISUAL = {
     livre: {
         ring: 'border-teal-400',
@@ -40,7 +46,7 @@ export const ESTADO_VISUAL = {
         bar: 'bg-teal-500',
         badgeBg: 'bg-teal-50',
         badgeText: 'text-teal-700',
-        label: 'Livre',
+        label: 'officeMap.estados.livre',
     },
     reservada: {
         ring: 'border-amber-400',
@@ -48,7 +54,7 @@ export const ESTADO_VISUAL = {
         bar: 'bg-amber-500',
         badgeBg: 'bg-amber-50',
         badgeText: 'text-amber-700',
-        label: 'Reservada',
+        label: 'officeMap.estados.reservada',
     },
     ocupada: {
         ring: 'border-red-400',
@@ -56,7 +62,7 @@ export const ESTADO_VISUAL = {
         bar: 'bg-red-500',
         badgeBg: 'bg-red-50',
         badgeText: 'text-red-700',
-        label: 'Ocupada',
+        label: 'officeMap.estados.ocupada',
     },
     indisponivel: {
         ring: 'border-slate-300',
@@ -64,17 +70,25 @@ export const ESTADO_VISUAL = {
         bar: 'bg-slate-300',
         badgeBg: 'bg-slate-100',
         badgeText: 'text-slate-600',
-        label: 'Indisponível',
+        label: 'officeMap.estados.indisponivel',
     },
 };
 
+/** Traduz o rótulo de um estado visual (ver ESTADO_VISUAL acima). */
+export const traduzirEstadoVisual = (chave, t) =>
+    (t ?? i18n.t.bind(i18n))(ESTADO_VISUAL[chave]?.label ?? chave);
+
 export const FILTROS = [
-    ['todos', 'Todas'],
-    ['livre', 'Livres'],
-    ['reservada', 'Reservadas'],
-    ['ocupada', 'Ocupadas'],
-    ['indisponivel', 'Indisponíveis'],
+    ['todos', 'officeMap.filtros.todas'],
+    ['livre', 'officeMap.filtros.livres'],
+    ['reservada', 'officeMap.filtros.reservadas'],
+    ['ocupada', 'officeMap.filtros.ocupadas'],
+    ['indisponivel', 'officeMap.filtros.indisponiveis'],
 ];
+
+/** Traduz o rótulo de um filtro de estado (ver FILTROS acima). */
+export const traduzirFiltro = (chaveTraducao, t) =>
+    (t ?? i18n.t.bind(i18n))(chaveTraducao);
 
 export function normalizarEstadoFiltro(status) {
     if (status === 'expira') {

@@ -1,4 +1,5 @@
 import { Armchair, CalendarCheck, QrCode } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 function ColunaAtividade({ icon: Icon, valor, label, titulo }) {
     return (
@@ -22,6 +23,8 @@ function ColunaAtividade({ icon: Icon, valor, label, titulo }) {
 }
 
 export default function AtividadePessoal({ atividade }) {
+    const { t } = useTranslation('dashboard');
+
     if (!atividade) {
         return null;
     }
@@ -35,39 +38,31 @@ export default function AtividadePessoal({ atividade }) {
     return (
         <section className="dashboard-card flex h-full flex-col p-5">
             <h2 className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
-                A sua atividade
+                {t('atividadePessoal.titulo')}
             </h2>
 
             <div className="mt-3 grid flex-1 grid-cols-3 divide-x divide-slate-100 dark:divide-[#2a5069]">
                 <ColunaAtividade
                     icon={CalendarCheck}
                     valor={diasNoEscritorioMes}
-                    label={
-                        diasNoEscritorioMes === 1
-                            ? 'dia este mês'
-                            : 'dias este mês'
-                    }
+                    label={t('atividadePessoal.diaEsteMes', { count: diasNoEscritorioMes })}
                 />
 
                 <ColunaAtividade
                     icon={Armchair}
                     valor={secretariaFavorita?.codigo ?? '—'}
-                    label="secretária favorita"
+                    label={t('atividadePessoal.secretariaFavorita')}
                     titulo={
                         secretariaFavorita
                             ? `${secretariaFavorita.setor} · ${secretariaFavorita.piso}`
-                            : 'Ainda sem dados suficientes'
+                            : t('atividadePessoal.aindaSemDados')
                     }
                 />
 
                 <ColunaAtividade
                     icon={QrCode}
                     valor={checkinsRealizados}
-                    label={
-                        checkinsRealizados === 1
-                            ? 'check-in este mês'
-                            : 'check-ins este mês'
-                    }
+                    label={t('atividadePessoal.checkinEsteMes', { count: checkinsRealizados })}
                 />
             </div>
         </section>

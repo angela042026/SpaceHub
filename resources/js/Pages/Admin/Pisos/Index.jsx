@@ -12,8 +12,13 @@ import {
     Search,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { ESTADO_UTILIZADOR, etiqueta } from '@/utils/estados';
 
 export default function Index({ pisos, edificios, filters }) {
+    const { t } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
     const [processingId, setProcessingId] = useState(null);
     const [carregando, setCarregando] = useState(false);
 
@@ -65,8 +70,8 @@ export default function Index({ pisos, edificios, filters }) {
 
     const alternarAtivo = (piso) => {
         const mensagem = piso.ativo
-            ? `Desativar o piso ${piso.nome}?`
-            : `Ativar o piso ${piso.nome}?`;
+            ? t('pisos.index.confirmarDesativar', { nome: piso.nome })
+            : t('pisos.index.confirmarAtivar', { nome: piso.nome });
 
         if (!confirm(mensagem)) {
             return;
@@ -101,7 +106,7 @@ export default function Index({ pisos, edificios, filters }) {
     const columns = [
         {
             key: 'nome',
-            label: 'Piso',
+            label: t('pisos.index.colunaPiso'),
             render: (piso) => (
                 <div>
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
@@ -113,12 +118,12 @@ export default function Index({ pisos, edificios, filters }) {
         },
         {
             key: 'edificio',
-            label: 'Edifício',
+            label: t('campos.edificio'),
             render: (piso) => piso.edificio ?? '-',
         },
         {
             key: 'ativo',
-            label: 'Estado',
+            label: t('listagem.estado'),
             render: (piso) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
@@ -127,20 +132,20 @@ export default function Index({ pisos, edificios, filters }) {
                             : 'bg-red-500/10 text-red-600 dark:text-red-400'
                     }`}
                 >
-                    {piso.ativo ? 'Ativo' : 'Inativo'}
+                    {etiqueta(ESTADO_UTILIZADOR, String(piso.ativo), piso.ativo ? 'Ativo' : 'Inativo', tc)}
                 </span>
             ),
         },
         {
             key: 'acoes',
-            label: 'Ações',
+            label: t('listagem.acoes'),
             align: 'right',
             render: (piso) => (
                 <div className="flex justify-end gap-2">
                     <Link
                         href={route('admin.pisos.edit', piso.id)}
-                        title="Editar piso"
-                        aria-label="Editar piso"
+                        title={t('pisos.index.editarPiso')}
+                        aria-label={t('pisos.index.editarPiso')}
                         className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
                     >
                         <Pencil size={16} strokeWidth={1.9} />
@@ -150,8 +155,8 @@ export default function Index({ pisos, edificios, filters }) {
                         type="button"
                         onClick={() => alternarAtivo(piso)}
                         disabled={processingId === piso.id}
-                        title={piso.ativo ? 'Desativar piso' : 'Ativar piso'}
-                        aria-label={piso.ativo ? 'Desativar piso' : 'Ativar piso'}
+                        title={piso.ativo ? t('pisos.index.desativarPiso') : t('pisos.index.ativarPiso')}
+                        aria-label={piso.ativo ? t('pisos.index.desativarPiso') : t('pisos.index.ativarPiso')}
                         className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
                             piso.ativo
                                 ? 'border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-500 dark:border-slate-700'
@@ -171,7 +176,7 @@ export default function Index({ pisos, edificios, filters }) {
 
     return (
         <DashboardLayout>
-            <Head title="Pisos" />
+            <Head title={t('pisos.index.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
@@ -182,11 +187,11 @@ export default function Index({ pisos, edificios, filters }) {
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Pisos
+                                {t('pisos.index.titulo')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {pisos.meta.total} piso{pisos.meta.total === 1 ? '' : 's'} registado{pisos.meta.total === 1 ? '' : 's'}.
+                                {t('pisos.index.registados', { count: pisos.meta.total })}
                             </p>
                         </div>
                     </div>
@@ -196,7 +201,7 @@ export default function Index({ pisos, edificios, filters }) {
                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
                     >
                         <Plus size={18} strokeWidth={2} />
-                        Novo piso
+                        {t('pisos.index.novoPiso')}
                     </Link>
                 </div>
 
@@ -212,7 +217,7 @@ export default function Index({ pisos, edificios, filters }) {
                             type="text"
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Pesquisar por nome ou código"
+                            placeholder={t('pisos.index.pesquisarPlaceholder')}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                     </div>
@@ -222,7 +227,7 @@ export default function Index({ pisos, edificios, filters }) {
                         onChange={(event) => handleEdificioChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
-                        <option value="">Todos os edifícios</option>
+                        <option value="">{t('pisos.index.todosOsEdificios')}</option>
 
                         {edificios.map((edificio) => (
                             <option key={edificio.id} value={edificio.id}>
@@ -236,9 +241,9 @@ export default function Index({ pisos, edificios, filters }) {
                         onChange={(event) => handleAtivoChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
-                        <option value="">Todos os estados</option>
-                        <option value="1">Ativos</option>
-                        <option value="0">Inativos</option>
+                        <option value="">{t('listagem.todosOsEstados')}</option>
+                        <option value="1">{t('listagem.ativos')}</option>
+                        <option value="0">{t('listagem.inativos')}</option>
                     </select>
 
                     <div className="flex gap-2">
@@ -247,7 +252,7 @@ export default function Index({ pisos, edificios, filters }) {
                             onClick={limpar}
                             className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700"
                         >
-                            Limpar
+                            {t('listagem.limpar')}
                         </button>
                     </div>
                 </div>
@@ -258,7 +263,7 @@ export default function Index({ pisos, edificios, filters }) {
                     <Table
                         columns={columns}
                         data={pisos.data}
-                        emptyMessage="Nenhum piso encontrado."
+                        emptyMessage={t('pisos.index.semResultados')}
                     />
 
                     <Pagination

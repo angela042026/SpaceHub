@@ -19,6 +19,7 @@ import ptProfile from './locales/pt/profile.json';
 import ptMapa from './locales/pt/mapa.json';
 import ptQrcode from './locales/pt/qrcode.json';
 import ptValidation from './locales/pt/validation.json';
+import ptLegal from './locales/pt/legal.json';
 
 import enCommon from './locales/en/common.json';
 import enLanding from './locales/en/landing.json';
@@ -35,6 +36,7 @@ import enProfile from './locales/en/profile.json';
 import enMapa from './locales/en/mapa.json';
 import enQrcode from './locales/en/qrcode.json';
 import enValidation from './locales/en/validation.json';
+import enLegal from './locales/en/legal.json';
 
 export const LOCALES_SUPORTADOS = ['pt', 'en'];
 
@@ -55,6 +57,7 @@ const resources = {
         mapa: ptMapa,
         qrcode: ptQrcode,
         validation: ptValidation,
+        legal: ptLegal,
     },
     en: {
         common: enCommon,
@@ -72,6 +75,7 @@ const resources = {
         mapa: enMapa,
         qrcode: enQrcode,
         validation: enValidation,
+        legal: enLegal,
     },
 };
 

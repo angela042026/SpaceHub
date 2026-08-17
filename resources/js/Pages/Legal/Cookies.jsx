@@ -2,17 +2,20 @@ import LegalLayout from '@/Components/Legal/LegalLayout';
 import LegalSection from '@/Components/Legal/LegalSection';
 import { Head, router } from '@inertiajs/react';
 import { Cookie } from 'lucide-react';
-
-const SECTIONS = [
-    { id: 'introducao', title: 'O que são cookies' },
-    { id: 'essenciais', title: 'Cookies essenciais' },
-    { id: 'opcionais', title: 'Cookies opcionais' },
-    { id: 'preferencias', title: 'Gerir preferências' },
-    { id: 'alteracoes', title: 'Alterações a esta política' },
-    { id: 'contacto', title: 'Contacto' },
-];
+import { useTranslation } from 'react-i18next';
 
 export default function Cookies() {
+    const { t } = useTranslation('legal');
+
+    const SECTIONS = [
+        { id: 'introducao', title: t('cookies.sections.introducao') },
+        { id: 'essenciais', title: t('cookies.sections.essenciais') },
+        { id: 'opcionais', title: t('cookies.sections.opcionais') },
+        { id: 'preferencias', title: t('cookies.sections.preferencias') },
+        { id: 'alteracoes', title: t('cookies.sections.alteracoes') },
+        { id: 'contacto', title: t('cookies.sections.contacto') },
+    ];
+
     const handleChangePreferences = () => {
         localStorage.removeItem('spacehub_cookie_consent');
         router.visit(route('home'));
@@ -20,57 +23,46 @@ export default function Cookies() {
 
     return (
         <>
-            <Head title="Política de Cookies" />
+            <Head title={t('cookies.titulo')} />
 
             <LegalLayout
                 icon={Cookie}
-                title="Política de Cookies"
-                subtitle="Explicamos aqui que cookies e tecnologias semelhantes utilizamos, para que servem, e como pode alterar a sua preferência a qualquer momento."
-                updatedAt="23 de julho de 2026"
+                title={t('cookies.titulo')}
+                subtitle={t('cookies.subtitulo')}
+                updatedAt={t('cookies.atualizadoEm')}
                 sections={SECTIONS}
             >
                 <LegalSection
                     id="introducao"
                     number={1}
-                    title="O que são cookies"
+                    title={t('cookies.sections.introducao')}
                 >
                     <p>
-                        Cookies são pequenos ficheiros de texto guardados no
-                        seu dispositivo quando visita a SpaceHub. Utilizamo-
-                        los, juntamente com armazenamento local semelhante
-                        (<em>localStorage</em>), para o funcionamento da
-                        plataforma e, mediante o seu consentimento, para
-                        compreender melhor como a plataforma é utilizada.
+                        {t('cookies.introducao.parte1')}
+                        <em>localStorage</em>
+                        {t('cookies.introducao.parte2')}
                     </p>
                 </LegalSection>
 
                 <LegalSection
                     id="essenciais"
                     number={2}
-                    title="Cookies essenciais"
+                    title={t('cookies.sections.essenciais')}
                 >
-                    <p>
-                        Estes cookies estão sempre ativos, pois são
-                        estritamente necessários para a plataforma funcionar
-                        corretamente. Não pedimos consentimento para estes,
-                        porque não recolhem dados para fins de análise,
-                        publicidade ou marketing.
-                    </p>
+                    <p>{t('cookies.essenciais.intro')}</p>
 
                     <ul>
                         <li>
-                            <strong>Sessão e autenticação:</strong> mantêm a
-                            sua sessão iniciada e protegem o acesso à sua
-                            conta;
+                            <strong>{t('cookies.essenciais.li1Strong')}</strong>{' '}
+                            {t('cookies.essenciais.li1')}
                         </li>
                         <li>
-                            <strong>Preferências de interface:</strong>{' '}
-                            guardam, por exemplo, a sua escolha de tema
-                            (claro/escuro);
+                            <strong>{t('cookies.essenciais.li2Strong')}</strong>{' '}
+                            {t('cookies.essenciais.li2')}
                         </li>
                         <li>
-                            <strong>Segurança:</strong> ajudam a prevenir a
-                            utilização abusiva da plataforma.
+                            <strong>{t('cookies.essenciais.li3Strong')}</strong>{' '}
+                            {t('cookies.essenciais.li3')}
                         </li>
                     </ul>
 
@@ -79,13 +71,13 @@ export default function Cookies() {
                             <thead>
                                 <tr className="border-b border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5">
                                     <th className="px-4 py-2.5 font-semibold text-[#102E55] dark:text-white">
-                                        Nome
+                                        {t('cookies.tabela.nome')}
                                     </th>
                                     <th className="px-4 py-2.5 font-semibold text-[#102E55] dark:text-white">
-                                        Finalidade
+                                        {t('cookies.tabela.finalidade')}
                                     </th>
                                     <th className="px-4 py-2.5 font-semibold text-[#102E55] dark:text-white">
-                                        Duração
+                                        {t('cookies.tabela.duracao')}
                                     </th>
                                 </tr>
                             </thead>
@@ -96,11 +88,10 @@ export default function Cookies() {
                                         spacehub-session
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        Mantém a sua sessão de autenticação
-                                        iniciada.
+                                        {t('cookies.essenciais.cookieSessao')}
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        2 horas de inatividade
+                                        {t('cookies.essenciais.duracaoInatividade')}
                                     </td>
                                 </tr>
 
@@ -109,11 +100,10 @@ export default function Cookies() {
                                         XSRF-TOKEN
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        Protege os formulários da
-                                        plataforma contra ataques CSRF.
+                                        {t('cookies.essenciais.cookieXsrf')}
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        2 horas de inatividade
+                                        {t('cookies.essenciais.duracaoInatividade')}
                                     </td>
                                 </tr>
 
@@ -122,11 +112,10 @@ export default function Cookies() {
                                         spacehub-theme
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        Guarda a sua preferência de tema
-                                        (claro/escuro).
+                                        {t('cookies.essenciais.cookieTema')}
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        Até ser apagado
+                                        {t('cookies.essenciais.duracaoAteApagado')}
                                     </td>
                                 </tr>
 
@@ -135,11 +124,10 @@ export default function Cookies() {
                                         spacehub_cookie_consent
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        Guarda a sua escolha no banner de
-                                        cookies.
+                                        {t('cookies.essenciais.cookieConsent')}
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        Até ser apagado
+                                        {t('cookies.essenciais.duracaoAteApagado')}
                                     </td>
                                 </tr>
                             </tbody>
@@ -150,31 +138,22 @@ export default function Cookies() {
                 <LegalSection
                     id="opcionais"
                     number={3}
-                    title="Cookies opcionais"
+                    title={t('cookies.sections.opcionais')}
                 >
-                    <p>
-                        Só são ativados se aceitar cookies opcionais no
-                        banner apresentado na sua primeira visita.
-                        Utilizamos o Google Analytics para perceber, de
-                        forma agregada, como a plataforma é utilizada (por
-                        exemplo, quais as páginas mais visitadas), o que nos
-                        ajuda a melhorar a experiência de utilização. Se
-                        rejeitar ou não responder ao banner, este script
-                        nunca chega a ser carregado.
-                    </p>
+                    <p>{t('cookies.opcionais.intro')}</p>
 
                     <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/10">
                         <table className="w-full min-w-[520px] border-collapse text-left text-sm">
                             <thead>
                                 <tr className="border-b border-slate-200 bg-slate-50 dark:border-white/10 dark:bg-white/5">
                                     <th className="px-4 py-2.5 font-semibold text-[#102E55] dark:text-white">
-                                        Nome
+                                        {t('cookies.tabela.nome')}
                                     </th>
                                     <th className="px-4 py-2.5 font-semibold text-[#102E55] dark:text-white">
-                                        Finalidade
+                                        {t('cookies.tabela.finalidade')}
                                     </th>
                                     <th className="px-4 py-2.5 font-semibold text-[#102E55] dark:text-white">
-                                        Duração
+                                        {t('cookies.tabela.duracao')}
                                     </th>
                                 </tr>
                             </thead>
@@ -185,11 +164,10 @@ export default function Cookies() {
                                         _ga
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        Google Analytics — distingue
-                                        utilizadores de forma anónima.
+                                        {t('cookies.opcionais.cookieGa')}
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        Até 2 anos
+                                        {t('cookies.opcionais.duracao')}
                                     </td>
                                 </tr>
 
@@ -198,11 +176,10 @@ export default function Cookies() {
                                         _ga_&lt;container-id&gt;
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        Google Analytics — mantém o estado
-                                        da sessão de navegação.
+                                        {t('cookies.opcionais.cookieGaSession')}
                                     </td>
                                     <td className="px-4 py-2.5">
-                                        Até 2 anos
+                                        {t('cookies.opcionais.duracao')}
                                     </td>
                                 </tr>
                             </tbody>
@@ -210,52 +187,36 @@ export default function Cookies() {
                     </div>
 
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                        Estes cookies só existem se aceitar cookies
-                        opcionais e se o Google Analytics estiver
-                        configurado na plataforma.
+                        {t('cookies.opcionais.nota')}
                     </p>
                 </LegalSection>
 
                 <LegalSection
                     id="preferencias"
                     number={4}
-                    title="Gerir as suas preferências"
+                    title={t('cookies.sections.preferencias')}
                 >
-                    <p>
-                        Pode alterar a sua escolha a qualquer momento. Ao
-                        clicar no botão abaixo, a sua preferência atual é
-                        apagada e o banner de cookies volta a ser
-                        apresentado na página inicial.
-                    </p>
+                    <p>{t('cookies.preferencias.texto')}</p>
 
                     <button
                         type="button"
                         onClick={handleChangePreferences}
                         className="inline-flex items-center gap-2 rounded-xl bg-[#14B8A6] px-5 py-2.5 text-sm font-semibold text-[#03172B] shadow-lg shadow-[#14B8A6]/20 transition hover:bg-[#0F9F91]"
                     >
-                        Alterar preferências de cookies
+                        {t('cookies.preferencias.botao')}
                     </button>
                 </LegalSection>
 
                 <LegalSection
                     id="alteracoes"
                     number={5}
-                    title="Alterações a esta política"
+                    title={t('cookies.sections.alteracoes')}
                 >
-                    <p>
-                        Esta Política de Cookies pode ser atualizada
-                        periodicamente, nomeadamente se adicionarmos novos
-                        cookies opcionais. Recomendamos a consulta ocasional
-                        desta página.
-                    </p>
+                    <p>{t('cookies.alteracoes.texto')}</p>
                 </LegalSection>
 
-                <LegalSection id="contacto" number={6} title="Contacto">
-                    <p>
-                        Para esclarecer qualquer dúvida sobre esta Política
-                        de Cookies, entre em contacto com a equipa do
-                        SpaceHub através do Centro de Ajuda da plataforma.
-                    </p>
+                <LegalSection id="contacto" number={6} title={t('cookies.sections.contacto')}>
+                    <p>{t('cookies.contacto.texto')}</p>
                 </LegalSection>
             </LegalLayout>
         </>

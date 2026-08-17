@@ -3,6 +3,9 @@ import InputError from '@/Components/InputError';
 import { Head, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Pencil, UserRound } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+import { etiquetaPeriodo } from '@/utils/estados';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -11,6 +14,8 @@ const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
 export default function Edit({ reserva, secretarias, periodos, pisos, setores }) {
+    const { t } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
 
     const [pisoId, setPisoId] = useState(String(reserva.secretaria.setor.piso_id));
     const [setorId, setSetorId] = useState(String(reserva.secretaria.setor_id));
@@ -89,7 +94,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
 
     return (
         <DashboardLayout>
-            <Head title="Editar Reserva" />
+            <Head title={t('reservas.edit.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -99,11 +104,11 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Editar Reserva
+                            {t('reservas.edit.titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Altera a data, o período ou o espaço desta reserva.
+                            {t('reservas.edit.subtitulo')}
                         </p>
                     </div>
                 </div>
@@ -126,7 +131,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                 <form onSubmit={submit} className="p-6" noValidate>
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
-                            <label htmlFor="data" className={labelClass}>Data</label>
+                            <label htmlFor="data" className={labelClass}>{t('reservas.edit.data')}</label>
                             <input
                                 id="data"
                                 type="date"
@@ -139,7 +144,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                         </div>
 
                         <div>
-                            <label htmlFor="periodo_id" className={labelClass}>Período</label>
+                            <label htmlFor="periodo_id" className={labelClass}>{t('reservas.edit.periodo')}</label>
                             <select
                                 id="periodo_id"
                                 value={data.periodo_id}
@@ -147,11 +152,11 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                                 required
                                 className={fieldClass}
                             >
-                                <option value="" disabled>Selecione...</option>
+                                <option value="" disabled>{t('secretarias.create.selecione')}</option>
 
                                 {periodos.map((periodo) => (
                                     <option key={periodo.id} value={periodo.id}>
-                                        {periodo.nome}
+                                        {etiquetaPeriodo(periodo.nome, tc)}
                                     </option>
                                 ))}
                             </select>
@@ -159,7 +164,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                         </div>
 
                         <div>
-                            <label htmlFor="piso_id" className={labelClass}>Piso</label>
+                            <label htmlFor="piso_id" className={labelClass}>{t('campos.piso')}</label>
                             <select
                                 id="piso_id"
                                 value={pisoId}
@@ -167,7 +172,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                                 required
                                 className={fieldClass}
                             >
-                                <option value="" disabled>Selecione...</option>
+                                <option value="" disabled>{t('secretarias.create.selecione')}</option>
 
                                 {pisos.map((piso) => (
                                     <option key={piso.id} value={piso.id}>
@@ -178,7 +183,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                         </div>
 
                         <div>
-                            <label htmlFor="setor_id" className={labelClass}>Categoria do Espaço</label>
+                            <label htmlFor="setor_id" className={labelClass}>{t('reservas.edit.categoriaDoEspaco')}</label>
                             <select
                                 id="setor_id"
                                 value={setorId}
@@ -188,7 +193,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                                 className={fieldClass}
                             >
                                 <option value="" disabled>
-                                    {pisoId ? 'Selecione...' : 'Selecione primeiro o piso'}
+                                    {pisoId ? t('secretarias.create.selecione') : t('secretarias.create.selecionePrimeiroPiso')}
                                 </option>
 
                                 {setoresDoPiso.map((setor) => (
@@ -200,7 +205,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                         </div>
 
                         <div className="sm:col-span-2">
-                            <label htmlFor="secretaria_id" className={labelClass}>Lugar</label>
+                            <label htmlFor="secretaria_id" className={labelClass}>{t('reservas.edit.lugar')}</label>
                             <select
                                 id="secretaria_id"
                                 value={data.secretaria_id}
@@ -210,7 +215,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                                 className={fieldClass}
                             >
                                 <option value="" disabled>
-                                    {setorId ? 'Selecione...' : 'Selecione primeiro a categoria'}
+                                    {setorId ? t('secretarias.create.selecione') : t('reservas.edit.selecionePrimeiroCategoria')}
                                 </option>
 
                                 {secretariasDisponiveis.map((secretaria) => (
@@ -223,7 +228,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                         </div>
 
                         <div className="sm:col-span-2">
-                            <label htmlFor="observacoes" className={labelClass}>Observações</label>
+                            <label htmlFor="observacoes" className={labelClass}>{t('reservas.edit.observacoes')}</label>
                             <textarea
                                 id="observacoes"
                                 rows={4}
@@ -241,7 +246,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                             disabled={processing}
                             className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {processing ? 'A guardar...' : 'Guardar Alterações'}
+                            {processing ? t('form.aGuardar') : t('form.guardarAlteracoes')}
                         </button>
 
                         <button
@@ -250,7 +255,7 @@ export default function Edit({ reserva, secretarias, periodos, pisos, setores })
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
                             <ArrowLeft size={16} strokeWidth={1.9} />
-                            Cancelar
+                            {t('form.cancelar')}
                         </button>
                     </div>
                 </form>

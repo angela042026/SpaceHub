@@ -12,8 +12,13 @@ import {
     Search,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { ESTADO_UTILIZADOR, etiqueta } from '@/utils/estados';
 
 export default function Index({ edificios, filters }) {
+    const { t } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
     const [processingId, setProcessingId] = useState(null);
     const [carregando, setCarregando] = useState(false);
 
@@ -58,8 +63,8 @@ export default function Index({ edificios, filters }) {
 
     const alternarAtivo = (edificio) => {
         const mensagem = edificio.ativo
-            ? `Desativar o edifício ${edificio.nome}?`
-            : `Ativar o edifício ${edificio.nome}?`;
+            ? t('edificios.index.confirmarDesativar', { nome: edificio.nome })
+            : t('edificios.index.confirmarAtivar', { nome: edificio.nome });
 
         if (!confirm(mensagem)) {
             return;
@@ -80,7 +85,7 @@ export default function Index({ edificios, filters }) {
     const columns = [
         {
             key: 'nome',
-            label: 'Edifício',
+            label: t('edificios.index.colunaEdificio'),
             render: (edificio) => (
                 <div>
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
@@ -92,7 +97,7 @@ export default function Index({ edificios, filters }) {
         },
         {
             key: 'morada',
-            label: 'Localização',
+            label: t('listagem.localizacao'),
             render: (edificio) => (
                 <span className="text-slate-600 dark:text-slate-300">
                     {[edificio.cidade, edificio.pais].filter(Boolean).join(', ') || '-'}
@@ -101,7 +106,7 @@ export default function Index({ edificios, filters }) {
         },
         {
             key: 'ativo',
-            label: 'Estado',
+            label: t('listagem.estado'),
             render: (edificio) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
@@ -110,20 +115,20 @@ export default function Index({ edificios, filters }) {
                             : 'bg-red-500/10 text-red-600 dark:text-red-400'
                     }`}
                 >
-                    {edificio.ativo ? 'Ativo' : 'Inativo'}
+                    {etiqueta(ESTADO_UTILIZADOR, String(edificio.ativo), edificio.ativo ? 'Ativo' : 'Inativo', tc)}
                 </span>
             ),
         },
         {
             key: 'acoes',
-            label: 'Ações',
+            label: t('listagem.acoes'),
             align: 'right',
             render: (edificio) => (
                 <div className="flex justify-end gap-2">
                     <Link
                         href={route('admin.edificios.edit', edificio.id)}
-                        title="Editar edifício"
-                        aria-label="Editar edifício"
+                        title={t('edificios.index.editarEdificio')}
+                        aria-label={t('edificios.index.editarEdificio')}
                         className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
                     >
                         <Pencil size={16} strokeWidth={1.9} />
@@ -133,8 +138,8 @@ export default function Index({ edificios, filters }) {
                         type="button"
                         onClick={() => alternarAtivo(edificio)}
                         disabled={processingId === edificio.id}
-                        title={edificio.ativo ? 'Desativar edifício' : 'Ativar edifício'}
-                        aria-label={edificio.ativo ? 'Desativar edifício' : 'Ativar edifício'}
+                        title={edificio.ativo ? t('edificios.index.desativarEdificio') : t('edificios.index.ativarEdificio')}
+                        aria-label={edificio.ativo ? t('edificios.index.desativarEdificio') : t('edificios.index.ativarEdificio')}
                         className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
                             edificio.ativo
                                 ? 'border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-500 dark:border-slate-700'
@@ -154,7 +159,7 @@ export default function Index({ edificios, filters }) {
 
     return (
         <DashboardLayout>
-            <Head title="Edifícios" />
+            <Head title={t('edificios.index.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
@@ -165,11 +170,11 @@ export default function Index({ edificios, filters }) {
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Edifícios
+                                {t('edificios.index.titulo')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {edificios.meta.total} edifício{edificios.meta.total === 1 ? '' : 's'} registado{edificios.meta.total === 1 ? '' : 's'}.
+                                {t('edificios.index.registados', { count: edificios.meta.total })}
                             </p>
                         </div>
                     </div>
@@ -179,7 +184,7 @@ export default function Index({ edificios, filters }) {
                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
                     >
                         <Plus size={18} strokeWidth={2} />
-                        Novo edifício
+                        {t('edificios.index.novoEdificio')}
                     </Link>
                 </div>
 
@@ -195,7 +200,7 @@ export default function Index({ edificios, filters }) {
                             type="text"
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Pesquisar por nome, código ou cidade"
+                            placeholder={t('edificios.index.pesquisarPlaceholder')}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                     </div>
@@ -205,9 +210,9 @@ export default function Index({ edificios, filters }) {
                         onChange={(event) => handleAtivoChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
-                        <option value="">Todos os estados</option>
-                        <option value="1">Ativos</option>
-                        <option value="0">Inativos</option>
+                        <option value="">{t('listagem.todosOsEstados')}</option>
+                        <option value="1">{t('listagem.ativos')}</option>
+                        <option value="0">{t('listagem.inativos')}</option>
                     </select>
 
                     <div className="flex gap-2">
@@ -216,7 +221,7 @@ export default function Index({ edificios, filters }) {
                             onClick={limpar}
                             className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700"
                         >
-                            Limpar
+                            {t('listagem.limpar')}
                         </button>
                     </div>
                 </div>
@@ -227,7 +232,7 @@ export default function Index({ edificios, filters }) {
                     <Table
                         columns={columns}
                         data={edificios.data}
-                        emptyMessage="Nenhum edifício encontrado."
+                        emptyMessage={t('edificios.index.semResultados')}
                     />
 
                     <Pagination

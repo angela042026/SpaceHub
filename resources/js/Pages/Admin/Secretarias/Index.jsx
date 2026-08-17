@@ -13,9 +13,11 @@ import {
     Search,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatarNomePiso } from '@/utils/formatarNomePiso';
 
 export default function Index({ secretarias, setores, filters }) {
+    const { t } = useTranslation('admin');
     const [processingId, setProcessingId] = useState(null);
     const [carregando, setCarregando] = useState(false);
 
@@ -67,8 +69,8 @@ export default function Index({ secretarias, setores, filters }) {
 
     const alternarAtivo = (secretaria) => {
         const mensagem = secretaria.ativo
-            ? `Desativar a secretária ${secretaria.codigo}?`
-            : `Ativar a secretária ${secretaria.codigo}?`;
+            ? t('secretarias.index.confirmarDesativar', { codigo: secretaria.codigo })
+            : t('secretarias.index.confirmarAtivar', { codigo: secretaria.codigo });
 
         if (!confirm(mensagem)) {
             return;
@@ -89,7 +91,7 @@ export default function Index({ secretarias, setores, filters }) {
     const columns = [
         {
             key: 'codigo',
-            label: 'Secretária',
+            label: t('secretarias.index.colunaSecretaria'),
             render: (secretaria) => (
                 <div className="flex items-center gap-2.5">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-500/10 text-teal-500">
@@ -103,17 +105,17 @@ export default function Index({ secretarias, setores, filters }) {
         },
         {
             key: 'setor',
-            label: 'Setor',
+            label: t('secretarias.create.setor'),
             render: (secretaria) => secretaria.setor ?? '-',
         },
         {
             key: 'piso',
-            label: 'Piso',
+            label: t('campos.piso'),
             render: (secretaria) => formatarNomePiso(secretaria.piso),
         },
         {
             key: 'reservavel',
-            label: 'Reservável',
+            label: t('setores.index.reservavel'),
             render: (secretaria) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
@@ -122,13 +124,13 @@ export default function Index({ secretarias, setores, filters }) {
                             : 'bg-slate-50 text-slate-400 dark:bg-slate-800/50 dark:text-slate-500'
                     }`}
                 >
-                    {secretaria.reservavel ? 'Reservável' : 'Não reservável'}
+                    {secretaria.reservavel ? t('setores.index.reservavel') : t('setores.index.naoReservavel')}
                 </span>
             ),
         },
         {
             key: 'ativo',
-            label: 'Estado',
+            label: t('listagem.estado'),
             render: (secretaria) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
@@ -137,20 +139,20 @@ export default function Index({ secretarias, setores, filters }) {
                             : 'bg-red-500/10 text-red-600 dark:text-red-400'
                     }`}
                 >
-                    {secretaria.ativo ? 'Ativa' : 'Inativa'}
+                    {secretaria.ativo ? t('secretarias.index.ativa') : t('secretarias.index.inativa')}
                 </span>
             ),
         },
         {
             key: 'acoes',
-            label: 'Ações',
+            label: t('listagem.acoes'),
             align: 'right',
             render: (secretaria) => (
                 <div className="flex justify-end gap-2">
                     <Link
                         href={route('secretarias.qrcode', secretaria.id)}
-                        title="Ver QR Code"
-                        aria-label="Ver QR Code"
+                        title={t('secretarias.index.verQrCode')}
+                        aria-label={t('secretarias.index.verQrCode')}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
@@ -160,8 +162,8 @@ export default function Index({ secretarias, setores, filters }) {
 
                     <Link
                         href={route('admin.secretarias.edit', secretaria.id)}
-                        title="Editar secretária"
-                        aria-label="Editar secretária"
+                        title={t('secretarias.index.editarSecretaria')}
+                        aria-label={t('secretarias.index.editarSecretaria')}
                         className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
                     >
                         <Pencil size={16} strokeWidth={1.9} />
@@ -171,8 +173,8 @@ export default function Index({ secretarias, setores, filters }) {
                         type="button"
                         onClick={() => alternarAtivo(secretaria)}
                         disabled={processingId === secretaria.id}
-                        title={secretaria.ativo ? 'Desativar secretária' : 'Ativar secretária'}
-                        aria-label={secretaria.ativo ? 'Desativar secretária' : 'Ativar secretária'}
+                        title={secretaria.ativo ? t('secretarias.index.desativarSecretaria') : t('secretarias.index.ativarSecretaria')}
+                        aria-label={secretaria.ativo ? t('secretarias.index.desativarSecretaria') : t('secretarias.index.ativarSecretaria')}
                         className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
                             secretaria.ativo
                                 ? 'border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-500 dark:border-slate-700'
@@ -192,7 +194,7 @@ export default function Index({ secretarias, setores, filters }) {
 
     return (
         <DashboardLayout>
-            <Head title="Secretárias" />
+            <Head title={t('secretarias.index.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
@@ -203,11 +205,11 @@ export default function Index({ secretarias, setores, filters }) {
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Secretárias
+                                {t('secretarias.index.titulo')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {secretarias.meta.total} secretária{secretarias.meta.total === 1 ? '' : 's'} registada{secretarias.meta.total === 1 ? '' : 's'}.
+                                {t('secretarias.index.registadas', { count: secretarias.meta.total })}
                             </p>
                         </div>
                     </div>
@@ -218,7 +220,7 @@ export default function Index({ secretarias, setores, filters }) {
                             className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                         >
                             <QrCode size={18} strokeWidth={1.9} />
-                            Ver QR Codes
+                            {t('secretarias.index.verQrCodes')}
                         </Link>
 
                         <Link
@@ -226,7 +228,7 @@ export default function Index({ secretarias, setores, filters }) {
                             className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
                         >
                             <Plus size={18} strokeWidth={2} />
-                            Nova secretária
+                            {t('secretarias.create.titulo')}
                         </Link>
                     </div>
                 </div>
@@ -243,7 +245,7 @@ export default function Index({ secretarias, setores, filters }) {
                             type="text"
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Pesquisar por código"
+                            placeholder={t('secretarias.index.pesquisarPlaceholder')}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                     </div>
@@ -253,7 +255,7 @@ export default function Index({ secretarias, setores, filters }) {
                         onChange={(event) => handleSetorChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
-                        <option value="">Todos os setores</option>
+                        <option value="">{t('secretarias.index.todosOsSetores')}</option>
 
                         {setores.map((setor) => (
                             <option key={setor.id} value={setor.id}>
@@ -267,9 +269,9 @@ export default function Index({ secretarias, setores, filters }) {
                         onChange={(event) => handleAtivoChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
-                        <option value="">Todos os estados</option>
-                        <option value="1">Ativas</option>
-                        <option value="0">Inativas</option>
+                        <option value="">{t('listagem.todosOsEstados')}</option>
+                        <option value="1">{t('secretarias.index.ativas')}</option>
+                        <option value="0">{t('secretarias.index.inativas')}</option>
                     </select>
 
                     <div className="flex gap-2">
@@ -278,7 +280,7 @@ export default function Index({ secretarias, setores, filters }) {
                             onClick={limpar}
                             className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700"
                         >
-                            Limpar
+                            {t('listagem.limpar')}
                         </button>
                     </div>
                 </div>
@@ -289,7 +291,7 @@ export default function Index({ secretarias, setores, filters }) {
                     <Table
                         columns={columns}
                         data={secretarias.data}
-                        emptyMessage="Nenhuma secretária encontrada."
+                        emptyMessage={t('secretarias.index.semResultados')}
                     />
 
                     <Pagination

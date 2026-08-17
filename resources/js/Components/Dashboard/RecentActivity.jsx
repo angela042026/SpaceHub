@@ -8,59 +8,41 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LoadingBadge } from '@/Components/Loading';
 
-const TIPOS = {
-    criada: {
-        icon: CalendarPlus,
-        dot: 'bg-teal-500',
-        texto: (utilizador, secretaria) =>
-            `${utilizador} reservou a secretária ${secretaria}`,
-    },
-    checkin: {
-        icon: CheckCircle2,
-        dot: 'bg-blue-500',
-        texto: (utilizador, secretaria) =>
-            `${utilizador} fez check-in na secretária ${secretaria}`,
-    },
-    cancelada: {
-        icon: XCircle,
-        dot: 'bg-red-500',
-        texto: (utilizador, secretaria) =>
-            `${utilizador} cancelou a reserva da secretária ${secretaria}`,
-    },
-    expirada: {
-        icon: TimerOff,
-        dot: 'bg-amber-500',
-        texto: (utilizador, secretaria) =>
-            `A reserva de ${utilizador} para a secretária ${secretaria} expirou`,
-    },
+const ICONES_TIPO = {
+    criada: { icon: CalendarPlus, dot: 'bg-teal-500' },
+    checkin: { icon: CheckCircle2, dot: 'bg-blue-500' },
+    cancelada: { icon: XCircle, dot: 'bg-red-500' },
+    expirada: { icon: TimerOff, dot: 'bg-amber-500' },
 };
 
-function tempoRelativo(timestamp) {
+function tempoRelativo(timestamp, t) {
     const diffMs = Date.now() - new Date(timestamp).getTime();
     const minutos = Math.max(0, Math.round(diffMs / 60000));
 
     if (minutos < 1) {
-        return 'agora mesmo';
+        return t('atividadeRecente.tempoRelativo.agoraMesmo');
     }
 
     if (minutos < 60) {
-        return `há ${minutos} min`;
+        return t('atividadeRecente.tempoRelativo.minutos', { count: minutos });
     }
 
     const horas = Math.round(minutos / 60);
 
     if (horas < 24) {
-        return `há ${horas} h`;
+        return t('atividadeRecente.tempoRelativo.horas', { count: horas });
     }
 
     const dias = Math.round(horas / 24);
 
-    return `há ${dias} dia${dias === 1 ? '' : 's'}`;
+    return t('atividadeRecente.tempoRelativo.dias', { count: dias });
 }
 
 export default function RecentActivity({ eventos = [] }) {
+    const { t } = useTranslation('dashboard');
     const [atualizando, setAtualizando] = useState(false);
 
     const eventosVisiveis = eventos.slice(0, 5);
@@ -104,17 +86,17 @@ export default function RecentActivity({ eventos = [] }) {
                 <div>
                     <div className="flex items-center gap-2">
                         <h2 className="text-lg font-bold text-slate-900 dark:text-[#f8fafc]">
-                            Atividade recente
+                            {t('atividadeRecente.titulo')}
                         </h2>
 
                         <LoadingBadge
                             show={atualizando}
-                            label="A atualizar"
+                            label={t('atividadeRecente.aAtualizar')}
                         />
                     </div>
 
                     <p className="text-sm text-slate-500 dark:text-[#8fa7bd]">
-                        Últimas ações no sistema.
+                        {t('atividadeRecente.subtitulo')}
                     </p>
                 </div>
             </div>
@@ -123,17 +105,18 @@ export default function RecentActivity({ eventos = [] }) {
                 {eventosVisiveis.length > 0 ? (
                     <ul className="divide-y divide-slate-100 dark:divide-[#2a5069]/60">
                         {eventosVisiveis.map((evento) => {
-                            const config =
-                                TIPOS[evento.tipo] ??
-                                TIPOS.criada;
+                            const tipo = ICONES_TIPO[evento.tipo] ? evento.tipo : 'criada';
+                            const config = ICONES_TIPO[tipo];
 
                             const utilizador =
                                 evento.utilizador ??
-                                'Utilizador removido';
+                                t('atividadeRecente.utilizadorRemovido');
 
                             const secretaria =
                                 evento.secretaria ??
-                                'secretária removida';
+                                t('atividadeRecente.secretariaRemovida');
+
+                            const texto = t(`atividadeRecente.tipos.${tipo}`, { utilizador, secretaria });
 
                             return (
                                 <li
@@ -171,20 +154,15 @@ export default function RecentActivity({ eventos = [] }) {
 
                                     <p
                                         className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-[#d7e3ed]"
-                                        title={config.texto(
-                                            utilizador,
-                                            secretaria,
-                                        )}
+                                        title={texto}
                                     >
-                                        {config.texto(
-                                            utilizador,
-                                            secretaria,
-                                        )}
+                                        {texto}
                                     </p>
 
                                     <span className="shrink-0 text-xs text-slate-400 dark:text-[#8fa7bd]">
                                         {tempoRelativo(
                                             evento.timestamp,
+                                            t,
                                         )}
                                     </span>
                                 </li>
@@ -201,7 +179,7 @@ export default function RecentActivity({ eventos = [] }) {
                         </div>
 
                         <p className="mt-4 max-w-xs text-sm leading-6 text-slate-400 dark:text-[#8fa7bd]">
-                            Ainda não existe atividade registada.
+                            {t('atividadeRecente.semAtividade')}
                         </p>
                     </div>
                 )}
@@ -211,7 +189,7 @@ export default function RecentActivity({ eventos = [] }) {
                         href={route('reservas.history')}
                         className="mt-auto flex items-center justify-center gap-2 rounded-xl border border-teal-500 bg-white py-2.5 text-sm font-bold text-teal-600 transition hover:bg-gradient-to-r hover:from-teal-50 hover:to-teal-100 hover:text-teal-700 dark:border-[#36566f] dark:bg-transparent dark:text-[#d7e3ed] dark:hover:border-[#18c3b3] dark:hover:bg-none dark:hover:bg-[#18c3b3]/[0.06] dark:hover:text-[#18c3b3]"
                     >
-                        Ver histórico completo
+                        {t('atividadeRecente.verHistoricoCompleto')}
                         <ArrowRight size={15} strokeWidth={1.9} />
                     </Link>
                 )}

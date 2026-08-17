@@ -12,6 +12,7 @@ import {
     Info,
     PieChart as PieChartIcon,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const COLORS = {
     livre: '#14b8a6',
@@ -33,13 +34,9 @@ const GRADIENTES_CSS = {
     ocupada: 'linear-gradient(to right, #fb7185, #e11d48)',
 };
 
-const LABELS = {
-    livre: 'Livres',
-    reservada: 'Reservadas',
-    ocupada: 'Ocupadas',
-};
-
 function DonutTooltip({ active, payload }) {
+    const { t } = useTranslation('dashboard');
+
     if (!active || !payload?.length) {
         return null;
     }
@@ -53,7 +50,7 @@ function DonutTooltip({ active, payload }) {
             </p>
 
             <p className="mt-1 text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
-                {item.value} secretárias
+                {t('charts.estadoAtual.secretariasCount', { count: item.value })}
             </p>
         </div>
     );
@@ -63,10 +60,10 @@ function DonutTooltip({ active, payload }) {
  * Mensagem de rodapé varia com a disponibilidade real — não é
  * decorativa, ajuda o admin a perceber de relance se precisa de agir.
  */
-function obterEstadoRodape(percentDisponivel, totalSecretarias) {
+function obterEstadoRodape(percentDisponivel, totalSecretarias, t) {
     if (totalSecretarias === 0) {
         return {
-            texto: 'Sem secretárias configuradas neste piso.',
+            texto: t('charts.estadoAtual.semSecretariasConfiguradas'),
             cor: 'bg-slate-100 text-slate-500 dark:bg-[#183f5d] dark:text-[#8fa7bd]',
             icon: Info,
         };
@@ -74,7 +71,7 @@ function obterEstadoRodape(percentDisponivel, totalSecretarias) {
 
     if (percentDisponivel === 100) {
         return {
-            texto: 'Todas as secretárias estão disponíveis.',
+            texto: t('charts.estadoAtual.todasDisponiveis'),
             cor: 'bg-green-500/10 text-green-600 dark:bg-[#22c983]/10 dark:text-[#22c983]',
             icon: CheckCircle2,
         };
@@ -82,20 +79,26 @@ function obterEstadoRodape(percentDisponivel, totalSecretarias) {
 
     if (percentDisponivel <= 10) {
         return {
-            texto: 'Ocupação perto do limite — pouca disponibilidade.',
+            texto: t('charts.estadoAtual.ocupacaoLimite'),
             cor: 'bg-rose-500/10 text-rose-600 dark:bg-[#ff4d6d]/10 dark:text-[#ff4d6d]',
             icon: AlertTriangle,
         };
     }
 
     return {
-        texto: `${100 - percentDisponivel}% da capacidade está em uso.`,
+        texto: t('charts.estadoAtual.capacidadeEmUso', { percentual: 100 - percentDisponivel }),
         cor: 'bg-teal-500/10 text-teal-600 dark:bg-[#18c3b3]/10 dark:text-[#18c3b3]',
         icon: Info,
     };
 }
 
 export default function OccupancyDonutChart({ data, porPiso = {}, pisos = [] }) {
+    const { t } = useTranslation('dashboard');
+    const LABELS = {
+        livre: t('officeMap.filtros.livres'),
+        reservada: t('officeMap.filtros.reservadas'),
+        ocupada: t('officeMap.filtros.ocupadas'),
+    };
     const [pisoSelecionado, setPisoSelecionado] = useState('');
 
     const dadosBase =
@@ -150,6 +153,7 @@ export default function OccupancyDonutChart({ data, porPiso = {}, pisos = [] }) 
     const estadoRodape = obterEstadoRodape(
         percentDisponivel,
         totalSecretarias,
+        t,
     );
     const IconeRodape = estadoRodape.icon;
 
@@ -166,11 +170,11 @@ export default function OccupancyDonutChart({ data, porPiso = {}, pisos = [] }) 
 
                     <div>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
-                            Estado atual
+                            {t('charts.estadoAtual.titulo')}
                         </h3>
 
                         <p className="mt-0.5 text-xs text-slate-400 dark:text-[#8fa7bd]">
-                            {totalSecretarias} secretárias
+                            {t('charts.estadoAtual.secretariasCount', { count: totalSecretarias })}
                         </p>
                     </div>
                 </div>
@@ -180,7 +184,7 @@ export default function OccupancyDonutChart({ data, porPiso = {}, pisos = [] }) 
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75 dark:bg-[#22c983]" />
                         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500 dark:bg-[#22c983]" />
                     </span>
-                    Agora
+                    {t('charts.estadoAtual.agora')}
                 </span>
             </header>
 
@@ -195,7 +199,7 @@ export default function OccupancyDonutChart({ data, porPiso = {}, pisos = [] }) 
                                 : 'bg-slate-100 text-slate-500 hover:text-teal-600 dark:bg-[#101f34] dark:text-[#afc0d0] dark:hover:text-[#18c3b3]'
                         }`}
                     >
-                        Todos
+                        {t('charts.estadoAtual.todos')}
                     </button>
 
                     {pisos.map((piso) => (
@@ -312,11 +316,11 @@ export default function OccupancyDonutChart({ data, porPiso = {}, pisos = [] }) 
                         </strong>
 
                         <span className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-[#8fa7bd]">
-                            Ocupação
+                            {t('charts.estadoAtual.ocupacao')}
                         </span>
 
                         <span className="text-[10px] text-slate-400 dark:text-[#8fa7bd]">
-                            Atual
+                            {t('charts.estadoAtual.atual')}
                         </span>
                     </div>
                 </div>

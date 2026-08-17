@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { lazy, Suspense, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { LoadingOverlay } from '@/Components/Loading';
 
@@ -55,12 +56,12 @@ const CHART_COLORS = {
     slate: '#64748b',
 };
 
-function formatarData(data) {
+function formatarData(data, locale = 'pt') {
     if (!data) {
         return '-';
     }
 
-    return new Date(data).toLocaleDateString('pt-PT', {
+    return new Date(data).toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT', {
         day: '2-digit',
         month: 'short',
     });
@@ -174,6 +175,7 @@ function RankingSection({
     getTotal,
     progressClass,
 }) {
+    const { t } = useTranslation('dashboard');
     const totais =
         items?.map((item) => Number(getTotal(item) ?? 0)) ?? [];
 
@@ -233,7 +235,7 @@ function RankingSection({
                         </div>
                     </>
                 ) : (
-                    <EmptyState text="Ainda não existem dados suficientes para apresentar este ranking." />
+                    <EmptyState text={t('statisticsPanel.semDadosSuficientesRanking')} />
                 )}
             </div>
         </section>
@@ -245,6 +247,7 @@ export default function StatisticsPanel({
     periodo = 'geral',
     periodoRoute = 'dashboard',
 }) {
+    const { t, i18n } = useTranslation('dashboard');
     const [carregando, setCarregando] = useState(false);
 
     function mudarPeriodo(event) {
@@ -293,10 +296,10 @@ export default function StatisticsPanel({
     const diasChart = useMemo(
         () =>
             estatisticas?.diasComMaiorOcupacao?.map((item) => ({
-                name: formatarData(item.data),
+                name: formatarData(item.data, i18n.language),
                 total: item.total,
             })) ?? [],
-        [estatisticas?.diasComMaiorOcupacao],
+        [estatisticas?.diasComMaiorOcupacao, i18n.language],
     );
 
     const pisoMaisUtilizado =
@@ -313,7 +316,7 @@ export default function StatisticsPanel({
 
     return (
         <section className="dashboard-card relative overflow-hidden">
-            <LoadingOverlay show={carregando} label="A atualizar estatísticas..." />
+            <LoadingOverlay show={carregando} label={t('statisticsPanel.aAtualizarEstatisticas')} />
 
             {/* Cabeçalho */}
             <div className="flex flex-col gap-5 border-b border-slate-100 px-6 py-5 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between">
@@ -324,11 +327,11 @@ export default function StatisticsPanel({
 
                     <div>
                         <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Estatísticas de Ocupação
+                            {t('statisticsPanel.titulo')}
                         </h2>
 
                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            Análise do uso dos espaços e das reservas.
+                            {t('statisticsPanel.subtitulo')}
                         </p>
                     </div>
                 </div>
@@ -343,19 +346,19 @@ export default function StatisticsPanel({
                     <select
                         value={periodo}
                         onChange={mudarPeriodo}
-                        aria-label="Selecionar período das estatísticas"
+                        aria-label={t('statisticsPanel.selecionarPeriodo')}
                         className="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/40 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
                         <option value="geral">
-                            Geral
+                            {t('statisticsPanel.periodos.geral')}
                         </option>
 
                         <option value="semana">
-                            Esta semana
+                            {t('statisticsPanel.periodos.semana')}
                         </option>
 
                         <option value="mes">
-                            Este mês
+                            {t('statisticsPanel.periodos.mes')}
                         </option>
                     </select>
 
@@ -383,15 +386,15 @@ export default function StatisticsPanel({
 
                                 <div>
                                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">
-                                        Piso em destaque
+                                        {t('statisticsPanel.pisoDestaque')}
                                     </p>
 
                                     <h3 className="mt-2 text-3xl font-extrabold tracking-tight">
-                                        {pisoMaisUtilizado?.nome ?? 'Sem dados'}
+                                        {pisoMaisUtilizado?.nome ?? t('destaques.semDados')}
                                     </h3>
 
                                     <p className="mt-2 text-sm text-slate-300">
-                                        Piso com maior número de reservas no período selecionado.
+                                        {t('statisticsPanel.pisoDestaqueTexto')}
                                     </p>
                                 </div>
                             </div>
@@ -403,7 +406,7 @@ export default function StatisticsPanel({
 
                                 <div>
                                     <p className="text-xs text-slate-300">
-                                        Total de reservas
+                                        {t('statisticsPanel.totalDeReservas')}
                                     </p>
 
                                     <p className="mt-0.5 text-2xl font-extrabold">
@@ -427,15 +430,15 @@ export default function StatisticsPanel({
 
                                 <div>
                                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">
-                                        Setor em destaque
+                                        {t('statisticsPanel.setorDestaque')}
                                     </p>
 
                                     <h3 className="mt-2 text-3xl font-extrabold tracking-tight">
-                                        {setorMaisUtilizado?.nome ?? 'Sem dados'}
+                                        {setorMaisUtilizado?.nome ?? t('destaques.semDados')}
                                     </h3>
 
                                     <p className="mt-2 text-sm text-slate-300">
-                                        Setor com maior número de reservas no período selecionado.
+                                        {t('statisticsPanel.setorDestaqueTexto')}
                                     </p>
                                 </div>
                             </div>
@@ -447,7 +450,7 @@ export default function StatisticsPanel({
 
                                 <div>
                                     <p className="text-xs text-slate-300">
-                                        Total de reservas
+                                        {t('statisticsPanel.totalDeReservas')}
                                     </p>
 
                                     <p className="mt-0.5 text-2xl font-extrabold">
@@ -462,8 +465,8 @@ export default function StatisticsPanel({
                 {/* Rankings */}
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                     <RankingSection
-                        title="Secretárias mais utilizadas"
-                        description="Postos com maior número de reservas"
+                        title={t('statisticsPanel.secretariasMaisUtilizadas')}
+                        description={t('statisticsPanel.secretariasMaisUtilizadasDesc')}
                         icon={TrendingUp}
                         items={estatisticas?.secretariasMaisUtilizadas}
                         chartData={secretariasMaisChart}
@@ -472,18 +475,18 @@ export default function StatisticsPanel({
                         getKey={(item) => item.secretaria_id}
                         getTitle={(item) =>
                             item.secretaria?.codigo ??
-                            'Secretária removida'
+                            t('statisticsPanel.secretariaRemovida')
                         }
                         getSubtitle={(item) =>
-                            `${item.total ?? 0} reservas registadas`
+                            t('statisticsPanel.reservasRegistadas', { count: item.total ?? 0 })
                         }
                         getTotal={(item) => item.total}
                         progressClass="bg-gradient-to-r from-teal-400 to-teal-500"
                     />
 
                     <RankingSection
-                        title="Secretárias menos utilizadas"
-                        description="Postos com menor procura"
+                        title={t('statisticsPanel.secretariasMenosUtilizadas')}
+                        description={t('statisticsPanel.secretariasMenosUtilizadasDesc')}
                         icon={TrendingDown}
                         items={estatisticas?.secretariasMenosUtilizadas}
                         chartData={secretariasMenosChart}
@@ -491,18 +494,18 @@ export default function StatisticsPanel({
                         gradientId="gradient-secretarias-menos"
                         getKey={(item) => item.id}
                         getTitle={(item) =>
-                            item.codigo ?? 'Secretária removida'
+                            item.codigo ?? t('statisticsPanel.secretariaRemovida')
                         }
                         getSubtitle={(item) =>
-                            `${item.reservas_count ?? 0} reservas registadas`
+                            t('statisticsPanel.reservasRegistadas', { count: item.reservas_count ?? 0 })
                         }
                         getTotal={(item) => item.reservas_count}
                         progressClass="bg-gradient-to-r from-slate-400 to-slate-500"
                     />
 
                     <RankingSection
-                        title="Utilizadores com mais reservas"
-                        description="Colaboradores mais ativos"
+                        title={t('statisticsPanel.utilizadoresComMaisReservas')}
+                        description={t('statisticsPanel.utilizadoresComMaisReservasDesc')}
                         icon={UserRound}
                         items={estatisticas?.utilizadoresComMaisReservas}
                         chartData={utilizadoresChart}
@@ -511,18 +514,18 @@ export default function StatisticsPanel({
                         getKey={(item) => item.user_id}
                         getTitle={(item) =>
                             item.user?.name ??
-                            'Utilizador removido'
+                            t('statisticsPanel.utilizadorRemovido')
                         }
                         getSubtitle={(item) =>
-                            `${item.total ?? 0} reservas registadas`
+                            t('statisticsPanel.reservasRegistadas', { count: item.total ?? 0 })
                         }
                         getTotal={(item) => item.total}
                         progressClass="bg-gradient-to-r from-navy-800 to-navy-900"
                     />
 
                     <RankingSection
-                        title="Dias com maior ocupação"
-                        description="Datas com maior atividade"
+                        title={t('statisticsPanel.diasComMaiorOcupacao')}
+                        description={t('statisticsPanel.diasComMaiorOcupacaoDesc')}
                         icon={CalendarDays}
                         items={estatisticas?.diasComMaiorOcupacao}
                         chartData={diasChart}
@@ -530,10 +533,10 @@ export default function StatisticsPanel({
                         gradientId="gradient-dias"
                         getKey={(item) => item.data}
                         getTitle={(item) =>
-                            formatarData(item.data)
+                            formatarData(item.data, i18n.language)
                         }
                         getSubtitle={(item) =>
-                            `${item.total ?? 0} reservas registadas`
+                            t('statisticsPanel.reservasRegistadas', { count: item.total ?? 0 })
                         }
                         getTotal={(item) => item.total}
                         progressClass="bg-gradient-to-r from-navy-800 to-teal-500"

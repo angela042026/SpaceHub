@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import DeskMarker from './DeskMarker';
 import MapLegend from './MapLegend';
 import SectorMarker from './SectorMarker';
@@ -35,6 +37,8 @@ export default function MapCanvas({
     onVerSecretariasDoSetor,
     onFecharSetorSelecionado,
 }) {
+    const { t } = useTranslation('dashboard');
+
     const alturas = {
         padrao: 'h-[460px] sm:h-[550px] xl:h-[585px]',
         grande: 'h-[500px] sm:h-[610px] xl:h-[690px]',
@@ -84,7 +88,7 @@ export default function MapCanvas({
                 >
                     <img
                         src={pisoAtual.planta}
-                        alt={`Planta do ${pisoAtual.nome}`}
+                        alt={t('officeMap.plantaAlt', { piso: pisoAtual.nome })}
                         draggable={false}
                         className={`pointer-events-none absolute inset-0 h-full w-full saturate-[1.04] contrast-[1.02] ${
                             ajustarProporcao ? 'object-contain' : 'object-fill'
@@ -144,8 +148,8 @@ export default function MapCanvas({
                         className="absolute bottom-3 left-3 rounded-lg border border-white/60 bg-white/90 px-3 py-2 text-[11px] font-semibold text-slate-500 shadow-sm backdrop-blur dark:border-[#2a5069]/60 dark:bg-[#101f34]/90 dark:text-[#b5c5d5] xl:hidden"
                     >
                         {setorSelecionado
-                            ? `${setorSelecionado.nome}: escolha uma secretária`
-                            : 'Clique num setor para ver as secretárias'}
+                            ? t('officeMap.escolhaSecretaria', { setor: setorSelecionado.nome })
+                            : t('officeMap.cliqueSetor')}
                     </div>
                 )}
 

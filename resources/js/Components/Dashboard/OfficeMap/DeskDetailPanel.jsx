@@ -10,6 +10,7 @@ import {
     Sparkles,
     X,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
 
@@ -18,6 +19,8 @@ import {
     ESTADO_VISUAL,
     estadoNormalizado,
     minutosDoDia,
+    traduzirComodidade,
+    traduzirEstadoVisual,
 } from './mapUtils';
 
 export default function DeskDetailPanel({
@@ -31,6 +34,8 @@ export default function DeskDetailPanel({
     setoresDoPiso,
     onSelecionarSetor,
 }) {
+    const { t } = useTranslation('dashboard');
+
     if (!secretaria) {
         if (!setor && showOverview) {
             return (
@@ -108,13 +113,15 @@ export default function DeskDetailPanel({
                     </div>
                     <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-[#f8fafc]">
                         {setor
-                            ? 'Escolha uma secretária'
-                            : 'Selecione um setor'}
+                            ? t('deskDetailPanel.escolhaSecretaria')
+                            : t('deskDetailPanel.selecioneSetor')}
                     </h3>
                     <p className="mt-2 max-w-[220px] text-xs leading-relaxed text-slate-500 dark:text-[#b5c5d5]">
                         {setor
-                            ? `As secretárias de ${setor.nome} estão visíveis no mapa.`
-                            : 'Clique no nome de um setor no mapa para visualizar apenas as secretárias desse setor.'}
+                            ? t('deskDetailPanel.secretariasVisiveisMapa', {
+                                  setor: setor.nome,
+                              })
+                            : t('deskDetailPanel.cliqueSetorMapa')}
                     </p>
                 </div>
             </aside>
@@ -142,7 +149,7 @@ export default function DeskDetailPanel({
                     type="button"
                     onClick={onClose}
                     className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
-                    aria-label="Fechar detalhes"
+                    aria-label={t('deskDetailPanel.fecharDetalhes')}
                 >
                     <X size={18} />
                 </button>
@@ -177,12 +184,12 @@ export default function DeskDetailPanel({
                             <span
                                 className={`h-2 w-2 rounded-full ${estado.bar}`}
                             />
-                            {estado.label}
+                            {traduzirEstadoVisual(estadoNormal, t)}
                         </span>
                         <p className="mt-1.5 text-[10px] text-slate-400 dark:text-[#8fa7bd]">
                             {estadoNormal === 'livre'
-                                ? 'Disponível agora'
-                                : 'Estado neste momento'}
+                                ? t('deskDetailPanel.disponivelAgora')
+                                : t('deskDetailPanel.estadoNesteMomento')}
                         </p>
                     </div>
                 </div>
@@ -190,30 +197,37 @@ export default function DeskDetailPanel({
 
             <div className="border-b border-slate-200 py-4 dark:border-[#2a5069]">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8fa7bd]">
-                    Comodidades
+                    {t('deskDetailPanel.comodidadesTitulo')}
                 </p>
 
                 <div className="mt-3 grid grid-cols-5 gap-2">
                     {comodidades.length > 0 ? (
                         comodidades.map(
-                            ([chave, label, Icon]) => (
-                                <div
-                                    key={chave}
-                                    className="group text-center"
-                                    title={label}
-                                >
-                                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-700 transition-colors duration-200 group-hover:bg-teal-500/15 group-hover:text-teal-700 dark:bg-slate-800 dark:text-slate-200 dark:group-hover:bg-[#18c3b3]/20 dark:group-hover:text-[#18c3b3]">
-                                        <Icon size={15} strokeWidth={1.8} />
+                            ([chave, chaveTraducao, Icon]) => {
+                                const label = traduzirComodidade(
+                                    chaveTraducao,
+                                    t,
+                                );
+
+                                return (
+                                    <div
+                                        key={chave}
+                                        className="group text-center"
+                                        title={label}
+                                    >
+                                        <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-700 transition-colors duration-200 group-hover:bg-teal-500/15 group-hover:text-teal-700 dark:bg-slate-800 dark:text-slate-200 dark:group-hover:bg-[#18c3b3]/20 dark:group-hover:text-[#18c3b3]">
+                                            <Icon size={15} strokeWidth={1.8} />
+                                        </div>
+                                        <p className="mt-1 truncate text-[8px] font-medium text-slate-500 dark:text-[#8fa7bd]">
+                                            {label}
+                                        </p>
                                     </div>
-                                    <p className="mt-1 truncate text-[8px] font-medium text-slate-500 dark:text-[#8fa7bd]">
-                                        {label}
-                                    </p>
-                                </div>
-                            ),
+                                );
+                            },
                         )
                     ) : (
                         <p className="col-span-5 text-xs text-slate-400 dark:text-[#8fa7bd]">
-                            Sem comodidades registadas.
+                            {t('deskDetailPanel.semComodidadesRegistadas')}
                         </p>
                     )}
                 </div>
@@ -231,8 +245,8 @@ export default function DeskDetailPanel({
                     className="h-11 w-full rounded-xl bg-teal-600 text-sm font-bold text-white shadow-lg shadow-teal-500/20 transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none dark:disabled:bg-[#2a5069] dark:disabled:text-[#8fa7bd]"
                 >
                     {estadoNormal === 'livre'
-                        ? 'Reservar agora'
-                        : 'Ver disponibilidade'}
+                        ? t('deskDetailPanel.reservarAgora')
+                        : t('deskDetailPanel.verDisponibilidade')}
                 </button>
             </div>
         </aside>
@@ -249,7 +263,7 @@ function formatarMinutos(minutos) {
 // Resumo dinâmico acima da timeline — olha só para os dados reais de
 // `periodos` (nunca inventa texto): identifica o segmento que contém a
 // hora atual e descreve até quando esse estado se mantém.
-function resumirDisponibilidade(periodos, agoraMinutos) {
+function resumirDisponibilidade(periodos, agoraMinutos, t) {
     const segmentoAtual = periodos.find((periodo) => {
         const inicio = minutosDoDia(periodo.inicio);
         const fim = minutosDoDia(periodo.fim);
@@ -261,11 +275,16 @@ function resumirDisponibilidade(periodos, agoraMinutos) {
         const fim = minutosDoDia(segmentoAtual.fim);
 
         if (estadoAtual === 'livre') {
-            return `Disponível até às ${formatarMinutos(fim)}`;
+            return t('deskDetailPanel.disponivelAte', {
+                hora: formatarMinutos(fim),
+            });
         }
 
-        const rotulo = ESTADO_VISUAL[estadoAtual]?.label ?? 'Indisponível';
-        return `${rotulo} até às ${formatarMinutos(fim)}`;
+        const rotulo = traduzirEstadoVisual(estadoAtual, t);
+        return t('deskDetailPanel.estadoAte', {
+            estado: rotulo,
+            hora: formatarMinutos(fim),
+        });
     }
 
     const proximoBloqueio = periodos
@@ -275,23 +294,26 @@ function resumirDisponibilidade(periodos, agoraMinutos) {
         .sort((a, b) => a - b)[0];
 
     if (proximoBloqueio !== undefined) {
-        return `Disponível até às ${formatarMinutos(proximoBloqueio)}`;
+        return t('deskDetailPanel.disponivelAte', {
+            hora: formatarMinutos(proximoBloqueio),
+        });
     }
 
-    return 'Disponível durante todo o período selecionado';
+    return t('deskDetailPanel.disponivelTodoPeriodo');
 }
 
 export function AvailabilityTimeline({ periodos }) {
+    const { t } = useTranslation('dashboard');
     const agoraMinutos = minutosDoDia(
         new Date().toTimeString().slice(0, 5),
     );
-    const resumo = resumirDisponibilidade(periodos, agoraMinutos);
+    const resumo = resumirDisponibilidade(periodos, agoraMinutos, t);
 
     return (
         <div className="border-b border-slate-200 py-4 dark:border-[#2a5069]">
             <div className="flex items-center justify-between">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8fa7bd]">
-                    Disponibilidade · hoje
+                    {t('deskDetailPanel.disponibilidadeHoje')}
                 </p>
                 <CalendarDays
                     size={13}
@@ -323,11 +345,15 @@ export function AvailabilityTimeline({ periodos }) {
                     const estado =
                         ESTADO_VISUAL[estadoChave] ??
                         ESTADO_VISUAL.reservada;
+                    const estadoLabel = traduzirEstadoVisual(
+                        estadoChave,
+                        t,
+                    );
 
                     return (
                         <span
                             key={`${periodo.inicio}-${periodo.fim}-${indice}`}
-                            title={`${estado.label} · ${periodo.inicio}–${periodo.fim}`}
+                            title={`${estadoLabel} · ${periodo.inicio}–${periodo.fim}`}
                             className={`absolute inset-y-0 ${estado.bar}`}
                             style={{
                                 left: `${(inicio / 1440) * 100}%`,
@@ -360,7 +386,7 @@ export function AvailabilityTimeline({ periodos }) {
                             <span
                                 className={`h-2 w-2 rounded-full ${item.bar}`}
                             />
-                            {item.label}
+                            {traduzirEstadoVisual(chave, t)}
                         </span>
                     ),
                 )}
@@ -439,6 +465,8 @@ function BarraDisponibilidadeSetor({ livres, reservadas, total }) {
 }
 
 function SetoresDoPisoPanel({ piso, setores, onSelecionarSetor }) {
+    const { t } = useTranslation('dashboard');
+
     const maiorSetorId = setores.reduce(
         (maior, setor) =>
             !maior || setor.total > maior.total ? setor : maior,
@@ -446,9 +474,9 @@ function SetoresDoPisoPanel({ piso, setores, onSelecionarSetor }) {
     )?.id;
 
     const passos = [
-        { numero: 1, label: 'Setor' },
-        { numero: 2, label: 'Secretária' },
-        { numero: 3, label: 'Reservar' },
+        { numero: 1, label: t('deskDetailPanel.passoSetor') },
+        { numero: 2, label: t('deskDetailPanel.passoSecretaria') },
+        { numero: 3, label: t('deskDetailPanel.passoReservar') },
     ];
     const passoAtual = 1;
 
@@ -457,23 +485,26 @@ function SetoresDoPisoPanel({ piso, setores, onSelecionarSetor }) {
             <div className="flex shrink-0 items-start justify-between gap-3">
                 <div className="min-w-0">
                     <p className="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-[#18c3b3]">
-                        Reserva rápida
+                        {t('deskDetailPanel.reservaRapida')}
                     </p>
 
                     <h3 className="mt-1 text-xl font-bold text-slate-900 dark:text-[#f8fafc]">
-                        Escolha onde quer ficar
+                        {t('deskDetailPanel.escolhaOndeQuerFicar')}
                     </h3>
 
                     <p className="mt-1 text-xs text-slate-500 dark:text-[#8fa7bd]">
-                        Selecione primeiro um setor
-                        {piso?.nome ? ` do ${piso.nome}` : ''}.
+                        {piso?.nome
+                            ? t('deskDetailPanel.selecionePrimeiroSetorDoPiso', {
+                                  piso: piso.nome,
+                              })
+                            : t('deskDetailPanel.selecionePrimeiroSetor')}
                     </p>
                 </div>
 
                 <Link
                     href={route('faqs.index')}
-                    title="Ajuda"
-                    aria-label="Ajuda"
+                    title={t('deskDetailPanel.ajuda')}
+                    aria-label={t('deskDetailPanel.ajuda')}
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:border-teal-400 hover:text-teal-600 dark:border-[#2a5069] dark:text-[#8fa7bd]"
                 >
                     <HelpCircle size={16} strokeWidth={1.9} />
@@ -519,7 +550,7 @@ function SetoresDoPisoPanel({ piso, setores, onSelecionarSetor }) {
             </div>
 
             <p className="mt-4 shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8fa7bd]">
-                Setores disponíveis
+                {t('deskDetailPanel.setoresDisponiveis')}
             </p>
 
             <div className="spacehub-scroll mt-2.5 min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
@@ -538,14 +569,16 @@ function SetoresDoPisoPanel({ piso, setores, onSelecionarSetor }) {
 
                                 {setor.id === maiorSetorId && (
                                     <span className="shrink-0 rounded-full bg-teal-500/10 px-2 py-0.5 text-[10px] font-bold text-teal-700 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
-                                        Mais opções
+                                        {t('deskDetailPanel.maisOpcoes')}
                                     </span>
                                 )}
                             </div>
 
                             <p className="mt-0.5 text-xs font-semibold text-slate-400 dark:text-[#8fa7bd]">
-                                {setor.livres} livres de{' '}
-                                {setor.total}
+                                {t('deskDetailPanel.livresDeTotal', {
+                                    livres: setor.livres,
+                                    total: setor.total,
+                                })}
                             </p>
 
                             <BarraDisponibilidadeSetor
@@ -571,8 +604,7 @@ function SetoresDoPisoPanel({ piso, setores, onSelecionarSetor }) {
                     className="mt-0.5 shrink-0 text-teal-600 dark:text-[#18c3b3]"
                 />
                 <p className="text-[11px] leading-relaxed text-teal-700 dark:text-[#18c3b3]">
-                    Ao escolher um setor, as secretárias disponíveis
-                    aparecem no mapa.
+                    {t('deskDetailPanel.avisoSetorMapa')}
                 </p>
             </div>
         </aside>
@@ -586,6 +618,7 @@ function SetoresDoPisoPanel({ piso, setores, onSelecionarSetor }) {
  * instruções de como continuar diretamente no mapa.
  */
 function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
+    const { t } = useTranslation('dashboard');
     const secretarias = setor.secretarias ?? [];
     const total = secretarias.length;
     const contagem = secretarias.reduce(
@@ -608,23 +641,24 @@ function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
             <div className="flex shrink-0 items-start justify-between gap-3">
                 <div className="min-w-0">
                     <p className="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-[#18c3b3]">
-                        Reserva rápida
+                        {t('deskDetailPanel.reservaRapida')}
                     </p>
 
                     <h3 className="mt-1 text-xl font-bold text-slate-900 dark:text-[#f8fafc]">
-                        Escolha uma secretária
+                        {t('deskDetailPanel.escolhaSecretaria')}
                     </h3>
 
                     <p className="mt-1 text-xs text-slate-500 dark:text-[#8fa7bd]">
-                        As secretárias de {setor.nome} estão
-                        visíveis no mapa.
+                        {t('deskDetailPanel.secretariasVisiveisMapa', {
+                            setor: setor.nome,
+                        })}
                     </p>
                 </div>
 
                 <Link
                     href={route('faqs.index')}
-                    title="Ajuda"
-                    aria-label="Ajuda"
+                    title={t('deskDetailPanel.ajuda')}
+                    aria-label={t('deskDetailPanel.ajuda')}
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-400 transition hover:border-teal-400 hover:text-teal-600 dark:border-[#2a5069] dark:text-[#8fa7bd]"
                 >
                     <HelpCircle size={16} strokeWidth={1.9} />
@@ -641,7 +675,7 @@ function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
                             <Check size={16} strokeWidth={2.5} />
                         </span>
                         <span className="whitespace-nowrap text-[11px] font-bold text-teal-700 dark:text-[#18c3b3]">
-                            Setor
+                            {t('deskDetailPanel.passoSetor')}
                         </span>
                     </div>
 
@@ -650,7 +684,7 @@ function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
                             2
                         </span>
                         <span className="whitespace-nowrap text-[11px] font-bold text-teal-700 dark:text-[#18c3b3]">
-                            Secretária
+                            {t('deskDetailPanel.passoSecretaria')}
                         </span>
                     </div>
 
@@ -659,14 +693,14 @@ function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
                             3
                         </span>
                         <span className="whitespace-nowrap text-[11px] font-bold text-slate-400 dark:text-[#8fa7bd]">
-                            Reservar
+                            {t('deskDetailPanel.passoReservar')}
                         </span>
                     </div>
                 </div>
             </div>
 
             <p className="mt-4 shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8fa7bd]">
-                Setor selecionado
+                {t('deskDetailPanel.setorSelecionado')}
             </p>
 
             <div className="mt-2.5 shrink-0 rounded-2xl border border-teal-500/20 bg-teal-500/[0.04] p-3.5 dark:border-[#18c3b3]/20 dark:bg-[#18c3b3]/[0.06]">
@@ -680,8 +714,11 @@ function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
                             {setor.nome}
                         </p>
                         <p className="text-xs font-semibold text-slate-500 dark:text-[#8fa7bd]">
-                            {piso?.nome} · {contagem.livre} de{' '}
-                            {total} livres
+                            {piso?.nome} ·{' '}
+                            {t('deskDetailPanel.deTotalLivres', {
+                                livres: contagem.livre,
+                                total,
+                            })}
                         </p>
                     </div>
                 </div>
@@ -697,12 +734,12 @@ function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
                     onClick={onAlterarSetor}
                     className="mt-2.5 text-xs font-bold text-teal-700 transition hover:text-teal-800 dark:text-[#18c3b3] dark:hover:text-[#5eead4]"
                 >
-                    ← Alterar setor
+                    ← {t('deskDetailPanel.alterarSetor')}
                 </button>
             </div>
 
             <p className="mt-4 shrink-0 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8fa7bd]">
-                Escolha no mapa
+                {t('deskDetailPanel.escolhaNoMapa')}
             </p>
 
             <div className="mt-2.5 flex-1 space-y-3">
@@ -712,30 +749,28 @@ function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
                     </span>
                     <div className="min-w-0">
                         <p className="text-xs font-bold text-slate-800 dark:text-[#f8fafc]">
-                            Selecione uma secretária numerada
+                            {t('deskDetailPanel.selecioneSecretariaNumerada')}
                         </p>
                         <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 dark:text-[#8fa7bd]">
-                            Clique num número turquesa para
-                            consultar os detalhes e a
-                            disponibilidade.
+                            {t('deskDetailPanel.cliqueNumeroTurquesa')}
                         </p>
 
                         <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] font-semibold text-slate-500 dark:text-[#8fa7bd]">
                             <span className="flex items-center gap-1.5">
                                 <span className="h-1.5 w-1.5 rounded-full bg-teal-500 dark:bg-[#18c3b3]" />
-                                Livre
+                                {t('officeMap.estados.livre')}
                             </span>
                             <span className="flex items-center gap-1.5">
                                 <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-                                Reservada
+                                {t('officeMap.estados.reservada')}
                             </span>
                             <span className="flex items-center gap-1.5">
                                 <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                                Ocupada
+                                {t('officeMap.estados.ocupada')}
                             </span>
                             <span className="flex items-center gap-1.5">
                                 <span className="h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-[#3d5a75]" />
-                                Indisponível
+                                {t('officeMap.estados.indisponivel')}
                             </span>
                         </div>
                     </div>
@@ -749,8 +784,7 @@ function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
                     className="mt-0.5 shrink-0 text-teal-600 dark:text-[#18c3b3]"
                 />
                 <p className="text-[11px] leading-relaxed text-teal-700 dark:text-[#18c3b3]">
-                    Depois de escolher a secretária, clique em
-                    Reservar agora para continuar.
+                    {t('deskDetailPanel.avisoReservarAgora')}
                 </p>
             </div>
         </aside>
@@ -772,6 +806,7 @@ function OcupacaoRing() {
 }
 
 function FloorOverview({ floorName, overview }) {
+    const { t } = useTranslation('dashboard');
     const total = overview?.total ?? 0;
     const livres = overview?.livres ?? 0;
     const reservadas = overview?.reservadas ?? 0;
@@ -784,13 +819,21 @@ function FloorOverview({ floorName, overview }) {
     const percentualOcupacao = percentual(emUtilizacao);
 
     const linhas = [
-        { chave: 'livre', label: 'Livres', valor: livres },
+        {
+            chave: 'livre',
+            label: t('officeMap.filtros.livres'),
+            valor: livres,
+        },
         {
             chave: 'reservada',
-            label: 'Reservadas',
+            label: t('officeMap.filtros.reservadas'),
             valor: reservadas,
         },
-        { chave: 'ocupada', label: 'Ocupadas', valor: ocupadas },
+        {
+            chave: 'ocupada',
+            label: t('officeMap.filtros.ocupadas'),
+            valor: ocupadas,
+        },
     ];
 
     return (
@@ -798,15 +841,15 @@ function FloorOverview({ floorName, overview }) {
             <div>
                 <div className="flex items-center gap-2">
                     <h2 className="text-lg font-extrabold text-slate-900 dark:text-[#f8fafc]">
-                        Visão geral
+                        {t('deskDetailPanel.visaoGeral')}
                     </h2>
                     <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 dark:bg-[#183f5d] dark:text-[#b5c5d5]">
-                        {floorName ?? 'Piso'}
+                        {floorName ?? t('deskDetailPanel.pisoFallback')}
                     </span>
                 </div>
 
                 <p className="mt-1 text-sm text-slate-500 dark:text-[#b5c5d5]">
-                    {total} secretárias
+                    {t('officeMap.secretariaCount', { count: total })}
                 </p>
             </div>
 
@@ -816,10 +859,12 @@ function FloorOverview({ floorName, overview }) {
                         {percentualOcupacao}%
                     </p>
                     <p className="mt-1 text-sm font-bold text-slate-700 dark:text-[#d7e3ed]">
-                        Ocupação atual
+                        {t('deskDetailPanel.ocupacaoAtual')}
                     </p>
                     <p className="mt-0.5 text-xs text-slate-400 dark:text-[#8fa7bd]">
-                        {emUtilizacao} reservadas ou ocupadas
+                        {t('deskDetailPanel.reservadasOuOcupadas', {
+                            count: emUtilizacao,
+                        })}
                     </p>
                 </div>
 
@@ -886,7 +931,7 @@ function FloorOverview({ floorName, overview }) {
                     <MapPin size={16} strokeWidth={1.8} />
                 </div>
                 <p className="text-xs leading-relaxed text-slate-500 dark:text-[#d7e3ed]">
-                    Selecione um setor no mapa para ver os detalhes.
+                    {t('deskDetailPanel.selecioneSetorMapa')}
                 </p>
             </div>
         </aside>

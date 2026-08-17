@@ -9,6 +9,7 @@ import {
     YAxis,
 } from 'recharts';
 import { Gauge } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * "Taxa de Ocupação por Dia" — área turquesa com linha de média,
@@ -19,6 +20,8 @@ import { Gauge } from 'lucide-react';
  * interno de dias).
  */
 function OcupacaoTooltip({ active, payload, label }) {
+    const { t } = useTranslation('dashboard');
+
     if (!active || !payload?.length) {
         return null;
     }
@@ -28,13 +31,14 @@ function OcupacaoTooltip({ active, payload, label }) {
             <p className="text-xs font-bold text-slate-700 dark:text-white">{label}</p>
 
             <p className="mt-1 text-sm font-bold text-teal-600 dark:text-teal-400">
-                {payload[0]?.value ?? 0}% de ocupação
+                {t('statistics.ocupacaoPorDia.percentualOcupacao', { valor: payload[0]?.value ?? 0 })}
             </p>
         </div>
     );
 }
 
 export default function OcupacaoPorDiaChart({ data }) {
+    const { t } = useTranslation('dashboard');
     const atual = data?.atual ?? [];
     const media = data?.media ?? 0;
 
@@ -48,17 +52,17 @@ export default function OcupacaoPorDiaChart({ data }) {
 
                     <div>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                            Taxa de Ocupação por Dia
+                            {t('statistics.ocupacaoPorDia.titulo')}
                         </h3>
 
                         <p className="mt-0.5 text-xs text-slate-500">
-                            Secretárias ocupadas / total reservável
+                            {t('statistics.ocupacaoPorDia.subtitulo')}
                         </p>
                     </div>
                 </div>
 
                 <span className="shrink-0 rounded-full bg-teal-500/10 px-2.5 py-1 text-xs font-bold text-teal-600 dark:text-teal-400">
-                    Média: {media}%
+                    {t('statistics.ocupacaoPorDia.media', { valor: media })}
                 </span>
             </header>
 
@@ -106,7 +110,7 @@ export default function OcupacaoPorDiaChart({ data }) {
                                     strokeDasharray="5 5"
                                     strokeWidth={1.5}
                                     label={{
-                                        value: `Média: ${media}%`,
+                                        value: t('statistics.ocupacaoPorDia.media', { valor: media }),
                                         position: 'insideTopRight',
                                         fill: '#0d9488',
                                         fontSize: 11,
@@ -129,7 +133,7 @@ export default function OcupacaoPorDiaChart({ data }) {
                     </div>
                 ) : (
                     <div className="flex h-[245px] items-center justify-center">
-                        <p className="text-sm text-slate-400">Sem dados de ocupação neste período.</p>
+                        <p className="text-sm text-slate-400">{t('statistics.ocupacaoPorDia.semDados')}</p>
                     </div>
                 )}
             </div>

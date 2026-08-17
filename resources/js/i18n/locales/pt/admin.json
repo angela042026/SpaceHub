@@ -1,1 +1,359 @@
-{}
+{
+    "campos": {
+        "nome": "Nome",
+        "codigo": "Código",
+        "morada": "Morada",
+        "codigoPostal": "Código postal",
+        "cidade": "Cidade",
+        "pais": "País",
+        "telefone": "Telefone",
+        "email": "E-mail",
+        "horaAbertura": "Hora de abertura",
+        "horaFecho": "Hora de fecho",
+        "imagem": "Imagem",
+        "escolherFicheiro": "Escolher ficheiro",
+        "trocarFicheiro": "Trocar ficheiro",
+        "previsualizacao": "Pré-visualização",
+        "descricao": "Descrição",
+        "edificio": "Edifício",
+        "numero": "Número",
+        "plantaImagem": "Planta (imagem)",
+        "previsualizacaoDaPlanta": "Pré-visualização da planta",
+        "piso": "Piso",
+        "tipo": "Tipo",
+        "capacidade": "Capacidade"
+    },
+    "form": {
+        "guardarAlteracoes": "Guardar alterações",
+        "aGuardar": "A guardar...",
+        "cancelar": "Cancelar"
+    },
+    "listagem": {
+        "localizacao": "Localização",
+        "estado": "Estado",
+        "acoes": "Ações",
+        "todosOsEstados": "Todos os estados",
+        "ativos": "Ativos",
+        "inativos": "Inativos",
+        "limpar": "Limpar"
+    },
+    "edificios": {
+        "create": {
+            "titulo": "Novo edifício",
+            "subtitulo": "Cadastra um novo edifício na plataforma.",
+            "criar": "Criar edifício",
+            "aCriar": "A criar..."
+        },
+        "edit": {
+            "headTitle": "Editar {{nome}}",
+            "titulo": "Editar edifício",
+            "imagemAlt": "Imagem do {{nome}}"
+        },
+        "index": {
+            "titulo": "Edifícios",
+            "colunaEdificio": "Edifício",
+            "registados_one": "{{count}} edifício registado.",
+            "registados_other": "{{count}} edifícios registados.",
+            "novoEdificio": "Novo edifício",
+            "pesquisarPlaceholder": "Pesquisar por nome, código ou cidade",
+            "semResultados": "Nenhum edifício encontrado.",
+            "editarEdificio": "Editar edifício",
+            "ativarEdificio": "Ativar edifício",
+            "desativarEdificio": "Desativar edifício",
+            "confirmarAtivar": "Ativar o edifício {{nome}}?",
+            "confirmarDesativar": "Desativar o edifício {{nome}}?"
+        }
+    },
+    "pisos": {
+        "create": {
+            "titulo": "Novo piso",
+            "subtitulo": "Cadastra um novo piso associado a um edifício.",
+            "selecioneEdificio": "Selecione um edifício",
+            "criar": "Criar piso",
+            "aCriar": "A criar..."
+        },
+        "edit": {
+            "headTitle": "Editar {{nome}}",
+            "titulo": "Editar piso",
+            "plantaAlt": "Planta do {{nome}}"
+        },
+        "index": {
+            "titulo": "Pisos",
+            "colunaPiso": "Piso",
+            "registados_one": "{{count}} piso registado.",
+            "registados_other": "{{count}} pisos registados.",
+            "novoPiso": "Novo piso",
+            "pesquisarPlaceholder": "Pesquisar por nome ou código",
+            "todosOsEdificios": "Todos os edifícios",
+            "semResultados": "Nenhum piso encontrado.",
+            "editarPiso": "Editar piso",
+            "ativarPiso": "Ativar piso",
+            "desativarPiso": "Desativar piso",
+            "confirmarAtivar": "Ativar o piso {{nome}}?",
+            "confirmarDesativar": "Desativar o piso {{nome}}?"
+        }
+    },
+    "setores": {
+        "create": {
+            "titulo": "Novo setor",
+            "subtitulo": "Cadastra um novo setor associado a um piso.",
+            "selecionePiso": "Selecione um piso",
+            "setorReservavel": "Setor reservável (com secretárias)",
+            "criar": "Criar setor",
+            "aCriar": "A criar..."
+        },
+        "edit": {
+            "headTitle": "Editar {{nome}}",
+            "titulo": "Editar setor"
+        },
+        "index": {
+            "titulo": "Setores",
+            "colunaSetor": "Setor",
+            "registados_one": "{{count}} setor registado.",
+            "registados_other": "{{count}} setores registados.",
+            "novoSetor": "Novo setor",
+            "pesquisarPlaceholder": "Pesquisar por nome ou código",
+            "todosOsPisos": "Todos os pisos",
+            "reservavel": "Reservável",
+            "naoReservavel": "Não reservável",
+            "semResultados": "Nenhum setor encontrado.",
+            "editarSetor": "Editar setor",
+            "ativarSetor": "Ativar setor",
+            "desativarSetor": "Desativar setor",
+            "confirmarAtivar": "Ativar o setor {{nome}}?",
+            "confirmarDesativar": "Desativar o setor {{nome}}?"
+        },
+        "tipos": {
+            "open_space": "Open Space",
+            "escritorio": "Escritório",
+            "escritorio_executivo": "Escritório Executivo",
+            "sala_reunioes": "Sala de Reuniões",
+            "sala_criativa": "Sala Criativa",
+            "phone_booth": "Phone Booth",
+            "rececao": "Receção",
+            "copa": "Copa",
+            "lounge": "Lounge",
+            "sala_espera": "Sala de Espera",
+            "wc": "Instalações Sanitárias",
+            "estacionamento": "Estacionamento",
+            "tecnico": "Sala Técnica",
+            "outro": "Outro"
+        }
+    },
+    "secretarias": {
+        "comodidadesTitulo": "Comodidades",
+        "comodidades": {
+            "monitor": "Monitor",
+            "dock_usb": "Dock USB-C",
+            "hdmi": "HDMI",
+            "ergonomica": "Cadeira ergonómica",
+            "junto_janela": "Junto à janela",
+            "luz_natural": "Luz natural",
+            "zona_silenciosa": "Zona silenciosa",
+            "proximo_copa": "Próximo da copa"
+        },
+        "create": {
+            "titulo": "Nova secretária",
+            "subtitulo": "Cadastra uma nova secretária associada a um setor.",
+            "selecione": "Selecione...",
+            "selecionePrimeiroPiso": "Selecione primeiro o piso",
+            "setor": "Setor",
+            "disponivelParaReserva": "Disponível para reserva",
+            "criar": "Criar secretária",
+            "aCriar": "A criar..."
+        },
+        "edit": {
+            "headTitle": "Editar {{codigo}}",
+            "titulo": "Editar secretária",
+            "imagemAlt": "Imagem da {{codigo}}"
+        },
+        "index": {
+            "titulo": "Secretárias",
+            "colunaSecretaria": "Secretária",
+            "registadas_one": "{{count}} secretária registada.",
+            "registadas_other": "{{count}} secretárias registadas.",
+            "verQrCodes": "Ver QR Codes",
+            "verQrCode": "Ver QR Code",
+            "pesquisarPlaceholder": "Pesquisar por código",
+            "todosOsSetores": "Todos os setores",
+            "ativas": "Ativas",
+            "inativas": "Inativas",
+            "ativa": "Ativa",
+            "inativa": "Inativa",
+            "semResultados": "Nenhuma secretária encontrada.",
+            "editarSecretaria": "Editar secretária",
+            "ativarSecretaria": "Ativar secretária",
+            "desativarSecretaria": "Desativar secretária",
+            "confirmarAtivar": "Ativar a secretária {{codigo}}?",
+            "confirmarDesativar": "Desativar a secretária {{codigo}}?"
+        }
+    },
+    "users": {
+        "create": {
+            "titulo": "Novo utilizador",
+            "subtitulo": "Cria uma conta e define o papel de acesso.",
+            "escolherFotografia": "Escolher fotografia",
+            "nomeCompleto": "Nome completo",
+            "senha": "Senha",
+            "confirmarSenha": "Confirmar senha",
+            "senhasNaoCoincidem": "As senhas não coincidem.",
+            "papel": "Papel",
+            "selecionePapel": "Selecione um papel",
+            "contaAtiva": "Conta ativa",
+            "criar": "Criar utilizador",
+            "aCriar": "A criar..."
+        },
+        "edit": {
+            "headTitle": "Editar {{nome}}",
+            "titulo": "Editar utilizador",
+            "trocarFotografia": "Trocar fotografia",
+            "novaSenha": "Nova senha",
+            "deixarBranco": "Deixe em branco para manter a atual",
+            "confirmarNovaSenha": "Confirmar nova senha",
+            "contaAtiva": "Conta ativa",
+            "contaDesativada": "Conta desativada"
+        },
+        "index": {
+            "titulo": "Utilizadores",
+            "colunaUtilizador": "Utilizador",
+            "registados_one": "{{count}} utilizador registado.",
+            "registados_other": "{{count}} utilizadores registados.",
+            "pesquisarPlaceholder": "Pesquisar por nome ou e-mail",
+            "todosOsPapeis": "Todos os papéis",
+            "nenhumEncontrado": "Nenhum utilizador encontrado",
+            "experimenteAlterarFiltros": "Experimente alterar ou limpar os filtros.",
+            "editarUtilizador": "Editar utilizador",
+            "ativarUtilizador": "Ativar utilizador",
+            "desativarUtilizador": "Desativar utilizador",
+            "naoPodeDesativarPropriaConta": "Não pode desativar a sua própria conta",
+            "confirmarDesativarTitulo": "Desativar {{nome}}?",
+            "confirmarDesativarTexto": "O utilizador deixa de conseguir aceder à plataforma até a conta ser reativada.",
+            "aDesativar": "A desativar..."
+        }
+    },
+    "reservas": {
+        "edit": {
+            "titulo": "Editar Reserva",
+            "subtitulo": "Altera a data, o período ou o espaço desta reserva.",
+            "data": "Data",
+            "periodo": "Período",
+            "categoriaDoEspaco": "Categoria do Espaço",
+            "lugar": "Lugar",
+            "selecionePrimeiroCategoria": "Selecione primeiro a categoria",
+            "observacoes": "Observações"
+        },
+        "index": {
+            "titulo": "Reservas",
+            "subtitulo_one": "{{count}} reserva de todos os utilizadores.",
+            "subtitulo_other": "{{count}} reservas de todos os utilizadores.",
+            "utilizador": "Utilizador",
+            "espaco": "Espaço",
+            "pesquisarPlaceholder": "Pesquisar por nome ou email…",
+            "todosOsEspacos": "Todos os espaços",
+            "semResultados": "Nenhuma reserva encontrada.",
+            "itemLabel": "reservas",
+            "editarReserva": "Editar reserva",
+            "cancelarReserva": "Cancelar reserva",
+            "semAcoes": "Sem ações",
+            "confirmarCancelar": "Cancelar a reserva de {{nome}}?",
+            "utilizadorGenerico": "utilizador"
+        }
+    },
+    "avaliacoes": {
+        "index": {
+            "titulo": "Avaliações",
+            "subtitulo": "Consulte e modere as avaliações enviadas pelos utilizadores.",
+            "nota": "Nota",
+            "comentario": "Comentário",
+            "utilizadorReserva": "Utilizador / Reserva",
+            "enviadaEm": "Enviada em",
+            "totalAvaliacoes": "Total de Avaliações",
+            "avaliacaoMedia": "Avaliação Média",
+            "pendentes": "Pendentes",
+            "taxaAprovacao": "Taxa de Aprovação",
+            "filtros": {
+                "todas": "Todas",
+                "pendente": "Pendentes",
+                "aprovada": "Aprovadas",
+                "rejeitada": "Rejeitadas"
+            },
+            "pesquisarPlaceholder": "Pesquisar avaliações…",
+            "encontradas_one": "{{count}} avaliação encontrada",
+            "encontradas_other": "{{count}} avaliações encontradas",
+            "aindaNaoExistem": "Ainda não existem avaliações.",
+            "aparecemAqui": "As avaliações enviadas pelos utilizadores aparecerão aqui.",
+            "nenhumaEncontrada": "Nenhuma avaliação encontrada.",
+            "experimenteAlterar": "Experimente alterar os filtros ou a pesquisa.",
+            "itemLabel": "avaliações",
+            "aprovarAvaliacao": "Aprovar avaliação",
+            "rejeitarAvaliacao": "Rejeitar avaliação",
+            "jaModerada": "Já moderada",
+            "confirmarAprovar": "Aprovar esta avaliação de {{nome}}?",
+            "confirmarRejeitar": "Rejeitar esta avaliação de {{nome}}?"
+        }
+    },
+    "atividade": {
+        "titulo": "Registo de Atividade",
+        "subtitulo": "Consulte as ações recentes realizadas no sistema.",
+        "registosEncontrados_one": "{{count}} registo encontrado",
+        "registosEncontrados_other": "{{count}} registos encontrados",
+        "dataEHora": "Data e hora",
+        "acao": "Ação",
+        "detalhes": "Detalhes",
+        "resultado": "Resultado",
+        "verDetalhes": "Ver detalhes da atividade",
+        "pesquisarPlaceholder": "Pesquisar utilizador ou descrição…",
+        "filtrarPorAcao": "Filtrar por ação",
+        "todasAsAcoes": "Todas as ações",
+        "filtrarPorUtilizador": "Filtrar por utilizador",
+        "todosOsUtilizadores": "Todos os utilizadores",
+        "filtrarPorPeriodo": "Filtrar por período",
+        "aCarregar": "A carregar…",
+        "erroCarregar": "Não foi possível carregar os registos.",
+        "tentarNovamente": "Tentar novamente",
+        "nenhumaCorrespondeFiltros": "Nenhuma atividade corresponde aos filtros aplicados.",
+        "aindaNaoExistem": "Ainda não existem atividades registadas.",
+        "tentaAlterarFiltros": "Tenta alterar ou limpar os filtros aplicados.",
+        "itemLabel": "registos",
+        "sistema": "Sistema",
+        "detalhesDaAtividade": "Detalhes da atividade",
+        "fechar": "Fechar",
+        "utilizadorResponsavel": "Utilizador responsável",
+        "entidadeAfetada": "Entidade afetada",
+        "descricao": "Descrição",
+        "metadados": "Metadados",
+        "semMetadados": "Sem metadados adicionais.",
+        "acoes": {
+            "reserva_criada": "Reserva criada",
+            "reserva_editada": "Reserva editada",
+            "reserva_cancelada": "Reserva cancelada",
+            "reserva_concluida": "Reserva concluída",
+            "reserva_nao_compareceu": "Reserva - não compareceu",
+            "checkin_efetuado": "Check-in efetuado",
+            "pagamento_atualizado": "Pagamento atualizado",
+            "utilizador_criado": "Utilizador criado",
+            "utilizador_atualizado": "Utilizador atualizado",
+            "utilizador_ativado": "Utilizador ativado",
+            "utilizador_desativado": "Utilizador desativado",
+            "espaco_criado": "Espaço criado",
+            "espaco_atualizado": "Espaço atualizado",
+            "espaco_ativado": "Espaço ativado",
+            "espaco_desativado": "Espaço desativado"
+        },
+        "resultados": {
+            "success": "Sucesso",
+            "cancelled": "Cancelada",
+            "automatic": "Automático",
+            "error": "Erro"
+        },
+        "entidades": {
+            "reserva": "Reserva",
+            "utilizador": "Utilizador",
+            "pagamento": "Pagamento",
+            "setor": "Setor",
+            "secretaria": "Secretária",
+            "edificio": "Edifício",
+            "piso": "Piso"
+        }
+    }
+}

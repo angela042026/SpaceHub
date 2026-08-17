@@ -1,1 +1,27 @@
-{}
+{
+    "titulo": "Estatísticas",
+    "descricao": "Acompanhe o desempenho e a utilização do SpaceHub.",
+    "subtitulo": "Relatório de Estatísticas",
+    "periodoImpressao": "Período: {{periodo}}",
+    "periodos": {
+        "7dias": "Últimos 7 dias",
+        "30dias": "Últimos 30 dias",
+        "90dias": "Últimos 90 dias",
+        "ano": "Último ano"
+    },
+    "kpis": {
+        "totalReservas": "Total de Reservas",
+        "utilizadoresAtivos": "Utilizadores Ativos",
+        "taxaOcupacaoMedia": "Taxa de Ocupação Média",
+        "sufixoPontosPercentuais": " p.p.",
+        "tempoMedioPorReserva": "Tempo Médio por Reserva"
+    },
+    "cards": {
+        "reservasPorEstado": "Reservas por Estado",
+        "reservasPorPiso": "Reservas por Piso",
+        "reservasPorPeriodoDoDia": "Reservas por Período do Dia",
+        "reservasPorSetor": "Reservas por Setor"
+    },
+    "filtrarPorEdificio": "Filtrar por edifício",
+    "todosOsEdificios": "Todos os edifícios"
+}

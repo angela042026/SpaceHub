@@ -1,8 +1,11 @@
-import { ESTADO_VISUAL } from './mapUtils';
+import { useTranslation } from 'react-i18next';
+import { ESTADO_VISUAL, traduzirEstadoVisual } from './mapUtils';
 
 const ORDEM = ['livre', 'ocupada', 'reservada', 'indisponivel'];
 
 export default function MapLegend({ compacto = false }) {
+    const { t } = useTranslation('dashboard');
+
     return (
         <div
             data-map-control="true"
@@ -20,7 +23,7 @@ export default function MapLegend({ compacto = false }) {
                         <span
                             className={`rounded-full ${estado.bar} ${compacto ? 'h-1.5 w-1.5' : 'h-2 w-2'}`}
                         />
-                        {estado.label}
+                        {traduzirEstadoVisual(chave, t)}
                     </span>
                 );
             })}

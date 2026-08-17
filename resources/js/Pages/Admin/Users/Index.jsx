@@ -14,10 +14,13 @@ import {
     X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ESTADO_UTILIZADOR, badge, etiqueta } from '@/utils/estados';
 
 export default function Index({ users, roles, filters }) {
     const { auth } = usePage().props;
+    const { t } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
 
     const [search, setSearch] = useState(filters.search ?? '');
     const [roleId, setRoleId] = useState(filters.role_id ?? '');
@@ -105,7 +108,7 @@ export default function Index({ users, roles, filters }) {
     const columns = [
         {
             key: 'name',
-            label: 'Utilizador',
+            label: t('users.index.colunaUtilizador'),
             render: (user) => (
                 <div className="flex items-center gap-3">
                     {user.fotografia_url ? (
@@ -134,23 +137,23 @@ export default function Index({ users, roles, filters }) {
         },
         {
             key: 'role',
-            label: 'Papel',
+            label: t('users.create.papel'),
             render: (user) => user.role ?? '-',
         },
         {
             key: 'ativo',
-            label: 'Estado',
+            label: t('listagem.estado'),
             render: (user) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${badge(ESTADO_UTILIZADOR, String(user.ativo))}`}
                 >
-                    {etiqueta(ESTADO_UTILIZADOR, String(user.ativo))}
+                    {etiqueta(ESTADO_UTILIZADOR, String(user.ativo), String(user.ativo), tc)}
                 </span>
             ),
         },
         {
             key: 'acoes',
-            label: 'Ações',
+            label: t('listagem.acoes'),
             align: 'right',
             render: (user) => {
                 const ehContaPropria = user.id === auth.user.id;
@@ -160,8 +163,8 @@ export default function Index({ users, roles, filters }) {
                     <div className="flex justify-end gap-2">
                         <Link
                             href={route('admin.users.edit', user.id)}
-                            title="Editar utilizador"
-                            aria-label="Editar utilizador"
+                            title={t('users.index.editarUtilizador')}
+                            aria-label={t('users.index.editarUtilizador')}
                             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
                         >
                             <Pencil size={16} strokeWidth={1.9} />
@@ -173,17 +176,17 @@ export default function Index({ users, roles, filters }) {
                             disabled={processingId === user.id || impedirDesativar}
                             title={
                                 impedirDesativar
-                                    ? 'Não pode desativar a sua própria conta'
+                                    ? t('users.index.naoPodeDesativarPropriaConta')
                                     : user.ativo
-                                        ? 'Desativar utilizador'
-                                        : 'Ativar utilizador'
+                                        ? t('users.index.desativarUtilizador')
+                                        : t('users.index.ativarUtilizador')
                             }
                             aria-label={
                                 impedirDesativar
-                                    ? 'Não pode desativar a sua própria conta'
+                                    ? t('users.index.naoPodeDesativarPropriaConta')
                                     : user.ativo
-                                        ? 'Desativar utilizador'
-                                        : 'Ativar utilizador'
+                                        ? t('users.index.desativarUtilizador')
+                                        : t('users.index.ativarUtilizador')
                             }
                             className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
                                 user.ativo
@@ -205,7 +208,7 @@ export default function Index({ users, roles, filters }) {
 
     return (
         <DashboardLayout>
-            <Head title="Utilizadores" />
+            <Head title={t('users.index.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
@@ -216,11 +219,11 @@ export default function Index({ users, roles, filters }) {
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Utilizadores
+                                {t('users.index.titulo')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {users.meta.total} utilizador{users.meta.total === 1 ? '' : 'es'} registado{users.meta.total === 1 ? '' : 's'}.
+                                {t('users.index.registados', { count: users.meta.total })}
                             </p>
                         </div>
                     </div>
@@ -230,7 +233,7 @@ export default function Index({ users, roles, filters }) {
                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
                     >
                         <Plus size={18} strokeWidth={2} />
-                        Novo utilizador
+                        {t('users.create.titulo')}
                     </Link>
                 </div>
 
@@ -252,7 +255,7 @@ export default function Index({ users, roles, filters }) {
                                     pesquisarAgora();
                                 }
                             }}
-                            placeholder="Pesquisar por nome ou e-mail"
+                            placeholder={t('users.index.pesquisarPlaceholder')}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
 
@@ -260,7 +263,7 @@ export default function Index({ users, roles, filters }) {
                             <button
                                 type="button"
                                 onClick={limparPesquisa}
-                                aria-label="Limpar pesquisa"
+                                aria-label={tc('acoes.limparFiltros')}
                                 className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                             >
                                 <X size={14} strokeWidth={2} />
@@ -273,7 +276,7 @@ export default function Index({ users, roles, filters }) {
                         onChange={(event) => handleRoleChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
-                        <option value="">Todos os papéis</option>
+                        <option value="">{t('users.index.todosOsPapeis')}</option>
 
                         {roles.map((role) => (
                             <option key={role.id} value={role.id}>
@@ -287,9 +290,9 @@ export default function Index({ users, roles, filters }) {
                         onChange={(event) => handleAtivoChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
-                        <option value="">Todos os estados</option>
-                        <option value="1">Ativos</option>
-                        <option value="0">Inativos</option>
+                        <option value="">{t('listagem.todosOsEstados')}</option>
+                        <option value="1">{t('listagem.ativos')}</option>
+                        <option value="0">{t('listagem.inativos')}</option>
                     </select>
 
                     <button
@@ -297,7 +300,7 @@ export default function Index({ users, roles, filters }) {
                         onClick={limparTudo}
                         className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700"
                     >
-                        Limpar
+                        {t('listagem.limpar')}
                     </button>
                 </div>
 
@@ -310,11 +313,11 @@ export default function Index({ users, roles, filters }) {
                         emptyMessage={
                             <div className="flex flex-col items-center gap-1.5">
                                 <p className="font-semibold text-slate-600 dark:text-slate-300">
-                                    Nenhum utilizador encontrado
+                                    {t('users.index.nenhumEncontrado')}
                                 </p>
 
                                 <p className="text-sm text-slate-400">
-                                    Experimente alterar ou limpar os filtros.
+                                    {t('users.index.experimenteAlterarFiltros')}
                                 </p>
 
                                 <button
@@ -322,7 +325,7 @@ export default function Index({ users, roles, filters }) {
                                     onClick={limparTudo}
                                     className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                                 >
-                                    Limpar filtros
+                                    {tc('acoes.limparFiltros')}
                                 </button>
                             </div>
                         }
@@ -346,12 +349,11 @@ export default function Index({ users, roles, filters }) {
 
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                Desativar {confirmando?.name}?
+                                {t('users.index.confirmarDesativarTitulo', { nome: confirmando?.name })}
                             </h2>
 
                             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                O utilizador deixa de conseguir aceder à plataforma até a conta
-                                ser reativada.
+                                {t('users.index.confirmarDesativarTexto')}
                             </p>
                         </div>
                     </div>
@@ -362,7 +364,7 @@ export default function Index({ users, roles, filters }) {
                             onClick={() => setConfirmando(null)}
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
-                            Cancelar
+                            {tc('acoes.cancelar')}
                         </button>
 
                         <button
@@ -371,7 +373,7 @@ export default function Index({ users, roles, filters }) {
                             disabled={processingId === confirmando?.id}
                             className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {processingId === confirmando?.id ? 'A desativar...' : 'Desativar utilizador'}
+                            {processingId === confirmando?.id ? t('users.index.aDesativar') : t('users.index.desativarUtilizador')}
                         </button>
                     </div>
                 </div>

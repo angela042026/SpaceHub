@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 // Mesmos tons subtis por piso já usados no chip de sugestão / mapa —
 // não introduz nenhuma cor nova na paleta.
 const TONS_PISO = ['bg-teal-500', 'bg-[#22c7be]', 'bg-[#4f8fea]'];
@@ -47,6 +49,7 @@ export default function AvailabilityOverview({
     overviewPorPiso = [],
     totalLivres = 0,
 }) {
+    const { t } = useTranslation('dashboard');
     const totalSecretarias = overviewPorPiso.reduce(
         (soma, piso) => soma + piso.total,
         0,
@@ -60,7 +63,7 @@ export default function AvailabilityOverview({
     return (
         <section className="dashboard-card flex h-full flex-col p-5">
             <h2 className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
-                Disponibilidade agora
+                {t('disponibilidadeAgora.titulo')}
             </h2>
 
             <div className="mt-4 flex flex-1 items-center gap-5">
@@ -72,7 +75,7 @@ export default function AvailabilityOverview({
                             {totalLivres}
                         </strong>
                         <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-slate-400 dark:text-[#8fa7bd]">
-                            livres
+                            {t('disponibilidadeAgora.livres')}
                         </span>
                     </div>
                 </div>

@@ -2,6 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, Pencil } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { TIPOS_SETOR } from '@/utils/tiposSetor';
 
 const fieldClass =
@@ -11,6 +12,7 @@ const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
 export default function Edit({ setor, pisos }) {
+    const { t } = useTranslation('admin');
     const { data, setData, put, processing, errors } = useForm({
         piso_id: setor.piso_id ?? '',
         nome: setor.nome ?? '',
@@ -28,7 +30,7 @@ export default function Edit({ setor, pisos }) {
 
     return (
         <DashboardLayout>
-            <Head title={`Editar ${setor.nome}`} />
+            <Head title={t('setores.edit.headTitle', { nome: setor.nome })} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -38,7 +40,7 @@ export default function Edit({ setor, pisos }) {
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Editar setor
+                            {t('setores.edit.titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -50,7 +52,7 @@ export default function Edit({ setor, pisos }) {
                 <form onSubmit={submit} className="p-6" noValidate>
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div className="sm:col-span-2">
-                            <label htmlFor="piso_id" className={labelClass}>Piso</label>
+                            <label htmlFor="piso_id" className={labelClass}>{t('campos.piso')}</label>
                             <select
                                 id="piso_id"
                                 value={data.piso_id}
@@ -66,29 +68,29 @@ export default function Edit({ setor, pisos }) {
                         </div>
 
                         <div>
-                            <label htmlFor="nome" className={labelClass}>Nome</label>
+                            <label htmlFor="nome" className={labelClass}>{t('campos.nome')}</label>
                             <input id="nome" type="text" value={data.nome} onChange={(e) => setData('nome', e.target.value)} autoFocus required className={fieldClass} />
                             <InputError message={errors.nome} className="mt-2" />
                         </div>
 
                         <div>
-                            <label htmlFor="codigo" className={labelClass}>Código</label>
+                            <label htmlFor="codigo" className={labelClass}>{t('campos.codigo')}</label>
                             <input id="codigo" type="text" value={data.codigo} onChange={(e) => setData('codigo', e.target.value)} required className={fieldClass} />
                             <InputError message={errors.codigo} className="mt-2" />
                         </div>
 
                         <div>
-                            <label htmlFor="tipo" className={labelClass}>Tipo</label>
+                            <label htmlFor="tipo" className={labelClass}>{t('campos.tipo')}</label>
                             <select id="tipo" value={data.tipo} onChange={(e) => setData('tipo', e.target.value)} className={fieldClass}>
                                 {TIPOS_SETOR.map((tipo) => (
-                                    <option key={tipo.value} value={tipo.value}>{tipo.label}</option>
+                                    <option key={tipo.value} value={tipo.value}>{t(tipo.label)}</option>
                                 ))}
                             </select>
                             <InputError message={errors.tipo} className="mt-2" />
                         </div>
 
                         <div>
-                            <label htmlFor="capacidade" className={labelClass}>Capacidade</label>
+                            <label htmlFor="capacidade" className={labelClass}>{t('campos.capacidade')}</label>
                             <input id="capacidade" type="number" min="0" value={data.capacidade} onChange={(e) => setData('capacidade', e.target.value)} className={fieldClass} />
                             <InputError message={errors.capacidade} className="mt-2" />
                         </div>
@@ -101,12 +103,12 @@ export default function Edit({ setor, pisos }) {
                                     onChange={(e) => setData('reservavel', e.target.checked)}
                                     className="h-4 w-4 rounded border-slate-300 text-teal-500 focus:ring-teal-500"
                                 />
-                                Setor reservável (com secretárias)
+                                {t('setores.create.setorReservavel')}
                             </label>
                         </div>
 
                         <div className="sm:col-span-2">
-                            <label htmlFor="descricao" className={labelClass}>Descrição</label>
+                            <label htmlFor="descricao" className={labelClass}>{t('campos.descricao')}</label>
                             <textarea id="descricao" rows={3} value={data.descricao} onChange={(e) => setData('descricao', e.target.value)} className={`${fieldClass} h-auto py-2`} />
                             <InputError message={errors.descricao} className="mt-2" />
                         </div>
@@ -118,7 +120,7 @@ export default function Edit({ setor, pisos }) {
                             disabled={processing}
                             className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {processing ? 'A guardar...' : 'Guardar alterações'}
+                            {processing ? t('form.aGuardar') : t('form.guardarAlteracoes')}
                         </button>
 
                         <button
@@ -127,7 +129,7 @@ export default function Edit({ setor, pisos }) {
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
                             <ArrowLeft size={16} strokeWidth={1.9} />
-                            Cancelar
+                            {t('form.cancelar')}
                         </button>
                     </div>
                 </form>

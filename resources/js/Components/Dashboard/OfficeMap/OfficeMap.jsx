@@ -6,6 +6,7 @@ import {
     useState,
 } from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import DeskDetailPanel from './DeskDetailPanel';
 import MapCanvas from './MapCanvas';
@@ -71,6 +72,7 @@ export default function OfficeMap({
     // como antes em todas as outras páginas.
     preencherAltura = false,
 }) {
+    const { t } = useTranslation('dashboard');
     const sectionRef = useRef(null);
     const dragStartRef = useRef(null);
 
@@ -619,7 +621,7 @@ export default function OfficeMap({
                             href={route('mapa.index')}
                             className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-[#dbe8f5] bg-[#f2f7fd] px-3 text-xs font-bold text-navy-900 transition hover:border-teal-400 hover:bg-teal-500/10 hover:text-teal-700 dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#d7e3ed] dark:hover:border-[#18c3b3] dark:hover:text-[#18c3b3]"
                         >
-                            Abrir mapa completo
+                            {t('officeMap.abrirMapaCompleto')}
                             <ArrowUpRight
                                 size={13}
                                 strokeWidth={2.4}

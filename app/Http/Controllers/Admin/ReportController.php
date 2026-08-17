@@ -63,7 +63,7 @@ class ReportController extends Controller
 
         return Inertia::render('Admin/Reports/Reservas', [
             'reservas' => $reservas,
-            'estados' => EstadoReserva::orderBy('nome')->get(['id', 'nome']),
+            'estados' => EstadoReserva::orderBy('nome')->get(['id', 'nome', 'codigo']),
             'filters' => $request->only(['data_inicio', 'data_fim', 'estado_reserva_id']),
             'geradoEm' => now()->format('d/m/Y H:i'),
         ]);
@@ -361,7 +361,7 @@ class ReportController extends Controller
 
         return Inertia::render('Admin/Reports/CancelamentosAusencias', [
             'reservas' => $reservas,
-            'estados' => EstadoReserva::whereIn('codigo', ['cancelada', 'nao_compareceu'])->orderBy('nome')->get(['id', 'nome']),
+            'estados' => EstadoReserva::whereIn('codigo', ['cancelada', 'nao_compareceu'])->orderBy('nome')->get(['id', 'nome', 'codigo']),
             'setores' => Setor::where('ativo', true)->orderBy('nome')->get(['id', 'nome']),
             'filters' => $request->only(['data_inicio', 'data_fim', 'estado_reserva_id', 'utilizador', 'setor_id']),
             'geradoEm' => now()->format('d/m/Y H:i'),

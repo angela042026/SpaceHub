@@ -6,13 +6,21 @@ import PrintFooter from '@/Components/Admin/PrintFooter';
 import PrintButton from '@/Components/Admin/PrintButton';
 import { Head, useForm } from '@inertiajs/react';
 import { LifeBuoy } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const ESTADOS = ['Pendente', 'Em análise', 'Resolvido'];
+import { ESTADO_SUPORTE, etiqueta } from '@/utils/estados';
+
+const ESTADOS = Object.keys(ESTADO_SUPORTE);
 
 export default function Suporte({ pedidos, filters, geradoEm }) {
+    const { t, i18n } = useTranslation('relatorios');
+    const { t: tc } = useTranslation('common');
     const { data, setData, get } = useForm({
         estado: filters.estado ?? '',
     });
+
+    const traduzirEstado = (estado) =>
+        etiqueta(ESTADO_SUPORTE, estado, estado, tc);
 
     const pesquisar = (event) => {
         event.preventDefault();
@@ -26,31 +34,37 @@ export default function Suporte({ pedidos, filters, geradoEm }) {
     const columns = [
         {
             key: 'user',
-            label: 'Utilizador',
+            label: t('suporte.colunas.utilizador'),
             render: (pedido) => pedido.user?.name ?? '-',
         },
         {
             key: 'assunto',
-            label: 'Assunto',
+            label: t('suporte.colunas.assunto'),
         },
         {
             key: 'estado',
-            label: 'Estado',
+            label: t('suporte.colunas.estado'),
+            render: (pedido) => traduzirEstado(pedido.estado),
         },
         {
             key: 'created_at',
-            label: 'Criado em',
-            render: (pedido) => new Date(pedido.created_at).toLocaleDateString('pt-PT'),
+            label: t('suporte.colunas.criadoEm'),
+            render: (pedido) =>
+                new Date(pedido.created_at).toLocaleDateString(
+                    i18n.language === 'en' ? 'en-GB' : 'pt-PT',
+                ),
         },
     ];
 
     return (
         <DashboardLayout>
-            <Head title="Relatório de Suporte" />
+            <Head title={t('suporte.titulo')} />
 
             <PrintHeader
-                title="Relatório de Suporte"
-                subtitle={`${pedidos.total} pedido${pedidos.total === 1 ? '' : 's'} listado${pedidos.total === 1 ? '' : 's'}`}
+                title={t('suporte.titulo')}
+                subtitle={t('suporte.subtituloImpressao', {
+                    count: pedidos.total,
+                })}
                 geradoEm={geradoEm}
             />
 
@@ -63,11 +77,13 @@ export default function Suporte({ pedidos, filters, geradoEm }) {
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Relatório de Suporte
+                                {t('suporte.titulo')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {pedidos.total} pedido{pedidos.total === 1 ? '' : 's'} encontrado{pedidos.total === 1 ? '' : 's'}.
+                                {t('suporte.encontrados', {
+                                    count: pedidos.total,
+                                })}
                             </p>
                         </div>
                     </div>
@@ -82,15 +98,15 @@ export default function Suporte({ pedidos, filters, geradoEm }) {
                     className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 print:hidden dark:border-slate-800 sm:grid-cols-[200px_auto]"
                 >
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-slate-500">Estado</label>
+                        <label className="mb-1 block text-xs font-semibold text-slate-500">{t('suporte.colunas.estado')}</label>
                         <select
                             value={data.estado}
                             onChange={(event) => setData('estado', event.target.value)}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         >
-                            <option value="">Todos os estados</option>
+                            <option value="">{t('suporte.todosEstados')}</option>
                             {ESTADOS.map((estado) => (
-                                <option key={estado} value={estado}>{estado}</option>
+                                <option key={estado} value={estado}>{traduzirEstado(estado)}</option>
                             ))}
                         </select>
                     </div>
@@ -100,7 +116,7 @@ export default function Suporte({ pedidos, filters, geradoEm }) {
                             type="submit"
                             className="h-11 w-full rounded-xl bg-navy-900 px-4 text-sm font-bold text-white transition hover:bg-navy-950 sm:w-auto"
                         >
-                            Filtrar
+                            {t('filtros.filtrar')}
                         </button>
                     </div>
                 </form>
@@ -109,10 +125,10 @@ export default function Suporte({ pedidos, filters, geradoEm }) {
                     <Table
                         columns={columns}
                         data={pedidos.data}
-                        emptyMessage="Nenhum pedido de suporte encontrado para os filtros selecionados."
+                        emptyMessage={t('suporte.semResultados')}
                     />
 
-                    <Pagination pagination={pedidos} itemLabel="pedidos" />
+                    <Pagination pagination={pedidos} itemLabel={t('suporte.itemLabel')} />
                 </div>
             </section>
 

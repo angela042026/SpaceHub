@@ -2,78 +2,67 @@ import LegalLayout from '@/Components/Legal/LegalLayout';
 import LegalSection from '@/Components/Legal/LegalSection';
 import { Head, Link } from '@inertiajs/react';
 import { ShieldCheck } from 'lucide-react';
-
-const SECTIONS = [
-    { id: 'introducao', title: 'Introdução' },
-    { id: 'dados-recolhidos', title: 'Dados recolhidos' },
-    { id: 'finalidade', title: 'Finalidade do tratamento' },
-    { id: 'base-legal', title: 'Base legal' },
-    { id: 'partilha', title: 'Partilha com terceiros' },
-    { id: 'conservacao', title: 'Conservação dos dados' },
-    { id: 'direitos', title: 'Os seus direitos' },
-    { id: 'seguranca', title: 'Segurança' },
-    { id: 'cookies', title: 'Cookies' },
-    { id: 'alteracoes', title: 'Alterações a esta política' },
-    { id: 'contacto', title: 'Contacto' },
-];
+import { useTranslation } from 'react-i18next';
 
 export default function Privacy() {
+    const { t } = useTranslation('legal');
+
+    const SECTIONS = [
+        { id: 'introducao', title: t('privacy.sections.introducao') },
+        { id: 'dados-recolhidos', title: t('privacy.sections.dadosRecolhidos') },
+        { id: 'finalidade', title: t('privacy.sections.finalidade') },
+        { id: 'base-legal', title: t('privacy.sections.baseLegal') },
+        { id: 'partilha', title: t('privacy.sections.partilha') },
+        { id: 'conservacao', title: t('privacy.sections.conservacao') },
+        { id: 'direitos', title: t('privacy.sections.direitos') },
+        { id: 'seguranca', title: t('privacy.sections.seguranca') },
+        { id: 'cookies', title: t('privacy.sections.cookies') },
+        { id: 'alteracoes', title: t('privacy.sections.alteracoes') },
+        { id: 'contacto', title: t('privacy.sections.contacto') },
+    ];
+
     return (
         <>
-            <Head title="Política de Privacidade" />
+            <Head title={t('privacy.titulo')} />
 
             <LegalLayout
                 icon={ShieldCheck}
-                title="Política de Privacidade"
-                subtitle="Explicamos aqui que dados pessoais recolhemos, para que finalidade, e quais os direitos que tem sobre a sua informação enquanto utilizador do SpaceHub."
-                updatedAt="17 de julho de 2026"
+                title={t('privacy.titulo')}
+                subtitle={t('privacy.subtitulo')}
+                updatedAt={t('privacy.atualizadoEm')}
                 sections={SECTIONS}
             >
                 <LegalSection
                     id="introducao"
                     number={1}
-                    title="Introdução"
+                    title={t('privacy.sections.introducao')}
                 >
-                    <p>
-                        Esta Política de Privacidade descreve como o
-                        SpaceHub recolhe, utiliza e protege os dados
-                        pessoais dos seus utilizadores, em conformidade
-                        com o Regulamento Geral sobre a Proteção de Dados
-                        (RGPD). Ao utilizar a plataforma, aceita as
-                        práticas aqui descritas.
-                    </p>
+                    <p>{t('privacy.introducao.texto')}</p>
                 </LegalSection>
 
                 <LegalSection
                     id="dados-recolhidos"
                     number={2}
-                    title="Dados recolhidos"
+                    title={t('privacy.sections.dadosRecolhidos')}
                 >
-                    <p>Recolhemos os seguintes tipos de dados:</p>
+                    <p>{t('privacy.dadosRecolhidos.intro')}</p>
 
                     <ul>
                         <li>
-                            <strong>Dados de identificação:</strong> nome,
-                            endereço de e-mail e, opcionalmente,
-                            fotografia de perfil;
+                            <strong>{t('privacy.dadosRecolhidos.li1Strong')}</strong>{' '}
+                            {t('privacy.dadosRecolhidos.li1')}
                         </li>
                         <li>
-                            <strong>Dados de autenticação:</strong> senha
-                            encriptada, ou identificador da conta Google
-                            quando o início de sessão é feito através
-                            desse serviço;
+                            <strong>{t('privacy.dadosRecolhidos.li2Strong')}</strong>{' '}
+                            {t('privacy.dadosRecolhidos.li2')}
                         </li>
                         <li>
-                            <strong>Dados de utilização:</strong>{' '}
-                            reservas efetuadas, datas e períodos
-                            reservados, secretárias e espaços utilizados,
-                            registos de check-in;
+                            <strong>{t('privacy.dadosRecolhidos.li3Strong')}</strong>{' '}
+                            {t('privacy.dadosRecolhidos.li3')}
                         </li>
                         <li>
-                            <strong>Dados técnicos:</strong> endereço IP e
-                            informação de sessão, utilizados para
-                            segurança e prevenção de abuso (ex.: limite de
-                            tentativas de login).
+                            <strong>{t('privacy.dadosRecolhidos.li4Strong')}</strong>{' '}
+                            {t('privacy.dadosRecolhidos.li4')}
                         </li>
                     </ul>
                 </LegalSection>
@@ -81,70 +70,49 @@ export default function Privacy() {
                 <LegalSection
                     id="finalidade"
                     number={3}
-                    title="Finalidade do tratamento"
+                    title={t('privacy.sections.finalidade')}
                 >
-                    <p>Os dados recolhidos são utilizados para:</p>
+                    <p>{t('privacy.finalidade.intro')}</p>
 
                     <ul>
-                        <li>Criar e gerir a sua conta de utilizador;</li>
-                        <li>
-                            Processar reservas de espaços e permitir o
-                            check-in através de código QR;
-                        </li>
-                        <li>
-                            Enviar comunicações relacionadas com a sua
-                            conta (confirmações, recuperação de senha,
-                            verificação de e-mail);
-                        </li>
-                        <li>
-                            Garantir a segurança da plataforma e prevenir
-                            utilização indevida.
-                        </li>
+                        <li>{t('privacy.finalidade.li1')}</li>
+                        <li>{t('privacy.finalidade.li2')}</li>
+                        <li>{t('privacy.finalidade.li3')}</li>
+                        <li>{t('privacy.finalidade.li4')}</li>
                     </ul>
                 </LegalSection>
 
                 <LegalSection
                     id="base-legal"
                     number={4}
-                    title="Base legal"
+                    title={t('privacy.sections.baseLegal')}
                 >
                     <p>
-                        Tratamos os seus dados com base em três
-                        fundamentos: a <strong>execução do contrato</strong>{' '}
-                        de utilização estabelecido ao criar a conta
-                        (necessário para gerir reservas e check-ins), o{' '}
-                        <strong>cumprimento de obrigações legais</strong> a
-                        que estamos sujeitos, e o seu{' '}
-                        <strong>consentimento explícito</strong>, dado ao
-                        aceitar estes termos no momento do registo — o
-                        qual pode ser retirado a qualquer momento, sem
-                        comprometer a licitude do tratamento realizado
-                        anteriormente.
+                        {t('privacy.baseLegal.parte1')}{' '}
+                        <strong>{t('privacy.baseLegal.execucaoContrato')}</strong>{' '}
+                        {t('privacy.baseLegal.parte2')}{' '}
+                        <strong>{t('privacy.baseLegal.cumprimentoObrigacoes')}</strong>{' '}
+                        {t('privacy.baseLegal.parte3')}{' '}
+                        <strong>{t('privacy.baseLegal.consentimentoExplicito')}</strong>
+                        {t('privacy.baseLegal.parte4')}
                     </p>
                 </LegalSection>
 
                 <LegalSection
                     id="partilha"
                     number={5}
-                    title="Partilha com terceiros"
+                    title={t('privacy.sections.partilha')}
                 >
-                    <p>
-                        Não vendemos nem partilhamos os seus dados
-                        pessoais com terceiros para fins comerciais.
-                        Podemos partilhar dados limitados com:
-                    </p>
+                    <p>{t('privacy.partilha.intro')}</p>
 
                     <ul>
                         <li>
-                            <strong>Google:</strong> caso opte por iniciar
-                            sessão através do Google, este serviço
-                            processa a autenticação de acordo com a
-                            própria política de privacidade da Google;
+                            <strong>{t('privacy.partilha.li1Strong')}</strong>{' '}
+                            {t('privacy.partilha.li1')}
                         </li>
                         <li>
-                            <strong>Administradores da organização:</strong>{' '}
-                            no âmbito da gestão de espaços, reservas e
-                            segurança da plataforma.
+                            <strong>{t('privacy.partilha.li2Strong')}</strong>{' '}
+                            {t('privacy.partilha.li2')}
                         </li>
                     </ul>
                 </LegalSection>
@@ -152,76 +120,38 @@ export default function Privacy() {
                 <LegalSection
                     id="conservacao"
                     number={6}
-                    title="Conservação dos dados"
+                    title={t('privacy.sections.conservacao')}
                 >
-                    <p>
-                        Os dados pessoais são conservados enquanto a conta
-                        se mantiver ativa. Após o encerramento de uma
-                        conta, os dados poderão ser conservados por um
-                        período adicional limitado, quando exigido por
-                        obrigações legais ou para efeitos de segurança e
-                        resolução de eventuais litígios.
-                    </p>
+                    <p>{t('privacy.conservacao.texto')}</p>
                 </LegalSection>
 
                 <LegalSection
                     id="direitos"
                     number={7}
-                    title="Os seus direitos"
+                    title={t('privacy.sections.direitos')}
                 >
-                    <p>
-                        Nos termos do RGPD, tem direito a aceder,
-                        retificar, apagar ou limitar o tratamento dos
-                        seus dados pessoais, bem como a solicitar a
-                        portabilidade dos mesmos e a opor-se ao seu
-                        tratamento em determinadas circunstâncias. Pode
-                        exercer estes direitos a qualquer momento através
-                        do Centro de Ajuda.
-                    </p>
+                    <p>{t('privacy.direitos.paragrafo1')}</p>
 
-                    <p>
-                        Caso considere que o tratamento dos seus dados
-                        viola a legislação aplicável, tem ainda o direito
-                        de apresentar reclamação junto da Comissão
-                        Nacional de Proteção de Dados (CNPD), enquanto
-                        autoridade de controlo competente.
-                    </p>
+                    <p>{t('privacy.direitos.paragrafo2')}</p>
                 </LegalSection>
 
                 <LegalSection
                     id="seguranca"
                     number={8}
-                    title="Segurança"
+                    title={t('privacy.sections.seguranca')}
                 >
-                    <p>
-                        Adotamos medidas técnicas e organizativas
-                        adequadas para proteger os seus dados, incluindo
-                        encriptação de senhas, controlo de acesso baseado
-                        em funções e limitação de tentativas de
-                        autenticação. Nenhum sistema é, no entanto,
-                        totalmente imune a riscos, pelo que recomendamos a
-                        utilização de uma senha forte e exclusiva.
-                    </p>
+                    <p>{t('privacy.seguranca.texto')}</p>
                 </LegalSection>
 
                 <LegalSection
                     id="cookies"
                     number={9}
-                    title="Cookies"
+                    title={t('privacy.sections.cookies')}
                 >
                     <p>
-                        Utilizamos cookies e armazenamento local
-                        estritamente necessários ao funcionamento da
-                        plataforma, nomeadamente para manter a sua sessão
-                        iniciada e guardar a sua preferência de tema
-                        (claro/escuro). Mediante o seu consentimento,
-                        utilizamos também cookies opcionais de análise de
-                        utilização. Não utilizamos cookies de publicidade
-                        ou de rastreamento de terceiros. Para mais
-                        detalhes e para alterar a sua preferência, consulte
-                        a nossa{' '}
+                        {t('privacy.cookies.parte1')}{' '}
                         <Link href={route('legal.cookies')}>
-                            Política de Cookies
+                            {t('privacy.cookies.linkTexto')}
                         </Link>
                         .
                     </p>
@@ -230,29 +160,17 @@ export default function Privacy() {
                 <LegalSection
                     id="alteracoes"
                     number={10}
-                    title="Alterações a esta política"
+                    title={t('privacy.sections.alteracoes')}
                 >
-                    <p>
-                        Esta Política de Privacidade pode ser atualizada
-                        periodicamente. Notificaremos alterações
-                        relevantes através da plataforma, sendo a
-                        utilização continuada do SpaceHub considerada
-                        como aceitação da versão mais recente.
-                    </p>
+                    <p>{t('privacy.alteracoes.texto')}</p>
                 </LegalSection>
 
                 <LegalSection
                     id="contacto"
                     number={11}
-                    title="Contacto"
+                    title={t('privacy.sections.contacto')}
                 >
-                    <p>
-                        Para exercer os seus direitos ou esclarecer
-                        qualquer dúvida sobre esta Política de
-                        Privacidade, entre em contacto com a equipa do
-                        SpaceHub através do Centro de Ajuda da
-                        plataforma.
-                    </p>
+                    <p>{t('privacy.contacto.texto')}</p>
                 </LegalSection>
             </LegalLayout>
         </>
