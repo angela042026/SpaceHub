@@ -1,2300 +1,1233 @@
-# 4. Arquitetura da Aplicação
+4. Arquitetura da Aplicação
 
-# 4.1 Introdução
+4.1 Introdução
 
-O SpaceHub foi desenvolvido segundo uma arquitetura em camadas baseada no padrão **Model-View-Controller (MVC)**, utilizando o framework Laravel para o backend e React com Inertia.js para o frontend.
+O SpaceHub foi desenvolvido segundo uma arquitetura em camadas baseada no padrão Model-View-Controller (MVC), utilizando Laravel 12 no backend e React no frontend, com integração através do Inertia.js.
 
-Esta arquitetura promove uma clara separação de responsabilidades, facilitando a manutenção, reutilização de código e evolução futura da aplicação.
+A solução combina três formas de comunicação:
 
-A comunicação entre frontend e backend é efetuada através de uma API REST protegida por autenticação baseada em tokens utilizando Laravel Sanctum.
+Interface web com Inertia.jsAs rotas Laravel entregam páginas React e respetivas propriedades, utilizando autenticação baseada em sessão e proteção CSRF.
 
----
+API RESTDisponibiliza endpoints JSON protegidos por Laravel Sanctum, utilizados em operações autenticadas, testes de integração e possíveis integrações externas.
 
-# 4.2 Arquitetura Geral
+Comunicação em tempo realOs eventos são transmitidos através de Laravel Reverb, broadcasting e Laravel Echo, permitindo atualizar o mapa, notificações, chat e outros elementos sem recarregar toda a página.
 
-A arquitetura do sistema encontra-se dividida em dois componentes principais.
+A arquitetura foi organizada para garantir:
 
-```
-                +-----------------------------+
-                |         React + Inertia     |
-                |        Interface Web        |
-                +-------------+---------------+
-                              |
-                              |
-                    HTTP / JSON / API
-                              |
-                              ▼
-                +-----------------------------+
-                |          Laravel 12         |
-                |        Backend API          |
-                +-------------+---------------+
-                              |
-               +--------------+--------------+
-               |              |              |
-               ▼              ▼              ▼
-        Controllers      Services      Policies
-               |
-               ▼
-        Form Requests
-               |
-               ▼
-            Models
-               |
-               ▼
-          Base de Dados
-```
+separação de responsabilidades;
 
----
+centralização das regras de negócio;
 
-# 4.3 Organização do Backend
+validação e autorização no backend;
 
-O backend encontra-se organizado segundo a estrutura recomendada pelo Laravel.
+reutilização de componentes;
 
-## Models
+manutenção e evolução do sistema;
 
-Representam as entidades persistidas na base de dados.
+proteção dos dados;
 
-Exemplos:
+facilidade de teste;
 
-- User
-- Role
-- Edificio
-- Piso
-- Setor
-- Secretaria
-- Reserva
+integração entre módulos.
 
-Os Models implementam relações Eloquent como:
+4.2 Tecnologias e responsabilidades
 
-- belongsTo()
-- hasMany()
-- hasOne()
+Tecnologia
 
----
+Responsabilidade
 
-## Controllers
+Laravel 12
 
-Os Controllers recebem os pedidos HTTP, validam permissões, coordenam a lógica da aplicação e devolvem respostas à API.
+Rotas, Controllers, autenticação, autorização, validação, Services, eventos e tarefas automáticas
 
-Cada entidade principal possui um Controller próprio.
+React
 
-Exemplos:
+Interface gráfica, componentes e interação com o utilizador
 
-- UserController
-- EdificioController
-- PisoController
-- SetorController
-- SecretariaController
-- ReservaController
-- DashboardController
-- AuthController
+Inertia.js
 
----
+Ligação entre as rotas Laravel e as páginas React
 
-## Form Requests
+Tailwind CSS
 
-A validação da entrada de dados é realizada através de Form Requests.
+Estilo visual, responsividade e consistência da interface
 
-Cada operação possui regras específicas de validação.
+Vite
 
-Exemplos:
+Compilação e otimização dos recursos do frontend
 
-- StoreUserRequest
-- UpdateUserRequest
-- StoreReservaRequest
-- UpdateReservaRequest
+MySQL
 
-Esta abordagem permite separar a validação da lógica de negócio.
+Persistência relacional dos dados
 
----
+Eloquent ORM
 
-## Resources
+Acesso aos dados e gestão das relações entre Models
 
-As respostas da API utilizam Resources para serializar os dados devolvidos ao frontend.
+Laravel Sanctum
 
-Exemplos:
+Autenticação das rotas API
 
-- UserResource
-- ReservaResource
-- PisoResource
-- SecretariaResource
+Laravel Reverb
 
-Os Resources garantem consistência nas respostas da API e ocultam informação desnecessária.
+Servidor WebSocket e comunicação em tempo real
 
----
+Laravel Echo
 
-## Policies
+Subscrição de canais e receção de eventos no frontend
 
-O controlo de permissões é realizado através de Policies.
+PHPUnit
 
-Cada entidade possui uma política própria.
+Testes automatizados
 
-Exemplos:
+Git e GitHub
 
-- UserPolicy
-- ReservaPolicy
-- SecretariaPolicy
+Controlo de versões, branches, Pull Requests e integração do trabalho
 
-Os Controllers recorrem ao método:
+4.3 Arquitetura geral
 
-```php
-Gate::authorize(...)
-```
+A aplicação encontra-se dividida nas seguintes camadas:
 
-garantindo que apenas utilizadores autorizados executam determinadas operações.
+Camada
 
----
+Componentes
 
-# 4.4 Persistência dos Dados
+Responsabilidade
 
-A persistência é assegurada através do ORM Eloquent.
+Apresentação
 
-Cada Model representa uma tabela da base de dados.
+React, Pages, Components, Layouts
 
-As relações são carregadas utilizando:
+Apresentar dados e recolher ações do utilizador
 
-- eager loading;
-- lazy loading quando necessário.
+Comunicação
 
-A utilização do Eloquent simplifica:
+Inertia.js, HTTP, JSON, formulários
 
-- consultas;
-- inserções;
-- atualizações;
-- gestão das relações.
+Transportar pedidos e respostas
 
----
+Encaminhamento
 
-# 4.5 Gestão de Ficheiros
+web.php, api.php, channels.php
 
-O sistema suporta armazenamento de ficheiros.
+Associar pedidos às operações da aplicação
 
-Atualmente são suportados:
+Segurança
 
-| Entidade | Ficheiro |
-|----------|----------|
-| User | Fotografia |
-| Piso | Planta |
+Sessões, Sanctum, middleware, Policies, CSRF
 
-Os ficheiros são armazenados em:
+Autenticar e autorizar operações
 
-```
-storage/app/public
-```
+Aplicação
 
-e disponibilizados através do link simbólico:
+Controllers, Form Requests, Resources, Services
 
-```
-public/storage
-```
+Coordenar pedidos e regras de negócio
 
-utilizando o sistema Storage do Laravel.
+Domínio
 
----
+Models, estados, relações e regras
 
-# 4.6 Autenticação
+Representar os conceitos centrais do sistema
 
-A autenticação é implementada através de Laravel Sanctum.
+Persistência
 
-Após autenticação é gerado um token associado ao utilizador autenticado.
+Eloquent ORM e MySQL
 
-As principais funcionalidades disponíveis incluem:
+Guardar e consultar dados
 
-- login;
-- logout;
-- recuperação de password;
-- alteração de password;
-- consulta do utilizador autenticado.
+Tempo real
 
-Os utilizadores inativos não podem iniciar sessão.
+Events, Broadcasting, Reverb e Echo
 
----
+Propagar alterações aos clientes ligados
 
-# 4.7 Autorização
+Processamento automático
 
-O acesso às funcionalidades encontra-se protegido por Policies.
+Commands e Scheduler
 
-Os diferentes papéis possuem permissões distintas.
+Executar tarefas periódicas
 
-| Papel | Permissões |
-|--------|------------|
-| Administrador | Gestão completa |
-| Gestor | Gestão operacional |
-| Colaborador | Consulta |
-| Utilizador | Reservas e perfil |
+Qualidade
 
----
+PHPUnit, Factories e Seeders
 
-# 4.8 Atualização em Tempo Real
+Validar comportamentos e preparar ambientes
 
-Sempre que ocorre uma alteração relevante nas reservas, o sistema emite o evento:
+Representação gráfica
 
-```
-MapaAtualizado
-```
+A imagem seguinte reúne:
 
-Este evento permite atualizar automaticamente o estado de ocupação apresentado no mapa sem necessidade de recarregar a página.
+Figura 4.1 — Arquitetura Geral do SpaceHub;
 
----
+Figura 4.2 — Fluxo de Criação de uma Reserva;
 
-# 4.9 Estrutura do Projeto
+Figura 4.3 — Arquitetura MVC do Backend.
 
-A organização principal do projeto segue a seguinte estrutura.
 
-```
-app
- ├── Events
- ├── Http
- │     ├── Controllers
- │     ├── Middleware
- │     ├── Requests
- │     └── Resources
- ├── Models
- ├── Policies
- └── Providers
 
-database
- ├── factories
- ├── migrations
- └── seeders
+A representação é conceptual. Na interface web, as respostas são normalmente entregues pelo Inertia.js; nas rotas API, são devolvidas respostas JSON.
 
-resources
- ├── js
- └── views
+4.4 Padrão Model-View-Controller
 
-routes
+4.4.1 Model
 
-tests
-```
+Os Models representam as entidades do domínio e a respetiva persistência.
 
----
+Entre os principais Models encontram-se:
 
-# 4.10 Testes
+User;
 
-O projeto possui uma suíte de testes automatizados desenvolvida com PHPUnit.
+Role;
 
-Os testes cobrem, entre outras áreas:
+Edificio;
 
-- autenticação;
-- autorização;
-- uploads;
-- reservas;
-- dashboard;
-- mapa;
-- QR Code;
-- gestão das entidades;
-- validação das regras de negócio.
+Piso;
 
-À data da conclusão do projeto, a suíte é composta por **111 testes automatizados**.
+Setor;
 
----
+Secretaria;
 
-# 4.11 Princípios de Desenvolvimento
+Reserva;
 
-Durante o desenvolvimento foram seguidos vários princípios de boas práticas.
+Periodo;
 
-Entre eles destacam-se:
+EstadoReserva;
 
-- separação de responsabilidades;
-- reutilização de código;
-- utilização de Form Requests;
-- utilização de Resources;
-- utilização de Policies;
-- utilização de Eloquent ORM;
-- utilização de eventos para comunicação interna;
-- testes automatizados;
-- tipagem explícita sempre que possível.
+Pagamento;
 
----
+Avaliacao;
 
-# 4.12 Considerações Finais
+Faq;
 
-A arquitetura adotada permite que o SpaceHub seja facilmente extensível e mantenha uma organização consistente entre os diferentes componentes da aplicação.
+PedidoSuporte.
 
-A utilização do ecossistema Laravel, em conjunto com React e Inertia.js, possibilita uma solução moderna, modular e preparada para evolução futura, mantendo simultaneamente elevados níveis de segurança, desempenho e manutenibilidade.# 4. Arquitetura da Aplicação
+Os Models definem:
 
-# 4.1 Introdução
+atributos preenchíveis;
 
-O SpaceHub foi desenvolvido segundo uma arquitetura em camadas baseada no padrão **Model-View-Controller (MVC)**, utilizando o framework **Laravel 12** no backend e **React**, integrado através do **Inertia.js**, no frontend.
+casts;
 
-A arquitetura adotada tem como principal objetivo garantir uma separação clara entre as diferentes responsabilidades da aplicação, permitindo organizar de forma consistente a interface, o processamento dos pedidos, a aplicação das regras de negócio, o controlo de permissões e a persistência dos dados.
+relações Eloquent;
 
-Esta separação contribui para:
+scopes de consulta;
 
-* facilitar a manutenção do código;
-* reduzir o acoplamento entre componentes;
-* promover a reutilização de funcionalidades;
-* melhorar a segurança;
-* simplificar os testes automatizados;
-* facilitar a evolução futura da aplicação;
-* permitir a integração de novos módulos sem alterações estruturais profundas.
+métodos auxiliares da entidade;
 
-O Laravel é responsável pela gestão das rotas, autenticação, autorização, validação, lógica de negócio, acesso à base de dados, eventos, comunicação em tempo real e entrega das páginas Inertia.
+comportamentos simples relacionados com o domínio.
 
-O React é responsável pela construção da interface gráfica e pela interação dinâmica com o utilizador. O Inertia.js estabelece a ligação entre o backend Laravel e os componentes React, permitindo desenvolver uma aplicação com comportamento semelhante ao de uma Single Page Application, sem exigir a criação de uma API independente para todas as páginas da interface web.
+As relações mais utilizadas são:
 
-A aplicação disponibiliza também rotas de API protegidas por autenticação através do **Laravel Sanctum**, utilizadas para operações autenticadas, comunicação baseada em JSON e preparação para integrações externas.
+belongsTo()
+hasMany()
+hasOne()
 
-A arquitetura atual suporta os principais módulos do SpaceHub:
+A lógica de negócio complexa não deve ficar concentrada nos Models.
 
-* autenticação;
-* gestão de utilizadores;
-* gestão de edifícios;
-* gestão de pisos;
-* gestão de setores;
-* gestão de secretárias;
-* gestão de reservas;
-* disponibilidade de espaços;
-* mapa interativo;
-* dashboard;
-* check-in através de QR Code;
-* pagamentos;
-* FAQs;
-* pedidos de suporte;
-* uploads;
-* comunicação em tempo real;
-* testes automatizados.
+4.4.2 View
 
----
+A camada de apresentação é construída maioritariamente com React.
 
-# 4.2 Arquitetura Geral
+As páginas são entregues através do Inertia.js e recebem do backend os dados necessários sob a forma de propriedades.
 
-A arquitetura do SpaceHub encontra-se dividida em diferentes camadas, cada uma com responsabilidades próprias.
+A interface é responsável por:
 
-De forma simplificada, a arquitetura pode ser representada da seguinte forma:
+apresentar informação;
 
-```text
-                +----------------------------------+
-                |            Utilizador            |
-                +----------------+-----------------+
-                                 |
-                                 ▼
-                +----------------------------------+
-                |       Interface React            |
-                |       Componentes e Páginas      |
-                +----------------+-----------------+
-                                 |
-                            Inertia.js
-                                 |
-                    HTTP / JSON / Form Data
-                                 |
-                                 ▼
-                +----------------------------------+
-                |          Rotas Laravel 12        |
-                |       web.php / api.php          |
-                +----------------+-----------------+
-                                 |
-                                 ▼
-                +----------------------------------+
-                |        Middleware Laravel        |
-                | auth / active / role / CSRF      |
-                +----------------+-----------------+
-                                 |
-                                 ▼
-                +----------------------------------+
-                |           Controllers            |
-                +-------+---------------+----------+
-                        |               |
-                        ▼               ▼
-                Form Requests        Policies
-                        |               |
-                        +-------+-------+
-                                |
-                                ▼
-                         Services / Eventos
-                                |
-                                ▼
-                             Models
-                                |
-                           Eloquent ORM
-                                |
-                                ▼
-                         Base de Dados MySQL
-```
+recolher dados;
 
-A aplicação pode ainda ser observada segundo as seguintes camadas funcionais:
+controlar estados visuais;
 
-1. **Camada de apresentação**
-   Constituída pelas páginas, layouts e componentes React.
+mostrar erros de validação;
 
-2. **Camada de comunicação**
-   Constituída pelo Inertia.js, pedidos HTTP, respostas Inertia, respostas JSON e formulários.
+executar navegação Inertia;
 
-3. **Camada de encaminhamento**
-   Constituída pelas rotas web e API.
+atualizar componentes;
 
-4. **Camada de segurança**
-   Constituída pela autenticação, middleware, Policies, Gates, proteção CSRF e validação de utilizadores ativos.
+apresentar tabelas, formulários, mapas e gráficos;
 
-5. **Camada de aplicação**
-   Constituída pelos Controllers, Form Requests, Resources e Services.
+reagir a eventos em tempo real.
 
-6. **Camada de domínio**
-   Constituída pelos Models, relações Eloquent, estados, regras de reserva e regras de pagamento.
+A estrutura Blade existente funciona essencialmente como ponto de entrada da aplicação Inertia.
 
-7. **Camada de persistência**
-   Constituída pelo Eloquent ORM e pela base de dados MySQL.
+4.4.3 Controller
 
-8. **Camada de eventos e tempo real**
-   Constituída pelos eventos Laravel, broadcasting, Laravel Reverb e Laravel Echo.
+Os Controllers recebem os pedidos e coordenam as camadas seguintes.
 
-9. **Camada de testes**
-   Constituída pelos testes de unidade e de funcionalidade desenvolvidos com PHPUnit.
+As suas responsabilidades incluem:
 
----
+obter o utilizador autenticado;
 
-# 4.3 Padrão Model-View-Controller
+autorizar a operação;
 
-O padrão MVC constitui a base da organização do projeto.
+receber dados já validados;
 
-## 4.3.1 Model
+chamar Services;
 
-Os Models representam as entidades do domínio e a respetiva persistência na base de dados.
+consultar ou atualizar Models;
 
-Cada Model corresponde, de forma geral, a uma tabela e contém:
+carregar relações;
 
-* atributos preenchíveis;
-* conversões de tipos;
-* relações com outras entidades;
-* métodos auxiliares;
-* regras simples relacionadas com a entidade;
-* scopes de consulta, quando necessários.
+emitir eventos;
 
-Entre os principais Models do projeto encontram-se:
+devolver páginas Inertia;
 
-* `User`;
-* `Role`;
-* `Edificio`;
-* `Piso`;
-* `Setor`;
-* `Secretaria`;
-* `Reserva`;
-* `Periodo`;
-* `EstadoReserva`;
-* `Pagamento`;
-* `Faq`;
-* `PedidoSuporte`.
+devolver Resources ou JSON;
 
-Os Models utilizam o Eloquent ORM para representar e manipular os dados.
+efetuar redirecionamentos;
 
-Exemplo conceptual:
+apresentar mensagens de sucesso ou erro.
 
-```php
-class Reserva extends Model
-{
-    protected $fillable = [
-        'user_id',
-        'secretaria_id',
-        'periodo_id',
-        'estado_reserva_id',
-        'data',
-    ];
-}
-```
+Os Controllers devem permanecer focados na coordenação. Regras extensas, reutilizáveis ou com vários efeitos laterais são transferidas para Services.
 
----
+4.5 Fluxo de uma requisição
 
-## 4.3.2 View
+4.5.1 Fluxo web com Inertia
 
-Na arquitetura tradicional do Laravel, a camada View é normalmente implementada através de Blade.
+Utilizador
+    ↓
+Página ou componente React
+    ↓
+Pedido HTTP
+    ↓
+Rota web
+    ↓
+Middleware
+    ↓
+Form Request e Policy
+    ↓
+Controller
+    ↓
+Service / Model
+    ↓
+Eloquent ORM
+    ↓
+MySQL
+    ↓
+Inertia::render() ou redirecionamento
+    ↓
+Página React atualizada
 
-No SpaceHub, a maior parte da interface autenticada é desenvolvida com **React**, sendo as páginas entregues através do Inertia.js.
+4.5.2 Fluxo API
 
-Os componentes React são responsáveis por:
+Cliente
+    ↓
+Pedido HTTP com JSON
+    ↓
+Rota API
+    ↓
+auth:sanctum / active / role
+    ↓
+Form Request e Policy
+    ↓
+Controller
+    ↓
+Service / Model
+    ↓
+Base de dados
+    ↓
+API Resource
+    ↓
+Resposta JSON
 
-* apresentar informação;
-* recolher dados introduzidos pelo utilizador;
-* mostrar mensagens de validação;
-* controlar estados da interface;
-* executar pedidos ao backend;
-* atualizar componentes sem recarregar toda a página;
-* apresentar mapas, tabelas, cartões e formulários;
-* reagir a eventos recebidos em tempo real.
+4.5.3 Respostas HTTP
 
-Embora exista uma estrutura `resources/views`, esta é utilizada principalmente como ponto de entrada da aplicação Inertia.
+As respostas mais relevantes incluem:
 
----
+Código
 
-## 4.3.3 Controller
+Significado
 
-Os Controllers funcionam como intermediários entre as rotas, os pedidos do utilizador, as regras de segurança, a lógica de aplicação e os Models.
+200
 
-As principais responsabilidades dos Controllers incluem:
+Operação concluída
 
-* receber pedidos HTTP;
-* obter o utilizador autenticado;
-* autorizar operações;
-* iniciar a validação;
-* chamar Services;
-* executar consultas;
-* carregar relações;
-* devolver respostas JSON;
-* devolver páginas Inertia;
-* redirecionar o utilizador;
-* emitir mensagens de sucesso ou erro.
+201
 
-Os Controllers não devem concentrar lógica de negócio complexa. Sempre que uma operação apresenta múltiplas regras, efeitos laterais ou possibilidade de reutilização, essa lógica deve ser transferida para uma classe Service.
+Recurso criado
 
----
+401
 
-# 4.4 Organização do Backend
+Utilizador não autenticado
 
-O backend encontra-se organizado de acordo com as convenções do Laravel 12.
+403
 
-A estrutura principal inclui:
+Operação não autorizada
 
-```text
+404
+
+Recurso inexistente
+
+422
+
+Dados inválidos
+
+500
+
+Erro interno não previsto
+
+4.6 Organização do projeto
+
+A estrutura principal segue as convenções do Laravel:
+
 app/
- ├── Events/
- ├── Http/
- │    ├── Controllers/
- │    │    └── Api/
- │    ├── Middleware/
- │    ├── Requests/
- │    └── Resources/
- ├── Models/
- ├── Policies/
- ├── Providers/
- ├── Services/
- └── Notifications/
-```
+├── Console/
+├── Events/
+├── Http/
+│   ├── Controllers/
+│   │   └── Api/
+│   ├── Middleware/
+│   ├── Requests/
+│   └── Resources/
+├── Models/
+├── Notifications/
+├── Policies/
+├── Providers/
+└── Services/
 
-Cada diretório possui uma responsabilidade específica.
+database/
+├── factories/
+├── migrations/
+└── seeders/
 
----
+resources/
+├── js/
+│   ├── Components/
+│   ├── Layouts/
+│   ├── Pages/
+│   ├── app.jsx
+│   └── bootstrap.js
+└── views/
 
-# 4.5 Models
+routes/
+├── api.php
+├── channels.php
+└── web.php
 
-Os Models representam as entidades persistidas na base de dados e constituem a camada de domínio e persistência da aplicação.
+tests/
+├── Feature/
+└── Unit/
 
-Os principais Models são:
+A estrutura real pode incluir diretórios adicionais criados durante a evolução do projeto, mantendo-se a separação por responsabilidade.
 
-| Model           | Responsabilidade                                |
-| --------------- | ----------------------------------------------- |
-| `User`          | Representar os utilizadores do sistema          |
-| `Role`          | Representar os papéis e perfis de autorização   |
-| `Edificio`      | Representar os edifícios disponíveis            |
-| `Piso`          | Representar os pisos pertencentes a edifícios   |
-| `Setor`         | Representar as áreas existentes em cada piso    |
-| `Secretaria`    | Representar as secretárias reserváveis          |
-| `Reserva`       | Representar as reservas efetuadas               |
-| `Periodo`       | Representar os períodos horários disponíveis    |
-| `EstadoReserva` | Representar os estados possíveis de uma reserva |
-| `Pagamento`     | Representar o pagamento associado a uma reserva |
-| `Faq`           | Representar perguntas frequentes                |
-| `PedidoSuporte` | Representar pedidos submetidos no Help Center   |
+4.7 Componentes do backend
 
-Os Models implementam relações Eloquent, incluindo:
+4.7.1 Rotas
 
-* `belongsTo()`;
-* `hasMany()`;
-* `hasOne()`.
+As rotas web encontram-se em:
 
-Exemplos conceptuais:
+routes/web.php
 
-```php
-public function pisos()
-{
-    return $this->hasMany(Piso::class);
-}
-```
+São utilizadas pela interface React através do Inertia.js e incluem:
 
-```php
-public function edificio()
-{
-    return $this->belongsTo(Edificio::class);
-}
-```
+dashboard;
 
-```php
-public function pagamento()
-{
-    return $this->hasOne(Pagamento::class);
-}
-```
+perfil;
 
-Estas relações permitem representar a estrutura hierárquica e funcional da aplicação.
+gestão de espaços;
 
-```text
-Edifício
-   |
-   +-- Pisos
-          |
-          +-- Setores
-                 |
-                 +-- Secretárias
-                        |
-                        +-- Reservas
-                               |
-                               +-- Pagamento
-```
+reservas;
 
----
+disponibilidade;
 
-# 4.6 Controllers
+mapa;
 
-Cada módulo principal possui um Controller responsável por coordenar os respetivos pedidos.
+check-in;
 
-Entre os Controllers existentes encontram-se:
+pagamentos;
 
-* `AuthController`;
-* `UserController`;
-* `EdificioController`;
-* `PisoController`;
-* `SetorController`;
-* `SecretariaController`;
-* `ReservaController`;
-* `DashboardController`;
-* `MapaController`;
-* `CheckinController`;
-* `PagamentoController`;
-* `FaqController`;
-* `PedidoSuporteController`;
-* `ProfileController`.
+avaliações;
 
-Existem Controllers associados às rotas web e Controllers específicos para a API.
+notificações;
 
-Os Controllers web devolvem normalmente:
+chat;
 
-* páginas Inertia;
-* redirecionamentos;
-* mensagens de sessão;
-* respostas adequadas aos formulários React.
+Help Center;
 
-Os Controllers API devolvem normalmente:
+páginas administrativas.
 
-* respostas JSON;
-* códigos de estado HTTP;
-* Resources;
-* mensagens de erro estruturadas.
+As rotas API encontram-se em:
 
-Exemplo conceptual de um Controller:
+routes/api.php
 
-```php
-public function index()
-{
-    Gate::authorize('viewAny', Reserva::class);
+São utilizadas para:
 
-    $reservas = Reserva::query()
-        ->with([
-            'user',
-            'secretaria.setor.piso.edificio',
-            'periodo',
-            'estadoReserva',
-            'pagamento',
-        ])
-        ->paginate();
+autenticação por token;
 
-    return Inertia::render('Reservas/Index', [
-        'reservas' => $reservas,
-    ]);
-}
-```
+operações JSON;
 
----
+testes de endpoints;
 
-# 4.7 Form Requests
+integrações externas;
 
-A validação dos dados é realizada através de classes Form Request.
+acesso desacoplado aos recursos.
 
-A utilização de Form Requests permite retirar dos Controllers as regras de validação e centralizar a definição dos dados aceites por cada operação.
+A autorização dos canais privados é definida em:
 
-Entre os Form Requests utilizados encontram-se:
+routes/channels.php
 
-* `StoreUserRequest`;
-* `UpdateUserRequest`;
-* `StoreEdificioRequest`;
-* `UpdateEdificioRequest`;
-* `StorePisoRequest`;
-* `UpdatePisoRequest`;
-* `StoreSetorRequest`;
-* `UpdateSetorRequest`;
-* `StoreSecretariaRequest`;
-* `UpdateSecretariaRequest`;
-* `StoreReservaRequest`;
-* `UpdateReservaRequest`;
-* Requests associados a pagamentos;
-* Requests associados a FAQs;
-* Requests associados a pedidos de suporte.
+4.7.2 Middleware
 
-Os Form Requests permitem definir:
+Os principais mecanismos são:
 
-* campos obrigatórios;
-* tipos de dados;
-* limites de tamanho;
-* regras de unicidade;
-* existência de chaves estrangeiras;
-* formatos de datas;
-* formatos de ficheiros;
-* mensagens de validação;
-* autorização adicional, quando necessária.
+auth — exige autenticação;
+
+auth:sanctum — protege endpoints API;
+
+active — bloqueia contas inativas;
+
+role — restringe rotas por papel;
+
+proteção CSRF — protege os formulários e pedidos web.
+
+A combinação de middleware permite rejeitar pedidos antes de estes chegarem à lógica do Controller.
+
+4.7.3 Form Requests
+
+Os Form Requests centralizam a validação dos dados de entrada.
+
+Permitem definir:
+
+campos obrigatórios;
+
+tipos de dados;
+
+limites;
+
+formatos;
+
+datas;
+
+chaves estrangeiras;
+
+regras de unicidade;
+
+validação de ficheiros;
+
+mensagens de erro.
 
 Exemplo conceptual:
 
-```php
 public function rules(): array
 {
     return [
         'secretaria_id' => ['required', 'integer', 'exists:secretarias,id'],
         'periodo_id' => ['required', 'integer', 'exists:periodos,id'],
         'data' => ['required', 'date'],
+        'tipo_duracao' => ['required', 'string'],
     ];
 }
-```
 
-A validação realizada no servidor é independente da validação existente na interface React, garantindo que pedidos manipulados ou enviados diretamente continuam protegidos.
+A validação no servidor é obrigatória, mesmo quando existe validação no frontend.
 
----
+4.7.4 Policies
 
-# 4.8 API Resources
+As Policies centralizam as permissões sobre cada recurso.
 
-As respostas da API podem utilizar Resources para controlar a representação dos Models em JSON.
+Entre as principais encontram-se:
 
-Entre os Resources utilizados ou previstos na arquitetura encontram-se:
+UserPolicy;
 
-* `UserResource`;
-* `ReservaResource`;
-* `PisoResource`;
-* `SetorResource`;
-* `SecretariaResource`;
-* `PagamentoResource`.
+EdificioPolicy;
 
-Os Resources permitem:
+PisoPolicy;
 
-* definir os campos devolvidos;
-* esconder informação interna;
-* formatar datas;
-* apresentar relações;
-* manter consistência entre respostas;
-* evitar a exposição direta de todos os atributos do Model.
+SetorPolicy;
 
-Exemplo conceptual:
+SecretariaPolicy;
 
-```php
-public function toArray($request): array
-{
-    return [
-        'id' => $this->id,
-        'data' => $this->data,
-        'estado' => $this->estadoReserva?->nome,
-        'secretaria' => new SecretariaResource($this->whenLoaded('secretaria')),
-    ];
-}
-```
+ReservaPolicy;
 
----
+PagamentoPolicy;
 
-# 4.9 Services
+Policies associadas a avaliações e suporte.
 
-A camada de Services é utilizada para concentrar regras de negócio que não devem permanecer nos Controllers.
+Os métodos podem incluir:
 
-O principal exemplo desta abordagem é o:
+viewAny
+view
+create
+update
+delete
+toggleAtivo
+cancelar
+confirmar
+moderar
 
-```text
-PagamentoService
-```
+Exemplo:
 
-O `PagamentoService` centraliza a lógica relacionada com o módulo de pagamentos.
-
-As suas responsabilidades incluem:
-
-* criar automaticamente um pagamento;
-* calcular o valor associado à reserva;
-* atualizar o valor de um pagamento;
-* gerar referências únicas;
-* confirmar pagamentos;
-* cancelar pagamentos;
-* validar alterações de estado;
-* simular o processamento do pagamento;
-* evitar duplicação de lógica;
-* manter consistência entre diferentes operações.
-
-A utilização de um Service permite que a mesma lógica seja reutilizada em:
-
-* Controllers;
-* comandos;
-* eventos;
-* testes;
-* futuras integrações com gateways externos.
-
-Fluxo conceptual:
-
-```text
-Pedido HTTP
-    |
-    ▼
-PagamentoController
-    |
-    ▼
-PagamentoPolicy
-    |
-    ▼
-Form Request
-    |
-    ▼
-PagamentoService
-    |
-    ▼
-Pagamento / Reserva
-    |
-    ▼
-Base de Dados
-```
-
-A lógica de pagamento permanece assim isolada da camada de apresentação.
-
----
-
-# 4.10 Policies e controlo de acesso
-
-A autorização é implementada através do sistema de Policies do Laravel.
-
-As Policies permitem definir, para cada entidade, quais os utilizadores autorizados a executar uma determinada ação.
-
-As principais Policies implementadas são:
-
-* `UserPolicy`;
-* `ReservaPolicy`;
-* `EdificioPolicy`;
-* `PisoPolicy`;
-* `SetorPolicy`;
-* `SecretariaPolicy`;
-* `PagamentoPolicy`.
-
-As Policies podem incluir métodos como:
-
-* `viewAny`;
-* `view`;
-* `create`;
-* `update`;
-* `delete`;
-* `toggleAtivo`;
-* `cancelar`;
-* `confirmar`;
-* métodos específicos de cada módulo.
-
-Exemplo conceptual:
-
-```php
-public function update(User $user, Reserva $reserva): bool
-{
-    return $user->role->nome === 'Administrador'
-        || $reserva->user_id === $user->id;
-}
-```
-
-Nos Controllers, a autorização é executada através de mecanismos como:
-
-```php
 Gate::authorize('update', $reserva);
-```
 
-ou:
+As Policies verificam o papel, a propriedade do recurso, o estado e outras condições da operação.
 
-```php
-$this->authorize('view', $pagamento);
-```
+4.7.5 Services
 
-Esta arquitetura evita a repetição de verificações manuais de papéis em diferentes Controllers.
+Os Services concentram regras que não devem permanecer nos Controllers.
 
----
+O PagamentoService é um exemplo central e pode ser responsável por:
 
-# 4.11 Papéis da aplicação
+calcular valores;
 
-O SpaceHub utiliza diferentes papéis para separar as responsabilidades dos utilizadores.
+criar pagamentos;
 
-Os papéis existentes são:
+gerar referências;
 
-* Administrador;
-* Gestor;
-* Colaborador;
-* Utilizador.
+confirmar ou cancelar pagamentos;
 
-A distribuição geral de permissões encontra-se representada na tabela seguinte.
+aplicar transições de estado;
 
-| Papel         | Responsabilidades gerais                                                 |
-| ------------- | ------------------------------------------------------------------------ |
-| Administrador | Gestão de utilizadores, consulta global, administração e acesso alargado |
-| Gestor        | Gestão operacional de edifícios, pisos, setores e secretárias            |
-| Colaborador   | Consulta de informação e utilização de funcionalidades permitidas        |
-| Utilizador    | Gestão do próprio perfil, reservas, check-in e pagamentos próprios       |
+manter coerência entre pagamento e reserva.
 
-As permissões reais não dependem apenas desta descrição geral, sendo aplicadas através das Policies e do middleware.
+A arquitetura também permite utilizar Services para:
 
----
+dashboard;
 
-# 4.12 Middleware
+disponibilidade;
 
-Os pedidos são processados por middleware antes de chegarem aos Controllers.
+reservas;
 
-Os principais mecanismos utilizados são:
+notificações;
 
-## 4.12.1 Middleware `auth`
+relatórios;
 
-Garante que apenas utilizadores autenticados acedem a rotas protegidas.
+integrações futuras.
 
-Nas rotas web é utilizada a autenticação baseada em sessão.
+4.7.6 API Resources
 
-Nas rotas API é utilizado:
+Os Resources controlam a representação JSON dos Models.
 
-```php
-auth:sanctum
-```
+Permitem:
 
----
+selecionar campos;
 
-## 4.12.2 Middleware `active`
+formatar datas;
 
-O middleware `active` impede que contas inativas utilizem funcionalidades protegidas.
+apresentar relações;
 
-Mesmo que um utilizador possua credenciais ou um token anteriormente emitido, o sistema verifica o estado atual da conta.
+ocultar informação interna;
 
-Este middleware é especialmente importante para permitir a desativação administrativa de utilizadores sem eliminar os seus dados.
+manter respostas consistentes.
 
----
+Os Resources não substituem os Models nem os Services; atuam apenas na serialização das respostas.
 
-## 4.12.3 Middleware `role`
+4.7.7 Events e Notifications
 
-O middleware `role` permite restringir grupos de rotas a um papel específico.
+Os Events representam acontecimentos relevantes, como:
+
+reserva criada;
+
+reserva cancelada;
+
+check-in realizado;
+
+pagamento confirmado;
+
+mapa atualizado;
+
+nova mensagem;
+
+alteração de notificação.
+
+As Notifications permitem guardar ou enviar informação destinada a um utilizador.
+
+4.7.8 Commands e Scheduler
+
+Os Commands executam operações automáticas ou administrativas.
+
+O Scheduler é utilizado em tarefas como:
+
+expiração de reservas sem check-in;
+
+cancelamento de reservas com pagamentos pendentes;
+
+atualização de estados;
+
+limpeza ou manutenção periódica.
 
 Exemplo conceptual:
 
-```php
-Route::middleware([
-    'auth:sanctum',
-    'active',
-    'role:Administrador',
-])->group(function () {
-    // Rotas administrativas
-});
-```
+Schedule::command('reservas:cancelar-expiradas')
+    ->everyMinute();
 
----
+4.8 Organização do frontend
 
-## 4.12.4 Proteção CSRF
+4.8.1 Pages
 
-As rotas web e os formulários são protegidos contra ataques Cross-Site Request Forgery através dos mecanismos disponibilizados pelo Laravel.
+As Pages representam ecrãs completos da aplicação.
 
-Os pedidos efetuados pelo Inertia respeitam esta proteção e utilizam os tokens necessários.
+Exemplo conceptual:
 
----
+Pages/
+├── Auth/
+├── Dashboard/
+├── Profile/
+├── Reservas/
+├── Pagamentos/
+├── Avaliacoes/
+├── Notificacoes/
+├── HelpCenter/
+├── Mapa/
+└── Admin/
 
-# 4.13 Autenticação
+4.8.2 Components
 
-A autenticação do SpaceHub utiliza mecanismos nativos do Laravel e o Laravel Sanctum.
+Os Components representam elementos reutilizáveis, como:
 
-As funcionalidades implementadas incluem:
+cartões estatísticos;
 
-* registo;
-* login;
-* logout;
-* consulta do utilizador autenticado;
-* recuperação da palavra-passe;
-* redefinição da palavra-passe;
-* edição do perfil;
-* alteração da palavra-passe;
-* eliminação da própria conta, quando aplicável.
+cabeçalhos;
 
-Nas rotas API, o Sanctum permite emitir tokens associados ao utilizador.
+menu lateral;
 
-Fluxo simplificado de autenticação por token:
+formulários;
 
-```text
-Utilizador
-    |
-    | email + password
-    ▼
-AuthController
-    |
-    | valida credenciais
-    ▼
-Laravel Auth
-    |
-    | cria token Sanctum
-    ▼
-Token devolvido ao cliente
-    |
-    | Authorization: Bearer <token>
-    ▼
-Rotas protegidas
-```
+tabelas;
 
-Os utilizadores inativos são impedidos de utilizar a aplicação.
+modais;
 
-As palavras-passe são armazenadas utilizando hashing seguro e nunca são guardadas em texto simples.
+paginação;
 
----
+cartões de reserva;
 
-# 4.14 Rotas Web e rotas API
+estados de pagamento;
 
-A aplicação separa os seus pontos de entrada em dois grupos principais.
+mapa de secretárias;
 
-## 4.14.1 Rotas Web
+indicadores de disponibilidade;
 
-As rotas web encontram-se definidas principalmente em:
+mensagens de erro;
 
-```text
-routes/web.php
-```
+controlos acessíveis.
 
-Estas rotas são utilizadas pela interface React através do Inertia.js.
+A componentização reduz duplicação e mantém consistência entre páginas.
 
-São responsáveis por funcionalidades como:
+4.8.3 Layouts
 
-* dashboard;
-* perfil;
-* reservas;
-* histórico de reservas;
-* disponibilidade;
-* mapa;
-* check-in;
-* QR Codes;
-* pagamentos;
-* Help Center;
-* páginas administrativas.
+Os Layouts definem estruturas partilhadas:
 
----
+cabeçalho;
 
-## 4.14.2 Rotas API
+navegação;
 
-As rotas API encontram-se definidas em:
+menu lateral;
 
-```text
-routes/api.php
-```
+conteúdo principal;
 
-Estas rotas são utilizadas para:
+perfil;
 
-* autenticação baseada em token;
-* operações JSON;
-* futuras integrações;
-* testes de endpoints;
-* comunicação desacoplada.
+notificações;
 
-As rotas privadas utilizam normalmente:
+chat;
 
-```php
-auth:sanctum
-```
+Help Center.
 
-e:
+O menu foi preparado para diferentes dimensões de ecrã, incluindo navegação responsiva.
 
-```php
-active
-```
+4.8.4 Inertia.js
 
-As rotas administrativas podem ainda utilizar:
+O Inertia.js permite que o backend devolva diretamente uma página React:
 
-```php
-role:Administrador
-```
-
----
-
-# 4.15 Inertia.js
-
-O Inertia.js permite utilizar Controllers e rotas Laravel para entregar páginas React sem necessidade de construir uma API REST separada para toda a interface web.
-
-Um Controller pode devolver uma página da seguinte forma:
-
-```php
 return Inertia::render('Reservas/Index', [
     'reservas' => $reservas,
 ]);
-```
 
-O Inertia transforma os dados fornecidos pelo backend em propriedades disponíveis no componente React.
+Esta integração permite:
 
-Este modelo apresenta várias vantagens:
+reutilizar rotas Laravel;
 
-* reutilização das rotas Laravel;
-* utilização direta da autenticação web;
-* manutenção das Policies no backend;
-* redirecionamentos tradicionais;
-* mensagens de sessão;
-* validação integrada;
-* menor duplicação entre frontend e backend;
-* navegação sem recarregamento integral da página.
+manter autenticação e autorização no backend;
 
-O SpaceHub utiliza, assim, uma arquitetura híbrida:
+apresentar erros de validação;
 
-* páginas web através de Inertia;
-* endpoints JSON através da API;
-* React como camada de apresentação.
+utilizar mensagens de sessão;
 
----
+navegar sem recarregar toda a página;
 
-# 4.16 Organização do Frontend
+evitar uma API separada para cada ecrã web.
 
-O frontend encontra-se principalmente em:
+4.8.5 Tailwind CSS e Vite
 
-```text
-resources/js
-```
+O Tailwind CSS é utilizado para:
 
-A organização inclui:
+responsividade;
 
-```text
-resources/js/
- ├── Components/
- ├── Layouts/
- ├── Pages/
- ├── app.jsx
- └── bootstrap.js
-```
+estados visuais;
 
-Dependendo do módulo, podem também existir ficheiros auxiliares para:
+acessibilidade;
 
-* serviços JavaScript;
-* utilitários;
-* hooks;
-* constantes;
-* configuração do Laravel Echo.
+consistência;
 
----
-
-## 4.16.1 Pages
-
-As páginas correspondem aos ecrãs principais da aplicação.
-
-Exemplos:
-
-```text
-Pages/
- ├── Auth/
- ├── Dashboard/
- ├── Profile/
- ├── Reservas/
- ├── Pagamentos/
- ├── HelpCenter/
- ├── Mapa/
- └── Admin/
-```
-
-Entre as páginas relacionadas com reservas encontram-se:
-
-* listagem;
-* criação;
-* edição;
-* histórico;
-* consulta de disponibilidade.
-
----
-
-## 4.16.2 Components
-
-Os componentes representam elementos reutilizáveis da interface.
-
-Entre os componentes do projeto encontram-se elementos como:
-
-* cartões estatísticos;
-* cabeçalhos;
-* menus laterais;
-* formulários;
-* tabelas;
-* modais;
-* cartões de reserva;
-* painéis estatísticos;
-* mapa de secretárias;
-* indicadores de estado;
-* mensagens de erro;
-* componentes de paginação.
-
-A reutilização de componentes reduz duplicação e promove consistência visual.
-
----
-
-## 4.16.3 Layouts
-
-Os Layouts definem estruturas comuns entre páginas.
-
-Um Layout pode incluir:
-
-* cabeçalho;
-* menu lateral;
-* navegação;
-* área de conteúdo;
-* informação do utilizador autenticado;
-* notificações;
-* acesso ao Help Center;
-* acesso ao perfil.
-
----
-
-## 4.16.4 Tailwind CSS
-
-O Tailwind CSS é utilizado para definir o estilo visual da aplicação.
-
-A sua utilização permite:
-
-* criar interfaces responsivas;
-* reutilizar classes utilitárias;
-* manter consistência;
-* reduzir ficheiros CSS específicos;
-* adaptar rapidamente layouts;
-* criar estados visuais para reservas e secretárias.
-
----
-
-## 4.16.5 Vite
+composição rápida de layouts.
 
 O Vite é utilizado para:
 
-* compilar os ficheiros React;
-* processar JavaScript;
-* processar CSS;
-* disponibilizar atualização rápida durante o desenvolvimento;
-* gerar os ficheiros otimizados para produção.
+compilar React;
 
----
+processar JavaScript e CSS;
 
-# 4.17 Persistência dos dados
+atualização rápida em desenvolvimento;
 
-A persistência dos dados é assegurada através do Eloquent ORM e da base de dados MySQL.
+gerar recursos otimizados para produção.
 
-Cada Model representa uma tabela ou entidade persistente.
+4.9 Autenticação e controlo de acesso
+
+4.9.1 Autenticação web
+
+A interface web utiliza a autenticação baseada em sessão disponibilizada pelo Laravel.
+
+As funcionalidades incluem:
+
+registo;
+
+login;
+
+logout;
+
+recuperação de palavra-passe;
+
+redefinição de palavra-passe;
+
+gestão do perfil;
+
+alteração de palavra-passe;
+
+Single Sign-On;
+
+bloqueio de contas inativas.
+
+4.9.2 Autenticação da API
+
+O Laravel Sanctum protege as rotas API através de tokens.
+
+Fluxo conceptual:
+
+Credenciais
+    ↓
+AuthController
+    ↓
+Validação
+    ↓
+Token Sanctum
+    ↓
+Authorization: Bearer <token>
+    ↓
+Endpoint protegido
+
+4.9.3 Papéis
+
+O SpaceHub utiliza:
+
+Papel
+
+Responsabilidade geral
+
+Administrador
+
+Gestão global e gestão de utilizadores
+
+Gestor
+
+Gestão operacional dos espaços
+
+Colaborador
+
+Consulta e operações autorizadas
+
+Utilizador
+
+Perfil, reservas, pagamentos e funcionalidades próprias
+
+A tabela é apenas um resumo. As permissões efetivas são aplicadas pelas Policies e pelo middleware.
+
+4.9.4 Defesa em profundidade
+
+A segurança é aplicada em várias camadas:
+
+Pedido
+  ↓
+Autenticação
+  ↓
+Conta ativa
+  ↓
+Papel, quando aplicável
+  ↓
+Policy
+  ↓
+Validação
+  ↓
+Controller / Service
+  ↓
+Model / Base de dados
+
+4.10 Segurança da aplicação
+
+A arquitetura utiliza:
+
+hashing de palavras-passe;
+
+proteção CSRF;
+
+Sanctum;
+
+Policies e Gates;
+
+middleware;
+
+Form Requests;
+
+restrições da base de dados;
+
+proteção contra mass assignment;
+
+validação de ficheiros;
+
+validação de propriedade dos recursos;
+
+tratamento de exceções;
+
+logging técnico.
+
+4.10.1 Mass assignment
+
+Os Models definem explicitamente os campos permitidos:
+
+protected $fillable = [
+    // campos autorizados
+];
+
+Os campos sensíveis não devem ser preenchidos diretamente a partir do pedido.
+
+4.10.2 Casts
+
+Os casts convertem valores para os tipos esperados:
+
+protected function casts(): array
+{
+    return [
+        'ativo' => 'boolean',
+        'data' => 'date',
+        'data_fim' => 'date',
+    ];
+}
+
+4.10.3 Uploads
+
+Os uploads validam:
+
+extensão;
+
+tipo MIME;
+
+tamanho;
+
+presença do ficheiro;
+
+substituição do ficheiro anterior.
+
+Os ficheiros são armazenados através do Laravel Storage:
+
+storage/app/public
+
+e disponibilizados por:
+
+public/storage
+
+4.10.4 Logging e auditoria
+
+O logging técnico regista erros e informação operacional através dos mecanismos do Laravel.
+
+Uma auditoria administrativa completa, com histórico detalhado de todas as alterações realizadas por cada utilizador, mantém-se como evolução futura e não deve ser confundida com os logs técnicos.
+
+4.11 Persistência e acesso aos dados
+
+4.11.1 Eloquent ORM
 
 O Eloquent é utilizado para:
 
-* criar registos;
-* consultar dados;
-* atualizar registos;
-* eliminar ou desativar dados;
-* carregar relações;
-* aplicar filtros;
-* ordenar resultados;
-* paginar listagens;
-* executar transações, quando necessário.
+criar;
+
+consultar;
+
+atualizar;
+
+desativar;
+
+carregar relações;
+
+filtrar;
+
+ordenar;
+
+paginar;
+
+executar transações.
+
+Os componentes React nunca acedem diretamente à base de dados.
+
+4.11.2 MySQL e migrations
+
+O MySQL armazena os dados relacionais.
+
+As migrations controlam:
+
+tabelas;
+
+colunas;
+
+índices;
+
+chaves estrangeiras;
+
+restrições;
+
+alterações de estrutura.
+
+Os seeders preparam dados iniciais e de demonstração.
+
+As factories criam dados consistentes para testes.
+
+4.11.3 Eager loading
+
+O eager loading reduz consultas repetidas e evita o problema N+1.
 
 Exemplo conceptual:
 
-```php
-$reserva = Reserva::create([
-    'user_id' => $user->id,
-    'secretaria_id' => $request->secretaria_id,
-    'periodo_id' => $request->periodo_id,
-    'data' => $request->data,
-    'estado_reserva_id' => $estado->id,
-]);
-```
-
-O acesso à base de dados não é realizado diretamente nos componentes React.
-
-Todos os dados passam pelo backend, garantindo que as regras de validação e autorização são aplicadas.
-
----
-
-# 4.18 Base de dados MySQL
-
-O SpaceHub utiliza MySQL como sistema de gestão de base de dados relacional.
-
-A estrutura é controlada através de migrations.
-
-As migrations permitem:
-
-* criar tabelas;
-* alterar tabelas;
-* adicionar índices;
-* adicionar chaves estrangeiras;
-* definir restrições;
-* reproduzir a estrutura em diferentes ambientes;
-* manter histórico das alterações.
-
-As principais tabelas representam:
-
-* utilizadores;
-* papéis;
-* edifícios;
-* pisos;
-* setores;
-* secretárias;
-* períodos;
-* estados de reserva;
-* reservas;
-* pagamentos;
-* FAQs;
-* pedidos de suporte.
-
----
-
-# 4.19 Relações entre entidades
-
-A arquitetura de dados utiliza relações explícitas entre Models.
-
-As principais relações incluem:
-
-## Utilizador e papel
-
-```text
-Role 1 ------ N User
-```
-
-Um papel pode estar associado a vários utilizadores.
-
-Cada utilizador possui um papel.
-
----
-
-## Edifício e piso
-
-```text
-Edificio 1 ------ N Piso
-```
-
-Um edifício pode conter vários pisos.
-
-Cada piso pertence a um edifício.
-
----
-
-## Piso e setor
-
-```text
-Piso 1 ------ N Setor
-```
-
-Um piso pode conter vários setores.
-
-Cada setor pertence a um piso.
-
----
-
-## Setor e secretária
-
-```text
-Setor 1 ------ N Secretaria
-```
-
-Um setor pode conter várias secretárias.
-
-Cada secretária pertence a um setor.
-
----
-
-## Utilizador e reserva
-
-```text
-User 1 ------ N Reserva
-```
-
-Um utilizador pode possuir várias reservas.
-
-Cada reserva pertence a um utilizador.
-
----
-
-## Secretária e reserva
-
-```text
-Secretaria 1 ------ N Reserva
-```
-
-Uma secretária pode estar associada a várias reservas em datas ou períodos diferentes.
-
----
-
-## Reserva e pagamento
-
-```text
-Reserva 1 ------ 0..1 Pagamento
-```
-
-Uma reserva pode possuir um pagamento associado.
-
-A relação é implementada no Model `Reserva` através de:
-
-```php
-public function pagamento()
-{
-    return $this->hasOne(Pagamento::class);
-}
-```
-
----
-
-# 4.20 Eager Loading
-
-O projeto utiliza eager loading para carregar relações antecipadamente e evitar o problema conhecido como **N+1 Queries**.
-
-Sem eager loading, a apresentação de uma lista de reservas poderia provocar uma consulta adicional por cada reserva para obter:
-
-* utilizador;
-* secretária;
-* setor;
-* piso;
-* edifício;
-* período;
-* estado;
-* pagamento.
-
-Com eager loading, as relações necessárias são carregadas de forma otimizada.
-
-Exemplo conceptual:
-
-```php
-$reservas = Reserva::with([
+Reserva::with([
     'user',
     'secretaria.setor.piso.edificio',
     'periodo',
     'estadoReserva',
     'pagamento',
 ])->paginate();
-```
 
-Também podem ser utilizados:
+4.11.4 Pesquisa, filtros e paginação
 
-```php
-$model->load(...);
-```
+As listagens com crescimento potencial aplicam os filtros no backend antes da paginação.
 
-e:
-
-```php
-$model->loadMissing(...);
-```
-
-A aplicação do eager loading apresenta as seguintes vantagens:
-
-* reduz o número de consultas;
-* melhora o desempenho das listagens;
-* evita consultas repetidas;
-* facilita a serialização;
-* melhora a resposta do dashboard;
-* melhora o carregamento do histórico;
-* melhora o carregamento do mapa.
-
----
-
-# 4.21 Paginação, pesquisa e filtros
-
-As listagens com potencial crescimento utilizam paginação.
-
-A paginação é especialmente relevante para:
-
-* utilizadores;
-* reservas;
-* pagamentos;
-* pedidos de suporte;
-* FAQs;
-* entidades administrativas.
-
-O backend aplica os filtros antes de executar a paginação.
-
-Exemplo conceptual:
-
-```php
-$query = Pagamento::query()
-    ->with(['reserva.user', 'reserva.secretaria']);
-
-if ($request->filled('estado')) {
-    $query->where('estado', $request->estado);
-}
-
-if ($request->filled('metodo')) {
-    $query->where('metodo', $request->metodo);
-}
-
-$pagamentos = $query
-    ->latest()
+$query
+    ->when($request->filled('estado'), function ($query) use ($request) {
+        $query->where('estado', $request->estado);
+    })
     ->paginate(10)
     ->withQueryString();
-```
 
-O método `withQueryString()` permite preservar filtros durante a navegação entre páginas.
+4.11.5 Transações
 
----
+Operações que atualizam vários registos relacionados devem utilizar transações.
 
-# 4.22 Gestão de ficheiros e uploads
+Exemplo:
 
-O sistema suporta armazenamento de ficheiros associados a diferentes entidades.
+DB::transaction(function () {
+    // criar reserva
+    // criar pagamento
+    // emitir alterações dependentes
+});
 
-Atualmente, os principais uploads incluem:
+A transação evita que a reserva e o pagamento fiquem num estado parcial.
 
-| Entidade | Tipo de ficheiro     |
-| -------- | -------------------- |
-| `User`   | Fotografia do perfil |
-| `Piso`   | Planta do piso       |
+4.12 Arquitetura dos módulos principais
 
-Os ficheiros são armazenados utilizando o sistema Storage do Laravel.
+4.12.1 Gestão de utilizadores
 
-O armazenamento público utiliza:
+O módulo combina:
 
-```text
-storage/app/public
-```
+Rotas
+→ Middleware
+→ UserController
+→ Form Requests
+→ UserPolicy
+→ User
+→ MySQL
+→ Página React ou UserResource
 
-Os ficheiros são disponibilizados através do link simbólico:
+Inclui gestão de papéis, estado ativo, perfil e fotografia.
 
-```text
-public/storage
-```
+4.12.2 Gestão de espaços
 
-A criação do link é realizada com:
+A hierarquia é:
 
-```bash
-php artisan storage:link
-```
-
-A arquitetura de uploads inclui:
-
-* validação do ficheiro;
-* validação da extensão;
-* validação do tipo MIME;
-* validação do tamanho;
-* geração de nomes seguros;
-* armazenamento através do Laravel;
-* substituição controlada de ficheiros anteriores;
-* eliminação segura do ficheiro antigo;
-* armazenamento do caminho na base de dados.
-
-Exemplo conceptual:
-
-```php
-$path = $request->file('fotografia')
-    ->store('utilizadores', 'public');
-```
-
-A utilização da abstração `Storage` evita dependência direta de caminhos físicos e permite futura mudança para outro sistema de armazenamento.
-
----
-
-# 4.23 Gestão de utilizadores
-
-O módulo de utilizadores permite gerir as contas existentes no sistema.
-
-As operações incluem:
-
-* listar utilizadores;
-* criar utilizadores;
-* consultar utilizadores;
-* atualizar utilizadores;
-* associar papéis;
-* ativar contas;
-* desativar contas;
-* editar o próprio perfil;
-* atualizar fotografia;
-* alterar palavra-passe.
-
-As operações administrativas são protegidas por:
-
-* autenticação;
-* middleware `active`;
-* middleware `role`, quando aplicável;
-* `UserPolicy`;
-* Form Requests.
-
-A eliminação direta de utilizadores pode ser limitada para preservar a integridade de reservas, pagamentos e histórico.
-
----
-
-# 4.24 Gestão de espaços
-
-A estrutura física do SpaceHub é organizada hierarquicamente.
-
-```text
 Edifício
-    |
-    ▼
-Piso
-    |
-    ▼
-Setor
-    |
-    ▼
-Secretária
-```
+└── Piso
+    └── Setor
+        └── Secretária
 
-Cada módulo possui:
+Cada módulo possui Model, Controller, Form Requests, Policy, rotas, interface e testes.
 
-* Model;
-* Controller;
-* Form Requests;
-* Policy;
-* rotas;
-* interface;
-* testes.
+O mapa utiliza coordenadas, dimensões e características armazenadas nos setores e secretárias.
 
-Esta organização permite representar diferentes instalações e respetivas plantas.
+4.12.3 Reservas
 
----
+O módulo de reservas integra:
 
-## 4.24.1 Edifícios
+disponibilidade;
 
-Os edifícios representam o nível superior da estrutura física.
+duração diária, semanal, mensal e anual;
 
-Podem incluir informação como:
+período Manhã, Tarde ou Dia inteiro;
 
-* nome;
-* código;
-* localização;
-* estado ativo.
+cálculo da data final;
 
----
+validação de sobreposições;
 
-## 4.24.2 Pisos
+estados;
 
-Os pisos pertencem a edifícios.
+pagamento;
 
-Podem incluir:
+check-in;
 
-* nome;
-* código;
-* número;
-* planta;
-* estado ativo.
+mapa;
 
-A planta carregada pode ser utilizada no mapa interativo.
+eventos;
 
----
+tarefas automáticas.
 
-## 4.24.3 Setores
+Uma reserva longa corresponde a um único registo de reserva e a um único pagamento.
 
-Os setores representam áreas funcionais dentro de um piso.
+4.12.4 Pagamentos
 
-Podem conter:
+O pagamento é criado automaticamente após a reserva.
 
-* nome;
-* tipo;
-* capacidade;
-* indicação de reservável;
-* coordenadas na planta;
-* largura;
-* altura.
+O módulo utiliza:
 
----
+PagamentoController
+→ PagamentoPolicy
+→ Form Request
+→ PagamentoService
+→ Pagamento / Reserva
+→ Base de dados
 
-## 4.24.4 Secretárias
+Os métodos simulados são:
 
-As secretárias representam os espaços individuais disponíveis para reserva.
+Cartão;
 
-Podem incluir:
+MB Way;
 
-* código;
-* posição no mapa;
-* ângulo;
-* características;
-* estado ativo;
-* indicação de reservável;
-* token QR;
-* setor associado.
+Transferência Bancária;
 
-Entre as características configuráveis encontram-se:
+PayPal.
 
-* monitor;
-* dock USB;
-* proximidade de janela;
-* características ergonómicas.
+O processamento não movimenta dinheiro real.
 
----
+4.12.5 Mapa e check-in
 
-# 4.25 Mapa interativo
+O mapa combina:
 
-O mapa interativo permite visualizar a organização física do espaço e o estado das secretárias.
+estrutura física;
 
-O mapa utiliza informação proveniente de:
+posições;
 
-* pisos;
-* plantas;
-* setores;
-* secretárias;
-* reservas;
-* estados de ocupação.
-
-Cada secretária pode ser posicionada através de coordenadas armazenadas na base de dados.
-
-A interface apresenta diferentes estados, tais como:
-
-* livre;
-* reservada;
-* ocupada;
-* indisponível;
-* inativa.
-
-Fluxo conceptual:
-
-```text
-Base de Dados
-    |
-    ▼
-MapaController
-    |
-    ▼
-Carregamento das relações
-    |
-    ▼
-Inertia
-    |
-    ▼
-Componente OfficeMap
-    |
-    ▼
-Representação gráfica
-```
-
-O mapa pode ser atualizado sem recarregamento total da página através da integração em tempo real.
-
----
-
-# 4.26 Reservas
-
-O módulo de reservas constitui uma das áreas centrais da aplicação.
-
-As funcionalidades implementadas incluem:
+reservas;
 
-* criação de reservas;
-* consulta de reservas;
-* edição de reservas;
-* cancelamento;
-* histórico;
-* verificação de disponibilidade;
-* validação de conflitos;
-* associação a período;
-* associação a secretária;
-* associação a utilizador;
-* associação a estado;
-* associação a pagamento;
-* check-in;
-* expiração automática.
-
-As reservas são protegidas por regras de autorização.
-
-De forma geral:
-
-* o Administrador pode consultar e gerir reservas de diferentes utilizadores;
-* os restantes utilizadores apenas podem aceder às operações autorizadas sobre as próprias reservas;
-* a criação depende da disponibilidade da secretária;
-* não são permitidas reservas incompatíveis para o mesmo período.
-
----
-
-# 4.27 Validação de conflitos de reservas
-
-Antes da criação ou alteração de uma reserva, o sistema verifica regras como:
-
-* existência da secretária;
-* secretária ativa;
-* secretária reservável;
-* existência do período;
-* ausência de outra reserva válida para a mesma secretária, data e período;
-* ausência de reserva duplicada do mesmo utilizador;
-* validade da data;
-* permissão do utilizador.
-
-Fluxo simplificado:
-
-```text
-Pedido de reserva
-    |
-    ▼
-StoreReservaRequest
-    |
-    ▼
-ReservaPolicy
-    |
-    ▼
-Consulta de disponibilidade
-    |
-    +-- Conflito encontrado --> Erro de validação
-    |
-    +-- Sem conflito --------> Criação da reserva
-```
-
----
-
-# 4.28 Estados das reservas
-
-As reservas utilizam estados para representar o seu ciclo de vida.
-
-Entre os estados utilizados encontram-se:
-
-* pendente;
-* confirmada;
-* cancelada;
-* expirada.
-
-O estado pode ser alterado devido a:
-
-* criação da reserva;
-* confirmação do check-in;
-* cancelamento pelo utilizador;
-* cancelamento administrativo;
-* expiração automática.
-
-A utilização de uma tabela de estados permite maior flexibilidade do que guardar diretamente um texto fixo em cada reserva.
-
----
-
-# 4.29 Expiração automática
-
-O SpaceHub inclui um mecanismo de expiração automática de reservas que não foram confirmadas dentro do período definido.
-
-Este mecanismo é implementado através de um comando Laravel executado pelo Scheduler.
-
-Exemplo de comando:
-
-```text
-reservas:cancelar-expiradas
-```
-
-O Scheduler executa periodicamente a verificação das reservas elegíveis.
-
-Fluxo conceptual:
-
-```text
-Laravel Scheduler
-    |
-    ▼
-Comando de verificação
-    |
-    ▼
-Reservas pendentes
-    |
-    ▼
-Verificação do limite de check-in
-    |
-    +-- Dentro do prazo --> Mantém estado
-    |
-    +-- Prazo excedido --> Marca como expirada
-```
-
-Este processo liberta automaticamente secretárias que não chegaram a ser utilizadas.
-
----
-
-# 4.30 Check-in através de QR Code
-
-O sistema implementa check-in através de QR Code.
-
-Cada secretária possui um token QR único.
-
-O fluxo de check-in inclui:
-
-1. o utilizador efetua uma reserva;
-2. o utilizador desloca-se à secretária;
-3. o QR Code da secretária é lido;
-4. o sistema identifica o token;
-5. o sistema localiza a secretária;
-6. o sistema verifica a existência de uma reserva válida;
-7. o sistema verifica o utilizador autenticado;
-8. o utilizador confirma o check-in;
-9. a reserva é atualizada;
-10. o mapa é atualizado.
-
-Representação simplificada:
-
-```text
+estados;
+
+disponibilidade.
+
+O check-in utiliza um qr_token único associado à secretária.
+
 QR Code
-    |
-    ▼
-qr_token
-    |
-    ▼
-Secretaria
-    |
-    ▼
-Reserva válida
-    |
-    ▼
-Utilizador autenticado
-    |
-    ▼
-Confirmação de check-in
-    |
-    ▼
-Reserva confirmada
-```
-
-As rotas de check-in incluem funcionalidades para:
-
-* abrir a câmara;
-* processar o token;
-* apresentar a confirmação;
-* confirmar a reserva.
+→ Secretaria
+→ Reserva elegível
+→ Utilizador autenticado
+→ Validação
+→ Check-in
+→ Reserva confirmada
+→ Evento de atualização
 
----
+4.12.6 Dashboard
 
-# 4.31 QR Codes das secretárias
-
-Os QR Codes são gerados com base num token único associado a cada secretária.
-
-A utilização de um token, em vez do identificador sequencial, reduz a exposição direta dos IDs internos.
-
-O sistema permite:
-
-* listar QR Codes;
-* gerar QR Code de uma secretária;
-* identificar uma secretária através do token;
-* utilizar o QR Code no fluxo de check-in.
-
-O token é armazenado na base de dados com restrição de unicidade.
-
----
-
-# 4.32 Módulo de pagamentos
-
-O módulo de pagamentos encontra-se integrado com o módulo de reservas.
-
-Cada reserva pode possuir um pagamento associado através da relação:
-
-```text
-Reserva hasOne Pagamento
-```
-
-O módulo inclui:
-
-* Model `Pagamento`;
-* Controller `PagamentoController`;
-* Policy `PagamentoPolicy`;
-* Service `PagamentoService`;
-* rotas;
-* páginas React;
-* filtros;
-* paginação;
-* testes automatizados.
-Módulo de Pagamentos
-
-- Gestão de pagamentos associados às reservas.
-- Métodos suportados:
-  - Cartão
-  - MB Way
-  - Transferência Bancária
-  - PayPal
-- Estados:
-  - Pendente
-  - Pago
-  - Falhado
-  - Reembolsado
-- Comprovativo de pagamento.
-- Ambiente de demonstração (sem transações reais).
-
-As funcionalidades implementadas incluem:
-
-* criação automática do pagamento;
-* cálculo e atualização do valor;
-* confirmação;
-* cancelamento;
-* histórico;
-* filtros por estado;
-* filtros por método;
-* pesquisa;
-* paginação;
-* referências únicas;
-* simulação de pagamento.
-
----
-
-# 4.33 Métodos de pagamento
-
-O sistema suporta os seguintes métodos:
-
-* Cartão;
-* MB Way;
-* Transferência Bancária.
-
-Nesta fase, o pagamento é simulado e não existe movimentação real de dinheiro.
+O dashboard agrega informação de vários módulos.
 
-A implementação atual foi desenvolvida de forma a permitir futura integração com um fornecedor externo.
+Pode utilizar:
 
-Exemplos de possíveis integrações futuras incluem:
+Services;
 
-* Stripe;
-* gateway bancário;
-* serviço MB Way;
-* outro fornecedor de pagamentos.
+consultas agregadas;
 
-A integração futura poderá ser realizada dentro do `PagamentoService`, preservando a maior parte da arquitetura existente.
+eager loading;
 
----
-
-# 4.34 Ciclo de vida de um pagamento
+cache;
 
-O ciclo de vida simplificado de um pagamento é o seguinte:
+eventos em tempo real.
 
-```text
-Reserva criada
-    |
-    ▼
-PagamentoService
-    |
-    ▼
-Pagamento criado automaticamente
-    |
-    ▼
-Estado pendente
-    |
-    +-- Pagamento simulado com sucesso
-    |       |
-    |       ▼
-    |   Estado pago
-    |
-    +-- Cancelamento
-            |
-            ▼
-        Estado cancelado
-```
+Apresenta indicadores, próximas reservas, ocupação, estados e informação financeira autorizada.
 
-O pagamento mantém uma referência única que permite identificá-lo independentemente do ID interno.
+4.12.7 Avaliações
 
----
+As avaliações são associadas a reservas elegíveis.
 
-# 4.35 Segurança dos pagamentos
+A arquitetura inclui:
 
-O módulo de pagamentos utiliza diferentes mecanismos de proteção:
+autorização;
 
-* autenticação;
-* middleware `active`;
-* `PagamentoPolicy`;
-* validação com Form Requests;
-* referências únicas;
-* associação obrigatória a uma reserva;
-* verificação do proprietário da reserva;
-* restrição de operações por estado;
-* utilização de Service para consistência das transições.
+validação;
 
-Os utilizadores comuns apenas podem consultar ou operar sobre pagamentos associados às próprias reservas, de acordo com as regras da Policy.
+persistência;
 
----
+moderação;
 
-# 4.36 Dashboard
+cálculo de médias por setor;
 
-O Dashboard apresenta uma visão resumida da utilização da plataforma.
+atualização da interface.
 
-Entre os elementos apresentados encontram-se:
+4.12.8 Notificações
 
-* cartões com indicadores;
-* número de reservas;
-* número de secretárias;
-* estados de ocupação;
-* próximas reservas;
-* informação de disponibilidade;
-* estatísticas;
-* mapa interativo.
+As notificações podem ser persistidas na base de dados e apresentadas no frontend.
 
-O fluxo de carregamento pode ser representado da seguinte forma:
+São utilizadas para acontecimentos como:
 
-```text
-DashboardController
-    |
-    +-- Consultas agregadas
-    +-- Próximas reservas
-    +-- Estatísticas
-    +-- Dados do mapa
-    |
-    ▼
-Inertia::render()
-    |
-    ▼
-Dashboard React
-```
+reservas;
 
-O Controller utiliza eager loading e consultas agregadas para reduzir o número de acessos à base de dados.
+pagamentos;
 
----
+check-in;
 
-# 4.37 Cartões e indicadores
+avaliações;
 
-Os cartões do Dashboard permitem apresentar informação resumida.
+suporte.
 
-Exemplos de indicadores:
+4.12.9 Chat
 
-* reservas existentes;
-* reservas ativas;
-* secretárias livres;
-* secretárias ocupadas;
-* edifícios;
-* utilizadores;
-* pedidos de suporte;
-* pagamentos.
+O chat combina persistência e comunicação em tempo real:
 
-Os cartões são implementados como componentes React reutilizáveis.
+Mensagem
+→ Controller
+→ Validação e autorização
+→ Base de dados
+→ Evento
+→ Reverb
+→ Echo
+→ Participantes autorizados
 
----
+4.12.10 Help Center
 
-# 4.38 Próximas reservas
+O Help Center integra:
 
-A área de próximas reservas apresenta as reservas futuras relevantes para o utilizador autenticado.
+FAQs;
 
-As informações podem incluir:
+pedidos de suporte;
 
-* data;
-* período;
-* edifício;
-* piso;
-* setor;
-* secretária;
-* estado;
-* pagamento;
-* opção de check-in, quando aplicável.
+validação;
 
-As relações são carregadas antecipadamente no backend para evitar múltiplas consultas.
+Policies;
 
----
+interface React;
 
-# 4.39 Estatísticas
+acompanhamento de estados.
 
-O sistema apresenta estatísticas relacionadas com a utilização dos espaços.
+4.13 Comunicação em tempo real
 
-Podem ser incluídos indicadores como:
+4.13.1 Laravel Reverb
 
-* número de reservas por período;
-* ocupação por piso;
-* ocupação por setor;
-* distribuição por estado;
-* secretárias disponíveis;
-* utilização diária;
-* próximas reservas.
+O Reverb funciona como servidor WebSocket.
 
-As estatísticas são calculadas no backend e enviadas aos componentes React através do Inertia.
+Permite que o backend envie eventos sem aguardar um novo pedido do cliente.
 
----
+4.13.2 Laravel Echo
 
-# 4.40 Help Center
-
-O SpaceHub inclui um Help Center constituído por dois módulos principais:
-
-* FAQs;
-* pedidos de suporte.
-
-O objetivo é permitir que os utilizadores encontrem respostas a questões frequentes e solicitem apoio quando necessário.
-
----
-
-## 4.40.1 FAQs
-
-O módulo de FAQs permite gerir perguntas e respostas frequentes.
-
-As funcionalidades podem incluir:
-
-* listar FAQs;
-* pesquisar;
-* filtrar;
-* criar;
-* editar;
-* ativar;
-* desativar;
-* eliminar, quando permitido.
-
-As FAQs podem ser administradas por utilizadores com permissões adequadas e consultadas pelos restantes utilizadores.
-
----
-
-## 4.40.2 Pedidos de suporte
-
-O módulo de pedidos de suporte permite ao utilizador submeter um pedido relacionado com a plataforma.
-
-Um pedido pode incluir:
-
-* assunto;
-* descrição;
-* utilizador;
-* estado;
-* prioridade;
-* datas;
-* resposta ou acompanhamento.
-
-O módulo está integrado com:
-
-* autenticação;
-* Policies;
-* validação;
-* persistência;
-* interface React.
-
----
-
-# 4.41 Eventos internos
-
-O Laravel disponibiliza um sistema de eventos que permite desacoplar ações.
-
-Um evento representa algo que ocorreu na aplicação.
-
-No SpaceHub, os eventos podem ser utilizados para situações como:
-
-* criação de reserva;
-* atualização de reserva;
-* cancelamento;
-* check-in;
-* expiração;
-* alteração do mapa;
-* atualização do dashboard;
-* criação de pagamento;
-* confirmação de pagamento.
-
-A utilização de eventos permite que diferentes partes do sistema reajam sem que o Controller conheça diretamente todas as ações secundárias.
-
----
-
-# 4.42 Evento MapaAtualizado
-
-Sempre que ocorre uma alteração relevante que afeta a ocupação dos espaços, o sistema pode emitir o evento:
-
-```text
-MapaAtualizado
-```
-
-Este evento permite notificar os clientes ligados à aplicação.
-
-Exemplos de ações que podem originar uma atualização:
-
-* criação de uma reserva;
-* cancelamento;
-* check-in;
-* expiração;
-* alteração de uma secretária;
-* mudança do estado de disponibilidade.
-
-Fluxo simplificado:
-
-```text
-Alteração numa reserva
-    |
-    ▼
-Evento MapaAtualizado
-    |
-    ▼
-Broadcast
-    |
-    ▼
-Laravel Reverb
-    |
-    ▼
-Laravel Echo
-    |
-    ▼
-Componente React
-    |
-    ▼
-Atualização do mapa
-```
-
----
-
-# 4.43 Laravel Reverb
-
-O Laravel Reverb é utilizado como servidor WebSocket da aplicação.
-
-A sua função é permitir comunicação em tempo real entre o backend e os clientes ligados.
-
-Ao contrário de pedidos HTTP tradicionais, nos quais o cliente tem de solicitar novamente os dados, o WebSocket permite que o servidor envie uma notificação assim que ocorre uma alteração.
-
-O Reverb pode ser utilizado para:
-
-* atualizar o mapa;
-* atualizar o dashboard;
-* refletir alterações de reservas;
-* atualizar indicadores;
-* preparar funcionalidades de chat;
-* apresentar notificações em tempo real.
-
----
-
-# 4.44 Laravel Echo
-
-No frontend, o Laravel Echo é responsável por subscrever canais e ouvir eventos transmitidos pelo backend.
+O Echo subscreve canais e recebe eventos no frontend.
 
 Exemplo conceptual:
 
-```javascript
 window.Echo
     .channel('mapa')
     .listen('MapaAtualizado', () => {
@@ -2302,1036 +1235,331 @@ window.Echo
             only: ['secretarias'],
         });
     });
-```
 
-Quando o evento é recebido, o componente pode:
+4.13.3 Canais
 
-* recarregar apenas determinadas propriedades Inertia;
-* atualizar o estado local;
-* apresentar uma notificação;
-* voltar a consultar os dados necessários.
+Podem existir:
 
-Esta abordagem evita recarregar a página completa.
+canais públicos;
 
----
+canais privados;
 
-# 4.45 Canais de broadcasting
+canais de presença.
 
-Os eventos podem ser transmitidos através de:
+Informação associada a utilizadores ou conversas deve utilizar canais autenticados.
 
-* canais públicos;
-* canais privados;
-* canais de presença.
+4.13.4 Evento de atualização do mapa
 
-Os canais privados exigem autenticação e são adequados para informação restrita.
+Reserva criada, alterada ou cancelada
+    ↓
+Evento MapaAtualizado
+    ↓
+Broadcast
+    ↓
+Laravel Reverb
+    ↓
+Laravel Echo
+    ↓
+Componente React
+    ↓
+Mapa atualizado
 
-A definição e autorização dos canais é realizada através da configuração de broadcasting e do ficheiro de canais da aplicação.
+Este mecanismo reduz inconsistências visuais entre utilizadores ligados em simultâneo.
 
-A escolha do tipo de canal depende da sensibilidade dos dados transmitidos.
+4.14 Fluxos técnicos principais
 
----
+4.14.1 Criação de uma reserva
 
-# 4.46 Atualização em tempo real
-
-A atualização em tempo real melhora a experiência do utilizador em cenários nos quais o estado do sistema pode mudar enquanto várias pessoas utilizam a aplicação.
-
-Exemplo:
-
-1. um utilizador reserva uma secretária;
-2. a reserva é guardada;
-3. o backend emite um evento;
-4. o Reverb transmite o evento;
-5. os restantes utilizadores recebem a atualização;
-6. a secretária deixa de ser apresentada como livre.
-
-Este processo reduz inconsistências visuais e evita que o utilizador tenha de atualizar manualmente a página.
-
----
-
-# 4.47 Scheduler e tarefas automáticas
-
-O Laravel Scheduler é utilizado para executar tarefas periódicas.
-
-No projeto, uma das principais tarefas é a verificação de reservas expiradas.
-
-O Scheduler permite definir a frequência de execução sem colocar essa responsabilidade no frontend ou nos pedidos dos utilizadores.
-
-Exemplo conceptual:
-
-```php
-Schedule::command('reservas:cancelar-expiradas')
-    ->everyMinute();
-```
-
-Em ambiente de produção, o servidor deverá executar periodicamente:
-
-```bash
-php artisan schedule:run
-```
-
-ou manter um processo adequado ao Scheduler.
-
----
-
-# 4.48 Seeders
-
-Os Seeders permitem inserir dados iniciais e dados de demonstração.
-
-Entre os Seeders do projeto encontram-se:
-
-* `RoleSeeder`;
-* `PeriodoSeeder`;
-* `EstadoReservaSeeder`;
-* `SpaceHubEstruturaSeeder`;
-* `UserSeeder`;
-* `ReservaSeeder`;
-* `FaqSeeder`.
-
-Os Seeders permitem preparar rapidamente um ambiente funcional.
-
-Exemplo de execução:
-
-```bash
-php artisan migrate:fresh --seed
-```
-
-A utilização de Seeders facilita:
-
-* desenvolvimento;
-* testes manuais;
-* demonstrações;
-* instalação;
-* preparação do ambiente académico.
-
----
-
-# 4.49 Factories
-
-As Factories são utilizadas principalmente nos testes automatizados.
-
-Permitem criar dados consistentes para Models como:
-
-* utilizadores;
-* reservas;
-* edifícios;
-* pisos;
-* setores;
-* secretárias;
-* pagamentos.
-
-Exemplo conceptual:
-
-```php
-$user = User::factory()->create();
-```
-
-As Factories reduzem duplicação nos testes e tornam os cenários mais legíveis.
-
----
-
-# 4.50 Segurança da aplicação
-
-A arquitetura de segurança utiliza vários mecanismos complementares.
-
-Entre os principais encontram-se:
-
-* autenticação;
-* Laravel Sanctum;
-* middleware;
-* Policies;
-* Gates;
-* Form Requests;
-* proteção CSRF;
-* hashing de palavras-passe;
-* validação de uploads;
-* proteção contra mass assignment;
-* controlo de utilizadores ativos;
-* restrição de rotas por papel;
-* validação de propriedade dos recursos;
-* restrições na base de dados.
-
-A segurança não depende apenas da interface.
-
-Mesmo que um utilizador tente enviar manualmente um pedido HTTP, o backend volta a validar:
-
-* identidade;
-* estado da conta;
-* papel;
-* permissão;
-* dados recebidos;
-* existência das relações;
-* regras de negócio.
-
----
-
-# 4.51 Proteção contra mass assignment
-
-Os Models definem explicitamente os atributos que podem ser preenchidos em massa através da propriedade:
-
-```php
-$fillable
-```
-
-Exemplo:
-
-```php
-protected $fillable = [
-    'nome',
-    'email',
-    'role_id',
-    'ativo',
-];
-```
-
-Esta abordagem impede que atributos não autorizados sejam alterados através de pedidos manipulados.
-
----
-
-# 4.52 Casts
-
-Os Models utilizam casts para garantir que determinados atributos são tratados com o tipo adequado.
-
-Exemplos:
-
-* valores booleanos;
-* datas;
-* datas e horas;
-* valores decimais;
-* enums ou estados, quando aplicável.
-
-Exemplo conceptual:
-
-```php
-protected function casts(): array
-{
-    return [
-        'ativo' => 'boolean',
-        'data' => 'date',
-        'valor' => 'decimal:2',
-    ];
-}
-```
-
----
-
-# 4.53 Transações
-
-Operações que alteram múltiplas entidades relacionadas podem utilizar transações de base de dados.
-
-Um exemplo é a criação de uma reserva acompanhada pela criação automática do respetivo pagamento.
-
-Fluxo conceptual:
-
-```text
-Início da transação
-    |
-    +-- Criar reserva
-    |
-    +-- Criar pagamento
-    |
-    +-- Emitir alterações necessárias
-    |
-    +-- Confirmar transação
-```
-
-Se uma das operações falhar, a transação pode ser revertida, evitando dados incompletos.
-
-Exemplo conceptual:
-
-```php
-DB::transaction(function () use ($dados) {
-    $reserva = Reserva::create($dados);
-
-    app(PagamentoService::class)
-        ->criarParaReserva($reserva);
-});
-```
-
----
-
-# 4.54 Tratamento de erros
-
-O tratamento de erros segue os mecanismos disponibilizados pelo Laravel.
-
-Podem ser devolvidos:
-
-* erros de validação;
-* respostas 401 para utilizadores não autenticados;
-* respostas 403 para utilizadores sem permissão;
-* respostas 404 para recursos inexistentes;
-* respostas 422 para dados inválidos;
-* respostas 500 para erros inesperados.
-
-Na interface Inertia, os erros de validação são disponibilizados aos componentes React e apresentados junto aos campos correspondentes.
-
----
-
-# 4.55 Logging
-
-O Laravel disponibiliza um sistema de logging utilizado para registar erros e informação relevante.
-
-Os logs podem ser utilizados para:
-
-* analisar exceções;
-* verificar falhas de pagamentos;
-* acompanhar tarefas automáticas;
-* investigar problemas de broadcasting;
-* confirmar execução do Scheduler;
-* identificar falhas de uploads.
-
-A arquitetura permite evoluir para um sistema de auditoria administrativa mais completo.
-
----
-
-# 4.56 Desempenho
-
-Foram aplicadas várias medidas para melhorar o desempenho:
-
-* eager loading;
-* paginação;
-* seleção de relações necessárias;
-* consultas agregadas;
-* reutilização de componentes;
-* compilação com Vite;
-* atualização parcial com Inertia;
-* comunicação em tempo real sem polling constante;
-* utilização de índices e chaves estrangeiras;
-* carregamento condicional de dados.
-
-A aplicação deve evitar carregar grandes quantidades de registos sem paginação.
-
----
-
-# 4.57 Cache e otimização
-
-O Laravel permite otimizar a aplicação através de comandos como:
-
-```bash
-php artisan optimize
-```
-
-Durante o desenvolvimento e após alterações estruturais, são utilizados comandos como:
-
-```bash
-php artisan optimize:clear
-```
-
-Podem ainda ser utilizados mecanismos de cache para:
-
-* configuração;
-* rotas;
-* Views;
-* resultados de consultas;
-* dados estatísticos pouco voláteis.
-
-A utilização de cache deverá considerar as atualizações em tempo real e a necessidade de invalidar dados alterados.
-
----
-
-# 4.58 Estrutura completa do projeto
-
-A estrutura principal do projeto pode ser representada da seguinte forma:
-
-```text
-SpaceHub/
-│
-├── app/
-│   ├── Console/
-│   │   └── Commands/
-│   │
-│   ├── Events/
-│   │   └── MapaAtualizado.php
-│   │
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── Api/
-│   │   │   ├── AuthController.php
-│   │   │   ├── DashboardController.php
-│   │   │   ├── EdificioController.php
-│   │   │   ├── PisoController.php
-│   │   │   ├── SetorController.php
-│   │   │   ├── SecretariaController.php
-│   │   │   ├── ReservaController.php
-│   │   │   ├── PagamentoController.php
-│   │   │   ├── MapaController.php
-│   │   │   ├── CheckinController.php
-│   │   │   ├── FaqController.php
-│   │   │   ├── PedidoSuporteController.php
-│   │   │   └── UserController.php
-│   │   │
-│   │   ├── Middleware/
-│   │   │   ├── EnsureUserIsActive.php
-│   │   │   └── RoleMiddleware.php
-│   │   │
-│   │   ├── Requests/
-│   │   │   ├── StoreUserRequest.php
-│   │   │   ├── UpdateUserRequest.php
-│   │   │   ├── StoreReservaRequest.php
-│   │   │   ├── UpdateReservaRequest.php
-│   │   │   └── ...
-│   │   │
-│   │   └── Resources/
-│   │       ├── UserResource.php
-│   │       ├── ReservaResource.php
-│   │       └── ...
-│   │
-│   ├── Models/
-│   │   ├── User.php
-│   │   ├── Role.php
-│   │   ├── Edificio.php
-│   │   ├── Piso.php
-│   │   ├── Setor.php
-│   │   ├── Secretaria.php
-│   │   ├── Reserva.php
-│   │   ├── Periodo.php
-│   │   ├── EstadoReserva.php
-│   │   ├── Pagamento.php
-│   │   ├── Faq.php
-│   │   └── PedidoSuporte.php
-│   │
-│   ├── Policies/
-│   │   ├── UserPolicy.php
-│   │   ├── ReservaPolicy.php
-│   │   ├── EdificioPolicy.php
-│   │   ├── PisoPolicy.php
-│   │   ├── SetorPolicy.php
-│   │   ├── SecretariaPolicy.php
-│   │   └── PagamentoPolicy.php
-│   │
-│   ├── Providers/
-│   │
-│   └── Services/
-│       └── PagamentoService.php
-│
-├── bootstrap/
-│   └── app.php
-│
-├── config/
-│
-├── database/
-│   ├── factories/
-│   ├── migrations/
-│   └── seeders/
-│
-├── docs/
-│   ├── 01-Introducao.md
-│   ├── 02-Requisitos.md
-│   ├── 03-ModeloDados.md
-│   ├── 04-Arquitetura.md
-│   ├── 05-API.md
-│   ├── 06-Roadmap.md
-│   ├── 07-Testes.md
-│   └── 08-PROJECT_CONTEXT.md
-│
-├── public/
-│   └── storage/
-│
-├── resources/
-│   ├── js/
-│   │   ├── Components/
-│   │   ├── Layouts/
-│   │   ├── Pages/
-│   │   ├── app.jsx
-│   │   └── bootstrap.js
-│   │
-│   ├── css/
-│   └── views/
-│
-├── routes/
-│   ├── api.php
-│   ├── channels.php
-│   ├── console.php
-│   └── web.php
-│
-├── storage/
-│   ├── app/
-│   │   └── public/
-│   ├── framework/
-│   └── logs/
-│
-├── tests/
-│   ├── Feature/
-│   └── Unit/
-│
-├── composer.json
-├── package.json
-├── phpunit.xml
-└── vite.config.js
-```
-
-A representação anterior apresenta a organização conceptual do projeto. Alguns ficheiros podem variar de acordo com a versão exata implementada.
-
----
-
-# 4.59 Testes automatizados
-
-O projeto possui uma suíte de testes automatizados desenvolvida com PHPUnit e com as ferramentas de teste do Laravel.
-
-Os testes encontram-se organizados principalmente em:
-
-```text
-tests/
- ├── Feature/
- └── Unit/
-```
-
-Os Feature Tests validam o comportamento da aplicação através de pedidos, autenticação, base de dados, Policies e respostas.
-
-Os Unit Tests validam componentes isolados, como Services ou regras específicas.
-
----
-
-## 4.59.1 Áreas cobertas pelos testes
-
-Os testes automatizados cobrem, entre outras áreas:
-
-* autenticação;
-* registo;
-* login;
-* logout;
-* recuperação de palavra-passe;
-* redefinição de palavra-passe;
-* atualização de perfil;
-* utilizadores inativos;
-* middleware;
-* Policies;
-* autorização;
-* gestão de utilizadores;
-* edifícios;
-* pisos;
-* setores;
-* secretárias;
-* reservas;
-* disponibilidade;
-* conflitos;
-* cancelamento;
-* histórico;
-* dashboard;
-* mapa;
-* QR Code;
-* check-in;
-* expiração automática;
-* uploads;
-* pagamentos;
-* Services;
-* filtros;
-* paginação;
-* Help Center.
-
----
-
-## 4.59.2 Testes de autenticação
-
-Os testes de autenticação verificam cenários como:
-
-* acesso de utilizadores autenticados;
-* rejeição de credenciais inválidas;
-* criação de sessão;
-* emissão de tokens;
-* logout;
-* recuperação de palavra-passe;
-* redefinição de palavra-passe;
-* bloqueio de utilizadores inativos.
-
----
-
-## 4.59.3 Testes de autorização
-
-Os testes de autorização verificam:
-
-* respostas 401 para utilizadores não autenticados;
-* respostas 403 para utilizadores sem permissão;
-* acesso de administradores;
-* acesso de gestores;
-* acesso de colaboradores;
-* acesso de utilizadores;
-* propriedade das reservas;
-* acesso a pagamentos próprios;
-* operações administrativas;
-* proteção dos módulos de espaços.
-
----
-
-## 4.59.4 Testes de Policies
-
-As Policies são testadas diretamente para garantir que as regras de autorização permanecem corretas.
-
-Entre as Policies testadas encontram-se:
-
-* `UserPolicy`;
-* `ReservaPolicy`;
-* `EdificioPolicy`;
-* `PisoPolicy`;
-* `SetorPolicy`;
-* `SecretariaPolicy`;
-* `PagamentoPolicy`.
-
----
-
-## 4.59.5 Testes de reservas
-
-Os testes de reservas verificam:
-
-* criação;
-* listagem;
-* atualização;
-* cancelamento;
-* disponibilidade;
-* conflitos;
-* acesso às próprias reservas;
-* proibição de acesso a reservas de outros utilizadores;
-* comportamento dos administradores;
-* estados;
-* expiração;
-* integração com check-in.
-
----
-
-## 4.59.6 Testes de pagamentos
-
-Os testes de pagamentos verificam:
-
-* criação automática;
-* associação à reserva;
-* cálculo do valor;
-* atualização do valor;
-* geração de referência;
-* confirmação;
-* cancelamento;
-* filtros;
-* paginação;
-* histórico;
-* permissões;
-* comportamento do `PagamentoService`.
-
----
-
-## 4.59.7 Testes de uploads
-
-Os testes de uploads verificam:
-
-* aceitação de ficheiros válidos;
-* rejeição de tipos inválidos;
-* limites de tamanho;
-* armazenamento;
-* atualização do caminho;
-* substituição de ficheiros;
-* associação ao utilizador ou ao piso.
-
----
-
-## 4.59.8 Estado atual da suíte
-
-À data da atualização desta documentação, a suíte apresenta o seguinte resultado:
-
-```text
-154 testes executados
-154 testes aprovados
-0 testes falhados
-```
-
-Este resultado demonstra que as principais funcionalidades e regras de segurança se encontram validadas.
-
----
-
-# 4.60 Processo de validação
-
-Durante o desenvolvimento, são utilizados comandos como:
-
-```bash
-php artisan optimize:clear
-```
-
-```bash
-composer dump-autoload
-```
-
-```bash
-php artisan test
-```
-
-```bash
-php artisan route:list
-```
-
-Para o frontend são utilizados:
-
-```bash
-npm install
-```
-
-```bash
-npm run build
-```
-
-Em ambientes Windows nos quais a execução de scripts PowerShell esteja limitada, pode ser utilizado:
-
-```bash
-npm.cmd install
-```
-
-e:
-
-```bash
-npm.cmd run build
-```
-
-Este processo permite validar:
-
-* carregamento das classes;
-* rotas;
-* testes;
-* compilação do frontend;
-* dependências;
-* integração entre backend e frontend.
-
----
-
-# 4.61 Princípios de desenvolvimento
-
-Durante o desenvolvimento do SpaceHub foram seguidos vários princípios e boas práticas.
-
-Entre eles destacam-se:
-
-* separação de responsabilidades;
-* arquitetura em camadas;
-* utilização do padrão MVC;
-* Controllers com função de coordenação;
-* utilização de Services para regras complexas;
-* utilização de Form Requests;
-* utilização de Resources;
-* utilização de Policies;
-* utilização de middleware;
-* utilização do Eloquent ORM;
-* eager loading;
-* paginação;
-* validação no servidor;
-* proteção contra mass assignment;
-* eventos para reduzir acoplamento;
-* atualização em tempo real;
-* componentes React reutilizáveis;
-* testes automatizados;
-* nomes descritivos;
-* tipagem explícita sempre que possível;
-* preservação da integridade referencial;
-* utilização das convenções do Laravel.
-
----
-
-# 4.62 Manutenibilidade
-
-A arquitetura favorece a manutenção porque cada responsabilidade se encontra numa camada adequada.
-
-Por exemplo:
-
-* alterações visuais são realizadas nos componentes React;
-* alterações de validação são realizadas nos Form Requests;
-* alterações de permissões são realizadas nas Policies;
-* alterações do fluxo de pagamento são realizadas no `PagamentoService`;
-* alterações de persistência são realizadas nos Models e migrations;
-* alterações de tempo real são realizadas nos eventos e canais;
-* alterações de rotas são realizadas nos respetivos ficheiros de rotas.
-
-Esta separação reduz a probabilidade de uma alteração local provocar efeitos inesperados noutros módulos.
-
----
-
-# 4.63 Extensibilidade
-
-A arquitetura está preparada para novas funcionalidades.
-
-Entre as possíveis evoluções encontram-se:
-
-* integração com gateways reais de pagamento;
-* notificações por correio eletrónico;
-* notificações na aplicação;
-* calendário Google;
-* calendário Microsoft Outlook;
-* mensagens do dia;
-* comunicados administrativos;
-* avaliações;
-* relatórios;
-* exportação de dados;
-* auditoria;
-* novos métodos de pagamento;
-* novas regras de reserva;
-* novas estatísticas;
-* aplicações móveis;
-* integração com sistemas externos.
-
-A utilização de Services, eventos, Policies e interfaces separadas reduz o impacto destas evoluções.
-
----
-
-# 4.64 Escalabilidade
-
-A aplicação foi desenvolvida para permitir crescimento gradual.
-
-Algumas características que contribuem para a escalabilidade incluem:
-
-* paginação;
-* eager loading;
-* separação por módulos;
-* utilização de WebSockets;
-* possibilidade de filas;
-* Scheduler;
-* Services;
-* base de dados relacional;
-* índices;
-* autenticação desacoplada através de Sanctum;
-* frontend componentizado.
-
-Em cenários de maior utilização, poderão ser adicionados:
-
-* Redis;
-* filas de processamento;
-* cache distribuída;
-* múltiplos workers;
-* balanceamento de carga;
-* armazenamento externo;
-* monitorização;
-* serviços externos de broadcasting.
-
----
-
-# 4.65 Integração entre módulos
-
-Os módulos do SpaceHub não funcionam de forma isolada.
-
-Existem integrações importantes, como:
-
-```text
-Utilizador
-    |
-    +-- Reserva
-            |
-            +-- Secretária
-            |      |
-            |      +-- Setor
-            |             |
-            |             +-- Piso
-            |                    |
-            |                    +-- Edifício
-            |
-            +-- Período
-            |
-            +-- Estado
-            |
-            +-- Pagamento
-            |
-            +-- Check-in
-```
-
-O Dashboard consulta informação de vários módulos.
-
-O mapa depende da estrutura dos espaços e das reservas.
-
-O pagamento depende da reserva.
-
-O check-in depende do utilizador, da reserva e da secretária.
-
-O Reverb permite refletir alterações destes módulos na interface.
-
----
-
-# 4.66 Fluxo completo de uma reserva
-
-O fluxo completo de uma reserva pode ser representado da seguinte forma:
-
-```text
 Utilizador autenticado
-    |
-    ▼
-Consulta de disponibilidade
-    |
-    ▼
-Seleção de data, período e secretária
-    |
-    ▼
+    ↓
+Seleciona data, duração, período e secretária
+    ↓
 StoreReservaRequest
-    |
-    ▼
+    ↓
 ReservaPolicy
-    |
-    ▼
-Verificação de conflitos
-    |
-    +-- Existe conflito --> Pedido rejeitado
-    |
-    +-- Não existe conflito
-            |
-            ▼
+    ↓
+Validação de disponibilidade e conflitos
+    ├── conflito → operação rejeitada
+    └── sem conflito
+            ↓
        Reserva criada
-            |
-            ▼
-    PagamentoService
-            |
-            ▼
-    Pagamento criado
-            |
-            ▼
-    Evento de atualização
-            |
-            ▼
-       Laravel Reverb
-            |
-            ▼
-    Atualização da interface
-            |
-            ▼
-     Check-in por QR Code
-            |
-            ▼
-    Reserva confirmada
-```
+            ↓
+       PagamentoService
+            ↓
+       Pagamento criado
+            ↓
+       Evento emitido
+            ↓
+       Interface atualizada
 
----
+4.14.2 Confirmação do pagamento
 
-# 4.67 Fluxo completo de um pagamento
-
-O fluxo de pagamento pode ser representado da seguinte forma:
-
-```text
-Reserva criada ou atualizada
-    |
-    ▼
+Pagamento pendente
+    ↓
+Utilizador seleciona o método
+    ↓
+PagamentoPolicy
+    ↓
+Validação
+    ↓
 PagamentoService
-    |
-    +-- Determina valor
-    |
-    +-- Gera referência única
-    |
-    +-- Cria ou atualiza Pagamento
-    |
-    ▼
-Utilizador seleciona método
-    |
-    ▼
-Simulação de processamento
-    |
-    +-- Sucesso --> Pagamento confirmado
-    |
-    +-- Cancelamento --> Pagamento cancelado
-    |
-    ▼
-Histórico disponível
-```
+    ↓
+Processamento simulado
+    ├── erro → estado mantido ou falhado, conforme a regra
+    └── sucesso
+            ↓
+       Pagamento confirmado
+            ↓
+       Reserva atualizada
+            ↓
+       Histórico disponível
 
----
+4.14.3 Check-in
 
-# 4.68 Fluxo de autorização
+Leitura do QR Code
+    ↓
+Identificação da secretária
+    ↓
+Pesquisa da reserva elegível
+    ↓
+Validação do utilizador, data, período e estado
+    ├── inválido → check-in rejeitado
+    └── válido
+            ↓
+       Reserva confirmada
+            ↓
+       Mapa e dashboard atualizados
 
-O fluxo de autorização pode ser representado da seguinte forma:
+4.14.4 Autorização
 
-```text
-Pedido HTTP
-    |
-    ▼
-Middleware de autenticação
-    |
-    +-- Não autenticado --> 401 / redirecionamento
-    |
-    ▼
+Pedido
+    ↓
+Autenticação
+    ├── falha → 401 ou redirecionamento
+    ↓
 Middleware active
-    |
-    +-- Utilizador inativo --> 403
-    |
-    ▼
+    ├── conta inativa → 403
+    ↓
 Middleware role, quando aplicável
-    |
-    +-- Papel inválido --> 403
-    |
-    ▼
+    ├── papel inválido → 403
+    ↓
 Policy
-    |
-    +-- Operação não autorizada --> 403
-    |
-    ▼
+    ├── operação não autorizada → 403
+    ↓
 Form Request
-    |
-    +-- Dados inválidos --> 422
-    |
-    ▼
+    ├── dados inválidos → 422
+    ↓
 Controller / Service
-```
 
-A utilização de várias camadas de segurança permite aplicar defesa em profundidade.
+4.15 Desempenho e otimização
 
----
+As principais medidas incluem:
 
-# 4.69 Decisões arquiteturais
+eager loading;
 
-As principais decisões arquiteturais do SpaceHub incluem:
+paginação;
 
-1. utilização do Laravel 12 como framework principal;
-2. utilização do padrão MVC;
-3. utilização de React para a interface;
-4. utilização do Inertia.js como ponte entre Laravel e React;
-5. utilização do Tailwind CSS;
-6. utilização do Sanctum para autenticação da API;
-7. utilização de Policies para autorização;
-8. utilização de middleware para utilizadores ativos e papéis;
-9. utilização de Form Requests para validação;
-10. utilização de Eloquent para persistência;
-11. utilização de Services para lógica de negócio complexa;
-12. utilização de eventos e Reverb para tempo real;
-13. utilização de QR Code para check-in;
-14. utilização de eager loading;
-15. utilização de paginação;
-16. utilização de testes automatizados;
-17. integração dos pagamentos com as reservas;
-18. separação das rotas web e API;
-19. organização modular da documentação;
-20. preparação para evolução futura.
+índices na base de dados;
 
----
+filtros executados no backend;
 
-# 4.70 Limitações atuais
+seleção dos campos necessários;
 
-Apesar da arquitetura estar preparada para evolução, existem limitações assumidas na versão atual.
+consultas agregadas;
 
-Entre elas:
+cache no dashboard;
 
-* os pagamentos são simulados;
-* não existe movimentação financeira real;
-* algumas integrações externas ainda não foram implementadas;
-* o sistema depende da execução correta do Scheduler;
-* a atualização em tempo real depende do funcionamento do Reverb;
-* o armazenamento utiliza a configuração atual do Laravel;
-* algumas funcionalidades avançadas de auditoria permanecem como evolução futura.
+componentes React reutilizáveis;
 
-Estas limitações não comprometem os objetivos académicos nem a demonstração das funcionalidades implementadas.
+recarregamento parcial com Inertia;
 
----
+atualização por eventos;
 
-# 4.71 Considerações finais
+build otimizado com Vite.
 
-A arquitetura adotada no SpaceHub permite manter uma organização consistente entre os diferentes componentes da aplicação.
+A cache deve ser invalidada quando os dados que alimentam o dashboard ou as estatísticas são alterados.
 
-A utilização do Laravel 12 fornece uma base sólida para:
+4.16 Tratamento de erros
 
-* rotas;
-* autenticação;
-* autorização;
-* validação;
-* persistência;
-* eventos;
-* tarefas agendadas;
-* testes;
-* segurança.
+A aplicação trata os erros em diferentes níveis:
 
-A utilização de React e Inertia.js permite desenvolver uma interface moderna e dinâmica, mantendo a lógica e a segurança centralizadas no backend.
+validação com Form Requests;
 
-O módulo de pagamentos demonstra a utilização de uma camada Service para centralizar regras de negócio.
+autorização com Policies;
 
-O Help Center demonstra a capacidade de adicionar novos módulos sem alterar a estrutura principal.
+exceções do Laravel;
 
-O mapa, o QR Code e o check-in demonstram a integração entre dados físicos, reservas e interação do utilizador.
+respostas HTTP adequadas;
 
-O Laravel Reverb permite refletir alterações relevantes em tempo real.
+mensagens de sessão;
 
-A utilização de eager loading, paginação e componentes reutilizáveis contribui para o desempenho e a manutenibilidade.
+mensagens de validação no React;
 
-A suíte composta por **154 testes automatizados, todos aprovados**, reforça a estabilidade do sistema e reduz o risco de regressões durante alterações futuras.
+logs técnicos;
 
-Desta forma, o SpaceHub apresenta uma arquitetura modular, segura, extensível e adequada aos objetivos definidos para o projeto académico.
+rollback de transações.
+
+Os erros apresentados ao utilizador não devem expor dados internos, queries, tokens ou configurações sensíveis.
+
+4.17 Testes automatizados
+
+Os testes são desenvolvidos com PHPUnit.
+
+Tipos de teste
+
+Feature Tests — validam fluxos HTTP, autenticação, autorização e integração entre camadas;
+
+Unit Tests — validam Services e comportamentos isolados.
+
+Áreas cobertas
+
+autenticação e recuperação de palavra-passe;
+
+utilizadores inativos;
+
+papéis, middleware e Policies;
+
+gestão de utilizadores;
+
+edifícios, pisos, setores e secretárias;
+
+reservas e disponibilidade;
+
+reservas longas;
+
+conflitos;
+
+pagamentos;
+
+mapa;
+
+QR Code e check-in;
+
+dashboard;
+
+uploads;
+
+avaliações;
+
+notificações;
+
+Help Center;
+
+filtros e paginação;
+
+regras de negócio.
+
+Na versão de referência da documentação, encontravam-se registados 154 testes aprovados. Antes da entrega final, a contagem deve ser confirmada com:
+
+php artisan test
+
+Processo de validação
+
+php artisan optimize:clear
+composer dump-autoload
+php artisan test
+php artisan route:list
+npm.cmd run build
+
+Quando existirem alterações de dependências:
+
+composer install
+npm.cmd install
+
+4.18 Boas práticas adotadas
+
+separação de responsabilidades;
+
+Controllers focados em coordenação;
+
+Services para lógica complexa;
+
+Form Requests para validação;
+
+Policies para autorização;
+
+Resources para respostas JSON;
+
+Eloquent para relações e persistência;
+
+componentes React reutilizáveis;
+
+eager loading;
+
+paginação;
+
+transações;
+
+eventos para desacoplamento;
+
+testes automatizados;
+
+Git com branches e Pull Requests;
+
+merges que preservam a autoria dos elementos da equipa.
+
+4.19 Decisões arquiteturais
+
+As principais decisões foram:
+
+utilizar Laravel 12 como framework principal;
+
+adotar o padrão MVC;
+
+utilizar React como camada de apresentação;
+
+utilizar Inertia.js na interface web;
+
+manter uma API REST protegida por Sanctum;
+
+utilizar Policies e middleware para autorização;
+
+utilizar Form Requests para validação;
+
+utilizar Services para regras de negócio complexas;
+
+utilizar Eloquent e MySQL para persistência;
+
+utilizar Reverb e Echo para tempo real;
+
+utilizar QR Code para check-in;
+
+associar pagamentos às reservas;
+
+representar reservas longas num único registo;
+
+utilizar testes automatizados;
+
+preservar a arquitetura existente durante a evolução do projeto.
+
+4.20 Limitações atuais
+
+As limitações assumidas incluem:
+
+pagamentos simulados, sem movimentação financeira real;
+
+dependência do Scheduler para tarefas automáticas;
+
+dependência do Reverb para comunicação em tempo real;
+
+ausência de integração final com Google Calendar e Outlook;
+
+ausência de uma aplicação móvel;
+
+auditoria administrativa completa ainda não implementada;
+
+necessidade de configuração adequada do ambiente para filas, Scheduler e WebSockets.
+
+Estas limitações não impedem a demonstração das funcionalidades previstas para o projeto académico.
+
+4.21 Considerações finais
+
+A arquitetura do SpaceHub combina Laravel, React e Inertia.js numa solução híbrida, mantendo a lógica, a validação e a segurança centralizadas no backend.
+
+A separação entre Controllers, Form Requests, Policies, Services, Models e Resources reduz o acoplamento e facilita os testes.
+
+O Eloquent e o MySQL asseguram a persistência dos dados, enquanto o Reverb e o Echo permitem refletir alterações em tempo real.
+
+A organização por módulos possibilitou integrar reservas, pagamentos, avaliações, notificações, chat, Help Center, dashboard, mapas e check-in sem substituir a arquitetura inicial.
+
+Desta forma, o SpaceHub apresenta uma arquitetura modular, segura, testável e adequada aos objetivos do projeto académico.

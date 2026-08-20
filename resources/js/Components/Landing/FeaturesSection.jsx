@@ -1,21 +1,14 @@
-import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    Armchair,
     BarChart3,
-    Building2,
     History,
-    Layers,
-    LayoutGrid,
     Lock,
     Map,
     MapPin,
     MessageSquare,
+    RefreshCw,
     ShieldCheck,
-    Users,
 } from 'lucide-react';
-
-const gestaoFluxoIcons = [Building2, Layers, LayoutGrid, Armchair, Users];
 
 // Uma onda por cartão (viewBox 400x170) em vez de um retângulo com
 // cantos arredondados — o fundo tem de se misturar com o cartão, não
@@ -89,18 +82,10 @@ export default function FeaturesSection() {
     const { t } = useTranslation('landing');
 
     const historico = [
-        { data: '12 Mai 2024', hora: '09:00 \u2013 12:00', estado: t('features.historico.concluida') },
-        { data: '8 Mai 2024', hora: '14:00 \u2013 17:00', estado: t('features.historico.cancelada') },
-        { data: '2 Mai 2024', hora: '09:00 \u2013 11:00', estado: t('features.historico.concluida') },
+        { data: '12 Mai 2024', hora: '09:00 – 12:00', estado: t('features.historico.concluida') },
+        { data: '8 Mai 2024', hora: '14:00 – 17:00', estado: t('features.historico.cancelada') },
+        { data: '2 Mai 2024', hora: '09:00 – 11:00', estado: t('features.historico.concluida') },
     ];
-
-    const gestaoFluxo = [
-        t('features.gestao.edificio'),
-        t('features.gestao.piso'),
-        t('features.gestao.setor'),
-        t('features.gestao.secretaria'),
-        t('features.gestao.utilizadores'),
-    ].map((label, indice) => ({ label, icon: gestaoFluxoIcons[indice] }));
 
     const acessos = [
         t('features.seguranca.acessoAdmin'),
@@ -248,32 +233,35 @@ export default function FeaturesSection() {
 
                     <CardFeature
                         indice={0}
-                        icon={Building2}
-                        title={t('features.gestao.titulo')}
-                        description={t('features.gestao.descricao')}
+                        icon={RefreshCw}
+                        title={t('features.googleCalendar.titulo')}
+                        description={t('features.googleCalendar.descricao')}
                     >
-                        <div className="relative z-10 flex h-full items-center justify-center gap-1 px-2">
-                            {gestaoFluxo.map((item, indice) => (
-                                <Fragment key={item.label}>
-                                    <div className="flex flex-col items-center gap-1">
-                                        <div className="grid h-8 w-8 place-items-center rounded-lg border border-[#14B8A6]/40 bg-white/70 text-[#14B8A6]">
-                                            <item.icon
-                                                size={14}
-                                                strokeWidth={1.8}
-                                            />
-                                        </div>
+                        <div className="relative z-10 flex h-full flex-col justify-center gap-2 px-4">
+                            <div className="flex items-center gap-2 rounded-xl bg-white/80 px-3 py-2 shadow-sm">
+                                <img
+                                    src="/images/logo/google-calendar-icon.png"
+                                    alt="Google Calendar"
+                                    className="h-7 w-7 shrink-0"
+                                />
 
-                                        <span className="text-[7.5px] font-semibold text-slate-500">
-                                            {item.label}
-                                        </span>
-                                    </div>
+                                <div className="min-w-0">
+                                    <p className="truncate text-[11px] font-bold text-[#071A33]">
+                                        {t('features.googleCalendar.exemploEspaco')}
+                                    </p>
 
-                                    {indice <
-                                        gestaoFluxo.length - 1 && (
-                                        <div className="mb-4 h-px w-2 border-t border-dashed border-[#14B8A6]/40" />
-                                    )}
-                                </Fragment>
-                            ))}
+                                    <p className="text-[9px] text-slate-400">
+                                        17 Ago · 08:00 – 13:00
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 pl-1">
+                                <span className="h-1.5 w-1.5 rounded-full bg-[#14B8A6]" />
+                                <span className="text-[9px] font-bold text-[#14B8A6]">
+                                    {t('features.googleCalendar.sincronizado')}
+                                </span>
+                            </div>
                         </div>
                     </CardFeature>
 

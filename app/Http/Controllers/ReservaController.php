@@ -267,6 +267,7 @@ class ReservaController extends Controller
             'reserva_cancelada',
             $this->descreverReserva($reserva->refresh())
         );
+        $googleCalendar->removerEvento($reserva->fresh(['user']));
 
         $googleCalendar->removerEvento($reserva->fresh(['user']));
 
