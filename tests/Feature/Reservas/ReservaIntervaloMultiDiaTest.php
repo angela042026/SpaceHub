@@ -163,7 +163,7 @@ class ReservaIntervaloMultiDiaTest extends TestCase
             ], $user->id);
 
             $this->assertNotNull($reserva->id);
-            $this->assertSame($dia->toDateString(), $reserva->data_fim);
+            $this->assertSame($dia->toDateString(), $reserva->data_fim->toDateString());
         }
     }
 
@@ -185,7 +185,7 @@ class ReservaIntervaloMultiDiaTest extends TestCase
 
         $domingoSeguinte = $segunda->copy()->addDays(6);
 
-        $this->assertSame($domingoSeguinte->toDateString(), $reserva->data_fim);
+        $this->assertSame($domingoSeguinte->toDateString(), $reserva->data_fim->toDateString());
 
         $diasOcupados = ReservaDia::where('reserva_id', $reserva->id)
             ->distinct()
@@ -223,7 +223,7 @@ class ReservaIntervaloMultiDiaTest extends TestCase
         // sexta, sábado, domingo, segunda, terça, quarta, quinta = 7 dias.
         $quintaSeguinte = $sexta->copy()->addDays(6);
 
-        $this->assertSame($quintaSeguinte->toDateString(), $reserva->data_fim);
+        $this->assertSame($quintaSeguinte->toDateString(), $reserva->data_fim->toDateString());
         $this->assertTrue($quintaSeguinte->isThursday());
 
         $diasEsperados = collect(range(0, 6))
@@ -260,7 +260,7 @@ class ReservaIntervaloMultiDiaTest extends TestCase
         ], $user->id);
 
         $this->assertNotNull($reserva->id);
-        $this->assertSame($sabado->copy()->addDays(6)->toDateString(), $reserva->data_fim);
+        $this->assertSame($sabado->copy()->addDays(6)->toDateString(), $reserva->data_fim->toDateString());
     }
 
     public function test_reserva_mensal_permite_fim_de_semana_e_atravessa_mudanca_de_mes(): void
@@ -282,7 +282,7 @@ class ReservaIntervaloMultiDiaTest extends TestCase
 
         $fimEsperado = $inicio->copy()->addMonthNoOverflow()->subDay();
 
-        $this->assertSame($fimEsperado->toDateString(), $reserva->data_fim);
+        $this->assertSame($fimEsperado->toDateString(), $reserva->data_fim->toDateString());
         $this->assertNotSame($inicio->month, $fimEsperado->month);
     }
 
@@ -304,7 +304,7 @@ class ReservaIntervaloMultiDiaTest extends TestCase
             'tipo_duracao' => 'mensal',
         ], $user->id);
 
-        $this->assertSame('2027-02-27', $reserva->data_fim);
+        $this->assertSame('2027-02-27', $reserva->data_fim->toDateString());
         $this->assertNotSame(3, Carbon::parse($reserva->data_fim)->month, 'A data final não deveria ter avançado para março.');
     }
 
@@ -326,7 +326,7 @@ class ReservaIntervaloMultiDiaTest extends TestCase
 
         $fimEsperado = $inicio->copy()->addYearNoOverflow()->subDay();
 
-        $this->assertSame($fimEsperado->toDateString(), $reserva->data_fim);
+        $this->assertSame($fimEsperado->toDateString(), $reserva->data_fim->toDateString());
         $this->assertNotSame($inicio->year, $fimEsperado->year);
     }
 
@@ -347,7 +347,7 @@ class ReservaIntervaloMultiDiaTest extends TestCase
             'tipo_duracao' => 'anual',
         ], $user->id);
 
-        $this->assertSame('2029-02-27', $reserva->data_fim);
+        $this->assertSame('2029-02-27', $reserva->data_fim->toDateString());
     }
 
     public function test_secretaria_ocupada_ao_fim_de_semana_continua_a_bloquear_conflito(): void

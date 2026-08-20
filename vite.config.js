@@ -19,4 +19,20 @@ export default defineConfig({
         }),
         react(),
     ],
+
+    build: {
+        rollupOptions: {
+            output: {
+                // Separa bibliotecas de terceiros do código da app: mudam
+                // com pouca frequência, por isso o browser reaproveita o
+                // cache destes ficheiros entre deploys em vez de os voltar
+                // a descarregar sempre que só o código da app muda.
+                manualChunks: {
+                    'vendor-react': ['react', 'react-dom', '@inertiajs/react'],
+                    'vendor-i18n': ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
+                    'vendor-realtime': ['laravel-echo', 'pusher-js'],
+                },
+            },
+        },
+    },
 });

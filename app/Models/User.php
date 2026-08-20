@@ -151,16 +151,6 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
-     * Se o utilizador já autorizou o SpaceHub a criar eventos no seu
-     * Google Calendar — o refresh_token só existe depois dessa
-     * autorização e mantém-se mesmo quando o access_token expira.
-     */
-    public function googleCalendarConectado(): bool
-    {
-        return $this->google_calendar_refresh_token !== null;
-    }
-
-    /**
      * Usado automaticamente pelo Laravel ao enviar Notifications (e-mail
      * e base de dados), incluindo as despoletadas por comandos agendados
      * sem pedido HTTP em curso — nesses contextos não há sessão de onde
