@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { estadoNormalizado } from './mapUtils';
 
@@ -14,6 +15,8 @@ export default function SelectedSectorFloatingCard({
     onVerSecretarias,
     onClose,
 }) {
+    const { t } = useTranslation('dashboard');
+
     if (!setor) {
         return null;
     }
@@ -43,7 +46,7 @@ export default function SelectedSectorFloatingCard({
                 <button
                     type="button"
                     onClick={onClose}
-                    aria-label="Fechar"
+                    aria-label={t('officeMap.fechar')}
                     className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:text-[#8fa7bd] dark:hover:bg-[#183f5d]"
                 >
                     <X size={15} strokeWidth={2} />
@@ -52,11 +55,11 @@ export default function SelectedSectorFloatingCard({
 
             <div className="mt-3 space-y-1">
                 <p className="text-sm text-slate-600 dark:text-[#b5c5d5]">
-                    {total} secretária{total === 1 ? '' : 's'}
+                    {t('officeMap.secretariaCount', { count: total })}
                 </p>
 
                 <p className="text-sm font-bold text-teal-600 dark:text-[#18c3b3]">
-                    {livres} disponíve{livres === 1 ? 'l' : 'is'} agora
+                    {t('officeMap.disponivelAgora', { count: livres })}
                 </p>
             </div>
 
@@ -65,7 +68,7 @@ export default function SelectedSectorFloatingCard({
                 onClick={onVerSecretarias}
                 className="mt-3 flex h-10 w-full items-center justify-center rounded-xl bg-teal-500 text-sm font-bold text-white shadow-sm transition hover:bg-teal-600 dark:bg-[#18c3b3] dark:text-[#03172b] dark:hover:bg-[#5eead4]"
             >
-                Ver secretárias
+                {t('officeMap.verSecretarias')}
             </button>
         </div>
     );

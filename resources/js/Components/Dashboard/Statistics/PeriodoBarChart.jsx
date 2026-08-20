@@ -7,6 +7,7 @@ import {
     Tooltip,
     XAxis,
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 /**
  * "Reservas por Período do Dia" — barras verticais em vez de donut
@@ -55,6 +56,8 @@ function TickNomePercentagem({ x, y, payload, data }) {
 }
 
 function PeriodoTooltip({ active, payload }) {
+    const { t } = useTranslation('dashboard');
+
     if (!active || !payload?.length) {
         return null;
     }
@@ -68,7 +71,7 @@ function PeriodoTooltip({ active, payload }) {
             </p>
 
             <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
-                {item.total} reserva{item.total === 1 ? '' : 's'} · {formatarPercentual(item.percent)}%
+                {t('statistics.reservasCount', { count: item.total })} · {formatarPercentual(item.percent)}%
             </p>
         </div>
     );
@@ -79,8 +82,10 @@ export default function PeriodoBarChart({
     title,
     subtitle,
     data = [],
-    emptyMessage = 'Sem reservas neste período.',
+    emptyMessage,
 }) {
+    const { t } = useTranslation('dashboard');
+    const mensagemVazia = emptyMessage ?? t('statistics.semReservasPeriodo');
     const total = data.reduce((soma, item) => soma + item.total, 0);
 
     return (
@@ -105,7 +110,7 @@ export default function PeriodoBarChart({
 
             {total === 0 ? (
                 <div className="flex min-h-[150px] flex-1 items-center justify-center px-5 py-8">
-                    <p className="text-sm text-slate-400">{emptyMessage}</p>
+                    <p className="text-sm text-slate-400">{mensagemVazia}</p>
                 </div>
             ) : (
                 <div className="flex flex-1 items-center p-5">

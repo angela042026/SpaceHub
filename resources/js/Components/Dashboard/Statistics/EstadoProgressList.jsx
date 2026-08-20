@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * "Reservas por Estado" — lista com barras horizontais de progresso em
@@ -19,8 +20,10 @@ export default function EstadoProgressList({
     title,
     subtitle,
     data = [],
-    emptyMessage = 'Sem reservas neste período.',
+    emptyMessage,
 }) {
+    const { t } = useTranslation('dashboard');
+    const mensagemVazia = emptyMessage ?? t('statistics.semReservasPeriodo');
     const total = data.reduce((soma, item) => soma + item.total, 0);
     const maxTotal = Math.max(...data.map((item) => item.total), 1);
     const ordenados = [...data].sort((a, b) => b.total - a.total);
@@ -47,7 +50,7 @@ export default function EstadoProgressList({
 
             {total === 0 ? (
                 <div className="flex min-h-[150px] flex-1 items-center justify-center px-5 py-8">
-                    <p className="text-sm text-slate-400">{emptyMessage}</p>
+                    <p className="text-sm text-slate-400">{mensagemVazia}</p>
                 </div>
             ) : (
                 <div className={`grid flex-1 content-center ${COLUNAS} items-center gap-x-3 gap-y-3 p-5`}>
@@ -83,7 +86,7 @@ export default function EstadoProgressList({
 
                     <div key="total-label" className="col-span-4 mt-1 border-t border-slate-100 pt-3 dark:border-slate-800">
                         <div className={`grid ${COLUNAS} items-center gap-x-3`}>
-                            <span className="text-[13px] font-bold text-slate-900 dark:text-white">Total</span>
+                            <span className="text-[13px] font-bold text-slate-900 dark:text-white">{t('statistics.total')}</span>
                             <span />
                             <span className="text-right text-[13px] font-bold tabular-nums text-slate-900 dark:text-white">
                                 {total}

@@ -3,33 +3,39 @@
  * que a página abre, independentemente do piso/espaço escolhido.
  * Marcar uma que o espaço não tem simplesmente devolve zero lugares.
  */
+/*
+ * `label` guarda a chave de tradução (namespace "reservas"), não o
+ * texto em si — resolve-se com t(preferencia.label) no componente que
+ * consome a lista.
+ */
 export const PREFERENCIAS = [
-    { key: "monitor", label: "Monitor" },
-    { key: "dock_usb", label: "Dock USB" },
-    { key: "hdmi", label: "HDMI" },
-    { key: "ergonomica", label: "Cadeira Ergonómica" },
-    { key: "junto_janela", label: "Junto à Janela" },
-    { key: "luz_natural", label: "Luz Natural" },
-    { key: "zona_silenciosa", label: "Zona Silenciosa" },
-    { key: "proximo_copa", label: "Junto à Copa" },
+    { key: "monitor", label: "preferencias.monitor" },
+    { key: "dock_usb", label: "preferencias.dockUsb" },
+    { key: "hdmi", label: "preferencias.hdmi" },
+    { key: "ergonomica", label: "preferencias.ergonomica" },
+    { key: "junto_janela", label: "preferencias.juntoJanela" },
+    { key: "luz_natural", label: "preferencias.luzNatural" },
+    { key: "zona_silenciosa", label: "preferencias.zonaSilenciosa" },
+    { key: "proximo_copa", label: "preferencias.proximoCopa" },
 ];
 
+/* `nome`/`descricao` guardam chaves de tradução, mesmo motivo. */
 export const DURACOES = {
     diaria: {
-        nome: 'Diária',
-        descricao: 'Válido para o dia selecionado.',
+        nome: 'duracoes.diaria.nome',
+        descricao: 'duracoes.diaria.descricao',
     },
     semanal: {
-        nome: 'Semanal',
-        descricao: '7 dias consecutivos.',
+        nome: 'duracoes.semanal.nome',
+        descricao: 'duracoes.semanal.descricao',
     },
     mensal: {
-        nome: 'Mensal',
-        descricao: 'Acesso contínuo durante 1 mês.',
+        nome: 'duracoes.mensal.nome',
+        descricao: 'duracoes.mensal.descricao',
     },
     anual: {
-        nome: 'Anual',
-        descricao: 'Acesso contínuo durante 1 ano.',
+        nome: 'duracoes.anual.nome',
+        descricao: 'duracoes.anual.descricao',
     },
 };
 
@@ -90,16 +96,19 @@ export const formatarDataInput = (data) => {
 };
 
 /**
- * Apresentar a data no formato português.
+ * Apresentar a data por extenso, sem o problema de fuso horário de
+ * `new Date('YYYY-MM-DD')` (que interpreta a string como UTC e pode
+ * recuar um dia em fusos negativos) — por isso não usa formatarData()
+ * de utils/formatadores.js diretamente, que não tem essa proteção.
  */
-export const formatarDataPortugues = (data) => {
+export const formatarDataPortugues = (data, locale = 'pt') => {
     const dataLocal = criarDataLocal(data);
 
     if (!dataLocal) {
         return '';
     }
 
-    return new Intl.DateTimeFormat('pt-PT', {
+    return new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'pt-PT', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',

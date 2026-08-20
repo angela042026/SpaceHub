@@ -1,5 +1,6 @@
 import { Area, AreaChart, ResponsiveContainer } from 'recharts';
 import { Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 /*
  * Cores fixas (não reagem ao tema, ver nota em PremiumChart/Panel) —
@@ -24,6 +25,7 @@ export default function KpiCard({
     sparkline = [],
     color = 'turquesa',
 }) {
+    const { t } = useTranslation('dashboard');
     const paleta = CORES[color] ?? CORES.turquesa;
     const temVariacao = variacao !== null && variacao !== undefined;
     const positiva = temVariacao && variacao > 0;
@@ -87,10 +89,10 @@ export default function KpiCard({
 
                 {temVariacao
                     ? `${positiva ? '+' : ''}${variacao}${variacaoSufixo}`
-                    : 'Sem dados do período anterior'}
+                    : t('statistics.semDadosPeriodoAnterior')}
 
                 {temVariacao && (
-                    <span className="font-medium text-slate-500"> vs. período anterior</span>
+                    <span className="font-medium text-slate-500"> {t('statistics.vsPeriodoAnterior')}</span>
                 )}
             </div>
         </div>

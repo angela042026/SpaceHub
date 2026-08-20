@@ -1,5 +1,6 @@
 import { Fragment, useMemo, useState } from 'react';
 import { Link } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * "Reservas por Setor" — em largura total (o Mapa de Ocupação saiu
@@ -29,9 +30,11 @@ export default function HorizontalBarCard({
     subtitle,
     data = [],
     color = '#14b8a6',
-    emptyMessage = 'Sem reservas neste período.',
+    emptyMessage,
     verTodosHref,
 }) {
+    const { t } = useTranslation('dashboard');
+    const mensagemVazia = emptyMessage ?? t('statistics.semReservasPeriodo');
     const [pisoSelecionado, setPisoSelecionado] = useState(null);
 
     const pisosDisponiveis = useMemo(() => {
@@ -85,14 +88,14 @@ export default function HorizontalBarCard({
                         <button
                             type="button"
                             onClick={() => setPisoSelecionado(null)}
-                            aria-label="Todos os pisos"
+                            aria-label={t('statistics.todosOsPisos')}
                             className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${
                                 pisoSelecionado === null
                                     ? 'bg-white text-teal-600 shadow-sm dark:bg-slate-700 dark:text-teal-400'
                                     : 'text-slate-500 hover:text-teal-600 dark:text-slate-400'
                             }`}
                         >
-                            Todos
+                            {t('statistics.todos')}
                         </button>
 
                         {pisosDisponiveis.map((piso) => (
@@ -151,7 +154,7 @@ export default function HorizontalBarCard({
                     </div>
                 ) : (
                     <div className="flex min-h-[150px] flex-1 items-center justify-center">
-                        <p className="text-sm text-slate-400">{emptyMessage}</p>
+                        <p className="text-sm text-slate-400">{mensagemVazia}</p>
                     </div>
                 )}
 
@@ -161,7 +164,7 @@ export default function HorizontalBarCard({
                             href={verTodosHref}
                             className="text-xs font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400"
                         >
-                            Ver todos os setores
+                            {t('statistics.verTodosSetores')}
                         </Link>
                     </div>
                 )}

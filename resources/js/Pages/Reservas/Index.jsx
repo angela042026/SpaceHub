@@ -15,8 +15,10 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
-import { ESTADO_RESERVA, badge } from '@/utils/estados';
+import { ESTADO_RESERVA, badge, etiqueta, etiquetaPeriodo } from '@/utils/estados';
+import { formatarData } from '@/utils/formatadores';
 import { ESTADOS_SEM_CANCELAMENTO, podeCancelarReserva } from '@/Components/Reservas/reservaHelpers';
 import LocalizacaoEspaco from '@/Components/Reservas/LocalizacaoEspaco';
 import { linkGoogleCalendar } from '@/utils/calendario';
@@ -26,24 +28,13 @@ import GoogleCalendarIcon from '@/Components/GoogleCalendarIcon';
  * Texto corrido, não um badge: entra a seguir a "Avaliação " numa frase.
  * Por isso não vem do ESTADO_AVALIACAO, que tem etiquetas soltas.
  */
-const AVALIACAO_ESTADO_LABEL = {
-    pendente: 'enviada (a aguardar aprovação)',
-    aprovada: 'aprovada',
-    rejeitada: 'não aprovada',
-};
-
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
-export default function Index({
-    reservas,
-    setores,
-    pisos,
-    edificios,
-    filters,
-    secretariasFavoritas = [],
-    googleCalendarConectado = false,
-}) {
+export default function Index({ reservas, setores, pisos, edificios, filters, secretariasFavoritas = [], googleCalendarConectado = false }) {
+    const { t, i18n } = useTranslation('reservas');
+    const { t: tc } = useTranslation('common');
+
     // Estrela de "secretária favorita" — marca a secretária (não a
     // reserva), otimista no clique e revertida se o pedido falhar.
     const [favoritas, setFavoritas] = useState(
@@ -102,7 +93,7 @@ export default function Index({
             // porquê, em vez de fechar como se nada tivesse acontecido.
             onSuccess: () => setReservaParaCancelar(null),
             onError: (erros) => setErroCancelamento(
-                erros.pagamento ?? 'Não foi possível cancelar a reserva.',
+                erros.pagamento ?? t('index.modalCancelar.erroGenerico'),
             ),
             onFinish: () => setACancelar(false),
         });
@@ -177,7 +168,7 @@ export default function Index({
 
     return (
         <DashboardLayout>
-            <Head title="Reservas" />
+            <Head title={t('index.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
@@ -188,11 +179,11 @@ export default function Index({
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                As Minhas Reservas
+                                {t('index.titulo')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {reservas.total} reserva{reservas.total === 1 ? '' : 's'} encontrada{reservas.total === 1 ? '' : 's'}.
+                                {t('index.descricao', { count: reservas.total })}
                             </p>
                         </div>
                     </div>
@@ -202,7 +193,7 @@ export default function Index({
                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
                     >
                         <Plus size={18} strokeWidth={2} />
-                        Nova Reserva
+                        {t('index.novaReserva')}
                     </Link>
                 </div>
 
@@ -213,12 +204,12 @@ export default function Index({
                             onChange={(e) => setData('estado', e.target.value)}
                             className={fieldClass}
                         >
-                            <option value="">Todos os estados</option>
-                            <option value="pendente">Pendente</option>
-                            <option value="confirmada">Confirmada</option>
-                            <option value="cancelada">Cancelada</option>
-                            <option value="concluida">Concluída</option>
-                            <option value="expirada">Expirada</option>
+                            <option value="">{t('index.todosOsEstados')}</option>
+                            <option value="pendente">{tc('estados.reserva.pendente')}</option>
+                            <option value="confirmada">{tc('estados.reserva.confirmada')}</option>
+                            <option value="cancelada">{tc('estados.reserva.cancelada')}</option>
+                            <option value="concluida">{tc('estados.reserva.concluida')}</option>
+                            <option value="expirada">{tc('estados.reserva.expirada')}</option>
                         </select>
 
                         <input
@@ -233,7 +224,7 @@ export default function Index({
                             onChange={(e) => setData('edificio', e.target.value)}
                             className={fieldClass}
                         >
-                            <option value="">Todos os edifícios</option>
+                            <option value="">{t('index.todosOsEdificios')}</option>
 
                             {edificios.map((edificio) => (
                                 <option key={edificio.id} value={edificio.id}>
@@ -247,7 +238,7 @@ export default function Index({
                             onChange={(e) => setData('piso', e.target.value)}
                             className={fieldClass}
                         >
-                            <option value="">Todos os pisos</option>
+                            <option value="">{t('index.todosOsPisos')}</option>
 
                             {pisos.map((piso) => (
                                 <option key={piso.id} value={piso.id}>
@@ -261,7 +252,7 @@ export default function Index({
                             onChange={(e) => setData('setor', e.target.value)}
                             className={fieldClass}
                         >
-                            <option value="">Todos os espaços</option>
+                            <option value="">{t('index.todosOsEspacos')}</option>
 
                             {setores.map((setor) => (
                                 <option key={setor.id} value={setor.id}>
@@ -277,7 +268,7 @@ export default function Index({
                             onClick={limpar}
                             className="shrink-0 self-start text-sm font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900 lg:self-auto"
                         >
-                            Limpar filtros
+                            {t('index.limparFiltros')}
                         </button>
                     )}
                 </div>
@@ -286,7 +277,7 @@ export default function Index({
                     {reservas.data.length === 0 ? (
                         <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
                             <p className="text-sm text-slate-400">
-                                Ainda não existem reservas.
+                                {t('index.semReservas')}
                             </p>
                         </div>
                     ) : (
@@ -329,14 +320,14 @@ export default function Index({
                                                 onClick={() => alternarFavorita(reserva.secretaria.id)}
                                                 aria-label={
                                                     favoritas.has(reserva.secretaria.id)
-                                                        ? `Remover ${reserva.secretaria.codigo} das favoritas`
-                                                        : `Marcar ${reserva.secretaria.codigo} como favorita`
+                                                        ? t('index.removerDasFavoritas', { codigo: reserva.secretaria.codigo })
+                                                        : t('index.marcarComoFavorita', { codigo: reserva.secretaria.codigo })
                                                 }
                                                 aria-pressed={favoritas.has(reserva.secretaria.id)}
                                                 title={
                                                     favoritas.has(reserva.secretaria.id)
-                                                        ? 'Remover dos favoritos'
-                                                        : 'Adicionar aos favoritos'
+                                                        ? t('index.removerDosFavoritos')
+                                                        : t('index.adicionarAosFavoritos')
                                                 }
                                                 className="absolute right-2.5 top-2.5 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-slate-400 shadow-sm backdrop-blur transition hover:scale-110 hover:text-amber-500 dark:bg-slate-900/80 dark:text-slate-500"
                                             >
@@ -370,20 +361,20 @@ export default function Index({
                                                     reserva.estado_reserva?.codigo,
                                                 )}`}
                                             >
-                                                {reserva.estado_reserva?.nome ?? '-'}
+                                                {etiqueta(ESTADO_RESERVA, reserva.estado_reserva?.codigo, '-', tc)}
                                             </span>
                                         </div>
 
                                         <LocalizacaoEspaco secretaria={reserva.secretaria} className="mt-1.5" />
 
                                         <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">
-                                            {new Date(reserva.data).toLocaleDateString('pt-PT')} · {reserva.periodo?.nome ?? '-'}
+                                            {formatarData(reserva.data, i18n.language)} · {etiquetaPeriodo(reserva.periodo?.nome, tc) ?? '-'}
                                         </p>
 
                                         {emVigor && googleCalendarConectado ? (
                                             <p className="mt-1.5 inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-teal-600 dark:text-teal-400">
                                                 <GoogleCalendarIcon size={26} />
-                                                Sincronizado com o Google Calendar
+                                                {t('index.sincronizadoGoogleCalendar')}
                                             </p>
                                         ) : linkCalendario && (
                                             <a
@@ -393,7 +384,7 @@ export default function Index({
                                                 className="mt-1.5 inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-teal-600 transition hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300"
                                             >
                                                 <GoogleCalendarIcon size={26} />
-                                                Adicionar ao Google Calendar
+                                                {t('index.adicionarAoGoogleCalendar')}
                                             </a>
                                         )}
 
@@ -405,7 +396,7 @@ export default function Index({
                                                         className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                                                     >
                                                         <Pencil size={16} strokeWidth={1.9} />
-                                                        Editar
+                                                        {t('index.editar')}
                                                     </Link>
 
                                                     {podeCancelarReserva(reserva) && (
@@ -415,7 +406,7 @@ export default function Index({
                                                             className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
                                                         >
                                                             <XCircle size={16} strokeWidth={1.9} />
-                                                            Cancelar
+                                                            {t('index.cancelar')}
                                                         </button>
                                                     )}
 
@@ -425,14 +416,14 @@ export default function Index({
                                                             className="flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-md"
                                                         >
                                                             <CreditCard size={16} strokeWidth={1.9} />
-                                                            Pagar
+                                                            {t('index.pagar')}
                                                         </Link>
                                                     )}
 
                                                     {reserva.pagamento?.estado === 'pago' && (
                                                         <div className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/10 px-3 py-2 text-sm font-bold text-emerald-600 dark:text-emerald-400">
                                                             <CreditCard size={16} strokeWidth={1.9} />
-                                                            Pago
+                                                            {t('index.pago')}
                                                         </div>
                                                     )}
                                                 </div>
@@ -443,7 +434,7 @@ export default function Index({
                                                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-500 dark:border-slate-700 dark:text-slate-300"
                                                 >
                                                     <XCircle size={16} strokeWidth={1.9} />
-                                                    Cancelar
+                                                    {t('index.cancelar')}
                                                 </button>
                                             ) : reserva.check_in_at && !reserva.avaliacao ? (
                                                 <button
@@ -452,21 +443,21 @@ export default function Index({
                                                     className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-300 px-3 py-2 text-sm font-semibold text-amber-600 transition hover:border-amber-400 hover:bg-amber-50 dark:border-amber-500/40 dark:text-amber-400 dark:hover:bg-amber-500/10"
                                                 >
                                                     <Star size={16} strokeWidth={1.9} />
-                                                    Avaliar
+                                                    {t('index.avaliar')}
                                                 </button>
                                             ) : reserva.avaliacao ? (
                                                 <p className="text-center text-xs font-semibold text-slate-400">
-                                                    Avaliação {AVALIACAO_ESTADO_LABEL[reserva.avaliacao.estado]}
+                                                    {t('index.avaliacaoPrefixo')} {t(`index.avaliacaoEstado.${reserva.avaliacao.estado}`)}
                                                 </p>
                                             ) : reserva.estado_reserva?.codigo === 'cancelada' ? (
                                                 <p className="text-center text-xs text-slate-400">
                                                     {reserva.cancelada_at
-                                                        ? `Cancelada em ${new Date(reserva.cancelada_at).toLocaleDateString('pt-PT')}`
-                                                        : 'Cancelada'}
+                                                        ? t('index.canceladaEm', { data: formatarData(reserva.cancelada_at, i18n.language) })
+                                                        : t('index.cancelada')}
                                                 </p>
                                             ) : (
                                                 <p className="text-center text-xs text-slate-400">
-                                                    Sem ações
+                                                    {t('index.semAcoes')}
                                                 </p>
                                             )}
                                         </div>
@@ -480,7 +471,7 @@ export default function Index({
                     {reservas.last_page > 1 && (
                         <div className="mt-5 flex items-center justify-between">
                             <p className="text-xs text-slate-400">
-                                Página {reservas.current_page} de {reservas.last_page}
+                                {tc('paginacao.pagina', { atual: reservas.current_page, total: reservas.last_page })}
                             </p>
 
                             <div className="flex gap-2">
@@ -488,7 +479,7 @@ export default function Index({
                                     type="button"
                                     disabled={!reservas.prev_page_url}
                                     onClick={() => irParaPagina(reservas.prev_page_url)}
-                                    aria-label="Página anterior"
+                                    aria-label={tc('paginacao.paginaAnterior')}
                                     className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
                                 >
                                     <ChevronLeft size={16} strokeWidth={1.9} />
@@ -498,7 +489,7 @@ export default function Index({
                                     type="button"
                                     disabled={!reservas.next_page_url}
                                     onClick={() => irParaPagina(reservas.next_page_url)}
-                                    aria-label="Página seguinte"
+                                    aria-label={tc('paginacao.paginaSeguinte')}
                                     className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
                                 >
                                     <ChevronRight size={16} strokeWidth={1.9} />
@@ -518,11 +509,14 @@ export default function Index({
 
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                Cancelar esta reserva?
+                                {t('index.modalCancelar.titulo')}
                             </h2>
 
                             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                A secretária {reservaParaCancelar?.secretaria?.codigo} no período {reservaParaCancelar?.periodo?.nome} fica livre para outra pessoa reservar. Esta ação não pode ser desfeita.
+                                {t('index.modalCancelar.descricao', {
+                                    codigo: reservaParaCancelar?.secretaria?.codigo,
+                                    periodo: etiquetaPeriodo(reservaParaCancelar?.periodo?.nome, tc),
+                                })}
                             </p>
                         </div>
                     </div>
@@ -539,7 +533,7 @@ export default function Index({
                             onClick={() => setReservaParaCancelar(null)}
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
-                            Voltar
+                            {t('index.modalCancelar.voltar')}
                         </button>
 
                         <button
@@ -551,10 +545,10 @@ export default function Index({
                             {aCancelar ? (
                                 <>
                                     <RotateCcw size={16} strokeWidth={2} className="animate-spin" />
-                                    A cancelar...
+                                    {t('index.modalCancelar.aCancelar')}
                                 </>
                             ) : (
-                                'Cancelar Reserva'
+                                t('index.modalCancelar.cancelarReserva')
                             )}
                         </button>
                     </div>
@@ -570,18 +564,18 @@ export default function Index({
 
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                Avaliar {reservaParaAvaliar?.secretaria?.codigo}
+                                {t('index.modalAvaliar.titulo', { codigo: reservaParaAvaliar?.secretaria?.codigo })}
                             </h2>
 
                             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                A tua avaliação fica pendente de aprovação antes de ser publicada.
+                                {t('index.modalAvaliar.descricao')}
                             </p>
                         </div>
                     </div>
 
                     <div className="mt-6">
                         <label className="mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200">
-                            Nota
+                            {t('index.modalAvaliar.nota')}
                         </label>
 
                         <div className="flex gap-1">
@@ -593,7 +587,7 @@ export default function Index({
                                     onMouseEnter={() => setNotaHover(valor)}
                                     onMouseLeave={() => setNotaHover(0)}
                                     className="text-amber-400 transition"
-                                    aria-label={`${valor} estrela${valor === 1 ? '' : 's'}`}
+                                    aria-label={t('index.modalAvaliar.estrela', { count: valor })}
                                 >
                                     <Star
                                         size={28}
@@ -613,7 +607,7 @@ export default function Index({
 
                     <div className="mt-5">
                         <label className="mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200">
-                            Comentário
+                            {t('index.modalAvaliar.comentario')}
                         </label>
 
                         <textarea
@@ -621,7 +615,7 @@ export default function Index({
                             onChange={(e) => avaliacaoForm.setData('comentario', e.target.value)}
                             rows={4}
                             maxLength={1000}
-                            placeholder="Conta-nos como foi a tua experiência..."
+                            placeholder={t('index.modalAvaliar.comentarioPlaceholder')}
                             className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
 
@@ -648,7 +642,7 @@ export default function Index({
                             onClick={fecharModalAvaliar}
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
-                            Cancelar
+                            {t('index.cancelar')}
                         </button>
 
                         <button
@@ -659,10 +653,10 @@ export default function Index({
                             {avaliacaoForm.processing ? (
                                 <>
                                     <RotateCcw size={16} strokeWidth={2} className="animate-spin" />
-                                    A enviar...
+                                    {t('index.modalAvaliar.aEnviar')}
                                 </>
                             ) : (
-                                'Enviar Avaliação'
+                                t('index.modalAvaliar.enviarAvaliacao')
                             )}
                         </button>
                     </div>

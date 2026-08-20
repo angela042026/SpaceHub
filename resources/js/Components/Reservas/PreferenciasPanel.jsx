@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, SlidersHorizontal } from 'lucide-react';
 
 /**
@@ -11,6 +12,7 @@ export default function PreferenciasPanel({
     preferencias,
     onAlternarPreferencia,
 }) {
+    const { t } = useTranslation('reservas');
     const [aberto, setAberto] = useState(false);
 
     const quantidadeAtiva = preferenciasDisponiveis.filter(
@@ -31,7 +33,7 @@ export default function PreferenciasPanel({
                         strokeWidth={1.9}
                         className="text-slate-400"
                     />
-                    Filtros adicionais
+                    {t('preferencias.filtrosAdicionais')}
                     {quantidadeAtiva > 0 && (
                         <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-teal-500 px-1.5 text-[11px] font-bold text-white">
                             {quantidadeAtiva}
@@ -96,7 +98,7 @@ export default function PreferenciasPanel({
                                     dark:peer-focus-visible:ring-offset-slate-900
                                 "
                             >
-                                {preferencia.label}
+                                {t(preferencia.label)}
                             </span>
                         </label>
                     ))}

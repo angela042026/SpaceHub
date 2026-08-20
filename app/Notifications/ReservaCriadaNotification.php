@@ -21,8 +21,12 @@ class ReservaCriadaNotification extends Notification implements ShouldQueue
     {
         return [
             'tipo' => 'reserva_criada',
-            'titulo' => 'Reserva criada com sucesso!',
-            'mensagem' => "A tua reserva para a secretária {$this->reserva->secretaria->codigo} no dia {$this->reserva->data->format('d/m/Y')} ({$this->duracaoLabel()}) foi confirmada.",
+            'titulo' => __('Reserva criada com sucesso!'),
+            'mensagem' => __('A tua reserva para a secretária :secretaria no dia :data (:duracao) foi confirmada.', [
+                'secretaria' => $this->reserva->secretaria->codigo,
+                'data' => $this->reserva->data->format('d/m/Y'),
+                'duracao' => $this->duracaoLabel(),
+            ]),
             'reserva_id' => $this->reserva->id,
         ];
     }
@@ -30,10 +34,10 @@ class ReservaCriadaNotification extends Notification implements ShouldQueue
     private function duracaoLabel(): string
     {
         return match ($this->reserva->tipo_duracao) {
-            'semanal' => 'Semanal',
-            'mensal' => 'Mensal',
-            'anual' => 'Anual',
-            default => $this->reserva->periodo?->nome ?? 'Diária',
+            'semanal' => __('Semanal'),
+            'mensal' => __('Mensal'),
+            'anual' => __('Anual'),
+            default => $this->reserva->periodo?->nome ?? __('Diária'),
         };
     }
 }

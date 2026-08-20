@@ -15,12 +15,9 @@ import {
     ArrowUpRight,
     TrendingUp,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const OPCOES_DIAS = [
-    { valor: 7, label: '7 dias' },
-    { valor: 30, label: '30 dias' },
-    { valor: 90, label: '90 dias' },
-];
+const OPCOES_DIAS = [7, 30, 90];
 
 const DADOS_VAZIOS = {
     atual: [],
@@ -32,6 +29,8 @@ const DADOS_VAZIOS = {
 };
 
 function CustomTooltip({ active, payload, label }) {
+    const { t } = useTranslation('dashboard');
+
     if (!active || !payload?.length) {
         return null;
     }
@@ -47,14 +46,14 @@ function CustomTooltip({ active, payload, label }) {
 
             <div className="mt-2 space-y-1 text-xs">
                 <div className="flex items-center justify-between gap-6">
-                    <span className="text-slate-500 dark:text-[#b5c5d5]">Atual</span>
+                    <span className="text-slate-500 dark:text-[#b5c5d5]">{t('charts.evolucaoOcupacao.atual')}</span>
                     <span className="font-bold text-teal-600 dark:text-[#18c3b3]">
                         {atual}%
                     </span>
                 </div>
 
                 <div className="flex items-center justify-between gap-6">
-                    <span className="text-slate-500 dark:text-[#b5c5d5]">Anterior</span>
+                    <span className="text-slate-500 dark:text-[#b5c5d5]">{t('charts.evolucaoOcupacao.anterior')}</span>
                     <span className="font-bold text-slate-500 dark:text-[#8fa7bd]">
                         {anterior}%
                     </span>
@@ -69,7 +68,7 @@ function CustomTooltip({ active, payload, label }) {
                 }`}
             >
                 {diferenca >= 0 ? '+' : ''}
-                {diferenca} p.p.
+                {diferenca} {t('charts.evolucaoOcupacao.pontosPercentuais')}
             </p>
         </div>
     );
@@ -92,6 +91,7 @@ export default function OccupancyTrendChart({
     data,
     pisos = [],
 }) {
+    const { t } = useTranslation('dashboard');
     const [dias, setDias] = useState(7);
     const [pisoId, setPisoId] = useState('');
     const [dados, setDados] = useState(data ?? DADOS_VAZIOS);
@@ -151,31 +151,31 @@ export default function OccupancyTrendChart({
 
                     <div>
                         <h2 className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
-                            Evolução da Ocupação
+                            {t('charts.evolucaoOcupacao.titulo')}
                         </h2>
 
                         <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8fa7bd]">
-                            Últimos {dias} dias
+                            {t('charts.evolucaoOcupacao.ultimosDias', { dias })}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-[#2a5069] dark:bg-[#101f34]">
-                        {OPCOES_DIAS.map((opcao) => (
+                        {OPCOES_DIAS.map((valor) => (
                             <button
-                                key={opcao.valor}
+                                key={valor}
                                 type="button"
                                 onClick={() =>
-                                    setDias(opcao.valor)
+                                    setDias(valor)
                                 }
                                 className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                                    dias === opcao.valor
+                                    dias === valor
                                         ? 'bg-teal-500 text-white dark:bg-[#18c3b3]'
                                         : 'text-slate-500 hover:text-teal-600 dark:text-[#afc0d0] dark:hover:text-[#18c3b3]'
                                 }`}
                             >
-                                {opcao.label}
+                                {t('charts.evolucaoOcupacao.diasOpcao', { count: valor })}
                             </button>
                         ))}
                     </div>
@@ -191,7 +191,7 @@ export default function OccupancyTrendChart({
                             className="h-9 rounded-xl border border-slate-200 bg-white py-0 pl-3 pr-8 text-xs font-bold text-slate-600 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#b5c5d5]"
                         >
                             <option value="">
-                                Todos os pisos
+                                {t('charts.evolucaoOcupacao.todosOsPisos')}
                             </option>
 
                             {pisos.map((piso) => (
@@ -209,17 +209,17 @@ export default function OccupancyTrendChart({
 
             <div className="flex flex-wrap items-center gap-6 px-5 pt-4">
                 <BlocoEstatistica
-                    label="Média"
+                    label={t('charts.evolucaoOcupacao.media')}
                     valor={`${dados.media}%`}
                 />
 
                 <BlocoEstatistica
-                    label="Pico"
+                    label={t('charts.evolucaoOcupacao.pico')}
                     valor={`${dados.pico}%`}
                 />
 
                 <BlocoEstatistica
-                    label="Mínimo"
+                    label={t('charts.evolucaoOcupacao.minimo')}
                     valor={`${dados.minimo}%`}
                 />
 
@@ -243,7 +243,7 @@ export default function OccupancyTrendChart({
                             />
                         )}
                         {variacaoPositiva ? '+' : ''}
-                        {dados.variacaoPP} p.p.
+                        {dados.variacaoPP} {t('charts.evolucaoOcupacao.pontosPercentuais')}
                     </span>
                 )}
             </div>
@@ -331,7 +331,7 @@ export default function OccupancyTrendChart({
                             strokeDasharray="4 4"
                             label={(props) => {
                                 const { viewBox } = props;
-                                const texto = `Média ${dados.media}%`;
+                                const texto = t('charts.evolucaoOcupacao.mediaValor', { valor: dados.media });
                                 const largura =
                                     texto.length * 6 + 14;
 
@@ -386,7 +386,7 @@ export default function OccupancyTrendChart({
                         <Line
                             type="monotone"
                             dataKey="anterior"
-                            name="Semana anterior"
+                            name={t('charts.evolucaoOcupacao.semanaAnterior')}
                             stroke="var(--chart-axis)"
                             strokeWidth={2}
                             strokeDasharray="5 5"
@@ -397,7 +397,7 @@ export default function OccupancyTrendChart({
                         <Line
                             type="monotone"
                             dataKey="atual"
-                            name="Semana atual"
+                            name={t('charts.evolucaoOcupacao.semanaAtual')}
                             stroke="var(--color-turquoise-strong)"
                             strokeWidth={3}
                             dot={{
@@ -419,7 +419,7 @@ export default function OccupancyTrendChart({
             <div className="flex items-center justify-center gap-5 border-t border-slate-100 px-5 py-3 text-xs font-semibold text-slate-500 dark:border-[#2a5069] dark:text-[#8fa7bd]">
                 <span className="flex items-center gap-1.5">
                     <span className="h-0.5 w-4 rounded-full bg-teal-500 dark:bg-[#18c3b3]" />
-                    Semana atual
+                    {t('charts.evolucaoOcupacao.semanaAtual')}
                 </span>
 
                 <span className="flex items-center gap-1.5">
@@ -439,7 +439,7 @@ export default function OccupancyTrendChart({
                             strokeDasharray="4 3"
                         />
                     </svg>
-                    Semana anterior
+                    {t('charts.evolucaoOcupacao.semanaAnterior')}
                 </span>
             </div>
         </section>

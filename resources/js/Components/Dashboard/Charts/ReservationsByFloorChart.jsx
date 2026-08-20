@@ -9,8 +9,11 @@ import {
     YAxis,
 } from 'recharts';
 import { Building2, Info } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 function CustomTooltip({ active, payload, label }) {
+    const { t } = useTranslation('dashboard');
+
     if (!active || !payload?.length) {
         return null;
     }
@@ -29,14 +32,14 @@ function CustomTooltip({ active, payload, label }) {
 
             <div className="mt-2 space-y-1 text-xs">
                 <div className="flex items-center justify-between gap-6">
-                    <span className="text-slate-500 dark:text-[#b5c5d5]">Atual</span>
+                    <span className="text-slate-500 dark:text-[#b5c5d5]">{t('charts.reservasPorPiso.atual')}</span>
                     <span className="font-bold text-teal-600 dark:text-[#18c3b3]">
                         {atual}
                     </span>
                 </div>
 
                 <div className="flex items-center justify-between gap-6">
-                    <span className="text-slate-500 dark:text-[#b5c5d5]">Anterior</span>
+                    <span className="text-slate-500 dark:text-[#b5c5d5]">{t('charts.reservasPorPiso.anterior')}</span>
                     <span className="font-bold text-blue-500 dark:text-blue-400">
                         {anterior}
                     </span>
@@ -62,6 +65,7 @@ function CustomTooltip({ active, payload, label }) {
 export default function ReservationsByFloorChart({
     data,
 }) {
+    const { t } = useTranslation('dashboard');
     const pisos = data?.pisos ?? [];
     const total = data?.total ?? 0;
     const pisoDestaque = data?.pisoDestaque ?? null;
@@ -79,11 +83,11 @@ export default function ReservationsByFloorChart({
 
                     <div>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
-                            Reservas por piso
+                            {t('charts.reservasPorPiso.titulo')}
                         </h3>
 
                         <p className="mt-0.5 text-xs text-slate-400 dark:text-[#8fa7bd]">
-                            Últimos 30 dias
+                            {t('charts.reservasPorPiso.subtitulo')}
                         </p>
                     </div>
                 </div>
@@ -93,7 +97,7 @@ export default function ReservationsByFloorChart({
                         {total}
                     </p>
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-[#8fa7bd]">
-                        Reservas
+                        {t('charts.reservasPorPiso.reservas')}
                     </p>
                 </div>
             </header>
@@ -102,12 +106,12 @@ export default function ReservationsByFloorChart({
                 <div className="flex items-center justify-center gap-5 text-xs font-semibold text-slate-500 dark:text-[#8fa7bd]">
                     <span className="flex items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full bg-teal-500 dark:bg-[#18c3b3]" />
-                        Período atual
+                        {t('charts.reservasPorPiso.periodoAtual')}
                     </span>
 
                     <span className="flex items-center gap-1.5">
                         <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
-                        Período anterior
+                        {t('charts.reservasPorPiso.periodoAnterior')}
                     </span>
                 </div>
 
@@ -229,15 +233,14 @@ export default function ReservationsByFloorChart({
                     </div>
                 ) : (
                     <div className="flex h-[220px] items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-400 dark:border-[#2a5069] dark:text-[#8fa7bd]">
-                        Ainda não existem dados por piso.
+                        {t('charts.reservasPorPiso.semDados')}
                     </div>
                 )}
 
                 {pisoDestaque && (
                     <div className="flex items-center gap-2 rounded-xl bg-teal-500/10 px-3.5 py-2.5 text-xs font-semibold text-teal-700 dark:bg-[#18c3b3]/10 dark:text-[#18c3b3]">
                         <Info size={14} strokeWidth={2} />
-                        {pisoDestaque.nome} concentra{' '}
-                        {pisoDestaque.percentual}% das reservas
+                        {t('charts.reservasPorPiso.pisoDestaque', { nome: pisoDestaque.nome, percentual: pisoDestaque.percentual })}
                     </div>
                 )}
             </div>

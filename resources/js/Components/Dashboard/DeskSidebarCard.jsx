@@ -1,9 +1,10 @@
 import { Link } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import { Armchair, Check, Copy, MapPin, MoreVertical, MousePointerClick, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { AvailabilityTimeline } from '@/Components/Dashboard/OfficeMap/DeskDetailPanel';
-import { COMODIDADES } from '@/Components/Dashboard/OfficeMap/mapUtils';
+import { COMODIDADES, traduzirComodidade } from '@/Components/Dashboard/OfficeMap/mapUtils';
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
 
 /**
@@ -24,6 +25,7 @@ export default function DeskSidebarCard({
     checkin,
     children,
 }) {
+    const { t } = useTranslation('dashboard');
     const [menuAberto, setMenuAberto] = useState(false);
     const [codigoCopiado, setCodigoCopiado] = useState(false);
     const menuRef = useRef(null);
@@ -50,13 +52,11 @@ export default function DeskSidebarCard({
                 </div>
 
                 <h3 className="text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
-                    Selecione uma secretária
+                    {t('deskSidebarCard.selecioneSecretaria')}
                 </h3>
 
                 <p className="max-w-[220px] text-xs leading-relaxed text-slate-500 dark:text-[#8fa7bd]">
-                    Clique num número do mapa para
-                    consultar disponibilidade e
-                    comodidades.
+                    {t('deskSidebarCard.selecioneSecretariaTexto')}
                 </p>
             </section>
         );
@@ -100,7 +100,7 @@ export default function DeskSidebarCard({
                         {recomendada && (
                             <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-teal-700 shadow-sm dark:bg-[#101f34] dark:text-[#18c3b3]">
                                 <Sparkles size={10} strokeWidth={2.4} />
-                                Recomendada para si
+                                {t('deskSidebarCard.recomendadaParaSi')}
                             </span>
                         )}
 
@@ -126,7 +126,7 @@ export default function DeskSidebarCard({
                         <button
                             type="button"
                             onClick={() => setMenuAberto((aberto) => !aberto)}
-                            aria-label="Mais ações"
+                            aria-label={t('deskSidebarCard.maisAcoes')}
                             aria-haspopup="menu"
                             aria-expanded={menuAberto}
                             className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition hover:bg-white hover:text-slate-600 dark:text-[#8fa7bd] dark:hover:bg-[#101f34]"
@@ -150,7 +150,7 @@ export default function DeskSidebarCard({
                                     ) : (
                                         <Copy size={13} />
                                     )}
-                                    {codigoCopiado ? 'Código copiado' : 'Copiar código'}
+                                    {codigoCopiado ? t('deskSidebarCard.codigoCopiado') : t('deskSidebarCard.copiarCodigo')}
                                 </button>
 
                                 <Link
@@ -159,7 +159,7 @@ export default function DeskSidebarCard({
                                     className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-semibold text-slate-600 transition hover:bg-slate-50 dark:text-[#d7e3ed] dark:hover:bg-[#183f5d]"
                                 >
                                     <MapPin size={13} />
-                                    Ver no mapa completo
+                                    {t('deskSidebarCard.verNoMapaCompleto')}
                                 </Link>
                             </div>
                         )}
@@ -175,30 +175,34 @@ export default function DeskSidebarCard({
 
             <div className="mt-4 border-t border-slate-100 pt-4 dark:border-[#2a5069]">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#8fa7bd]">
-                    Comodidades
+                    {t('deskSidebarCard.comodidadesTitulo')}
                 </p>
 
                 <div className="mt-3 grid grid-cols-5 gap-2">
                     {comodidades.length > 0 ? (
                         comodidades.map(
-                            ([chave, label, Icon]) => (
-                                <div
-                                    key={chave}
-                                    className="group text-center"
-                                    title={label}
-                                >
-                                    <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-700 transition-colors duration-200 group-hover:bg-teal-500/15 group-hover:text-teal-700 dark:bg-[#183f5d] dark:text-[#d7e3ed] dark:group-hover:bg-[#18c3b3]/20 dark:group-hover:text-[#18c3b3]">
-                                        <Icon size={15} strokeWidth={1.8} />
+                            ([chave, chaveTraducao, Icon]) => {
+                                const label = traduzirComodidade(chaveTraducao, t);
+
+                                return (
+                                    <div
+                                        key={chave}
+                                        className="group text-center"
+                                        title={label}
+                                    >
+                                        <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50 text-slate-700 transition-colors duration-200 group-hover:bg-teal-500/15 group-hover:text-teal-700 dark:bg-[#183f5d] dark:text-[#d7e3ed] dark:group-hover:bg-[#18c3b3]/20 dark:group-hover:text-[#18c3b3]">
+                                            <Icon size={15} strokeWidth={1.8} />
+                                        </div>
+                                        <p className="mt-1 truncate text-[8px] font-medium text-slate-500 dark:text-[#8fa7bd]">
+                                            {label}
+                                        </p>
                                     </div>
-                                    <p className="mt-1 truncate text-[8px] font-medium text-slate-500 dark:text-[#8fa7bd]">
-                                        {label}
-                                    </p>
-                                </div>
-                            ),
+                                );
+                            },
                         )
                     ) : (
                         <p className="col-span-5 text-xs text-slate-400 dark:text-[#8fa7bd]">
-                            Sem comodidades registadas.
+                            {t('deskSidebarCard.semComodidadesRegistadas')}
                         </p>
                     )}
                 </div>
@@ -212,8 +216,7 @@ export default function DeskSidebarCard({
                 <div className="border-b border-slate-200 pb-4 dark:border-[#2a5069]">
                     <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-[#8fa7bd]">
                         <span>
-                            Check-in até às{' '}
-                            {checkin.limiteLabel}
+                            {t('deskSidebarCard.checkinAte', { hora: checkin.limiteLabel })}
                         </span>
                         <span className="rounded-full bg-amber-500/10 px-2 py-0.5 font-bold text-amber-600 dark:bg-[#f5a524]/10 dark:text-[#f5a524]">
                             {checkin.restanteLabel}

@@ -6,8 +6,13 @@ import PrintFooter from '@/Components/Admin/PrintFooter';
 import PrintButton from '@/Components/Admin/PrintButton';
 import { Head, useForm } from '@inertiajs/react';
 import { CircleX } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+import { ESTADO_RESERVA, etiqueta } from '@/utils/estados';
 
 export default function CancelamentosAusencias({ reservas, estados, setores, filters, geradoEm }) {
+    const { t, i18n } = useTranslation('relatorios');
+    const { t: tc } = useTranslation('common');
     const { data, setData, get } = useForm({
         data_inicio: filters.data_inicio ?? '',
         data_fim: filters.data_fim ?? '',
@@ -28,22 +33,25 @@ export default function CancelamentosAusencias({ reservas, estados, setores, fil
     const columns = [
         {
             key: 'data',
-            label: 'Data',
-            render: (reserva) => new Date(reserva.data).toLocaleDateString('pt-PT'),
+            label: t('filtros.data'),
+            render: (reserva) =>
+                new Date(reserva.data).toLocaleDateString(
+                    i18n.language === 'en' ? 'en-GB' : 'pt-PT',
+                ),
         },
         {
             key: 'user',
-            label: 'Utilizador',
+            label: t('cancelamentos.colunas.utilizador'),
             render: (reserva) => reserva.user?.name ?? '-',
         },
         {
             key: 'secretaria',
-            label: 'Secretária',
+            label: t('cancelamentos.colunas.secretaria'),
             render: (reserva) => reserva.secretaria?.codigo ?? '-',
         },
         {
             key: 'localizacao',
-            label: 'Localização',
+            label: t('cancelamentos.colunas.localizacao'),
             render: (reserva) => {
                 const setor = reserva.secretaria?.setor;
                 return [setor?.piso?.edificio?.nome, setor?.piso?.nome, setor?.nome]
@@ -53,23 +61,33 @@ export default function CancelamentosAusencias({ reservas, estados, setores, fil
         },
         {
             key: 'estado',
-            label: 'Estado',
-            render: (reserva) => reserva.estado_reserva?.nome ?? '-',
+            label: t('cancelamentos.colunas.estado'),
+            render: (reserva) =>
+                reserva.estado_reserva?.codigo
+                    ? etiqueta(
+                          ESTADO_RESERVA,
+                          reserva.estado_reserva.codigo,
+                          reserva.estado_reserva.nome,
+                          tc,
+                      )
+                    : '-',
         },
         {
             key: 'observacoes',
-            label: 'Observações',
+            label: t('cancelamentos.colunas.observacoes'),
             render: (reserva) => reserva.observacoes || '-',
         },
     ];
 
     return (
         <DashboardLayout>
-            <Head title="Relatório de Cancelamentos e Ausências" />
+            <Head title={t('cancelamentos.titulo')} />
 
             <PrintHeader
-                title="Relatório de Cancelamentos e Ausências"
-                subtitle={`${reservas.total} registo${reservas.total === 1 ? '' : 's'} listado${reservas.total === 1 ? '' : 's'}`}
+                title={t('cancelamentos.titulo')}
+                subtitle={t('cancelamentos.subtituloImpressao', {
+                    count: reservas.total,
+                })}
                 geradoEm={geradoEm}
             />
 
@@ -82,11 +100,13 @@ export default function CancelamentosAusencias({ reservas, estados, setores, fil
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Relatório de Cancelamentos e Ausências
+                                {t('cancelamentos.titulo')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {reservas.total} registo{reservas.total === 1 ? '' : 's'} encontrado{reservas.total === 1 ? '' : 's'}.
+                                {t('cancelamentos.encontrados', {
+                                    count: reservas.total,
+                                })}
                             </p>
                         </div>
                     </div>
@@ -101,7 +121,7 @@ export default function CancelamentosAusencias({ reservas, estados, setores, fil
                     className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 print:hidden dark:border-slate-800 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_160px_1fr_160px_auto]"
                 >
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-slate-500">De</label>
+                        <label className="mb-1 block text-xs font-semibold text-slate-500">{t('filtros.de')}</label>
                         <input
                             type="date"
                             value={data.data_inicio}
@@ -111,7 +131,7 @@ export default function CancelamentosAusencias({ reservas, estados, setores, fil
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-slate-500">Até</label>
+                        <label className="mb-1 block text-xs font-semibold text-slate-500">{t('filtros.ate')}</label>
                         <input
                             type="date"
                             value={data.data_fim}
@@ -121,24 +141,26 @@ export default function CancelamentosAusencias({ reservas, estados, setores, fil
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-slate-500">Estado</label>
+                        <label className="mb-1 block text-xs font-semibold text-slate-500">{t('cancelamentos.colunas.estado')}</label>
                         <select
                             value={data.estado_reserva_id}
                             onChange={(event) => setData('estado_reserva_id', event.target.value)}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         >
-                            <option value="">Todos</option>
+                            <option value="">{t('filtros.todos')}</option>
                             {estados.map((estado) => (
-                                <option key={estado.id} value={estado.id}>{estado.nome}</option>
+                                <option key={estado.id} value={estado.id}>
+                                    {etiqueta(ESTADO_RESERVA, estado.codigo, estado.nome, tc)}
+                                </option>
                             ))}
                         </select>
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-slate-500">Utilizador</label>
+                        <label className="mb-1 block text-xs font-semibold text-slate-500">{t('cancelamentos.colunas.utilizador')}</label>
                         <input
                             type="text"
-                            placeholder="Nome do utilizador"
+                            placeholder={t('cancelamentos.nomeUtilizadorPlaceholder')}
                             value={data.utilizador}
                             onChange={(event) => setData('utilizador', event.target.value)}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
@@ -146,13 +168,13 @@ export default function CancelamentosAusencias({ reservas, estados, setores, fil
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-slate-500">Setor</label>
+                        <label className="mb-1 block text-xs font-semibold text-slate-500">{t('filtros.setor')}</label>
                         <select
                             value={data.setor_id}
                             onChange={(event) => setData('setor_id', event.target.value)}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         >
-                            <option value="">Todos</option>
+                            <option value="">{t('filtros.todos')}</option>
                             {setores.map((setor) => (
                                 <option key={setor.id} value={setor.id}>{setor.nome}</option>
                             ))}
@@ -164,7 +186,7 @@ export default function CancelamentosAusencias({ reservas, estados, setores, fil
                             type="submit"
                             className="h-11 w-full rounded-xl bg-navy-900 px-4 text-sm font-bold text-white transition hover:bg-navy-950 sm:w-auto"
                         >
-                            Filtrar
+                            {t('filtros.filtrar')}
                         </button>
                     </div>
                 </form>
@@ -173,10 +195,10 @@ export default function CancelamentosAusencias({ reservas, estados, setores, fil
                     <Table
                         columns={columns}
                         data={reservas.data}
-                        emptyMessage="Nenhum cancelamento ou ausência encontrado para os filtros selecionados."
+                        emptyMessage={t('cancelamentos.semResultados')}
                     />
 
-                    <Pagination pagination={reservas} itemLabel="registos" />
+                    <Pagination pagination={reservas} itemLabel={t('cancelamentos.itemLabel')} />
                 </div>
             </section>
 

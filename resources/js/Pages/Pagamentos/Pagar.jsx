@@ -1,7 +1,9 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { cloneElement, isValidElement, useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatarDataCurta, formatarValorEuro } from '@/utils/formatacaoPagamento';
+import { etiquetaPeriodo } from '@/utils/estados';
 import {
     ArrowLeft,
     Building2,
@@ -15,37 +17,40 @@ import {
     MapPin,
 } from 'lucide-react';
 
-const METODOS_PAGAMENTO = [
-    {
-        valor: 'cartao',
-        titulo: 'Cartão',
-        descricao: 'Visa, Mastercard ou outro cartão bancário.',
-        imagem: '/images/payment/cartao.jpeg',
-    },
-    {
-        valor: 'mbway',
-        titulo: 'MB Way',
-        descricao: 'Confirmação através do número de telemóvel.',
-        imagem: '/images/payment/mbway.jpeg',
-    },
-    {
-        valor: 'transferencia',
-        titulo: 'Transferência',
-        descricao: 'Consulta o IBAN e utiliza a referência indicada.',
-        imagem: '/images/payment/transferencia.jpeg',
-    },
-    {
-        valor: 'paypal',
-        titulo: 'PayPal',
-        descricao: 'Pagamento através de uma conta PayPal.',
-        imagem: '/images/payment/paypal.jpeg',
-    },
-];
-
 const inputClasses =
     'w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500';
 
 export default function Pagar({ pagamento }) {
+    const { t, i18n } = useTranslation('pagamentos');
+    const { t: tc } = useTranslation('common');
+
+    const METODOS_PAGAMENTO = [
+        {
+            valor: 'cartao',
+            titulo: tc('estados.metodoPagamento.cartao'),
+            descricao: t('pagar.metodos.cartao.descricao'),
+            imagem: '/images/payment/cartao.jpeg',
+        },
+        {
+            valor: 'mbway',
+            titulo: tc('estados.metodoPagamento.mbway'),
+            descricao: t('pagar.metodos.mbway.descricao'),
+            imagem: '/images/payment/mbway.jpeg',
+        },
+        {
+            valor: 'transferencia',
+            titulo: tc('estados.metodoPagamento.transferencia'),
+            descricao: t('pagar.metodos.transferencia.descricao'),
+            imagem: '/images/payment/transferencia.jpeg',
+        },
+        {
+            valor: 'paypal',
+            titulo: tc('estados.metodoPagamento.paypal'),
+            descricao: t('pagar.metodos.paypal.descricao'),
+            imagem: '/images/payment/paypal.jpeg',
+        },
+    ];
+
     const {
         data,
         setData,
@@ -95,28 +100,28 @@ export default function Pagar({ pagamento }) {
     const numeroPiso = setor?.piso?.numero;
     const localizacao = [
         nomeEdificio,
-        numeroPiso != null ? `Piso ${numeroPiso}` : null,
+        numeroPiso != null ? t('pagar.piso', { numero: numeroPiso }) : null,
     ]
         .filter(Boolean)
         .join(' · ');
 
     return (
         <DashboardLayout>
-            <Head title="Efetuar pagamento" />
+            <Head title={t('pagar.tituloPagina')} />
 
             <div className="mx-auto flex w-full min-w-0 max-w-[1600px] flex-col gap-[clamp(20px,1.6vw,32px)] pb-10 [overflow-x:clip]">
                 <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-600 dark:text-teal-400">
-                            Pagamento simulado
+                            {t('pagar.pagamentoSimulado')}
                         </p>
 
                         <h1 className="mt-1 text-[clamp(1.875rem,2vw,2.25rem)] font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                            Efetuar pagamento
+                            {t('pagar.tituloPagina')}
                         </h1>
 
                         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                            Confirma os dados da reserva e escolhe o método de pagamento.
+                            {t('pagar.subtitulo')}
                         </p>
                     </div>
 
@@ -125,7 +130,7 @@ export default function Pagar({ pagamento }) {
                         className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-semibold text-slate-700 shadow-sm transition hover:border-teal-500 hover:bg-teal-50 hover:text-teal-600 outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-teal-500 dark:hover:bg-slate-800 dark:hover:text-teal-400 dark:focus-visible:ring-offset-slate-950"
                     >
                         <ArrowLeft size={18} />
-                        Voltar ao detalhe
+                        {t('pagar.voltarAoDetalhe')}
                     </Link>
                 </header>
 
@@ -135,29 +140,29 @@ export default function Pagar({ pagamento }) {
                             <div className="mb-6 flex items-start justify-between gap-4">
                                 <div>
                                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                        Resumo da reserva
+                                        {t('pagar.resumoDaReserva')}
                                     </p>
 
                                     <h2 className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100">
-                                        Reserva #{reserva?.id ?? '-'}
+                                        {t('pagar.reservaNumero', { id: reserva?.id ?? '-' })}
                                     </h2>
                                 </div>
 
                                 <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
-                                    Pendente
+                                    {t('pagar.pendente')}
                                 </span>
                             </div>
 
                             <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 min-[1600px]:grid-cols-[minmax(135px,0.8fr)_minmax(130px,0.8fr)_minmax(280px,2fr)_minmax(240px,1.6fr)]">
-                                <ResumoItem Icone={CalendarDays} titulo="Data">
+                                <ResumoItem Icone={CalendarDays} titulo={t('pagar.data')}>
                                     {formatarDataCurta(reserva?.data)}
                                 </ResumoItem>
 
-                                <ResumoItem Icone={Clock} titulo="Período">
-                                    {reserva?.periodo?.nome ?? '-'}
+                                <ResumoItem Icone={Clock} titulo={t('pagar.periodo')}>
+                                    {etiquetaPeriodo(reserva?.periodo?.nome, tc) || '-'}
                                 </ResumoItem>
 
-                                <ResumoItem Icone={Building2} titulo="Espaço" quebraLinha>
+                                <ResumoItem Icone={Building2} titulo={t('pagar.espaco')} quebraLinha>
                                     <span className="flex flex-wrap items-center gap-2">
                                         <span>{setor?.nome ?? '-'}</span>
 
@@ -169,7 +174,7 @@ export default function Pagar({ pagamento }) {
                                     </span>
                                 </ResumoItem>
 
-                                <ResumoItem Icone={MapPin} titulo="Localização" quebraLinha>
+                                <ResumoItem Icone={MapPin} titulo={t('pagar.localizacao')} quebraLinha>
                                     {localizacao || '-'}
                                 </ResumoItem>
                             </div>
@@ -178,11 +183,11 @@ export default function Pagar({ pagamento }) {
                         <div className="flex min-w-0 flex-col justify-between border-t border-slate-200 bg-slate-50 p-[clamp(20px,2vw,36px)] dark:border-slate-800 dark:bg-slate-950/50 lg:border-l lg:border-t-0">
                             <div>
                                 <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                    Total a pagar
+                                    {t('pagar.totalAPagar')}
                                 </p>
 
                                 <p className="mt-2 text-[clamp(2.25rem,3vw,3rem)] font-black tracking-tight text-slate-900 dark:text-white">
-                                    {formatarValorEuro(pagamento.valor)}
+                                    {formatarValorEuro(pagamento.valor, i18n.language)}
                                 </p>
                             </div>
 
@@ -195,7 +200,7 @@ export default function Pagar({ pagamento }) {
 
                                     <div className="min-w-0">
                                         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                            Referência
+                                            {t('pagar.referencia')}
                                         </p>
 
                                         <p className="mt-1 break-all text-sm font-semibold text-slate-700 dark:text-slate-300">
@@ -212,7 +217,7 @@ export default function Pagar({ pagamento }) {
                     {Object.keys(errors).length > 0 && (
                         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
                             <p className="font-bold">
-                                O pagamento não foi confirmado:
+                                {t('pagar.erroTitulo')}
                             </p>
 
                             <ul className="mt-2 list-disc space-y-1 pl-5">
@@ -231,12 +236,11 @@ export default function Pagar({ pagamento }) {
 
                         <div>
                             <p className="font-semibold text-amber-800 dark:text-amber-300">
-                                Ambiente de demonstração
+                                {t('pagar.ambienteDemonstracao')}
                             </p>
 
                             <p className="mt-1 text-sm text-amber-700 dark:text-amber-400">
-                                Os pagamentos apresentados nesta aplicação são simulados para fins
-                                académicos. Não é efetuada qualquer transação financeira real.
+                                {t('pagar.ambienteDemonstracaoTexto')}
                             </p>
                         </div>
                     </div>
@@ -244,17 +248,17 @@ export default function Pagar({ pagamento }) {
                     <section className="dashboard-card p-[clamp(20px,2vw,36px)]">
                         <div className="mb-6">
                             <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                                Escolhe o método de pagamento
+                                {t('pagar.escolheMetodo')}
                             </h2>
 
                             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                Seleciona uma das opções disponíveis para continuar.
+                                {t('pagar.selecionaOpcao')}
                             </p>
                         </div>
 
                         <fieldset>
                             <legend className="sr-only">
-                                Método de pagamento
+                                {t('pagar.metodoDePagamento')}
                             </legend>
 
                             <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
@@ -347,15 +351,15 @@ export default function Pagar({ pagamento }) {
 
                                 <div>
                                     <p className="text-sm font-semibold text-teal-600 dark:text-teal-400">
-                                        Passo 2
+                                        {t('pagar.passo2')}
                                     </p>
 
                                     <h2 className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100">
-                                        Dados do pagamento
+                                        {t('pagar.dadosDoPagamento')}
                                     </h2>
 
                                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                        Preenche apenas os dados necessários para o método selecionado.
+                                        {t('pagar.preencheApenasNecessarios')}
                                     </p>
                                 </div>
                             </div>
@@ -363,7 +367,7 @@ export default function Pagar({ pagamento }) {
                             {data.metodo_pagamento === 'cartao' && (
                                 <div className="space-y-5">
                                     <Campo
-                                        label="Nome do titular"
+                                        label={t('pagar.nomeDoTitular')}
                                         erro={errors.nome_titular}
                                     >
                                         <input
@@ -375,14 +379,14 @@ export default function Pagar({ pagamento }) {
                                                     evento.target.value,
                                                 )
                                             }
-                                            placeholder="Nome como aparece no cartão"
+                                            placeholder={t('pagar.nomeComoNoCartaoPlaceholder')}
                                             autoComplete="cc-name"
                                             className={inputClasses}
                                         />
                                     </Campo>
 
                                     <Campo
-                                        label="Número do cartão"
+                                        label={t('pagar.numeroDoCartao')}
                                         erro={errors.numero_cartao}
                                     >
                                         <input
@@ -407,7 +411,7 @@ export default function Pagar({ pagamento }) {
 
                                     <div className="grid gap-5 sm:grid-cols-2">
                                         <Campo
-                                            label="Validade"
+                                            label={t('pagar.validade')}
                                             erro={errors.validade_cartao}
                                         >
                                             <input
@@ -439,7 +443,7 @@ export default function Pagar({ pagamento }) {
                                             />
                                         </Campo>
 
-                                        <Campo label="CVV" erro={errors.cvv}>
+                                        <Campo label={t('pagar.cvv')} erro={errors.cvv}>
                                             <input
                                                 type="password"
                                                 inputMode="numeric"
@@ -462,7 +466,7 @@ export default function Pagar({ pagamento }) {
                                     </div>
 
                                     <Nota>
-                                        Os dados do cartão são utilizados apenas nesta simulação e não são guardados.
+                                        {t('pagar.notaCartao')}
                                     </Nota>
                                 </div>
                             )}
@@ -470,7 +474,7 @@ export default function Pagar({ pagamento }) {
                             {data.metodo_pagamento === 'mbway' && (
                                 <div className="space-y-5">
                                     <Campo
-                                        label="Número de telemóvel"
+                                        label={t('pagar.numeroDeTelemovel')}
                                         erro={errors.telefone_mbway}
                                     >
                                         <input
@@ -494,7 +498,7 @@ export default function Pagar({ pagamento }) {
                                     </Campo>
 
                                     <Nota>
-                                        Será simulada uma notificação MB Way para o número indicado.
+                                        {t('pagar.notaMbway')}
                                     </Nota>
                                 </div>
                             )}
@@ -503,18 +507,18 @@ export default function Pagar({ pagamento }) {
                                 <div className="space-y-5">
                                     <div className="divide-y divide-slate-200 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:divide-slate-700 dark:border-slate-700 dark:bg-slate-950/50">
                                         <LinhaDados
-                                            titulo="IBAN"
+                                            titulo={t('pagar.iban')}
                                             valor="PT50 0002 0123 1234 5678 9015 4"
                                         />
 
                                         <LinhaDados
-                                            titulo="Referência"
+                                            titulo={t('pagar.referencia')}
                                             valor={pagamento.referencia ?? '-'}
                                         />
 
                                         <LinhaDados
-                                            titulo="Valor"
-                                            valor={formatarValorEuro(pagamento.valor)}
+                                            titulo={t('pagar.valorLabel')}
+                                            valor={formatarValorEuro(pagamento.valor, i18n.language)}
                                         />
                                     </div>
 
@@ -534,7 +538,7 @@ export default function Pagar({ pagamento }) {
                                         />
 
                                         <span className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                            Confirmo que consultei os dados da transferência e que utilizarei a referência indicada.
+                                            {t('pagar.confirmoTransferencia')}
                                         </span>
                                     </label>
 
@@ -551,7 +555,7 @@ export default function Pagar({ pagamento }) {
                             {data.metodo_pagamento === 'paypal' && (
                                 <div className="space-y-5">
                                     <Campo
-                                        label="Email associado ao PayPal"
+                                        label={t('pagar.emailPaypal')}
                                         erro={errors.email_paypal}
                                     >
                                         <input
@@ -563,14 +567,14 @@ export default function Pagar({ pagamento }) {
                                                     evento.target.value,
                                                 )
                                             }
-                                            placeholder="utilizador@exemplo.pt"
+                                            placeholder={t('pagar.emailPaypalPlaceholder')}
                                             autoComplete="email"
                                             className={inputClasses}
                                         />
                                     </Campo>
 
                                     <Nota>
-                                        O redirecionamento para o PayPal será simulado neste projeto académico.
+                                        {t('pagar.notaPaypal')}
                                     </Nota>
                                 </div>
                             )}
@@ -586,7 +590,7 @@ export default function Pagar({ pagamento }) {
                     <section className="dashboard-card flex flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                             <LockKeyhole size={15} />
-                            Simulação segura: os dados sensíveis não são guardados.
+                            {t('pagar.simulacaoSegura')}
                         </div>
 
                         <div className="flex flex-col-reverse gap-3 sm:flex-row">
@@ -594,7 +598,7 @@ export default function Pagar({ pagamento }) {
                                 href={route('pagamentos.show', pagamento.id)}
                                 className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                             >
-                                Cancelar
+                                {t('pagar.cancelar')}
                             </Link>
 
                             <button
@@ -612,8 +616,8 @@ export default function Pagar({ pagamento }) {
                                 <CheckCircle2 size={18} />
 
                                 {processing
-                                    ? 'A confirmar...'
-                                    : 'Confirmar pagamento'}
+                                    ? t('pagar.aConfirmar')
+                                    : t('pagar.confirmarPagamento')}
                             </button>
                         </div>
                     </section>

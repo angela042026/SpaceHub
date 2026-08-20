@@ -1,0 +1,140 @@
+{
+    "index": {
+        "titulo": "Reports",
+        "descricao": "View, filter and export SpaceHub's key management data.",
+        "verRelatorio": "View report",
+        "cards": {
+            "reservas": {
+                "titulo": "Reservations Report",
+                "descricao": "List of reservations, filterable by period, status, space and user."
+            },
+            "utilizadores": {
+                "titulo": "Users Report",
+                "descricao": "List of system accounts, filterable by role, status and sign-up date."
+            },
+            "suporte": {
+                "titulo": "Support Report",
+                "descricao": "Support requests, filterable by status, priority and period."
+            },
+            "ocupacao": {
+                "titulo": "Occupancy Report",
+                "descricao": "Analyse space usage and identify peak occupancy periods by period, floor, sector and building."
+            },
+            "espacos": {
+                "titulo": "Spaces Report",
+                "descricao": "Compare desk usage and identify the most and least booked spaces by period, floor, sector and space."
+            },
+            "cancelamentos": {
+                "titulo": "Cancellations and No-shows Report",
+                "descricao": "Track cancellations and no-shows to identify usage patterns by period, status, user and space."
+            }
+        }
+    },
+    "suporte": {
+        "titulo": "Support Report",
+        "subtituloImpressao_one": "{{count}} request listed",
+        "subtituloImpressao_other": "{{count}} requests listed",
+        "encontrados_one": "{{count}} request found.",
+        "encontrados_other": "{{count}} requests found.",
+        "colunas": {
+            "utilizador": "User",
+            "assunto": "Subject",
+            "estado": "Status",
+            "criadoEm": "Created at"
+        },
+        "todosEstados": "All statuses",
+        "semResultados": "No support requests found for the selected filters.",
+        "itemLabel": "requests"
+    },
+    "filtros": {
+        "data": "Date",
+        "de": "From",
+        "ate": "To",
+        "piso": "Floor",
+        "setor": "Sector",
+        "todos": "All",
+        "filtrar": "Filter",
+        "criadoEm": "Created at"
+    },
+    "ocupacao": {
+        "titulo": "Occupancy Report",
+        "subtituloImpressao_one": "{{count}} day listed",
+        "subtituloImpressao_other": "{{count}} days listed",
+        "encontrados_one": "{{count}} day found.",
+        "encontrados_other": "{{count}} days found.",
+        "colunas": {
+            "secretariasOcupadas": "Occupied Desks",
+            "totalSecretarias": "Total Desks",
+            "taxaOcupacao": "Occupancy Rate"
+        },
+        "semResultados": "No days found for the selected filters.",
+        "itemLabel": "days"
+    },
+    "utilizadores": {
+        "titulo": "Users Report",
+        "subtituloImpressao_one": "{{count}} user listed",
+        "subtituloImpressao_other": "{{count}} users listed",
+        "encontrados_one": "{{count}} user found.",
+        "encontrados_other": "{{count}} users found.",
+        "colunas": {
+            "nome": "Name",
+            "email": "Email",
+            "papel": "Role",
+            "estado": "Status"
+        },
+        "todosPapeis": "All roles",
+        "todosEstados": "All statuses",
+        "ativos": "Active",
+        "inativos": "Inactive",
+        "semResultados": "No users found for the selected filters.",
+        "itemLabel": "users"
+    },
+    "reservas": {
+        "titulo": "Reservations Report",
+        "subtituloImpressao_one": "{{count}} reservation listed",
+        "subtituloImpressao_other": "{{count}} reservations listed",
+        "encontrados_one": "{{count}} reservation found.",
+        "encontrados_other": "{{count}} reservations found.",
+        "colunas": {
+            "utilizador": "User",
+            "secretaria": "Desk",
+            "localizacao": "Location",
+            "periodo": "Period",
+            "estado": "Status"
+        },
+        "semResultados": "No reservations found for the selected filters.",
+        "itemLabel": "reservations"
+    },
+    "espacos": {
+        "titulo": "Spaces Report",
+        "subtituloImpressao_one": "{{count}} desk listed",
+        "subtituloImpressao_other": "{{count}} desks listed",
+        "encontrados_one": "{{count}} desk found.",
+        "encontrados_other": "{{count}} desks found.",
+        "colunas": {
+            "secretaria": "Desk",
+            "edificio": "Building",
+            "diasOcupados": "Days Occupied",
+            "percentualTotal": "% of Total"
+        },
+        "semResultados": "No desks found for the selected filters.",
+        "itemLabel": "desks"
+    },
+    "cancelamentos": {
+        "titulo": "Cancellations and No-shows Report",
+        "subtituloImpressao_one": "{{count}} record listed",
+        "subtituloImpressao_other": "{{count}} records listed",
+        "encontrados_one": "{{count}} record found.",
+        "encontrados_other": "{{count}} records found.",
+        "colunas": {
+            "utilizador": "User",
+            "secretaria": "Desk",
+            "localizacao": "Location",
+            "estado": "Status",
+            "observacoes": "Notes"
+        },
+        "nomeUtilizadorPlaceholder": "User name",
+        "semResultados": "No cancellations or no-shows found for the selected filters.",
+        "itemLabel": "records"
+    }
+}

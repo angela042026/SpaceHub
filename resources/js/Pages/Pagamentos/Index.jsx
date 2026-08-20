@@ -2,6 +2,7 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
 import { Head, Link, router } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ChevronLeft,
     ChevronRight,
@@ -10,7 +11,7 @@ import {
     Search,
     X,
 } from 'lucide-react';
-import { ESTADO_PAGAMENTO, METODO_PAGAMENTO, badge, etiqueta } from '@/utils/estados';
+import { ESTADO_PAGAMENTO, METODO_PAGAMENTO, badge, etiqueta, etiquetaPeriodo } from '@/utils/estados';
 import { encurtarReferencia, formatarDataCurta, formatarValorEuro } from '@/utils/formatacaoPagamento';
 
 export default function Index({
@@ -19,6 +20,9 @@ export default function Index({
     filters,
     isAdmin = false,
 }) {
+    const { t, i18n } = useTranslation('pagamentos');
+    const { t: tc } = useTranslation('common');
+
     const [busca, setBusca] = useState(filters?.busca ?? '');
 
     const irParaPagina = (url) => {
@@ -89,7 +93,7 @@ export default function Index({
     const columns = [
         {
             key: 'referencia',
-            label: 'Referência',
+            label: t('index.referencia'),
             render: (pagamento) => (
                 <div>
                     <p
@@ -105,7 +109,7 @@ export default function Index({
                     </p>
 
                     <p className="text-xs text-slate-400">
-                        Reserva #{pagamento.reserva_id}
+                        {t('index.reservaNumero', { id: pagamento.reserva_id })}
                     </p>
                 </div>
             ),
@@ -115,7 +119,7 @@ export default function Index({
             ? [
                   {
                       key: 'utilizador',
-                      label: 'Utilizador',
+                      label: t('index.utilizador'),
                       render: (pagamento) => (
                           <div>
                               <p className="font-semibold text-slate-800 dark:text-slate-100">
@@ -133,7 +137,7 @@ export default function Index({
 
         {
             key: 'data',
-            label: 'Data',
+            label: t('index.data'),
             render: (pagamento) => {
                 const temDataPagamento = Boolean(pagamento.data_pagamento);
                 const cancelado = pagamento.estado === 'cancelado';
@@ -154,8 +158,8 @@ export default function Index({
 
                         <p className="text-xs text-slate-400">
                             {temDataPagamento
-                                ? 'Data do pagamento'
-                                : 'Data da reserva'}
+                                ? t('index.dataDoPagamento')
+                                : t('index.dataDaReserva')}
                         </p>
                     </div>
                 );
@@ -163,7 +167,7 @@ export default function Index({
         },
         {
             key: 'espaco',
-            label: 'Espaço',
+            label: t('index.espaco'),
             render: (pagamento) => (
                 <div>
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
@@ -173,14 +177,14 @@ export default function Index({
                     <p className="text-xs text-slate-400">
                         {pagamento.reserva?.secretaria?.codigo ?? '-'}
                         {' · '}
-                        {pagamento.reserva?.periodo?.nome ?? '-'}
+                        {etiquetaPeriodo(pagamento.reserva?.periodo?.nome, tc) || '-'}
                     </p>
                 </div>
             ),
         },
         {
             key: 'valor',
-            label: 'Valor',
+            label: t('index.valor'),
             render: (pagamento) => (
                 <span
                     className={`font-semibold ${
@@ -189,13 +193,13 @@ export default function Index({
                             : 'text-slate-800 dark:text-slate-100'
                     }`}
                 >
-                    {formatarValorEuro(pagamento.valor)}
+                    {formatarValorEuro(pagamento.valor, i18n.language)}
                 </span>
             ),
         },
         {
             key: 'metodo_pagamento',
-            label: 'Método',
+            label: t('index.metodo'),
             render: (pagamento) => (
                 <span
                     className={`inline-flex items-center gap-2 ${
@@ -217,21 +221,22 @@ export default function Index({
                     {etiqueta(
                         METODO_PAGAMENTO,
                         pagamento.metodo_pagamento,
-                        'Por definir',
+                        t('index.porDefinir'),
+                        tc,
                     )}
                 </span>
             ),
         },
         {
             key: 'estado',
-            label: 'Estado',
+            label: t('index.estado'),
             render: (pagamento) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
                         badge(ESTADO_PAGAMENTO, pagamento.estado)
                     }`}
                 >
-                    {etiqueta(ESTADO_PAGAMENTO, pagamento.estado)}
+                    {etiqueta(ESTADO_PAGAMENTO, pagamento.estado, pagamento.estado, tc)}
                 </span>
             ),
         },
@@ -242,8 +247,8 @@ export default function Index({
                 <Link
                     href={route('pagamentos.show', pagamento.id)}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 outline-none transition hover:border-teal-500 hover:bg-teal-50 hover:text-teal-600 focus-visible:border-teal-500 focus-visible:ring-2 focus-visible:ring-teal-500/40 dark:border-slate-700 dark:hover:bg-teal-400/10 dark:hover:text-teal-400"
-                    title="Ver detalhes do pagamento"
-                    aria-label="Ver detalhes do pagamento"
+                    title={t('index.verDetalhes')}
+                    aria-label={t('index.verDetalhes')}
                 >
                     <Eye size={16} strokeWidth={1.9} />
                 </Link>
@@ -253,7 +258,7 @@ export default function Index({
 
     return (
         <DashboardLayout>
-            <Head title={isAdmin ? 'Pagamentos' : 'Os meus pagamentos'} />
+            <Head title={isAdmin ? t('index.tituloAdmin') : t('index.tituloUtilizador')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 lg:flex-row lg:items-center lg:justify-between">
@@ -265,14 +270,14 @@ export default function Index({
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
                                 {isAdmin
-                                    ? 'Pagamentos'
-                                    : 'Os meus pagamentos'}
+                                    ? t('index.tituloAdmin')
+                                    : t('index.tituloUtilizador')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
                                 {filtrosAtivos
-                                    ? `${pagamentos.total} de ${totalGeral} pagamentos`
-                                    : `${pagamentos.total} pagamento${pagamentos.total === 1 ? '' : 's'} no total.`}
+                                    ? t('index.contagem', { atual: pagamentos.total, total: totalGeral })
+                                    : t('index.contagemTotal', { count: pagamentos.total })}
                             </p>
                         </div>
                     </div>
@@ -289,7 +294,7 @@ export default function Index({
                                 type="text"
                                 value={busca}
                                 onChange={(event) => setBusca(event.target.value)}
-                                placeholder="Pesquisar pagamentos"
+                                placeholder={t('index.pesquisarPlaceholder')}
                                 className="w-56 rounded-xl border-slate-200 bg-white py-2 pl-9 pr-8 text-sm text-slate-700 shadow-sm placeholder:text-slate-400 focus:border-teal-500 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                             />
 
@@ -297,8 +302,8 @@ export default function Index({
                                 <button
                                     type="button"
                                     onClick={() => setBusca('')}
-                                    aria-label="Limpar pesquisa"
-                                    title="Limpar pesquisa"
+                                    aria-label={t('index.limparPesquisa')}
+                                    title={t('index.limparPesquisa')}
                                     className="absolute right-2 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                                 >
                                     <X size={13} strokeWidth={2.2} />
@@ -316,14 +321,14 @@ export default function Index({
                             }
                             className="rounded-xl border-slate-200 bg-white text-sm text-slate-700 shadow-sm focus:border-teal-500 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                         >
-                            <option value="">Todos os estados</option>
-                            <option value="pendente">Pendente</option>
-                            <option value="pago">Pago</option>
-                            <option value="recusado">Recusado</option>
+                            <option value="">{t('index.todosOsEstados')}</option>
+                            <option value="pendente">{tc('estados.pagamento.pendente')}</option>
+                            <option value="pago">{tc('estados.pagamento.pago')}</option>
+                            <option value="recusado">{tc('estados.pagamento.recusado')}</option>
                             <option value="reembolsado">
-                                Reembolsado
+                                {tc('estados.pagamento.reembolsado')}
                             </option>
-                            <option value="cancelado">Cancelado</option>
+                            <option value="cancelado">{tc('estados.pagamento.cancelado')}</option>
                         </select>
 
                         <select
@@ -336,13 +341,13 @@ export default function Index({
                             }
                             className="rounded-xl border-slate-200 bg-white text-sm text-slate-700 shadow-sm focus:border-teal-500 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                         >
-                            <option value="">Todos os métodos</option>
-                            <option value="cartao">Cartão</option>
-                            <option value="mbway">MB Way</option>
+                            <option value="">{t('index.todosOsMetodos')}</option>
+                            <option value="cartao">{tc('estados.metodoPagamento.cartao')}</option>
+                            <option value="mbway">{tc('estados.metodoPagamento.mbway')}</option>
                             <option value="transferencia">
-                                Transferência
+                                {tc('estados.metodoPagamento.transferencia')}
                             </option>
-                            <option value="paypal">PayPal</option>
+                            <option value="paypal">{tc('estados.metodoPagamento.paypal')}</option>
                         </select>
                     </div>
                 </div>
@@ -354,20 +359,20 @@ export default function Index({
                         emptyMessage={
                             filtrosAtivos ? (
                                 <>
-                                    Nenhum pagamento encontrado.
+                                    {t('index.nenhumPagamentoEncontrado')}
                                     <br />
                                     <button
                                         type="button"
                                         onClick={limparFiltros}
                                         className="mt-2 font-semibold text-teal-600 underline-offset-2 hover:underline dark:text-teal-400"
                                     >
-                                        Limpar filtros
+                                        {t('index.limparFiltros')}
                                     </button>
                                 </>
                             ) : isAdmin ? (
-                                'Ainda não existem pagamentos registados.'
+                                t('index.semPagamentosAdmin')
                             ) : (
-                                'Ainda não existem pagamentos associados às tuas reservas.'
+                                t('index.semPagamentosUtilizador')
                             )
                         }
                     />
@@ -375,8 +380,7 @@ export default function Index({
                     {pagamentos.last_page > 1 && (
                         <div className="mt-5 flex items-center justify-between">
                             <p className="text-xs text-slate-400">
-                                Página {pagamentos.current_page} de{' '}
-                                {pagamentos.last_page}
+                                {t('index.paginaXDeY', { atual: pagamentos.current_page, total: pagamentos.last_page })}
                             </p>
 
                             <div className="flex gap-2">
@@ -389,7 +393,7 @@ export default function Index({
                                         )
                                     }
                                     className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
-                                    aria-label="Página anterior"
+                                    aria-label={t('index.paginaAnterior')}
                                 >
                                     <ChevronLeft
                                         size={16}
@@ -406,7 +410,7 @@ export default function Index({
                                         )
                                     }
                                     className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
-                                    aria-label="Página seguinte"
+                                    aria-label={t('index.paginaSeguinte')}
                                 >
                                     <ChevronRight
                                         size={16}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Cookie } from 'lucide-react';
 import { loadAnalytics } from '@/Lib/analytics';
 import {
@@ -15,6 +16,7 @@ function notifyVisibility(isVisible) {
 }
 
 export default function CookieBanner() {
+    const { t } = useTranslation('landing');
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
@@ -59,18 +61,16 @@ export default function CookieBanner() {
 
                         <div className="max-w-xl">
                             <h2 className="text-sm font-semibold text-[#5EEAD4]">
-                                Utilizamos cookies
+                                {t('cookies.titulo')}
                             </h2>
 
                             <p className="mt-1 text-sm leading-6 text-slate-200">
-                                Cookies essenciais garantem o funcionamento
-                                da SpaceHub. Com o seu consentimento,
-                                ativamos também cookies de análise.
+                                {t('cookies.descricao')}
                                 <a
                                     href={route('legal.cookies')}
                                     className="ml-2 whitespace-nowrap font-semibold text-[#5EEAD4] underline-offset-4 transition hover:underline"
                                 >
-                                    Política de Cookies
+                                    {t('cookies.politicaDeCookies')}
                                 </a>
                             </p>
                         </div>
@@ -82,7 +82,7 @@ export default function CookieBanner() {
                             onClick={rejectCookies}
                             className="h-11 rounded-xl border border-white/20 bg-white/5 px-5 text-sm font-medium text-white transition hover:bg-white/10"
                         >
-                            Só essenciais
+                            {t('cookies.soEssenciais')}
                         </button>
 
                         <button
@@ -90,7 +90,7 @@ export default function CookieBanner() {
                             onClick={acceptCookies}
                             className="h-11 rounded-xl bg-[#14B8A6]/80 px-5 text-sm font-semibold text-[#03172B] shadow-lg shadow-[#14B8A6]/20 transition hover:bg-[#14B8A6]"
                         >
-                            Aceitar todos
+                            {t('cookies.aceitarTodos')}
                         </button>
                     </div>
                 </div>

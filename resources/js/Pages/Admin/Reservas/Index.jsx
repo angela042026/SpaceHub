@@ -12,7 +12,8 @@ import {
     XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
-import { ESTADO_RESERVA, badge } from '@/utils/estados';
+import { useTranslation } from 'react-i18next';
+import { ESTADO_RESERVA, badge, etiqueta, etiquetaPeriodo } from '@/utils/estados';
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
 
 const fieldClass =
@@ -22,6 +23,8 @@ const labelClass =
     'mb-1.5 block text-xs font-semibold text-slate-500 dark:text-slate-400';
 
 export default function Index({ reservas, estados, edificios, pisos, setores, filters }) {
+    const { t, i18n } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
 
     const [processingId, setProcessingId] = useState(null);
     const [carregando, setCarregando] = useState(false);
@@ -54,7 +57,9 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
     };
 
     const cancelarReserva = (reserva) => {
-        if (!confirm(`Cancelar a reserva de ${reserva.user?.name ?? 'utilizador'}?`)) {
+        if (!confirm(t('reservas.index.confirmarCancelar', {
+            nome: reserva.user?.name ?? t('reservas.index.utilizadorGenerico'),
+        }))) {
             return;
         }
 
@@ -69,7 +74,7 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
     const columns = [
         {
             key: 'user',
-            label: 'Utilizador',
+            label: t('reservas.index.utilizador'),
             render: (reserva) => (
                 <div>
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
@@ -81,17 +86,23 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
         },
         {
             key: 'data',
-            label: 'Data',
-            render: (reserva) => new Date(reserva.data).toLocaleDateString('pt-PT'),
+            label: t('reservas.edit.data'),
+            render: (reserva) =>
+                new Date(reserva.data).toLocaleDateString(
+                    i18n.language === 'en' ? 'en-GB' : 'pt-PT',
+                ),
         },
         {
             key: 'periodo',
-            label: 'Período',
-            render: (reserva) => reserva.periodo?.nome ?? '-',
+            label: t('reservas.edit.periodo'),
+            render: (reserva) =>
+                reserva.periodo?.nome
+                    ? etiquetaPeriodo(reserva.periodo.nome, tc)
+                    : '-',
         },
         {
             key: 'espaco',
-            label: 'Espaço',
+            label: t('reservas.index.espaco'),
             render: (reserva) => (
                 <div className="flex items-center gap-2.5">
                     {resolverImagemSecretaria(reserva.secretaria) ? (
@@ -119,28 +130,35 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
         },
         {
             key: 'estado',
-            label: 'Estado',
+            label: t('listagem.estado'),
             render: (reserva) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
                         badge(ESTADO_RESERVA, reserva.estado_reserva?.codigo)
                     }`}
                 >
-                    {reserva.estado_reserva?.nome ?? '-'}
+                    {reserva.estado_reserva?.codigo
+                        ? etiqueta(
+                              ESTADO_RESERVA,
+                              reserva.estado_reserva.codigo,
+                              reserva.estado_reserva.nome,
+                              tc,
+                          )
+                        : '-'}
                 </span>
             ),
         },
         {
             key: 'acoes',
-            label: 'Ações',
+            label: t('listagem.acoes'),
             align: 'right',
             render: (reserva) =>
                 reserva.cancelada_at === null ? (
                     <div className="flex justify-end gap-2">
                         <Link
                             href={route('admin.reservas.edit', reserva.id)}
-                            title="Editar reserva"
-                            aria-label="Editar reserva"
+                            title={t('reservas.index.editarReserva')}
+                            aria-label={t('reservas.index.editarReserva')}
                             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-1 dark:border-slate-700 dark:hover:bg-teal-500/10"
                         >
                             <Pencil size={16} strokeWidth={1.9} />
@@ -150,8 +168,8 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                             type="button"
                             onClick={() => cancelarReserva(reserva)}
                             disabled={processingId === reserva.id}
-                            title="Cancelar reserva"
-                            aria-label="Cancelar reserva"
+                            title={t('reservas.index.cancelarReserva')}
+                            aria-label={t('reservas.index.cancelarReserva')}
                             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:hover:bg-red-500/10"
                         >
                             {processingId === reserva.id ? (
@@ -162,14 +180,14 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                         </button>
                     </div>
                 ) : (
-                    <span className="text-sm text-slate-400">Sem ações</span>
+                    <span className="text-sm text-slate-400">{t('reservas.index.semAcoes')}</span>
                 ),
         },
     ];
 
     return (
         <DashboardLayout>
-            <Head title="Reservas" />
+            <Head title={t('reservas.index.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -179,11 +197,11 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Reservas
+                            {t('reservas.index.titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {reservas.total} reserva{reservas.total === 1 ? '' : 's'} de todos os utilizadores.
+                            {t('reservas.index.subtitulo', { count: reservas.total })}
                         </p>
                     </div>
                 </div>
@@ -203,7 +221,7 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                                     type="text"
                                     value={data.search}
                                     onChange={(event) => setData('search', event.target.value)}
-                                    placeholder="Pesquisar por nome ou email…"
+                                    placeholder={t('reservas.index.pesquisarPlaceholder')}
                                     className={`${fieldClass} pl-9`}
                                 />
                             </div>
@@ -213,7 +231,7 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                                     type="submit"
                                     className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white transition hover:bg-navy-950"
                                 >
-                                    Pesquisar
+                                    {tc('acoes.pesquisar')}
                                 </button>
 
                                 <button
@@ -221,7 +239,7 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                                     onClick={limpar}
                                     className="h-11 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700 dark:bg-transparent"
                                 >
-                                    Limpar filtros
+                                    {tc('acoes.limparFiltros')}
                                 </button>
                             </div>
                         </div>
@@ -229,25 +247,25 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                         {/* Linha 2 — filtros de refinamento */}
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
                             <div>
-                                <label htmlFor="filtro-estado" className={labelClass}>Estado</label>
+                                <label htmlFor="filtro-estado" className={labelClass}>{t('listagem.estado')}</label>
                                 <select
                                     id="filtro-estado"
                                     value={data.estado}
                                     onChange={(event) => setData('estado', event.target.value)}
                                     className={fieldClass}
                                 >
-                                    <option value="">Todos os estados</option>
+                                    <option value="">{t('listagem.todosOsEstados')}</option>
 
                                     {estados.map((estado) => (
                                         <option key={estado.id} value={estado.codigo}>
-                                            {estado.nome}
+                                            {etiqueta(ESTADO_RESERVA, estado.codigo, estado.nome, tc)}
                                         </option>
                                     ))}
                                 </select>
                             </div>
 
                             <div>
-                                <label htmlFor="filtro-data" className={labelClass}>Data</label>
+                                <label htmlFor="filtro-data" className={labelClass}>{t('reservas.edit.data')}</label>
                                 <input
                                     id="filtro-data"
                                     type="date"
@@ -258,14 +276,14 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                             </div>
 
                             <div>
-                                <label htmlFor="filtro-edificio" className={labelClass}>Edifício</label>
+                                <label htmlFor="filtro-edificio" className={labelClass}>{t('campos.edificio')}</label>
                                 <select
                                     id="filtro-edificio"
                                     value={data.edificio}
                                     onChange={(event) => setData('edificio', event.target.value)}
                                     className={fieldClass}
                                 >
-                                    <option value="">Todos os edifícios</option>
+                                    <option value="">{t('pisos.index.todosOsEdificios')}</option>
 
                                     {edificios.map((edificio) => (
                                         <option key={edificio.id} value={edificio.id}>
@@ -276,14 +294,14 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                             </div>
 
                             <div>
-                                <label htmlFor="filtro-piso" className={labelClass}>Piso</label>
+                                <label htmlFor="filtro-piso" className={labelClass}>{t('campos.piso')}</label>
                                 <select
                                     id="filtro-piso"
                                     value={data.piso}
                                     onChange={(event) => setData('piso', event.target.value)}
                                     className={fieldClass}
                                 >
-                                    <option value="">Todos os pisos</option>
+                                    <option value="">{t('setores.index.todosOsPisos')}</option>
 
                                     {pisos.map((piso) => (
                                         <option key={piso.id} value={piso.id}>
@@ -294,14 +312,14 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                             </div>
 
                             <div>
-                                <label htmlFor="filtro-setor" className={labelClass}>Espaço</label>
+                                <label htmlFor="filtro-setor" className={labelClass}>{t('reservas.index.espaco')}</label>
                                 <select
                                     id="filtro-setor"
                                     value={data.setor}
                                     onChange={(event) => setData('setor', event.target.value)}
                                     className={fieldClass}
                                 >
-                                    <option value="">Todos os espaços</option>
+                                    <option value="">{t('reservas.index.todosOsEspacos')}</option>
 
                                     {setores.map((setor) => (
                                         <option key={setor.id} value={setor.id}>
@@ -320,7 +338,7 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                     <Table
                         columns={columns}
                         data={reservas.data}
-                        emptyMessage="Nenhuma reserva encontrada."
+                        emptyMessage={t('reservas.index.semResultados')}
                     />
 
                     <Pagination
@@ -328,7 +346,7 @@ export default function Index({ reservas, estados, edificios, pisos, setores, fi
                         disabled={carregando}
                         onStart={() => setCarregando(true)}
                         onFinish={() => setCarregando(false)}
-                        itemLabel="reservas"
+                        itemLabel={t('reservas.index.itemLabel')}
                     />
                 </div>
             </section>

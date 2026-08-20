@@ -3,6 +3,7 @@ import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { Camera, CheckCircle2, Mail, UserCog, UserRound } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -11,6 +12,7 @@ const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
 export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
+    const { t } = useTranslation('profile');
     const user = usePage().props.auth.user;
     const [preview, setPreview] = useState(null);
 
@@ -46,11 +48,11 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
 
                 <div>
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                        Dados do Perfil
+                        {t('informacaoPerfil.titulo')}
                     </h2>
 
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Atualiza o teu nome e endereço de email.
+                        {t('informacaoPerfil.subtitulo')}
                     </p>
                 </div>
             </div>
@@ -74,7 +76,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
 
                             <label
                                 htmlFor="fotografia"
-                                aria-label="Trocar fotografia"
+                                aria-label={t('informacaoPerfil.trocarFotografia')}
                                 className="absolute bottom-0.5 right-0.5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white text-teal-600 shadow-md ring-1 ring-slate-200 transition hover:bg-teal-50 dark:bg-slate-800 dark:text-teal-400 dark:ring-slate-700"
                             >
                                 <Camera size={15} strokeWidth={2} />
@@ -93,7 +95,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
                             htmlFor="fotografia"
                             className="inline-flex cursor-pointer items-center rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                         >
-                            Alterar fotografia
+                            {t('informacaoPerfil.alterarFotografia')}
                         </label>
 
                         <InputError message={errors.fotografia} className="text-center" />
@@ -108,7 +110,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
                             <div className="grid max-w-xl grid-cols-1 gap-5 sm:grid-cols-2">
                                 <div>
                                     <label htmlFor="name" className={labelClass}>
-                                        Nome
+                                        {t('informacaoPerfil.nome')}
                                     </label>
 
                                     <input
@@ -127,7 +129,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
 
                                 <div>
                                     <label htmlFor="email" className={labelClass}>
-                                        Email
+                                        {t('informacaoPerfil.email')}
                                     </label>
 
                                     <input
@@ -150,20 +152,20 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
 
                                     <div className="text-sm">
                                         <p>
-                                            O teu endereço de email ainda não foi verificado.{' '}
+                                            {t('informacaoPerfil.emailNaoVerificado')}{' '}
                                             <Link
                                                 href={route('verification.send')}
                                                 method="post"
                                                 as="button"
                                                 className="font-bold underline decoration-2 underline-offset-2 hover:opacity-80"
                                             >
-                                                Clica aqui para reenviar o email de verificação.
+                                                {t('informacaoPerfil.clicaAquiParaReenviar')}
                                             </Link>
                                         </p>
 
                                         {status === 'verification-link-sent' && (
                                             <p className="mt-2 font-semibold text-teal-600 dark:text-teal-400">
-                                                Foi enviado um novo link de verificação para o teu email.
+                                                {t('informacaoPerfil.linkVerificacaoEnviado')}
                                             </p>
                                         )}
                                     </div>
@@ -182,7 +184,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
                             >
                                 <span className="flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400">
                                     <CheckCircle2 size={16} strokeWidth={2} />
-                                    Guardado.
+                                    {t('informacaoPerfil.guardado')}
                                 </span>
                             </Transition>
 
@@ -191,7 +193,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status }) {
                                 disabled={processing}
                                 className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {processing ? 'A guardar...' : 'Guardar alterações'}
+                                {processing ? t('informacaoPerfil.aGuardar') : t('informacaoPerfil.guardarAlteracoes')}
                             </button>
                         </div>
                     </div>

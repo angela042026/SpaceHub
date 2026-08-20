@@ -1,0 +1,9 @@
+{
+    "tituloPagina": "Minhas Avaliações",
+    "titulo": "As Minhas Avaliações",
+    "descricao_one": "{{count}} avaliação enviada.",
+    "descricao_other": "{{count}} avaliações enviadas.",
+    "semAvaliacoes": "Ainda não enviaste nenhuma avaliação.",
+    "aAguardarModeracao": "A aguardar moderação",
+    "pagina": "Página {{atual}} de {{total}}"
+}

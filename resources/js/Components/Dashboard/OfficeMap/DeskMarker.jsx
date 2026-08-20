@@ -1,6 +1,7 @@
 import { MapPin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-import { ESTADO_VISUAL, estadoNormalizado } from './mapUtils';
+import { ESTADO_VISUAL, estadoNormalizado, traduzirEstadoVisual } from './mapUtils';
 
 export default function DeskMarker({
     secretaria,
@@ -9,10 +10,13 @@ export default function DeskMarker({
     onSelect,
     pisoNome,
 }) {
-    const estado =
-        ESTADO_VISUAL[
-            estadoNormalizado(secretaria.status)
-        ] ?? ESTADO_VISUAL.indisponivel;
+    const { t } = useTranslation('dashboard');
+    const chaveEstado = estadoNormalizado(secretaria.status);
+    const estado = ESTADO_VISUAL[chaveEstado] ?? ESTADO_VISUAL.indisponivel;
+    const estadoLabel = traduzirEstadoVisual(
+        ESTADO_VISUAL[chaveEstado] ? chaveEstado : 'indisponivel',
+        t,
+    );
 
     return (
         <button
@@ -33,7 +37,7 @@ export default function DeskMarker({
                 left: `${secretaria.planta_x}%`,
                 top: `${secretaria.planta_y}%`,
             }}
-            aria-label={`Selecionar ${secretaria.codigo}`}
+            aria-label={t('officeMap.selecionarSecretaria', { codigo: secretaria.codigo })}
         >
             {selected ? (
                 <>
@@ -64,7 +68,7 @@ export default function DeskMarker({
                             className={`h-1.5 w-1.5 rounded-full ${estado.bar}`}
                         />
                         <span className="text-[10px] font-semibold text-slate-600">
-                            {estado.label}
+                            {estadoLabel}
                         </span>
                     </span>
                 </>
@@ -91,7 +95,7 @@ export default function DeskMarker({
                                 {secretaria.codigo}
                             </span>
                             <span className="text-[10px] font-semibold text-slate-500">
-                                · {estado.label}
+                                · {estadoLabel}
                             </span>
                         </span>
 

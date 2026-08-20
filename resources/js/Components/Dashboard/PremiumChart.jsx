@@ -7,6 +7,7 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Isolado do StatisticsPanel para poder ser importado com React.lazy —
@@ -14,6 +15,8 @@ import {
  * em vez de entrar sempre no bundle da página de Estatísticas.
  */
 function CustomTooltip({ active, payload, label }) {
+    const { t } = useTranslation('dashboard');
+
     if (!active || !payload?.length) {
         return null;
     }
@@ -25,7 +28,7 @@ function CustomTooltip({ active, payload, label }) {
             </p>
 
             <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
-                {payload[0]?.value ?? 0} reservas
+                {t('statistics.reservasCount', { count: payload[0]?.value ?? 0 })}
             </p>
         </div>
     );

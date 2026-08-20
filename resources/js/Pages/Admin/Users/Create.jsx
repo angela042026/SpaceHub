@@ -7,6 +7,9 @@ import {
     UserRoundPlus,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { etiquetaRole } from '@/utils/estados';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -15,6 +18,8 @@ const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
 export default function Create({ roles }) {
+    const { t } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
     const [preview, setPreview] = useState(null);
 
     const { data, setData, post, processing, errors } = useForm({
@@ -52,7 +57,7 @@ export default function Create({ roles }) {
 
     return (
         <DashboardLayout>
-            <Head title="Novo utilizador" />
+            <Head title={t('users.create.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -62,11 +67,11 @@ export default function Create({ roles }) {
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Novo utilizador
+                            {t('users.create.titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Cria uma conta e define o papel de acesso.
+                            {t('users.create.subtitulo')}
                         </p>
                     </div>
                 </div>
@@ -76,7 +81,7 @@ export default function Create({ roles }) {
                         {preview ? (
                             <img
                                 src={preview}
-                                alt="Pré-visualização"
+                                alt={t('campos.previsualizacao')}
                                 className="h-16 w-16 rounded-full object-cover"
                             />
                         ) : (
@@ -90,7 +95,7 @@ export default function Create({ roles }) {
                                 htmlFor="fotografia"
                                 className="inline-flex cursor-pointer items-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                             >
-                                Escolher fotografia
+                                {t('users.create.escolherFotografia')}
                             </label>
 
                             <input
@@ -108,7 +113,7 @@ export default function Create({ roles }) {
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
                             <label htmlFor="name" className={labelClass}>
-                                Nome completo
+                                {t('users.create.nomeCompleto')}
                             </label>
 
                             <input
@@ -126,7 +131,7 @@ export default function Create({ roles }) {
 
                         <div>
                             <label htmlFor="email" className={labelClass}>
-                                E-mail
+                                {t('campos.email')}
                             </label>
 
                             <input
@@ -143,7 +148,7 @@ export default function Create({ roles }) {
 
                         <div>
                             <label htmlFor="password" className={labelClass}>
-                                Senha
+                                {t('users.create.senha')}
                             </label>
 
                             <input
@@ -161,7 +166,7 @@ export default function Create({ roles }) {
 
                         <div>
                             <label htmlFor="password_confirmation" className={labelClass}>
-                                Confirmar senha
+                                {t('users.create.confirmarSenha')}
                             </label>
 
                             <input
@@ -176,14 +181,14 @@ export default function Create({ roles }) {
 
                             {passwordConfirmationMismatch && (
                                 <p className="mt-2 text-xs font-medium text-red-500">
-                                    As senhas não coincidem.
+                                    {t('users.create.senhasNaoCoincidem')}
                                 </p>
                             )}
                         </div>
 
                         <div>
                             <label htmlFor="role_id" className={labelClass}>
-                                Papel
+                                {t('users.create.papel')}
                             </label>
 
                             <select
@@ -194,12 +199,12 @@ export default function Create({ roles }) {
                                 className={fieldClass}
                             >
                                 <option value="" disabled>
-                                    Selecione um papel
+                                    {t('users.create.selecionePapel')}
                                 </option>
 
                                 {roles.map((role) => (
                                     <option key={role.id} value={role.id}>
-                                        {role.nome}
+                                        {etiquetaRole(role.nome, tc)}
                                     </option>
                                 ))}
                             </select>
@@ -215,7 +220,7 @@ export default function Create({ roles }) {
                                     onChange={(event) => setData('ativo', event.target.checked)}
                                     className="h-4 w-4 rounded border-slate-300 text-teal-500 focus:ring-teal-500"
                                 />
-                                Conta ativa
+                                {t('users.create.contaAtiva')}
                             </label>
                         </div>
                     </div>
@@ -227,7 +232,7 @@ export default function Create({ roles }) {
                             className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <UserRoundPlus size={18} strokeWidth={2} />
-                            {processing ? 'A criar...' : 'Criar utilizador'}
+                            {processing ? t('users.create.aCriar') : t('users.create.criar')}
                         </button>
 
                         <Link
@@ -235,7 +240,7 @@ export default function Create({ roles }) {
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
                             <ArrowLeft size={16} strokeWidth={1.9} />
-                            Cancelar
+                            {tc('acoes.cancelar')}
                         </Link>
                     </div>
                 </form>

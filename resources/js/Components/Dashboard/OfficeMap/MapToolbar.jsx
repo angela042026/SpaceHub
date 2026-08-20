@@ -10,8 +10,9 @@ import {
     ZoomIn,
     ZoomOut,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-import { FILTROS, MAX_ZOOM, MIN_ZOOM, ZOOM_STEP } from './mapUtils';
+import { FILTROS, MAX_ZOOM, MIN_ZOOM, ZOOM_STEP, traduzirFiltro } from './mapUtils';
 
 // Atalho real: Ctrl/Cmd+K foca a pesquisa — a dica "Ctrl K" só é
 // mostrada porque este listener existe de facto, não é decorativa.
@@ -40,6 +41,7 @@ export default function MapToolbar({
     onFullscreen,
     simples = false,
 }) {
+    const { t } = useTranslation('dashboard');
     const inputRef = useRef(null);
 
     useEffect(() => {
@@ -72,7 +74,7 @@ export default function MapToolbar({
                                 : 'text-slate-600 hover:bg-white/70 dark:text-[#b5c5d5] dark:hover:bg-[#183f5d]'
                         }`}
                     >
-                        {Number(piso.numero) === -1 ? `Piso ${piso.numero}` : piso.nome}
+                        {Number(piso.numero) === -1 ? t('officeMap.pisoFallback', { numero: piso.numero }) : piso.nome}
 
                         {ativo && (
                             <span className="absolute inset-x-3 -bottom-0.5 h-[2px] rounded-full bg-white/70" />
@@ -98,7 +100,7 @@ export default function MapToolbar({
                             value={selectedEdificio}
                             onChange={(event) => setSelectedEdificio?.(event.target.value)}
                             className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#f8fafc]"
-                            aria-label="Selecionar edifício"
+                            aria-label={t('officeMap.selecionarEdificio')}
                         >
                             {edificios.map((edificio) => (
                                 <option key={edificio.id} value={edificio.id}>
@@ -108,7 +110,7 @@ export default function MapToolbar({
                         </select>
                     )}
 
-                    <IconButtonBox icon={Expand} label="Ecrã inteiro" onClick={onFullscreen} />
+                    <IconButtonBox icon={Expand} label={t('officeMap.ecraInteiro')} onClick={onFullscreen} />
                 </div>
             </div>
         );
@@ -128,7 +130,7 @@ export default function MapToolbar({
                             )
                         }
                         className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#f8fafc]"
-                        aria-label="Selecionar edifício"
+                        aria-label={t('officeMap.selecionarEdificio')}
                     >
                         {edificios.map((edificio) => (
                             <option
@@ -154,7 +156,7 @@ export default function MapToolbar({
                         onChange={(event) =>
                             setPesquisa(event.target.value)
                         }
-                        placeholder="Pesquisar espaço ou secretária..."
+                        placeholder={t('officeMap.pesquisarPlaceholder')}
                         className="h-10 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-9 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#f8fafc] dark:placeholder-[#8fa7bd] dark:focus:border-[#18c3b3] dark:focus:ring-[#18c3b3]/15"
                     />
 
@@ -163,7 +165,7 @@ export default function MapToolbar({
                             type="button"
                             onClick={() => setPesquisa('')}
                             className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-100 dark:text-[#8fa7bd] dark:hover:bg-[#183f5d]"
-                            aria-label="Limpar pesquisa"
+                            aria-label={t('officeMap.limparPesquisa')}
                         >
                             <X size={14} />
                         </button>
@@ -173,7 +175,7 @@ export default function MapToolbar({
                 <div className="relative">
                     <ToolbarButton
                         icon={SlidersHorizontal}
-                        label="Filtrar"
+                        label={t('officeMap.filtrar')}
                         active={filtro !== 'todos'}
                         onClick={() =>
                             setFiltrosAbertos(
@@ -185,7 +187,7 @@ export default function MapToolbar({
                     {filtrosAbertos && (
                         <div className="absolute right-0 top-12 z-50 w-44 rounded-xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-[#2a5069] dark:bg-[#101f34]">
                             {FILTROS.map(
-                                ([valor, label]) => (
+                                ([valor, chaveTraducao]) => (
                                     <button
                                         key={valor}
                                         type="button"
@@ -201,7 +203,7 @@ export default function MapToolbar({
                                                 : 'text-slate-600 hover:bg-slate-50 dark:text-[#b5c5d5] dark:hover:bg-[#183f5d]'
                                         }`}
                                     >
-                                        {label}
+                                        {traduzirFiltro(chaveTraducao, t)}
                                         {filtro === valor && (
                                             <Check size={14} />
                                         )}
@@ -214,7 +216,7 @@ export default function MapToolbar({
 
                 <ToolbarButton
                     icon={RotateCw}
-                    label="Girar"
+                    label={t('officeMap.girar')}
                     onClick={() =>
                         setRotacao((rotacao + 90) % 360)
                     }
@@ -223,7 +225,7 @@ export default function MapToolbar({
                 <div className="flex h-10 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-[#2a5069] dark:bg-[#101f34]">
                     <IconButton
                         icon={ZoomOut}
-                        label="Diminuir zoom"
+                        label={t('officeMap.diminuirZoom')}
                         disabled={zoom <= MIN_ZOOM}
                         onClick={() => onZoom(-ZOOM_STEP)}
                     />
@@ -232,7 +234,7 @@ export default function MapToolbar({
                     </span>
                     <IconButton
                         icon={ZoomIn}
-                        label="Aumentar zoom"
+                        label={t('officeMap.aumentarZoom')}
                         disabled={zoom >= MAX_ZOOM}
                         onClick={() => onZoom(ZOOM_STEP)}
                     />
@@ -240,13 +242,13 @@ export default function MapToolbar({
 
                 <ToolbarButton
                     icon={RotateCcw}
-                    label="Resetar"
+                    label={t('officeMap.resetar')}
                     onClick={onReset}
                 />
 
                 <IconButtonBox
                     icon={Expand}
-                    label="Ecrã inteiro"
+                    label={t('officeMap.ecraInteiro')}
                     onClick={onFullscreen}
                 />
             </div>

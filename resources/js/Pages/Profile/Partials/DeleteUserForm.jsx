@@ -2,12 +2,14 @@ import InputError from '@/Components/InputError';
 import Modal from '@/Components/Modal';
 import { useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
 export default function DeleteUserForm() {
+    const { t } = useTranslation('profile');
     const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
     const passwordInput = useRef();
 
@@ -55,11 +57,11 @@ export default function DeleteUserForm() {
 
                     <div>
                         <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                            Eliminar conta
+                            {t('eliminarConta.titulo')}
                         </h2>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Depois de eliminada, todos os dados da conta serão apagados permanentemente.
+                            {t('eliminarConta.subtitulo')}
                         </p>
                     </div>
                 </div>
@@ -70,7 +72,7 @@ export default function DeleteUserForm() {
                     className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-red-200 bg-transparent px-5 py-2.5 text-sm font-bold text-red-600 transition hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-950/30 sm:self-center"
                 >
                     <Trash2 size={16} strokeWidth={1.9} />
-                    Eliminar conta
+                    {t('eliminarConta.botao')}
                 </button>
             </div>
 
@@ -83,12 +85,11 @@ export default function DeleteUserForm() {
 
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                Tens a certeza que queres eliminar a tua conta?
+                                {t('eliminarConta.confirmarTitulo')}
                             </h2>
 
                             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                Esta ação é permanente e irreversível. Introduz a tua
-                                palavra-passe para confirmar que queres eliminar a conta.
+                                {t('eliminarConta.confirmarTexto')}
                             </p>
                         </div>
                     </div>
@@ -101,7 +102,7 @@ export default function DeleteUserForm() {
                             ref={passwordInput}
                             value={data.password}
                             onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Palavra-passe"
+                            placeholder={t('eliminarConta.passwordPlaceholder')}
                             autoFocus
                             className={fieldClass}
                         />
@@ -115,7 +116,7 @@ export default function DeleteUserForm() {
                             onClick={closeModal}
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
-                            Cancelar
+                            {t('eliminarConta.cancelar')}
                         </button>
 
                         <button
@@ -123,7 +124,7 @@ export default function DeleteUserForm() {
                             disabled={processing}
                             className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {processing ? 'A eliminar...' : 'Eliminar conta'}
+                            {processing ? t('eliminarConta.aEliminar') : t('eliminarConta.confirmarBotao')}
                         </button>
                     </div>
                 </form>

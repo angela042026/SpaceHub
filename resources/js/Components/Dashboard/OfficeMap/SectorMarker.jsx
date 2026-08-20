@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 export default function SectorMarker({
     setor,
     selected,
@@ -5,6 +7,7 @@ export default function SectorMarker({
     destaqueDiscreto = false,
     compacto = false,
 }) {
+    const { t } = useTranslation('dashboard');
     const temSecretarias = setor.secretarias?.length > 0;
 
     const conteudo = (
@@ -57,7 +60,7 @@ export default function SectorMarker({
                 top: `${setor.centroY}%`,
             }}
             aria-pressed={selected}
-            aria-label={`Ver secretárias do setor ${setor.nome}`}
+            aria-label={t('officeMap.verSecretariasDoSetor', { setor: setor.nome })}
         >
             {conteudo}
             <span
@@ -67,7 +70,7 @@ export default function SectorMarker({
                         : 'text-slate-400'
                 }`}
             >
-                {setor.secretarias.length} secretárias
+                {t('officeMap.secretariaCount', { count: setor.secretarias.length })}
             </span>
         </button>
     );

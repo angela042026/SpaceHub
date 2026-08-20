@@ -7,6 +7,9 @@ import {
     UserRound,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { etiquetaRole } from '@/utils/estados';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -15,6 +18,8 @@ const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
 export default function Edit({ user, roles }) {
+    const { t } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
     const [preview, setPreview] = useState(null);
 
     const { data, setData, put, processing, errors } = useForm({
@@ -68,7 +73,7 @@ export default function Edit({ user, roles }) {
 
     return (
         <DashboardLayout>
-            <Head title={`Editar ${user.name}`} />
+            <Head title={t('users.edit.headTitle', { nome: user.name })} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -78,7 +83,7 @@ export default function Edit({ user, roles }) {
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Editar utilizador
+                            {t('users.edit.titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -106,7 +111,7 @@ export default function Edit({ user, roles }) {
                                 htmlFor="fotografia"
                                 className="inline-flex cursor-pointer items-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                             >
-                                Trocar fotografia
+                                {t('users.edit.trocarFotografia')}
                             </label>
 
                             <input
@@ -124,7 +129,7 @@ export default function Edit({ user, roles }) {
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
                             <label htmlFor="name" className={labelClass}>
-                                Nome completo
+                                {t('users.create.nomeCompleto')}
                             </label>
 
                             <input
@@ -142,7 +147,7 @@ export default function Edit({ user, roles }) {
 
                         <div>
                             <label htmlFor="email" className={labelClass}>
-                                E-mail
+                                {t('campos.email')}
                             </label>
 
                             <input
@@ -159,7 +164,7 @@ export default function Edit({ user, roles }) {
 
                         <div>
                             <label htmlFor="password" className={labelClass}>
-                                Nova senha
+                                {t('users.edit.novaSenha')}
                             </label>
 
                             <input
@@ -168,7 +173,7 @@ export default function Edit({ user, roles }) {
                                 value={data.password}
                                 onChange={(event) => setData('password', event.target.value)}
                                 autoComplete="new-password"
-                                placeholder="Deixe em branco para manter a atual"
+                                placeholder={t('users.edit.deixarBranco')}
                                 className={fieldClass}
                             />
 
@@ -177,7 +182,7 @@ export default function Edit({ user, roles }) {
 
                         <div>
                             <label htmlFor="password_confirmation" className={labelClass}>
-                                Confirmar nova senha
+                                {t('users.edit.confirmarNovaSenha')}
                             </label>
 
                             <input
@@ -191,14 +196,14 @@ export default function Edit({ user, roles }) {
 
                             {passwordConfirmationMismatch && (
                                 <p className="mt-2 text-xs font-medium text-red-500">
-                                    As senhas não coincidem.
+                                    {t('users.create.senhasNaoCoincidem')}
                                 </p>
                             )}
                         </div>
 
                         <div>
                             <label htmlFor="role_id" className={labelClass}>
-                                Papel
+                                {t('users.create.papel')}
                             </label>
 
                             <select
@@ -210,7 +215,7 @@ export default function Edit({ user, roles }) {
                             >
                                 {roles.map((role) => (
                                     <option key={role.id} value={role.id}>
-                                        {role.nome}
+                                        {etiquetaRole(role.nome, tc)}
                                     </option>
                                 ))}
                             </select>
@@ -226,7 +231,7 @@ export default function Edit({ user, roles }) {
                                         : 'bg-red-500/10 text-red-600 dark:text-red-400'
                                 }`}
                             >
-                                {user.ativo ? 'Conta ativa' : 'Conta desativada'}
+                                {user.ativo ? t('users.edit.contaAtiva') : t('users.edit.contaDesativada')}
                             </span>
                         </div>
                     </div>
@@ -238,7 +243,7 @@ export default function Edit({ user, roles }) {
                             className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Pencil size={18} strokeWidth={2} />
-                            {processing ? 'A guardar...' : 'Guardar alterações'}
+                            {processing ? t('form.aGuardar') : t('form.guardarAlteracoes')}
                         </button>
 
                         <button
@@ -247,7 +252,7 @@ export default function Edit({ user, roles }) {
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
                             <ArrowLeft size={16} strokeWidth={1.9} />
-                            Cancelar
+                            {t('form.cancelar')}
                         </button>
                     </div>
                 </form>

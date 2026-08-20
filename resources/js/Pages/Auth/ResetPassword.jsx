@@ -4,6 +4,7 @@ import AuthField from '@/Components/Auth/AuthField';
 import AuthLayout from '@/Components/Auth/AuthLayout';
 import PasswordField from '@/Components/Auth/PasswordField';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     KeyRound,
@@ -11,6 +12,7 @@ import {
 } from 'lucide-react';
 
 export default function ResetPassword({ token, email }) {
+    const { t } = useTranslation('auth');
     const {
         data,
         setData,
@@ -40,16 +42,16 @@ export default function ResetPassword({ token, email }) {
 
     return (
         <>
-            <Head title="Redefinir senha" />
+            <Head title={t('redefinirSenha.redefinir')} />
 
             <AuthLayout
-                title="Crie uma nova"
-                highlightedTitle="senha"
-                subtitle="Escolha uma senha forte para voltar a aceder à sua conta."
-                heroTitle="Nova senha."
-                heroPrefix="Proteja a sua"
-                heroHighlightedTitle="conta."
-                heroDescription="A sua nova senha será utilizada nos próximos acessos ao SpaceHub."
+                title={t('redefinirSenha.titulo')}
+                highlightedTitle={t('redefinirSenha.tituloDestaque')}
+                subtitle={t('redefinirSenha.subtitulo')}
+                heroTitle={t('redefinirSenha.heroTitulo')}
+                heroPrefix={t('redefinirSenha.heroPrefixo')}
+                heroHighlightedTitle={t('redefinirSenha.heroTituloDestaque')}
+                heroDescription={t('redefinirSenha.heroDescricao')}
             >
                 <form
                     onSubmit={submit}
@@ -80,19 +82,18 @@ export default function ResetPassword({ token, email }) {
                             />
 
                             <p>
-                                Introduza uma nova senha e confirme-a
-                                para concluir a recuperação da conta.
+                                {t('redefinirSenha.aviso')}
                             </p>
                         </div>
 
                         <AuthField
                             id="email"
-                            label="E-mail"
+                            label={t('campos.email')}
                             name="email"
                             type="email"
                             icon={Mail}
                             value={data.email}
-                            placeholder="exemplo@spacehub.pt"
+                            placeholder={t('campos.emailPlaceholder')}
                             autoComplete="username"
                             error={errors.email}
                             onChange={(event) =>
@@ -105,10 +106,10 @@ export default function ResetPassword({ token, email }) {
 
                         <PasswordField
                             id="password"
-                            label="Nova senha"
+                            label={t('campos.novaSenha')}
                             name="password"
                             value={data.password}
-                            placeholder="Introduza a nova senha"
+                            placeholder={t('campos.novaSenhaPlaceholder')}
                             autoComplete="new-password"
                             error={errors.password}
                             className="mt-5"
@@ -122,10 +123,10 @@ export default function ResetPassword({ token, email }) {
 
                         <PasswordField
                             id="password_confirmation"
-                            label="Confirmar nova senha"
+                            label={t('campos.confirmarNovaSenha')}
                             name="password_confirmation"
                             value={data.password_confirmation}
-                            placeholder="Confirme a nova senha"
+                            placeholder={t('campos.confirmarNovaSenhaPlaceholder')}
                             autoComplete="new-password"
                             error={
                                 errors.password_confirmation
@@ -141,8 +142,8 @@ export default function ResetPassword({ token, email }) {
 
                         <AuthActions
                             processing={processing}
-                            submitText="Redefinir senha"
-                            processingText="A guardar..."
+                            submitText={t('redefinirSenha.redefinir')}
+                            processingText={t('redefinirSenha.aGuardar')}
                             submitIcon={KeyRound}
                             showSecondary={false}
                         />
@@ -156,7 +157,7 @@ export default function ResetPassword({ token, email }) {
                         dark:text-slate-300
                     "
                 >
-                    Lembrou-se da senha?{' '}
+                    {t('recuperarSenha.lembrouSeDaSenha')}{' '}
 
                     <Link
                         href={route('login')}
@@ -177,7 +178,7 @@ export default function ResetPassword({ token, email }) {
                             size={15}
                             aria-hidden="true"
                         />
-                        Voltar ao login
+                        {t('recuperarSenha.voltarAoLogin')}
                     </Link>
                 </p>
             </AuthLayout>

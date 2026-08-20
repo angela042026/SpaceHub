@@ -6,8 +6,10 @@ import PrintFooter from '@/Components/Admin/PrintFooter';
 import PrintButton from '@/Components/Admin/PrintButton';
 import { Head, useForm } from '@inertiajs/react';
 import { TrendingUp } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Ocupacao({ linhas, pisos, filters, geradoEm }) {
+    const { t, i18n } = useTranslation('relatorios');
     const { data, setData, get } = useForm({
         data_inicio: filters.data_inicio ?? '',
         data_fim: filters.data_fim ?? '',
@@ -26,34 +28,40 @@ export default function Ocupacao({ linhas, pisos, filters, geradoEm }) {
     const columns = [
         {
             key: 'data',
-            label: 'Data',
-            render: (linha) => new Date(`${linha.data}T00:00:00`).toLocaleDateString('pt-PT'),
+            label: t('filtros.data'),
+            render: (linha) =>
+                new Date(`${linha.data}T00:00:00`).toLocaleDateString(
+                    i18n.language === 'en' ? 'en-GB' : 'pt-PT',
+                ),
         },
         {
             key: 'secretariasOcupadas',
-            label: 'Secretárias Ocupadas',
+            label: t('ocupacao.colunas.secretariasOcupadas'),
             align: 'right',
         },
         {
             key: 'totalSecretarias',
-            label: 'Secretárias Totais',
+            label: t('ocupacao.colunas.totalSecretarias'),
             align: 'right',
         },
         {
             key: 'taxaOcupacao',
-            label: 'Taxa de Ocupação',
+            label: t('ocupacao.colunas.taxaOcupacao'),
             align: 'right',
-            render: (linha) => `${`${linha.taxaOcupacao}`.replace('.', ',')}%`,
+            render: (linha) =>
+                `${`${linha.taxaOcupacao}`.replace('.', i18n.language === 'en' ? '.' : ',')}%`,
         },
     ];
 
     return (
         <DashboardLayout>
-            <Head title="Relatório de Ocupação" />
+            <Head title={t('ocupacao.titulo')} />
 
             <PrintHeader
-                title="Relatório de Ocupação"
-                subtitle={`${linhas.total} dia${linhas.total === 1 ? '' : 's'} listado${linhas.total === 1 ? '' : 's'}`}
+                title={t('ocupacao.titulo')}
+                subtitle={t('ocupacao.subtituloImpressao', {
+                    count: linhas.total,
+                })}
                 geradoEm={geradoEm}
             />
 
@@ -66,11 +74,13 @@ export default function Ocupacao({ linhas, pisos, filters, geradoEm }) {
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Relatório de Ocupação
+                                {t('ocupacao.titulo')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {linhas.total} dia{linhas.total === 1 ? '' : 's'} encontrado{linhas.total === 1 ? '' : 's'}.
+                                {t('ocupacao.encontrados', {
+                                    count: linhas.total,
+                                })}
                             </p>
                         </div>
                     </div>
@@ -85,7 +95,7 @@ export default function Ocupacao({ linhas, pisos, filters, geradoEm }) {
                     className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 print:hidden dark:border-slate-800 sm:grid-cols-[1fr_1fr_200px_auto]"
                 >
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-slate-500">De</label>
+                        <label className="mb-1 block text-xs font-semibold text-slate-500">{t('filtros.de')}</label>
                         <input
                             type="date"
                             value={data.data_inicio}
@@ -95,7 +105,7 @@ export default function Ocupacao({ linhas, pisos, filters, geradoEm }) {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-slate-500">Até</label>
+                        <label className="mb-1 block text-xs font-semibold text-slate-500">{t('filtros.ate')}</label>
                         <input
                             type="date"
                             value={data.data_fim}
@@ -105,13 +115,13 @@ export default function Ocupacao({ linhas, pisos, filters, geradoEm }) {
                     </div>
 
                     <div>
-                        <label className="mb-1 block text-xs font-semibold text-slate-500">Piso</label>
+                        <label className="mb-1 block text-xs font-semibold text-slate-500">{t('filtros.piso')}</label>
                         <select
                             value={data.piso_id}
                             onChange={(event) => setData('piso_id', event.target.value)}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         >
-                            <option value="">Todos</option>
+                            <option value="">{t('filtros.todos')}</option>
                             {pisos.map((piso) => (
                                 <option key={piso.id} value={piso.id}>{piso.nome}</option>
                             ))}
@@ -123,7 +133,7 @@ export default function Ocupacao({ linhas, pisos, filters, geradoEm }) {
                             type="submit"
                             className="h-11 w-full rounded-xl bg-navy-900 px-4 text-sm font-bold text-white transition hover:bg-navy-950 sm:w-auto"
                         >
-                            Filtrar
+                            {t('filtros.filtrar')}
                         </button>
                     </div>
                 </form>
@@ -133,10 +143,10 @@ export default function Ocupacao({ linhas, pisos, filters, geradoEm }) {
                         columns={columns}
                         data={linhas.data}
                         keyField="data"
-                        emptyMessage="Nenhum dia encontrado para os filtros selecionados."
+                        emptyMessage={t('ocupacao.semResultados')}
                     />
 
-                    <Pagination pagination={linhas} itemLabel="dias" />
+                    <Pagination pagination={linhas} itemLabel={t('ocupacao.itemLabel')} />
                 </div>
             </section>
 

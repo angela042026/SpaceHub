@@ -41,13 +41,13 @@ class AvaliacaoController extends Controller
 
         if ($reserva->check_in_at === null) {
             return back()->withErrors([
-                'avaliacao' => 'Só podes avaliar reservas em que já fizeste check-in.',
+                'avaliacao' => __('Só podes avaliar reservas em que já fizeste check-in.'),
             ]);
         }
 
         if ($reserva->avaliacao !== null) {
             return back()->withErrors([
-                'avaliacao' => 'Já avaliaste esta reserva.',
+                'avaliacao' => __('Já avaliaste esta reserva.'),
             ]);
         }
 
@@ -60,6 +60,6 @@ class AvaliacaoController extends Controller
 
         return redirect()
             ->route('reservas.index')
-            ->with('success', 'Avaliação enviada com sucesso. Obrigado pelo feedback!');
+            ->with('success', __('Avaliação enviada com sucesso. Obrigado pelo feedback!'));
     }
 }

@@ -12,10 +12,14 @@ import {
     Search,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { tipoSetorLabel } from '@/utils/tiposSetor';
 import { formatarNomePiso } from '@/utils/formatarNomePiso';
+import { ESTADO_UTILIZADOR, etiqueta } from '@/utils/estados';
 
 export default function Index({ setores, pisos, filters }) {
+    const { t } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
     const [processingId, setProcessingId] = useState(null);
     const [carregando, setCarregando] = useState(false);
 
@@ -67,8 +71,8 @@ export default function Index({ setores, pisos, filters }) {
 
     const alternarAtivo = (setor) => {
         const mensagem = setor.ativo
-            ? `Desativar o setor ${setor.nome}?`
-            : `Ativar o setor ${setor.nome}?`;
+            ? t('setores.index.confirmarDesativar', { nome: setor.nome_localizado })
+            : t('setores.index.confirmarAtivar', { nome: setor.nome_localizado });
 
         if (!confirm(mensagem)) {
             return;
@@ -89,11 +93,11 @@ export default function Index({ setores, pisos, filters }) {
     const columns = [
         {
             key: 'nome',
-            label: 'Setor',
+            label: t('setores.index.colunaSetor'),
             render: (setor) => (
                 <div>
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
-                        {setor.nome}
+                        {setor.nome_localizado}
                     </p>
                     <p className="text-xs text-slate-400">{setor.codigo}</p>
                 </div>
@@ -101,17 +105,17 @@ export default function Index({ setores, pisos, filters }) {
         },
         {
             key: 'piso',
-            label: 'Piso',
+            label: t('campos.piso'),
             render: (setor) => formatarNomePiso(setor.piso),
         },
         {
             key: 'tipo',
-            label: 'Tipo',
-            render: (setor) => tipoSetorLabel(setor.tipo),
+            label: t('campos.tipo'),
+            render: (setor) => tipoSetorLabel(setor.tipo, t),
         },
         {
             key: 'reservavel',
-            label: 'Reservável',
+            label: t('setores.index.reservavel'),
             render: (setor) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
@@ -120,13 +124,13 @@ export default function Index({ setores, pisos, filters }) {
                             : 'bg-slate-50 text-slate-400 dark:bg-slate-800/50 dark:text-slate-500'
                     }`}
                 >
-                    {setor.reservavel ? 'Reservável' : 'Não reservável'}
+                    {setor.reservavel ? t('setores.index.reservavel') : t('setores.index.naoReservavel')}
                 </span>
             ),
         },
         {
             key: 'ativo',
-            label: 'Estado',
+            label: t('listagem.estado'),
             render: (setor) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
@@ -135,20 +139,20 @@ export default function Index({ setores, pisos, filters }) {
                             : 'bg-red-500/10 text-red-600 dark:text-red-400'
                     }`}
                 >
-                    {setor.ativo ? 'Ativo' : 'Inativo'}
+                    {etiqueta(ESTADO_UTILIZADOR, String(setor.ativo), setor.ativo ? 'Ativo' : 'Inativo', tc)}
                 </span>
             ),
         },
         {
             key: 'acoes',
-            label: 'Ações',
+            label: t('listagem.acoes'),
             align: 'right',
             render: (setor) => (
                 <div className="flex justify-end gap-2">
                     <Link
                         href={route('admin.setores.edit', setor.id)}
-                        title="Editar setor"
-                        aria-label="Editar setor"
+                        title={t('setores.index.editarSetor')}
+                        aria-label={t('setores.index.editarSetor')}
                         className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
                     >
                         <Pencil size={16} strokeWidth={1.9} />
@@ -158,8 +162,8 @@ export default function Index({ setores, pisos, filters }) {
                         type="button"
                         onClick={() => alternarAtivo(setor)}
                         disabled={processingId === setor.id}
-                        title={setor.ativo ? 'Desativar setor' : 'Ativar setor'}
-                        aria-label={setor.ativo ? 'Desativar setor' : 'Ativar setor'}
+                        title={setor.ativo ? t('setores.index.desativarSetor') : t('setores.index.ativarSetor')}
+                        aria-label={setor.ativo ? t('setores.index.desativarSetor') : t('setores.index.ativarSetor')}
                         className={`flex h-9 w-9 items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
                             setor.ativo
                                 ? 'border-slate-200 text-slate-500 hover:border-red-400 hover:text-red-500 dark:border-slate-700'
@@ -179,7 +183,7 @@ export default function Index({ setores, pisos, filters }) {
 
     return (
         <DashboardLayout>
-            <Head title="Setores" />
+            <Head title={t('setores.index.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
@@ -190,11 +194,11 @@ export default function Index({ setores, pisos, filters }) {
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Setores
+                                {t('setores.index.titulo')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                {setores.meta.total} setor{setores.meta.total === 1 ? '' : 'es'} registado{setores.meta.total === 1 ? '' : 's'}.
+                                {t('setores.index.registados', { count: setores.meta.total })}
                             </p>
                         </div>
                     </div>
@@ -204,7 +208,7 @@ export default function Index({ setores, pisos, filters }) {
                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg"
                     >
                         <Plus size={18} strokeWidth={2} />
-                        Novo setor
+                        {t('setores.index.novoSetor')}
                     </Link>
                 </div>
 
@@ -220,7 +224,7 @@ export default function Index({ setores, pisos, filters }) {
                             type="text"
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Pesquisar por nome ou código"
+                            placeholder={t('setores.index.pesquisarPlaceholder')}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                     </div>
@@ -230,7 +234,7 @@ export default function Index({ setores, pisos, filters }) {
                         onChange={(event) => handlePisoChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
-                        <option value="">Todos os pisos</option>
+                        <option value="">{t('setores.index.todosOsPisos')}</option>
 
                         {pisos.map((piso) => (
                             <option key={piso.id} value={piso.id}>
@@ -244,9 +248,9 @@ export default function Index({ setores, pisos, filters }) {
                         onChange={(event) => handleAtivoChange(event.target.value)}
                         className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                     >
-                        <option value="">Todos os estados</option>
-                        <option value="1">Ativos</option>
-                        <option value="0">Inativos</option>
+                        <option value="">{t('listagem.todosOsEstados')}</option>
+                        <option value="1">{t('listagem.ativos')}</option>
+                        <option value="0">{t('listagem.inativos')}</option>
                     </select>
 
                     <div className="flex gap-2">
@@ -255,7 +259,7 @@ export default function Index({ setores, pisos, filters }) {
                             onClick={limpar}
                             className="h-11 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700"
                         >
-                            Limpar
+                            {t('listagem.limpar')}
                         </button>
                     </div>
                 </div>
@@ -266,7 +270,7 @@ export default function Index({ setores, pisos, filters }) {
                     <Table
                         columns={columns}
                         data={setores.data}
-                        emptyMessage="Nenhum setor encontrado."
+                        emptyMessage={t('setores.index.semResultados')}
                     />
 
                     <Pagination

@@ -102,8 +102,10 @@ class ReservaController extends Controller
             'reservas' => $reservas,
             'estados' => EstadoReserva::orderBy('nome')->get(['id', 'nome', 'codigo']),
             'edificios' => Edificio::where('ativo', true)->orderBy('nome')->get(),
-            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(),
-            'setores' => Setor::where('reservavel', true)->orderBy('nome')->get(),
+            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get()
+                ->each(fn (Piso $piso) => $piso->nome = $piso->nome_localizado),
+            'setores' => Setor::where('reservavel', true)->orderBy('nome')->get()
+                ->each(fn (Setor $setor) => $setor->nome = $setor->nome_localizado),
             'filters' => $request->only([
                 'search',
                 'estado',
@@ -127,8 +129,10 @@ class ReservaController extends Controller
         return Inertia::render('Admin/Reservas/Edit', [
             'reserva' => $reserva,
             'periodos' => Periodo::where('ativo', true)->orderBy('hora_inicio')->get(),
-            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(),
-            'setores' => Setor::where('reservavel', true)->with('piso')->orderBy('piso_id')->orderBy('nome')->get(),
+            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get()
+                ->each(fn (Piso $piso) => $piso->nome = $piso->nome_localizado),
+            'setores' => Setor::where('reservavel', true)->with('piso')->orderBy('piso_id')->orderBy('nome')->get()
+                ->each(fn (Setor $setor) => $setor->nome = $setor->nome_localizado),
             'secretarias' => Secretaria::where('reservavel', true)
                 ->where('ativo', true)
                 ->with('setor.piso')
@@ -180,7 +184,7 @@ class ReservaController extends Controller
         )) {
             return back()
                 ->withErrors([
-                    'secretaria_id' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
+                    'secretaria_id' => __('Esta secretária já se encontra reservada para a data e período selecionados.'),
                 ])
                 ->withInput();
         }
@@ -195,7 +199,7 @@ class ReservaController extends Controller
         )) {
             return back()
                 ->withErrors([
-                    'data' => 'Este utilizador já possui outra reserva para esta data e período.',
+                    'data' => __('Este utilizador já possui outra reserva para esta data e período.'),
                 ])
                 ->withInput();
         }
@@ -272,7 +276,7 @@ class ReservaController extends Controller
 
         return redirect()
             ->route('admin.reservas.index')
-            ->with('success', 'Reserva atualizada com sucesso.');
+            ->with('success', __('Reserva atualizada com sucesso.'));
     }
 
     /**
@@ -290,7 +294,7 @@ class ReservaController extends Controller
         if ($reserva->cancelada_at !== null) {
             return redirect()
                 ->route('admin.reservas.index')
-                ->with('error', 'Esta reserva já se encontra cancelada.');
+                ->with('error', __('Esta reserva já se encontra cancelada.'));
         }
 
         $estadoCanceladaId = EstadoReserva::idPorCodigo('cancelada');
@@ -368,7 +372,7 @@ class ReservaController extends Controller
 
         return back()
             ->withErrors([
-                'secretaria_id' => 'Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.',
+                'secretaria_id' => __('Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.'),
             ])
             ->withInput();
     }

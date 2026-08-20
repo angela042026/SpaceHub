@@ -100,11 +100,13 @@ class ReservaController extends Controller
 
             'setores' => Setor::where('reservavel', true)
                 ->orderBy('nome')
-                ->get(),
+                ->get()
+                ->each(fn (Setor $setor) => $setor->nome = $setor->nome_localizado),
 
             'pisos' => Piso::where('ativo', true)
                 ->orderBy('numero')
-                ->get(),
+                ->get()
+                ->each(fn (Piso $piso) => $piso->nome = $piso->nome_localizado),
 
             'edificios' => Edificio::where('ativo', true)
                 ->orderBy('nome')
@@ -226,7 +228,7 @@ class ReservaController extends Controller
         if ($reserva->cancelada_at !== null) {
             return redirect()
                 ->route('reservas.index')
-                ->with('error', 'Esta reserva já se encontra cancelada.');
+                ->with('error', __('Esta reserva já se encontra cancelada.'));
         }
 
         $estadoCanceladaId = EstadoReserva::idPorCodigo('cancelada');
@@ -273,7 +275,7 @@ class ReservaController extends Controller
             ->route('reservas.index')
             ->with(
                 'success',
-                'Reserva e pagamento cancelados com sucesso.'
+                __('Reserva e pagamento cancelados com sucesso.')
             );
     }
 
@@ -287,10 +289,12 @@ class ReservaController extends Controller
         if ($reserva->cancelada_at !== null) {
             return redirect()
                 ->route('reservas.index')
-                ->with('error', 'Não é possível alterar uma reserva cancelada.');
+                ->with('error', __('Não é possível alterar uma reserva cancelada.'));
         }
 
         $reserva->load('secretaria.setor.piso');
+        $reserva->secretaria->setor->nome = $reserva->secretaria->setor->nome_localizado;
+        $reserva->secretaria->setor->piso->nome = $reserva->secretaria->setor->piso->nome_localizado;
         $reservaData = $reserva->toArray();
         $reservaData['data'] = $reserva->data->format('Y-m-d');
 
@@ -328,7 +332,7 @@ class ReservaController extends Controller
                 ->route('reservas.index')
                 ->with(
                     'error',
-                    'Não é possível alterar uma reserva cancelada.'
+                    __('Não é possível alterar uma reserva cancelada.')
                 );
         }
 
@@ -366,7 +370,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'secretaria_id' =>
-                    'Esta secretária já se encontra reservada para a data e período selecionados.',
+                    __('Esta secretária já se encontra reservada para a data e período selecionados.'),
                 ])
                 ->withInput();
         }
@@ -382,7 +386,7 @@ class ReservaController extends Controller
             return back()
                 ->withErrors([
                     'data' =>
-                    'Já possui outra reserva incompatível com este período na data selecionada.',
+                    __('Já possui outra reserva incompatível com este período na data selecionada.'),
                 ])
                 ->withInput();
         }
@@ -463,7 +467,7 @@ class ReservaController extends Controller
 
         return redirect()
             ->route('reservas.index')
-            ->with('success', 'Reserva atualizada com sucesso.');
+            ->with('success', __('Reserva atualizada com sucesso.'));
     }
 
     /**
@@ -496,7 +500,7 @@ class ReservaController extends Controller
 
         return back()
             ->withErrors([
-                'secretaria_id' => 'Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.',
+                'secretaria_id' => __('Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.'),
             ])
             ->withInput();
     }

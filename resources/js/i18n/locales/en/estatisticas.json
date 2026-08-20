@@ -1,0 +1,27 @@
+{
+    "titulo": "Statistics",
+    "descricao": "Track SpaceHub's performance and usage.",
+    "subtitulo": "Statistics Report",
+    "periodoImpressao": "Period: {{periodo}}",
+    "periodos": {
+        "7dias": "Last 7 days",
+        "30dias": "Last 30 days",
+        "90dias": "Last 90 days",
+        "ano": "Last year"
+    },
+    "kpis": {
+        "totalReservas": "Total Reservations",
+        "utilizadoresAtivos": "Active Users",
+        "taxaOcupacaoMedia": "Average Occupancy Rate",
+        "sufixoPontosPercentuais": " p.p.",
+        "tempoMedioPorReserva": "Average Time per Reservation"
+    },
+    "cards": {
+        "reservasPorEstado": "Reservations by Status",
+        "reservasPorPiso": "Reservations by Floor",
+        "reservasPorPeriodoDoDia": "Reservations by Time of Day",
+        "reservasPorSetor": "Reservations by Sector"
+    },
+    "filtrarPorEdificio": "Filter by building",
+    "todosOsEdificios": "All buildings"
+}

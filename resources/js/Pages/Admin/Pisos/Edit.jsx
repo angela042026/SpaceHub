@@ -3,6 +3,7 @@ import InputError from '@/Components/InputError';
 import { Head, useForm } from '@inertiajs/react';
 import { ArrowLeft, ImagePlus, Pencil } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -11,11 +12,13 @@ const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
 export default function Edit({ piso, edificios }) {
+    const { t } = useTranslation('admin');
     const [preview, setPreview] = useState(null);
 
     const { data, setData, put, processing, errors } = useForm({
         edificio_id: piso.edificio_id ?? '',
         nome: piso.nome ?? '',
+        nome_en: piso.nome_en ?? '',
         codigo: piso.codigo ?? '',
         numero: piso.numero ?? '',
         planta: null,
@@ -36,7 +39,7 @@ export default function Edit({ piso, edificios }) {
 
     return (
         <DashboardLayout>
-            <Head title={`Editar ${piso.nome}`} />
+            <Head title={t('pisos.edit.headTitle', { nome: piso.nome_localizado })} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -46,11 +49,11 @@ export default function Edit({ piso, edificios }) {
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Editar piso
+                            {t('pisos.edit.titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {piso.nome}
+                            {piso.nome_localizado}
                         </p>
                     </div>
                 </div>
@@ -58,7 +61,7 @@ export default function Edit({ piso, edificios }) {
                 <form onSubmit={submit} className="p-6" noValidate>
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div className="sm:col-span-2">
-                            <label htmlFor="edificio_id" className={labelClass}>Edifício</label>
+                            <label htmlFor="edificio_id" className={labelClass}>{t('campos.edificio')}</label>
                             <select
                                 id="edificio_id"
                                 value={data.edificio_id}
@@ -74,31 +77,37 @@ export default function Edit({ piso, edificios }) {
                         </div>
 
                         <div>
-                            <label htmlFor="nome" className={labelClass}>Nome</label>
+                            <label htmlFor="nome" className={labelClass}>{t('campos.nome')}</label>
                             <input id="nome" type="text" value={data.nome} onChange={(e) => setData('nome', e.target.value)} autoFocus required className={fieldClass} />
                             <InputError message={errors.nome} className="mt-2" />
                         </div>
 
                         <div>
-                            <label htmlFor="codigo" className={labelClass}>Código</label>
+                            <label htmlFor="nome_en" className={labelClass}>{t('campos.nomeEn')}</label>
+                            <input id="nome_en" type="text" value={data.nome_en} onChange={(e) => setData('nome_en', e.target.value)} placeholder={t('campos.nomeEnPlaceholder')} className={fieldClass} />
+                            <InputError message={errors.nome_en} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <label htmlFor="codigo" className={labelClass}>{t('campos.codigo')}</label>
                             <input id="codigo" type="text" value={data.codigo} onChange={(e) => setData('codigo', e.target.value)} required className={fieldClass} />
                             <InputError message={errors.codigo} className="mt-2" />
                         </div>
 
                         <div>
-                            <label htmlFor="numero" className={labelClass}>Número</label>
+                            <label htmlFor="numero" className={labelClass}>{t('campos.numero')}</label>
                             <input id="numero" type="number" value={data.numero} onChange={(e) => setData('numero', e.target.value)} required className={fieldClass} />
                             <InputError message={errors.numero} className="mt-2" />
                         </div>
 
                         <div>
-                            <label htmlFor="planta" className={labelClass}>Planta (imagem)</label>
+                            <label htmlFor="planta" className={labelClass}>{t('campos.plantaImagem')}</label>
                             <label
                                 htmlFor="planta"
                                 className="flex h-11 w-full cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 px-3 text-sm text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
                             >
                                 <ImagePlus size={16} strokeWidth={1.9} />
-                                {data.planta ? data.planta.name : 'Trocar ficheiro'}
+                                {data.planta ? data.planta.name : t('campos.trocarFicheiro')}
                             </label>
                             <input id="planta" type="file" accept="image/png,image/jpeg,image/webp" onChange={handlePlanta} className="hidden" />
                             <InputError message={errors.planta} className="mt-2" />
@@ -108,14 +117,14 @@ export default function Edit({ piso, edificios }) {
                             <div className="sm:col-span-2">
                                 <img
                                     src={preview ?? piso.planta_url}
-                                    alt={`Planta do ${piso.nome}`}
+                                    alt={t('pisos.edit.plantaAlt', { nome: piso.nome_localizado })}
                                     className="max-h-48 rounded-xl border border-slate-200 object-contain dark:border-slate-700"
                                 />
                             </div>
                         )}
 
                         <div className="sm:col-span-2">
-                            <label htmlFor="descricao" className={labelClass}>Descrição</label>
+                            <label htmlFor="descricao" className={labelClass}>{t('campos.descricao')}</label>
                             <textarea id="descricao" rows={3} value={data.descricao} onChange={(e) => setData('descricao', e.target.value)} className={`${fieldClass} h-auto py-2`} />
                             <InputError message={errors.descricao} className="mt-2" />
                         </div>
@@ -127,7 +136,7 @@ export default function Edit({ piso, edificios }) {
                             disabled={processing}
                             className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {processing ? 'A guardar...' : 'Guardar alterações'}
+                            {processing ? t('form.aGuardar') : t('form.guardarAlteracoes')}
                         </button>
 
                         <button
@@ -136,7 +145,7 @@ export default function Edit({ piso, edificios }) {
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
                             <ArrowLeft size={16} strokeWidth={1.9} />
-                            Cancelar
+                            {t('form.cancelar')}
                         </button>
                     </div>
                 </form>

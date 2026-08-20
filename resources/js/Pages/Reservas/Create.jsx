@@ -1,6 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle, CalendarDays, CalendarPlus, Inbox, RotateCcw, Star } from 'lucide-react';
 import LugarCard from '@/Components/Reservas/LugarCard';
 import LugarCardSkeleton from '@/Components/Reservas/LugarCardSkeleton';
@@ -12,6 +13,7 @@ import {
     calcularDataFim,
     proximaDataValida,
 } from '@/Components/Reservas/reservaHelpers';
+import { etiquetaPeriodo } from '@/utils/estados';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -41,6 +43,7 @@ export default function Create({
     setores,
     filters,
 }) {
+    const { t, i18n } = useTranslation('reservas');
     const { errors } = usePage().props;
 
     const [filtros, setFiltros] = useState({
@@ -396,7 +399,7 @@ export default function Create({
 
     return (
         <DashboardLayout>
-            <Head title="Nova Reserva" />
+            <Head title={t('criar.tituloPagina')} />
 
             <section className="dashboard-card overflow-hidden pb-28">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -409,13 +412,11 @@ export default function Create({
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Nova Reserva
+                            {t('criar.tituloPagina')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Escolhe a data, a duração e o
-                            tipo de espaço. Depois seleciona
-                            o período e reserva.
+                            {t('criar.subtitulo')}
                         </p>
                     </div>
                 </div>
@@ -449,7 +450,7 @@ export default function Create({
                 <div className="border-b border-slate-100 px-6 py-6 dark:border-slate-800">
                     <div className="mb-4 flex items-center justify-between gap-3">
                         <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                            Filtros de pesquisa
+                            {t('criar.filtrosDePesquisa')}
                         </p>
 
                         {filtrosAlterados && (
@@ -458,7 +459,7 @@ export default function Create({
                                 onClick={limparFiltros}
                                 className="text-xs font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900"
                             >
-                                Limpar filtros
+                                {t('criar.limparFiltros')}
                             </button>
                         )}
                     </div>
@@ -470,8 +471,8 @@ export default function Create({
                                 className={labelClass}
                             >
                                 {reservaLonga
-                                    ? 'Data de início'
-                                    : 'Data'}
+                                    ? t('criar.dataDeInicio')
+                                    : t('criar.data')}
                             </label>
 
                             <input
@@ -497,7 +498,7 @@ export default function Create({
                                 htmlFor="tipo_duracao"
                                 className={labelClass}
                             >
-                                Tipo de duração
+                                {t('criar.tipoDeDuracao')}
                             </label>
 
                             <select
@@ -512,19 +513,19 @@ export default function Create({
                                 className={fieldClass}
                             >
                                 <option value="diaria">
-                                    Diária
+                                    {t('duracoes.diaria.nome')}
                                 </option>
 
                                 <option value="semanal">
-                                    Semanal
+                                    {t('duracoes.semanal.nome')}
                                 </option>
 
                                 <option value="mensal">
-                                    Mensal
+                                    {t('duracoes.mensal.nome')}
                                 </option>
 
                                 <option value="anual">
-                                    Anual
+                                    {t('duracoes.anual.nome')}
                                 </option>
                             </select>
                         </div>
@@ -534,7 +535,7 @@ export default function Create({
                                 htmlFor="piso_id"
                                 className={labelClass}
                             >
-                                Piso
+                                {t('criar.piso')}
                             </label>
 
                             <select
@@ -554,7 +555,7 @@ export default function Create({
                                 className={fieldClass}
                             >
                                 <option value="">
-                                    Todos os pisos
+                                    {t('criar.todosOsPisos')}
                                 </option>
 
                                 {pisos.map((piso) => (
@@ -573,7 +574,7 @@ export default function Create({
                                 htmlFor="setor_id"
                                 className={labelClass}
                             >
-                                Categoria do Espaço
+                                {t('criar.categoriaDoEspaco')}
                             </label>
 
                             <select
@@ -593,7 +594,7 @@ export default function Create({
                                 className={fieldClass}
                             >
                                 <option value="">
-                                    Todas as categorias
+                                    {t('criar.todasAsCategorias')}
                                 </option>
 
                                 {setoresFiltrados.map(
@@ -638,7 +639,7 @@ export default function Create({
                             </span>
 
                             <span className="text-slate-500 dark:text-slate-400">
-                                ({setorSelecionado.avaliacao_total} avaliaç{setorSelecionado.avaliacao_total === 1 ? 'ão' : 'ões'})
+                                {t('criar.avaliacao', { count: setorSelecionado.avaliacao_total })}
                             </span>
                         </div>
                     )}
@@ -658,19 +659,12 @@ export default function Create({
 
                                     <div>
                                         <p className="font-bold text-teal-800 dark:text-teal-200">
-                                            Reserva{' '}
-                                            {descricaoDuracao.nome.toLowerCase()}
+                                            {t('criar.reservaTipo', { tipo: t(descricaoDuracao.nome).toLowerCase() })}
                                         </p>
 
                                         <p className="mt-0.5 text-sm text-teal-700 dark:text-teal-300">
-                                            {
-                                                descricaoDuracao.descricao
-                                            }{' '}
-                                            Inclui sábados
-                                            e domingos.
-                                            Sempre no
-                                            período Dia
-                                            inteiro.
+                                            {t(descricaoDuracao.descricao)}{' '}
+                                            {t('criar.avisoDiasCorridos')}
                                         </p>
                                     </div>
                                 </div>
@@ -683,7 +677,7 @@ export default function Create({
                                                 labelClass
                                             }
                                         >
-                                            De
+                                            {t('criar.de')}
                                         </label>
 
                                         <input
@@ -691,6 +685,7 @@ export default function Create({
                                             type="text"
                                             value={formatarDataPortugues(
                                                 filtros.data,
+                                                i18n.language,
                                             )}
                                             readOnly
                                             className={
@@ -706,7 +701,7 @@ export default function Create({
                                                 labelClass
                                             }
                                         >
-                                            Até
+                                            {t('criar.ate')}
                                         </label>
 
                                         <input
@@ -714,6 +709,7 @@ export default function Create({
                                             type="text"
                                             value={formatarDataPortugues(
                                                 dataFimCalculada,
+                                                i18n.language,
                                             )}
                                             readOnly
                                             className={
@@ -728,12 +724,7 @@ export default function Create({
                     {reservaLonga &&
                         !filtros.data && (
                             <div className="mt-5 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-700 dark:border-teal-400/20 dark:bg-teal-400/10 dark:text-teal-300">
-                                As reservas semanais,
-                                mensais e anuais são
-                                efetuadas apenas para o
-                                dia inteiro. Escolhe a
-                                data de início para veres
-                                a data final.
+                                {t('criar.avisoReservaLongaSemData')}
                             </div>
                         )}
 
@@ -747,33 +738,31 @@ export default function Create({
                 <div className="px-6 py-6">
                     <div className="mb-5">
                         <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                            Espaços disponíveis
+                            {t('criar.espacosDisponiveis')}
                         </h2>
 
                         {filtros.data && (
                             <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
                                 {carregando
-                                    ? 'A procurar espaços...'
-                                    : `${lugaresComDisponibilidade.length} espaço${
-                                          lugaresComDisponibilidade.length === 1 ? '' : 's'
-                                      } encontrado${
-                                          lugaresComDisponibilidade.length === 1 ? '' : 's'
-                                      } para ${formatarDataPortugues(filtros.data)}`}
+                                    ? t('criar.aProcurarEspacos')
+                                    : t('criar.espacoEncontrado', {
+                                          count: lugaresComDisponibilidade.length,
+                                          data: formatarDataPortugues(filtros.data, i18n.language),
+                                      })}
                             </p>
                         )}
                     </div>
 
                     {!filtros.data ? (
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Escolhe uma data para veres
-                            os lugares disponíveis.
+                            {t('criar.escolheUmaData')}
                         </p>
                     ) : erroConsultaLugares ? (
                         <div className="flex flex-col items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
                             <div className="flex items-start gap-2">
                                 <AlertTriangle size={18} strokeWidth={1.9} className="mt-0.5 shrink-0" />
                                 <span>
-                                    Não foi possível carregar os espaços.
+                                    {t('criar.erroCarregarEspacos')}
                                 </span>
                             </div>
 
@@ -783,7 +772,7 @@ export default function Create({
                                 className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 dark:border-red-400/30 dark:text-red-300 dark:hover:bg-red-400/10"
                             >
                                 <RotateCcw size={14} strokeWidth={2} />
-                                Tentar novamente
+                                {t('criar.tentarNovamente')}
                             </button>
                         </div>
                     ) : carregando ? (
@@ -797,7 +786,7 @@ export default function Create({
                             <Inbox size={28} strokeWidth={1.6} className="text-slate-300 dark:text-slate-600" />
 
                             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                Nenhum espaço encontrado com estes filtros.
+                                {t('criar.nenhumEspacoEncontrado')}
                             </p>
 
                             <button
@@ -805,21 +794,21 @@ export default function Create({
                                 onClick={limparFiltros}
                                 className="text-xs font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900"
                             >
-                                Limpar filtros
+                                {t('criar.limparFiltros')}
                             </button>
                         </div>
                     ) : (
                         <div>
                             {secretariaAlvo && !mostrarTodos && (
                                 <div className="mb-4 flex items-center justify-between rounded-xl border border-teal-500/20 bg-teal-500/5 px-4 py-2.5 text-sm text-teal-700 dark:text-teal-400">
-                                    <span>A reservar diretamente o lugar selecionado no mapa.</span>
+                                    <span>{t('criar.aReservarLugarDoMapa')}</span>
 
                                     <button
                                         type="button"
                                         onClick={() => setMostrarTodos(true)}
                                         className="font-semibold underline underline-offset-2 hover:no-underline"
                                     >
-                                        Ver todos os lugares deste setor
+                                        {t('criar.verTodosOsLugares')}
                                     </button>
                                 </div>
                             )}
@@ -859,7 +848,7 @@ export default function Create({
                                         }
                                         className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-teal-500/50 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:border-slate-700 dark:text-slate-300 dark:hover:text-teal-400 dark:focus-visible:ring-offset-slate-900"
                                     >
-                                        Carregar mais espaços
+                                        {t('criar.carregarMaisEspacos')}
                                     </button>
                                 </div>
                             )}

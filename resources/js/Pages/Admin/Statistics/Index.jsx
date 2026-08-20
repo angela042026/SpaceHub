@@ -12,6 +12,8 @@ import {
     Users,
 } from 'lucide-react';
 
+import { useTranslation } from 'react-i18next';
+
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import PrintHeader from '@/Components/Admin/PrintHeader';
 import PrintFooter from '@/Components/Admin/PrintFooter';
@@ -26,12 +28,7 @@ import HorizontalBarCard from '@/Components/Dashboard/Statistics/HorizontalBarCa
 import TopUsersCard from '@/Components/Dashboard/Statistics/TopUsersCard';
 import PeriodFilter from '@/Components/Dashboard/Statistics/PeriodFilter';
 
-const PERIODO_LABELS = {
-    '7dias': 'Últimos 7 dias',
-    '30dias': 'Últimos 30 dias',
-    '90dias': 'Últimos 90 dias',
-    ano: 'Último ano',
-};
+import { ESTADO_RESERVA, etiqueta, etiquetaPeriodo } from '@/utils/estados';
 
 // Paleta cíclica para "Reservas por Piso" (o número de pisos é
 // dinâmico) — mesmos tons turquesa/azul/roxo já usados no resto do
@@ -56,6 +53,8 @@ const CORES_PERIODO_DIA = {
 };
 
 export default function Index({ dashboard, periodo, edificioId, edificios, geradoEm }) {
+    const { t } = useTranslation('estatisticas');
+    const { t: tc } = useTranslation('common');
     const [aAtualizar, setAAtualizar] = useState(false);
 
     const visitar = (alteracoes) => {
@@ -81,14 +80,14 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
     }));
 
     const reservasPorPeriodoDoDiaData = dashboard.reservasPorPeriodoDoDia.map((item) => ({
-        label: item.nome,
+        label: etiquetaPeriodo(item.nome, tc),
         total: item.total,
         percent: item.percentual,
         color: CORES_PERIODO_DIA[item.nome] ?? '#14b8a6',
     }));
 
     const reservasPorEstadoData = dashboard.reservasPorEstado.map((item) => ({
-        label: item.nome,
+        label: etiqueta(ESTADO_RESERVA, item.codigo, item.nome, tc),
         total: item.total,
         percent: item.percentual,
         color: CORES_ESTADO[item.codigo] ?? '#94a3b8',
@@ -96,11 +95,13 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
 
     return (
         <DashboardLayout>
-            <Head title="Estatísticas" />
+            <Head title={t('titulo')} />
 
             <PrintHeader
-                title="Relatório de Estatísticas"
-                subtitle={`Período: ${PERIODO_LABELS[periodo] ?? periodo}`}
+                title={t('subtitulo')}
+                subtitle={t('periodoImpressao', {
+                    periodo: t(`periodos.${periodo}`, { defaultValue: periodo }),
+                })}
                 geradoEm={geradoEm}
             />
 
@@ -129,11 +130,11 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Estatísticas
+                                {t('titulo')}
                             </h1>
 
                             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                Acompanhe o desempenho e a utilização do SpaceHub.
+                                {t('descricao')}
                             </p>
                         </div>
                     </div>
@@ -174,7 +175,7 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
                     <KpiCard
                         icon={CalendarDays}
-                        label="Total de Reservas"
+                        label={t('kpis.totalReservas')}
                         value={kpis.totalReservas.valor}
                         variacao={kpis.totalReservas.variacaoPercentual}
                         sparkline={kpis.totalReservas.sparkline}
@@ -183,7 +184,7 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
 
                     <KpiCard
                         icon={Users}
-                        label="Utilizadores Ativos"
+                        label={t('kpis.utilizadoresAtivos')}
                         value={kpis.utilizadoresAtivos.valor}
                         variacao={kpis.utilizadoresAtivos.variacaoPercentual}
                         sparkline={kpis.utilizadoresAtivos.sparkline}
@@ -192,17 +193,17 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
 
                     <KpiCard
                         icon={Gauge}
-                        label="Taxa de Ocupação Média"
+                        label={t('kpis.taxaOcupacaoMedia')}
                         value={`${kpis.taxaOcupacaoMedia.valor}%`}
                         variacao={kpis.taxaOcupacaoMedia.variacaoPontosPercentuais}
-                        variacaoSufixo=" p.p."
+                        variacaoSufixo={t('kpis.sufixoPontosPercentuais')}
                         sparkline={kpis.taxaOcupacaoMedia.sparkline}
                         color="turquesa"
                     />
 
                     <KpiCard
                         icon={Clock}
-                        label="Tempo Médio por Reserva"
+                        label={t('kpis.tempoMedioPorReserva')}
                         value={`${kpis.tempoMedioPorReserva.valorHoras}h`}
                         variacao={kpis.tempoMedioPorReserva.variacaoPercentual}
                         sparkline={kpis.tempoMedioPorReserva.sparkline}
@@ -225,13 +226,13 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                     <EstadoProgressList
                         icon={ListChecks}
-                        title="Reservas por Estado"
+                        title={t('cards.reservasPorEstado')}
                         data={reservasPorEstadoData}
                     />
 
                     <DonutCard
                         icon={Building2}
-                        title="Reservas por Piso"
+                        title={t('cards.reservasPorPiso')}
                         data={reservasPorPisoData}
                         tamanhoDonut={150}
                         headerExtra={
@@ -241,10 +242,10 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
                                     onChange={(event) =>
                                         visitar({ edificio_id: event.target.value || null })
                                     }
-                                    aria-label="Filtrar por edifício"
+                                    aria-label={t('filtrarPorEdificio')}
                                     className="h-8 shrink-0 rounded-lg border border-slate-200 bg-white px-2 text-xs font-semibold text-slate-600 outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
                                 >
-                                    <option value="">Todos os edifícios</option>
+                                    <option value="">{t('todosOsEdificios')}</option>
 
                                     {edificios.map((edificio) => (
                                         <option key={edificio.id} value={edificio.id}>
@@ -260,7 +261,7 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
                     <PeriodoBarChart
                         icon={Sun}
-                        title="Reservas por Período do Dia"
+                        title={t('cards.reservasPorPeriodoDoDia')}
                         data={reservasPorPeriodoDoDiaData}
                     />
 
@@ -278,7 +279,7 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
                 <div className="grid grid-cols-1 gap-5">
                     <HorizontalBarCard
                         icon={MapPinned}
-                        title="Reservas por Setor"
+                        title={t('cards.reservasPorSetor')}
                         data={dashboard.reservasPorSetor}
                         color="#14b8a6"
                         verTodosHref={route('admin.setores.index')}

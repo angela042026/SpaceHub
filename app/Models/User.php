@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\RoleName;
+use App\Http\Middleware\SetLocale;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasLocalePreference
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
@@ -28,6 +30,7 @@ class User extends Authenticatable
         'ativo',
         'fotografia',
         'email_verified_at',
+        'locale',
         'google_calendar_access_token',
         'google_calendar_refresh_token',
         'google_calendar_token_expira_em',
@@ -155,5 +158,17 @@ class User extends Authenticatable
     public function googleCalendarConectado(): bool
     {
         return $this->google_calendar_refresh_token !== null;
+    }
+
+    /**
+     * Usado automaticamente pelo Laravel ao enviar Notifications (e-mail
+     * e base de dados), incluindo as despoletadas por comandos agendados
+     * sem pedido HTTP em curso — nesses contextos não há sessão de onde
+     * o SetLocale possa ler o idioma, por isso a preferência tem de ficar
+     * persistida aqui (ver LocaleController::update()).
+     */
+    public function preferredLocale(): string
+    {
+        return $this->locale ?? SetLocale::LOCALE_OMISSAO;
     }
 }

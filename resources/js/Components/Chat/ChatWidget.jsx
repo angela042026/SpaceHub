@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MessageCircleMore, MessageSquare, X, ArrowRight, BookOpen } from 'lucide-react';
 import { Link } from '@inertiajs/react';
 import ChatBot from './ChatBot';
@@ -8,6 +9,7 @@ import useReservaAlteracaoBarVisible from '@/Lib/useReservaAlteracaoBarVisible';
 const DURACAO_ANIMACAO_MS = 200;
 
 export default function ChatWidget() {
+    const { t } = useTranslation('common');
     const [mounted, setMounted] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [modoAtivo, setModoAtivo] = useState('menu');
@@ -75,7 +77,7 @@ export default function ChatWidget() {
                                 <button
                                     type="button"
                                     onClick={fechar}
-                                    aria-label="Fechar chat de suporte"
+                                    aria-label={t('chat.fecharChat')}
                                     className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-white/80 transition hover:bg-white/15 hover:text-white"
                                 >
                                     <X size={16} />
@@ -91,10 +93,10 @@ export default function ChatWidget() {
 
                                     <div>
                                         <p className="text-base font-bold leading-tight text-white">
-                                            Olá!
+                                            {t('chat.saudacao')}
                                         </p>
                                         <p className="text-sm leading-tight text-white/90">
-                                            Como podemos ajudar?
+                                            {t('chat.comoPodemosAjudar')}
                                         </p>
                                     </div>
                                 </div>
@@ -102,7 +104,7 @@ export default function ChatWidget() {
                                 <div className="mt-3 flex items-center gap-1.5">
                                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                                     <span className="text-xs font-medium text-white/85">
-                                        Assistente disponível
+                                        {t('chat.assistenteDisponivel')}
                                     </span>
                                 </div>
                             </div>
@@ -110,7 +112,7 @@ export default function ChatWidget() {
                             {/* Opções */}
                             <div className="p-4">
                                 <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-400">
-                                    Escolha uma opção
+                                    {t('chat.escolhaUmaOpcao')}
                                 </p>
 
                                 <div className="space-y-2.5">
@@ -125,10 +127,10 @@ export default function ChatWidget() {
                                             </div>
                                             <div>
                                                 <span className="block text-sm font-semibold text-[#071A33]">
-                                                    Central de ajuda
+                                                    {t('chat.centralDeAjuda')}
                                                 </span>
                                                 <span className="block text-xs text-slate-500">
-                                                    Encontre respostas rápidas
+                                                    {t('chat.encontreRespostasRapidas')}
                                                 </span>
                                             </div>
                                         </div>
@@ -153,10 +155,10 @@ export default function ChatWidget() {
                                             </div>
                                             <div>
                                                 <span className="block text-sm font-semibold text-[#071A33]">
-                                                    Assistente virtual
+                                                    {t('chat.assistenteVirtual')}
                                                 </span>
                                                 <span className="block text-xs text-slate-500">
-                                                    Respostas imediatas
+                                                    {t('chat.respostasImediatas')}
                                                 </span>
                                             </div>
                                         </div>
@@ -186,7 +188,7 @@ export default function ChatWidget() {
                         e.stopPropagation();
                         abrir();
                     }}
-                    aria-label="Abrir chat de suporte"
+                    aria-label={t('chat.abrirChat')}
                     className="flex h-12 w-12 items-center justify-center rounded-full bg-teal-500 text-white shadow-lg shadow-teal-500/30 transition-all duration-250 hover:bg-teal-600 active:scale-95"
                 >
                     <MessageCircleMore size={22} />

@@ -63,7 +63,7 @@ class ReportController extends Controller
 
         return Inertia::render('Admin/Reports/Reservas', [
             'reservas' => $reservas,
-            'estados' => EstadoReserva::orderBy('nome')->get(['id', 'nome']),
+            'estados' => EstadoReserva::orderBy('nome')->get(['id', 'nome', 'codigo']),
             'filters' => $request->only(['data_inicio', 'data_fim', 'estado_reserva_id']),
             'geradoEm' => now()->format('d/m/Y H:i'),
         ]);
@@ -205,7 +205,8 @@ class ReportController extends Controller
 
         return Inertia::render('Admin/Reports/Ocupacao', [
             'linhas' => $linhasPaginadas,
-            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(['id', 'nome']),
+            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(['id', 'nome', 'nome_en'])
+                ->map(fn (Piso $piso) => ['id' => $piso->id, 'nome' => $piso->nome_localizado]),
             'filters' => [
                 'data_inicio' => $dataInicio->toDateString(),
                 'data_fim' => $dataFim->toDateString(),
@@ -265,8 +266,8 @@ class ReportController extends Controller
             ->map(fn ($secretaria) => [
                 'id' => $secretaria->id,
                 'codigo' => $secretaria->codigo,
-                'setor' => $secretaria->setor?->nome,
-                'piso' => $secretaria->setor?->piso?->nome,
+                'setor' => $secretaria->setor?->nome_localizado,
+                'piso' => $secretaria->setor?->piso?->nome_localizado,
                 'edificio' => $secretaria->setor?->piso?->edificio?->nome,
                 'diasOcupados' => (int) ($diasOcupadosPorSecretaria->get($secretaria->id)->total ?? 0),
             ])
@@ -301,8 +302,10 @@ class ReportController extends Controller
 
         return Inertia::render('Admin/Reports/Espacos', [
             'linhas' => $linhasPaginadas,
-            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(['id', 'nome']),
-            'setores' => Setor::where('ativo', true)->orderBy('nome')->get(['id', 'nome']),
+            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(['id', 'nome', 'nome_en'])
+                ->map(fn (Piso $piso) => ['id' => $piso->id, 'nome' => $piso->nome_localizado]),
+            'setores' => Setor::where('ativo', true)->orderBy('nome')->get(['id', 'nome', 'nome_en'])
+                ->map(fn (Setor $setor) => ['id' => $setor->id, 'nome' => $setor->nome_localizado]),
             'filters' => [
                 'data_inicio' => $dataInicio->toDateString(),
                 'data_fim' => $dataFim->toDateString(),
@@ -361,8 +364,9 @@ class ReportController extends Controller
 
         return Inertia::render('Admin/Reports/CancelamentosAusencias', [
             'reservas' => $reservas,
-            'estados' => EstadoReserva::whereIn('codigo', ['cancelada', 'nao_compareceu'])->orderBy('nome')->get(['id', 'nome']),
-            'setores' => Setor::where('ativo', true)->orderBy('nome')->get(['id', 'nome']),
+            'estados' => EstadoReserva::whereIn('codigo', ['cancelada', 'nao_compareceu'])->orderBy('nome')->get(['id', 'nome', 'codigo']),
+            'setores' => Setor::where('ativo', true)->orderBy('nome')->get(['id', 'nome', 'nome_en'])
+                ->map(fn (Setor $setor) => ['id' => $setor->id, 'nome' => $setor->nome_localizado]),
             'filters' => $request->only(['data_inicio', 'data_fim', 'estado_reserva_id', 'utilizador', 'setor_id']),
             'geradoEm' => now()->format('d/m/Y H:i'),
         ]);

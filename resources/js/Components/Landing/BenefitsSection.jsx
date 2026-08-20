@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import {
     BarChart3,
     CheckCircle2,
@@ -6,32 +7,23 @@ import {
     QrCode,
 } from 'lucide-react';
 
-const benefits = [
-    'Encontre espaços livres em tempo real',
-    'Reserve em poucos passos',
-    'Faça check-in através de QR Code',
-    'Consulte ou cancele quando precisar',
-];
-
-const highlights = [
-    {
-        value: '24h',
-        label: 'Acesso à plataforma',
-        icon: Clock3,
-    },
-    {
-        value: '100%',
-        label: 'Processo digital',
-        icon: QrCode,
-    },
-    {
-        value: 'Tempo real',
-        label: 'Dados atualizados',
-        icon: BarChart3,
-    },
-];
+const highlightIcons = [Clock3, QrCode, BarChart3];
 
 export default function BenefitsSection() {
+    const { t } = useTranslation('landing');
+
+    const benefits = t('benefits.itens', { returnObjects: true });
+
+    const highlights = [
+        t('benefits.indicadores.acesso', { returnObjects: true }),
+        t('benefits.indicadores.processo', { returnObjects: true }),
+        t('benefits.indicadores.dados', { returnObjects: true }),
+    ].map((item, indice) => ({
+        value: item.valor,
+        label: item.label,
+        icon: highlightIcons[indice],
+    }));
+
     return (
         <section
             id="beneficios"
@@ -42,19 +34,17 @@ export default function BenefitsSection() {
                     {/* Conteúdo */}
                     <div>
                         <span className="text-sm font-bold uppercase tracking-[0.2em] text-[#14B8A6]">
-                            Benefícios
+                            {t('benefits.eyebrow')}
                         </span>
 
                         <h2 className="mt-4 max-w-2xl text-3xl font-black leading-tight tracking-[-0.04em] text-[#071A33] sm:text-4xl lg:text-5xl">
-                            Mais liberdade.
+                            {t('benefits.tituloLinha1')}
                             <br />
-                            Menos complicações.
+                            {t('benefits.tituloLinha2')}
                         </h2>
 
                         <p className="mt-6 max-w-xl text-base leading-8 text-slate-600">
-                            Encontre o espaço certo, consulte a
-                            disponibilidade e reserve tudo de forma
-                            simples, rápida e segura.
+                            {t('benefits.descricao')}
                         </p>
 
                         <div className="mt-9 space-y-4">
@@ -82,8 +72,7 @@ export default function BenefitsSection() {
                                 className="text-[#14B8A6]"
                             />
 
-                            Os seus dados protegidos em conformidade com
-                            o RGPD.
+                            {t('benefits.rgpd')}
                         </div>
                     </div>
 
@@ -98,7 +87,7 @@ export default function BenefitsSection() {
 
                                 <img
                                     src="/images/landing/dashboard-spacehub.png"
-                                    alt="Painel do SpaceHub com reservas, ocupação e estatísticas em tempo real"
+                                    alt={t('benefits.imagemAlt')}
                                     loading="lazy"
                                     className="h-[480px] w-full object-cover object-center lg:h-[590px]"
                                 />

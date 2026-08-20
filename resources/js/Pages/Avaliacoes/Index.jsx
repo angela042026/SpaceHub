@@ -1,10 +1,8 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, router } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import { Building2, CalendarDays, ChevronLeft, ChevronRight, Hash, Star } from 'lucide-react';
 import { ESTADO_AVALIACAO, badge, etiqueta } from '@/utils/estados';
-
-const rotuloEstadoAvaliacao = (estado) =>
-    estado === 'pendente' ? 'A aguardar moderação' : etiqueta(ESTADO_AVALIACAO, estado);
 
 const badgeEstadoAvaliacao = (estado) =>
     estado === 'pendente'
@@ -12,6 +10,12 @@ const badgeEstadoAvaliacao = (estado) =>
         : badge(ESTADO_AVALIACAO, estado);
 
 export default function Index({ avaliacoes }) {
+    const { t, i18n } = useTranslation('avaliacoes');
+    const { t: tc } = useTranslation('common');
+
+    const rotuloEstadoAvaliacao = (estado) =>
+        estado === 'pendente' ? t('aAguardarModeracao') : etiqueta(ESTADO_AVALIACAO, estado, estado, tc);
+
     const irParaPagina = (url) => {
         if (!url) {
             return;
@@ -22,7 +26,7 @@ export default function Index({ avaliacoes }) {
 
     return (
         <DashboardLayout>
-            <Head title="Minhas Avaliações" />
+            <Head title={t('tituloPagina')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -32,11 +36,11 @@ export default function Index({ avaliacoes }) {
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            As Minhas Avaliações
+                            {t('titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {avaliacoes.meta.total} avaliaç{avaliacoes.meta.total === 1 ? 'ão' : 'ões'} enviada{avaliacoes.meta.total === 1 ? '' : 's'}.
+                            {t('descricao', { count: avaliacoes.meta.total })}
                         </p>
                     </div>
                 </div>
@@ -45,7 +49,7 @@ export default function Index({ avaliacoes }) {
                     {avaliacoes.data.length === 0 ? (
                         <div className="flex min-h-[220px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40">
                             <p className="text-sm text-slate-400">
-                                Ainda não enviaste nenhuma avaliação.
+                                {t('semAvaliacoes')}
                             </p>
                         </div>
                     ) : (
@@ -88,7 +92,7 @@ export default function Index({ avaliacoes }) {
 
                                             <span className="inline-flex items-center gap-1.5">
                                                 <CalendarDays size={13} strokeWidth={1.9} />
-                                                {new Date(avaliacao.reserva?.data ?? avaliacao.created_at).toLocaleDateString('pt-PT')}
+                                                {new Date(avaliacao.reserva?.data ?? avaliacao.created_at).toLocaleDateString(i18n.language === 'en' ? 'en-GB' : 'pt-PT')}
                                             </span>
                                         </div>
                                     </div>
@@ -108,7 +112,7 @@ export default function Index({ avaliacoes }) {
                     {avaliacoes.meta.last_page > 1 && (
                         <div className="mt-5 flex items-center justify-between">
                             <p className="text-xs text-slate-400">
-                                Página {avaliacoes.meta.current_page} de {avaliacoes.meta.last_page}
+                                {t('pagina', { atual: avaliacoes.meta.current_page, total: avaliacoes.meta.last_page })}
                             </p>
 
                             <div className="flex gap-2">

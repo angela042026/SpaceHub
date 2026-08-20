@@ -1,6 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import LocalizacaoEspaco from '@/Components/Reservas/LocalizacaoEspaco';
 import { Head, Link } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     Building2,
@@ -11,13 +12,16 @@ import {
     Printer,
     UserRound,
 } from 'lucide-react';
-import { METODO_PAGAMENTO, etiqueta } from '@/utils/estados';
+import { METODO_PAGAMENTO, etiqueta, etiquetaPeriodo } from '@/utils/estados';
 import { formatarDataCurta, formatarDataHora, formatarValorEuro } from '@/utils/formatacaoPagamento';
 import { resolverImagemPorSetor } from '@/utils/imagemSetor';
 
 const GRADIENTE = '[background:linear-gradient(120deg,#176A85_0%,#0F9698_50%,#12BFAE_100%)]';
 
 export default function Comprovativo({ pagamento }) {
+    const { t, i18n } = useTranslation('pagamentos');
+    const { t: tc } = useTranslation('common');
+
     const reserva = pagamento.reserva;
     const utilizador = reserva?.user;
     const secretaria = reserva?.secretaria;
@@ -36,21 +40,21 @@ export default function Comprovativo({ pagamento }) {
 
     return (
         <DashboardLayout>
-            <Head title="Comprovativo de pagamento" />
+            <Head title={t('comprovativo.tituloPagina')} />
 
             <div className="mx-auto w-[94%] min-w-0 max-w-[1600px]">
                 <header className="mb-6 flex flex-col gap-4 print:hidden sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-teal-600 dark:text-teal-400">
-                            Pagamento concluído
+                            {t('comprovativo.pagamentoConcluido')}
                         </p>
 
                         <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                            Comprovativo de pagamento
+                            {t('comprovativo.tituloPagina')}
                         </h1>
 
                         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                            Consulta ou imprime os dados deste pagamento.
+                            {t('comprovativo.subtitulo')}
                         </p>
                     </div>
 
@@ -60,17 +64,17 @@ export default function Comprovativo({ pagamento }) {
                             className={botaoSecundarioClasses}
                         >
                             <ArrowLeft size={18} />
-                            Voltar ao detalhe
+                            {t('comprovativo.voltarAoDetalhe')}
                         </Link>
 
                         <button type="button" onClick={imprimirComprovativo} className={botaoSecundarioClasses}>
                             <Printer size={18} />
-                            Imprimir
+                            {t('comprovativo.imprimir')}
                         </button>
 
                         <button type="button" onClick={imprimirComprovativo} className={botaoPrimarioClasses}>
                             <Download size={18} />
-                            Guardar como PDF
+                            {t('comprovativo.guardarComoPdf')}
                         </button>
                     </div>
                 </header>
@@ -103,22 +107,22 @@ export default function Comprovativo({ pagamento }) {
 
                                 <div className="min-w-0">
                                     <p className="text-[11px] font-bold uppercase tracking-wider text-teal-100">
-                                        Comprovativo de pagamento
+                                        {t('comprovativo.tituloPagina')}
                                     </p>
 
                                     <h2 className="truncate text-xl font-black tracking-tight print:text-[26px] sm:text-2xl">
-                                        Pagamento confirmado
+                                        {t('comprovativo.pagamentoConfirmado')}
                                     </h2>
 
                                     <p className="truncate text-sm font-medium text-teal-50/80">
-                                        Reserva #{reserva?.id ?? '-'}
+                                        {t('comprovativo.reservaNumero', { id: reserva?.id ?? '-' })}
                                     </p>
                                 </div>
                             </div>
 
                             <span className="inline-flex shrink-0 items-center gap-1.5 self-start whitespace-nowrap rounded-full border border-white/25 bg-white/10 px-4 py-1.5 text-sm font-semibold text-white sm:self-auto">
                                 <CheckCircle2 size={14} />
-                                Pago
+                                {t('comprovativo.pago')}
                             </span>
                         </div>
                     </section>
@@ -130,34 +134,35 @@ export default function Comprovativo({ pagamento }) {
                                 <CreditCard size={17} className="text-teal-600 dark:text-teal-400" />
 
                                 <h3 className="whitespace-nowrap text-sm font-semibold uppercase tracking-wider text-teal-600 dark:text-teal-400 print:text-base">
-                                    Informação do pagamento
+                                    {t('comprovativo.informacaoDoPagamento')}
                                 </h3>
                             </div>
 
                             <div className="divide-y divide-slate-100 dark:divide-slate-800">
                                 <LinhaInfo
-                                    titulo="Referência do pagamento"
+                                    titulo={t('comprovativo.referenciaDoPagamento')}
                                     valor={pagamento.referencia ?? '-'}
                                     semQuebra
                                 />
 
                                 <LinhaInfo
-                                    titulo="Método de pagamento"
+                                    titulo={t('comprovativo.metodoDePagamento')}
                                     valor={etiqueta(
                                         METODO_PAGAMENTO,
                                         pagamento.metodo_pagamento,
-                                        'Não indicado',
+                                        t('comprovativo.naoIndicado'),
+                                        tc,
                                     )}
                                 />
 
                                 <LinhaInfo
-                                    titulo="Data do pagamento"
-                                    valor={formatarDataHora(pagamento.data_pagamento)}
+                                    titulo={t('comprovativo.dataDoPagamento')}
+                                    valor={formatarDataHora(pagamento.data_pagamento, i18n.language)}
                                 />
 
-                                <LinhaInfo titulo="Número do pagamento" valor={`#${pagamento.id}`} />
+                                <LinhaInfo titulo={t('comprovativo.numeroDoPagamento')} valor={`#${pagamento.id}`} />
 
-                                <LinhaInfo titulo="Estado" valor="Pagamento concluído" />
+                                <LinhaInfo titulo={t('comprovativo.estado')} valor={t('comprovativo.pagamentoConcluidoEstado')} />
                             </div>
                         </div>
 
@@ -166,14 +171,14 @@ export default function Comprovativo({ pagamento }) {
                                 <UserRound size={17} className="text-teal-600 dark:text-teal-400" />
 
                                 <h3 className="whitespace-nowrap text-sm font-semibold uppercase tracking-wider text-teal-600 dark:text-teal-400 print:text-base">
-                                    Titular da reserva
+                                    {t('comprovativo.titularDaReserva')}
                                 </h3>
                             </div>
 
                             <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                                <LinhaInfo titulo="Nome" valor={utilizador?.name ?? '-'} />
-                                <LinhaInfo titulo="Email" valor={utilizador?.email ?? '-'} />
-                                <LinhaInfo titulo="Número da reserva" valor={`#${reserva?.id ?? '-'}`} />
+                                <LinhaInfo titulo={t('comprovativo.nome')} valor={utilizador?.name ?? '-'} />
+                                <LinhaInfo titulo={t('comprovativo.email')} valor={utilizador?.email ?? '-'} />
+                                <LinhaInfo titulo={t('comprovativo.numeroDaReserva')} valor={`#${reserva?.id ?? '-'}`} />
                             </div>
                         </div>
                     </section>
@@ -184,7 +189,7 @@ export default function Comprovativo({ pagamento }) {
                             <Building2 size={17} className="text-teal-600 dark:text-teal-400" />
 
                             <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100 print:text-base">
-                                Espaço reservado
+                                {t('comprovativo.espacoReservado')}
                             </h3>
                         </div>
 
@@ -224,7 +229,7 @@ export default function Comprovativo({ pagamento }) {
                             <div className="flex shrink-0 gap-10 print:gap-8">
                                 <div>
                                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                        Data
+                                        {t('comprovativo.data')}
                                     </p>
 
                                     <p className="mt-1 font-bold text-slate-900 dark:text-slate-100 print:text-sm">
@@ -234,11 +239,11 @@ export default function Comprovativo({ pagamento }) {
 
                                 <div>
                                     <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                        Período
+                                        {t('comprovativo.periodo')}
                                     </p>
 
                                     <p className="mt-1 font-bold text-slate-900 dark:text-slate-100 print:text-sm">
-                                        {reserva?.periodo?.nome ?? '-'}
+                                        {etiquetaPeriodo(reserva?.periodo?.nome, tc) || '-'}
                                     </p>
                                 </div>
                             </div>
@@ -248,11 +253,11 @@ export default function Comprovativo({ pagamento }) {
                     {/* Total pago — faixa final do cartão */}
                     <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-b-[20px] border-t border-[#DCE6EF] bg-[#F3FBFA] px-8 py-5 dark:border-slate-800 dark:bg-teal-950/10 print:rounded-none print:[break-inside:avoid] print:[page-break-inside:avoid] print:px-7 print:py-5 sm:px-10">
                         <span className="text-xs font-bold uppercase tracking-wide text-teal-700 dark:text-teal-400 print:text-sm">
-                            Total pago
+                            {t('comprovativo.totalPago')}
                         </span>
 
                         <span className="shrink-0 whitespace-nowrap text-[clamp(2rem,1.8vw,2.125rem)] font-bold text-slate-900 dark:text-slate-100 print:text-[28px]">
-                            {formatarValorEuro(pagamento.valor)}
+                            {formatarValorEuro(pagamento.valor, i18n.language)}
                         </span>
                     </div>
                 </main>
@@ -261,11 +266,11 @@ export default function Comprovativo({ pagamento }) {
                 <footer className="mt-5 flex flex-col gap-3 text-sm text-slate-500 dark:text-slate-400 print:[break-inside:avoid] print:[page-break-inside:avoid] print:mt-5 print:gap-2.5">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <p>
-                            Este comprovativo foi gerado automaticamente pelo SpaceHub.
+                            {t('comprovativo.geradoAutomaticamente')}
                         </p>
 
                         <p className="font-medium">
-                            Referência: {pagamento.referencia ?? '-'}
+                            {t('comprovativo.referencia', { referencia: pagamento.referencia ?? '-' })}
                         </p>
                     </div>
 
@@ -273,10 +278,7 @@ export default function Comprovativo({ pagamento }) {
                         <Info size={18} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
 
                         <p>
-                            <strong>Nota:</strong> Este comprovativo corresponde a uma
-                            simulação de pagamento realizada para fins académicos.
-                            Não constitui um documento fiscal nem comprova uma transação
-                            financeira real.
+                            <strong>{t('comprovativo.notaLabel')}</strong> {t('comprovativo.notaTexto')}
                         </p>
                     </div>
                 </footer>

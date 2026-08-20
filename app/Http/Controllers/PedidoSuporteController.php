@@ -101,14 +101,14 @@ class PedidoSuporteController extends Controller
         if ($pedido->estado !== 'Pendente') {
             return redirect()
                 ->back()
-                ->with('error', 'Só pedidos pendentes podem ser marcados como em análise.');
+                ->with('error', __('Só pedidos pendentes podem ser marcados como em análise.'));
         }
 
         $pedido->update(['estado' => 'Em análise']);
 
         return redirect()
             ->back()
-            ->with('success', 'Pedido marcado como em análise.');
+            ->with('success', __('Pedido marcado como em análise.'));
     }
 
     /** Regista a resposta do admin/gestor e marca o pedido como resolvido. */
@@ -132,7 +132,7 @@ class PedidoSuporteController extends Controller
 
         return redirect()
             ->route('support.index')
-            ->with('success', 'Resposta enviada e pedido marcado como resolvido.');
+            ->with('success', __('Resposta enviada e pedido marcado como resolvido.'));
     }
 
     /**Apresenta o formulário de contacto. */
@@ -172,6 +172,6 @@ class PedidoSuporteController extends Controller
 
         return redirect()
             ->route('faqs.index')
-            ->with('success', 'Pedido de suporte enviado com sucesso.');
+            ->with('success', __('Pedido de suporte enviado com sucesso.'));
     }
 }

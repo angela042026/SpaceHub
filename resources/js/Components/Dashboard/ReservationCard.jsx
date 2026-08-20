@@ -1,5 +1,6 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Modal from '@/Components/Modal';
 import {
     AlertTriangle,
@@ -28,12 +29,12 @@ function getEstadoClasses(codigo) {
         ESTADO_RESERVA_NAVY[codigo] ?? {
             badge: 'bg-slate-400/15 text-slate-300',
             dot: 'bg-slate-400',
-            label: 'Sem estado',
         }
     );
 }
 
 import { podeCancelarReserva } from '@/Components/Reservas/reservaHelpers';
+import { ESTADO_RESERVA, etiqueta as traduzirEstadoReserva } from '@/utils/estados';
 
 /**
  * Janela de check-in [início do período, início + tolerância], com a
@@ -63,14 +64,14 @@ function calcularJanelaCheckin(reserva, toleranciaMinutos) {
     return { inicio, limite };
 }
 
-function formatarHora(data) {
-    return data.toLocaleTimeString('pt-PT', {
+function formatarHora(data, locale = 'pt') {
+    return data.toLocaleTimeString(locale === 'en' ? 'en-GB' : 'pt-PT', {
         hour: '2-digit',
         minute: '2-digit',
     });
 }
 
-function useCheckinCountdown(reserva, toleranciaMinutos) {
+function useCheckinCountdown(reserva, toleranciaMinutos, t, locale) {
     const [agora, setAgora] = useState(() => new Date());
 
     useEffect(() => {
@@ -109,10 +110,10 @@ function useCheckinCountdown(reserva, toleranciaMinutos) {
     );
 
     return {
-        limiteLabel: formatarHora(limite),
-        inicioLabel: formatarHora(inicio),
-        fimLabel: formatarHora(limite),
-        restanteLabel: `${minutosRestantes} min restantes`,
+        limiteLabel: formatarHora(limite, locale),
+        inicioLabel: formatarHora(inicio, locale),
+        fimLabel: formatarHora(limite, locale),
+        restanteLabel: t('reservationCard.minutosRestantes', { count: minutosRestantes }),
         percentual,
     };
 }
@@ -156,6 +157,8 @@ export default function ReservationCard({
     toleranciaCheckinMinutos = 30,
     onSelecionarSugestao,
 }) {
+    const { t, i18n } = useTranslation('dashboard');
+    const { t: tc } = useTranslation('common');
     const [processing, setProcessing] = useState(false);
     const [aConfirmarCancelamento, setAConfirmarCancelamento] =
         useState(false);
@@ -167,6 +170,8 @@ export default function ReservationCard({
     const checkin = useCheckinCountdown(
         reserva,
         toleranciaCheckinMinutos,
+        t,
+        i18n.language,
     );
 
     if (!reserva) {
@@ -176,15 +181,15 @@ export default function ReservationCard({
 
                 <div className="relative z-10">
                     <p className="text-xs font-semibold text-slate-300">
-                        Hoje
+                        {t('reservationCard.hoje')}
                     </p>
 
                     <h2 className="mt-1 text-xl font-bold text-white">
-                        Ainda não tem reserva
+                        {t('reservationCard.aindaNaoTemReserva')}
                     </h2>
 
                     <p className="mt-1 text-sm text-slate-300">
-                        {totalLivres} secretárias disponíveis agora
+                        {t('reservationCard.secretariasDisponiveisAgora', { count: totalLivres })}
                     </p>
 
                     <div className="mt-4 flex flex-wrap items-center gap-4">
@@ -196,7 +201,7 @@ export default function ReservationCard({
                                 size={17}
                                 strokeWidth={2}
                             />
-                            Reservar espaço
+                            {t('reservationCard.reservarEspaco')}
                         </Link>
                     </div>
 
@@ -217,7 +222,7 @@ export default function ReservationCard({
 
                                 <div className="min-w-0">
                                     <p className="text-[11px] font-semibold text-slate-300">
-                                        Recomendação para si
+                                        {t('reservationCard.recomendacaoParaSi')}
                                     </p>
                                     <p className="truncate text-sm font-bold text-white">
                                         {sugestao.codigo}
@@ -229,7 +234,7 @@ export default function ReservationCard({
                             </div>
 
                             <span className="shrink-0 rounded-full bg-teal-400/15 px-2.5 py-1 text-[11px] font-bold text-teal-300">
-                                Livre
+                                {t('reservationCard.livre')}
                             </span>
                         </button>
                     )}
@@ -298,7 +303,7 @@ export default function ReservationCard({
                         </div>
                         <div>
                             <p className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                                Reserva de hoje
+                                {t('reservationCard.reservaDeHoje')}
                             </p>
                             <h2 className="text-2xl font-extrabold leading-tight text-white">
                                 {reserva.secretaria?.codigo}
@@ -312,8 +317,9 @@ export default function ReservationCard({
                         <span
                             className={`h-2 w-2 rounded-full ${estado.dot}`}
                         />
-                        {reserva.estado_reserva?.nome ??
-                            estado.label}
+                        {ESTADO_RESERVA[estadoCodigo]
+                            ? traduzirEstadoReserva(ESTADO_RESERVA, estadoCodigo, estadoCodigo, tc)
+                            : t('reservationCard.semEstado')}
                     </span>
                 </div>
 
@@ -323,7 +329,7 @@ export default function ReservationCard({
                 </p>
 
                 <p className="mt-0.5 text-sm text-slate-400">
-                    Hoje · {reserva.periodo?.nome}
+                    {t('reservationCard.hojePeriodo', { periodo: reserva.periodo?.nome })}
                 </p>
 
                 {errors?.reserva && (
@@ -343,8 +349,7 @@ export default function ReservationCard({
                     <div className="mt-5 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4">
                         <div className="flex items-center justify-between text-xs font-bold text-amber-300">
                             <span>
-                                Check-in disponível até às{' '}
-                                {checkin.limiteLabel}
+                                {t('reservationCard.checkinDisponivelAte', { hora: checkin.limiteLabel })}
                             </span>
                             <span>{checkin.restanteLabel}</span>
                         </div>
@@ -373,7 +378,7 @@ export default function ReservationCard({
                                     size={18}
                                     strokeWidth={2}
                                 />
-                                Check-in efetuado
+                                {t('reservationCard.checkinEfetuado')}
                             </>
                         ) : (
                             <>
@@ -381,7 +386,7 @@ export default function ReservationCard({
                                     size={18}
                                     strokeWidth={2}
                                 />
-                                {ehStaff ? 'Fazer Check-in' : 'Ler QR para Check-in'}
+                                {ehStaff ? t('reservationCard.fazerCheckin') : t('reservationCard.lerQrParaCheckin')}
                             </>
                         )}
                     </button>
@@ -395,7 +400,7 @@ export default function ReservationCard({
                         className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-red-400/50 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <XCircle size={18} strokeWidth={2} />
-                        Cancelar Reserva
+                        {t('reservationCard.cancelarReserva')}
                     </button>
                 </div>
             </div>
@@ -417,17 +422,14 @@ export default function ReservationCard({
 
                         <div>
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                                Cancelar esta reserva?
+                                {t('reservationCard.cancelarEstaReserva')}
                             </h2>
 
                             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                A secretária{' '}
-                                {reserva.secretaria?.codigo}{' '}
-                                no período{' '}
-                                {reserva.periodo?.nome} fica
-                                livre para outra pessoa
-                                reservar. Esta ação não pode
-                                ser desfeita.
+                                {t('reservationCard.cancelarTexto', {
+                                    codigo: reserva.secretaria?.codigo,
+                                    periodo: reserva.periodo?.nome,
+                                })}
                             </p>
                         </div>
                     </div>
@@ -442,7 +444,7 @@ export default function ReservationCard({
                             }
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 dark:border-slate-700 dark:text-slate-300"
                         >
-                            Voltar
+                            {t('reservationCard.voltar')}
                         </button>
 
                         <button
@@ -458,10 +460,10 @@ export default function ReservationCard({
                                         strokeWidth={2}
                                         className="animate-spin"
                                     />
-                                    A cancelar...
+                                    {t('reservationCard.aCancelar')}
                                 </>
                             ) : (
-                                'Cancelar Reserva'
+                                t('reservationCard.cancelarReserva')
                             )}
                         </button>
                     </div>

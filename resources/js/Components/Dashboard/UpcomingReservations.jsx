@@ -5,55 +5,44 @@ import {
     CalendarDays,
     ChevronRight,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
+import { etiqueta as traduzirEstadoReserva, ESTADO_RESERVA } from '@/utils/estados';
 
-function formatarData(data) {
+function formatarData(data, locale = 'pt') {
     if (!data) {
         return '-';
     }
 
-    return new Date(data).toLocaleDateString('pt-PT', {
+    return new Date(data).toLocaleDateString(locale === 'en' ? 'en-GB' : 'pt-PT', {
         day: '2-digit',
         month: 'short',
     });
 }
 
-function getEstadoReserva(reserva) {
+function getEstadoReserva(reserva, t, tSemEstado) {
     const codigo = reserva.estado_reserva?.codigo;
 
-    const estados = {
-        pendente: {
-            label: 'Pendente',
-            badge: 'bg-amber-500/10 text-amber-600 dark:bg-[#f5a524]/10 dark:text-[#f5a524]',
-        },
-        confirmada: {
-            label: 'Confirmada',
-            badge: 'bg-teal-500/10 text-teal-600 dark:bg-[#18c3b3]/10 dark:text-[#18c3b3]',
-        },
-        cancelada: {
-            label: 'Cancelada',
-            badge: 'bg-red-500/10 text-red-600 dark:bg-[#ff4d6d]/10 dark:text-[#ff4d6d]',
-        },
-        expirada: {
-            label: 'Expirada',
-            badge: 'bg-slate-500/10 text-slate-600 dark:bg-[#8fa7bd]/10 dark:text-[#8fa7bd]',
-        },
-        concluida: {
-            label: 'Concluída',
-            badge: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400',
-        },
+    const CORES = {
+        pendente: 'bg-amber-500/10 text-amber-600 dark:bg-[#f5a524]/10 dark:text-[#f5a524]',
+        confirmada: 'bg-teal-500/10 text-teal-600 dark:bg-[#18c3b3]/10 dark:text-[#18c3b3]',
+        cancelada: 'bg-red-500/10 text-red-600 dark:bg-[#ff4d6d]/10 dark:text-[#ff4d6d]',
+        expirada: 'bg-slate-500/10 text-slate-600 dark:bg-[#8fa7bd]/10 dark:text-[#8fa7bd]',
+        concluida: 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400',
     };
 
-    return (
-        estados[codigo] ?? {
-            label: reserva.estado_reserva?.nome ?? 'Sem estado',
-            badge: 'bg-slate-500/10 text-slate-600 dark:bg-[#8fa7bd]/10 dark:text-[#8fa7bd]',
-        }
-    );
+    return {
+        label: ESTADO_RESERVA[codigo]
+            ? traduzirEstadoReserva(ESTADO_RESERVA, codigo, codigo, t)
+            : (reserva.estado_reserva?.nome ?? tSemEstado),
+        badge: CORES[codigo] ?? 'bg-slate-500/10 text-slate-600 dark:bg-[#8fa7bd]/10 dark:text-[#8fa7bd]',
+    };
 }
 
 export default function UpcomingReservations({ reservas = [], compact = false, className = '' }) {
+    const { t, i18n } = useTranslation('dashboard');
+    const { t: tc } = useTranslation('common');
     const limite = compact ? 2 : 4;
     const reservasVisiveis = reservas.slice(0, limite);
 
@@ -62,7 +51,7 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
             <section className={`dashboard-card flex flex-col overflow-hidden p-4 ${className}`}>
                 <div className="flex items-center justify-between">
                     <h2 className="text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
-                        Próximas reservas
+                        {t('proximasReservas.titulo')}
                     </h2>
 
                     {reservas.length > 0 && (
@@ -70,7 +59,7 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
                             href={route('reservas.index')}
                             className="text-xs font-bold text-teal-600 hover:text-teal-700 dark:text-[#18c3b3] dark:hover:text-[#15a999]"
                         >
-                            Ver todas
+                            {t('proximasReservas.verTodas')}
                         </Link>
                     )}
                 </div>
@@ -78,7 +67,7 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
                 {reservas.length > 0 ? (
                     <ul className="mt-2 divide-y divide-slate-100 dark:divide-[#2a5069]/60">
                         {reservasVisiveis.map((reserva) => {
-                            const estado = getEstadoReserva(reserva);
+                            const estado = getEstadoReserva(reserva, tc, t('proximasReservas.semEstado'));
 
                             return (
                                 <li key={reserva.id}>
@@ -93,14 +82,14 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center gap-1.5">
                                                 <h3 className="truncate text-xs font-bold text-slate-900 dark:text-[#f8fafc]">
-                                                    {reserva.secretaria?.codigo ?? 'Secretária removida'}
+                                                    {reserva.secretaria?.codigo ?? t('proximasReservas.secretariaRemovida')}
                                                 </h3>
                                                 <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold ${estado.badge}`}>
                                                     {estado.label}
                                                 </span>
                                             </div>
                                             <p className="truncate text-[11px] text-slate-500 dark:text-[#8fa7bd]">
-                                                {formatarData(reserva.data)} · {reserva.periodo?.nome ?? '-'}
+                                                {formatarData(reserva.data, i18n.language)} · {reserva.periodo?.nome ?? '-'}
                                             </p>
                                         </div>
                                     </Link>
@@ -116,10 +105,10 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
 
                         <div>
                             <h3 className="text-xs font-bold text-slate-800 dark:text-[#f8fafc]">
-                                Não tem reservas agendadas.
+                                {t('proximasReservas.semReservasAgendadas')}
                             </h3>
                             <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 dark:text-[#8fa7bd]">
-                                Que tal planear a sua semana?
+                                {t('proximasReservas.planearSemanaTexto')}
                             </p>
                         </div>
 
@@ -127,7 +116,7 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
                             href={route('reservas.availability')}
                             className="inline-flex h-9 shrink-0 items-center justify-center rounded-lg border border-teal-500/30 bg-white px-3.5 text-[11px] font-bold text-teal-700 transition hover:bg-teal-500/10 dark:border-[#18c3b3]/30 dark:bg-transparent dark:text-[#18c3b3]"
                         >
-                            Planear semana
+                            {t('proximasReservas.planearSemana')}
                         </Link>
                     </div>
                 )}
@@ -145,11 +134,11 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
 
                     <div>
                         <h2 className="text-xl font-bold text-slate-900 dark:text-[#f8fafc]">
-                            Próximas reservas
+                            {t('proximasReservas.titulo')}
                         </h2>
 
                         <p className="mt-0.5 text-sm text-slate-500 dark:text-[#8fa7bd]">
-                            Reservas futuras confirmadas
+                            {t('proximasReservas.subtitulo')}
                         </p>
                     </div>
                 </div>
@@ -159,7 +148,7 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
                 {reservas.length > 0 ? (
                     <ul className="divide-y divide-slate-100 dark:divide-[#2a5069]/60">
                         {reservasVisiveis.map((reserva) => {
-                            const estado = getEstadoReserva(reserva);
+                            const estado = getEstadoReserva(reserva, tc, t('proximasReservas.semEstado'));
                             const imagem =
                                 resolverImagemSecretaria(
                                     reserva.secretaria,
@@ -181,7 +170,7 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
                                                         reserva
                                                             .secretaria
                                                             ?.codigo ??
-                                                        'Espaço reservado'
+                                                        t('proximasReservas.espacoReservado')
                                                     }
                                                     className="h-full w-full object-cover"
                                                 />
@@ -199,7 +188,7 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
                                             <div className="flex items-center gap-2">
                                                 <h3 className="truncate text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
                                                     {reserva.secretaria?.codigo ??
-                                                        'Secretária removida'}
+                                                        t('proximasReservas.secretariaRemovida')}
                                                 </h3>
 
                                                 <span
@@ -222,6 +211,7 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
                                             <p className="text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
                                                 {formatarData(
                                                     reserva.data,
+                                                    i18n.language,
                                                 )}
                                             </p>
 
@@ -248,11 +238,11 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
                         </div>
 
                         <h3 className="mt-5 text-lg font-bold text-slate-900 dark:text-[#f8fafc]">
-                            Sem reservas futuras
+                            {t('proximasReservas.semReservasFuturas')}
                         </h3>
 
                         <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500 dark:text-[#8fa7bd]">
-                            Ainda não tens reservas agendadas para os próximos dias.
+                            {t('proximasReservas.semReservasFuturasTexto')}
                         </p>
                     </div>
                 )}
@@ -262,7 +252,7 @@ export default function UpcomingReservations({ reservas = [], compact = false, c
                         href={route('reservas.index')}
                         className="mt-auto flex items-center justify-center gap-2 rounded-xl border border-teal-500 bg-white py-2.5 text-sm font-bold text-teal-600 transition hover:bg-gradient-to-r hover:from-teal-50 hover:to-teal-100 hover:text-teal-700 dark:border-[#36566f] dark:bg-transparent dark:text-[#d7e3ed] dark:hover:border-[#18c3b3] dark:hover:bg-none dark:hover:bg-[#18c3b3]/[0.06] dark:hover:text-[#18c3b3]"
                     >
-                        Ver todas as reservas
+                        {t('proximasReservas.verTodasAsReservas')}
                         <ArrowRight size={15} strokeWidth={1.9} />
                     </Link>
                 )}

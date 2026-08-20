@@ -14,6 +14,8 @@ class PisoResource extends JsonResource
             'edificio_id' => $this->edificio_id,
             'edificio' => $this->edificio?->nome,
             'nome' => $this->nome,
+            'nome_en' => $this->nome_en,
+            'nome_localizado' => $this->nome_localizado,
             'codigo' => $this->codigo,
             'numero' => $this->numero,
 

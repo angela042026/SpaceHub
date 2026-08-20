@@ -13,17 +13,13 @@ import {
     ThumbsUp,
 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ESTADO_AVALIACAO, etiqueta } from '@/utils/estados';
 
 // Rótulos no plural, só para os filtros desta página — os estados
 // partilhados em utils/estados.js ficam no singular porque também servem
 // o badge por linha ("Pendente", não "Pendentes").
-const FILTROS_ESTADO = [
-    { valor: 'todas', label: 'Todas' },
-    { valor: 'pendente', label: 'Pendentes' },
-    { valor: 'aprovada', label: 'Aprovadas' },
-    { valor: 'rejeitada', label: 'Rejeitadas' },
-];
+const FILTROS_ESTADO = ['todas', 'pendente', 'aprovada', 'rejeitada'];
 
 // Cor do badge "Estado" só nesta página: o pendente partilhado
 // (bg-amber-500/10 + amber-600) compete visualmente com as estrelas
@@ -41,6 +37,8 @@ function formatarDecimal(valor) {
 }
 
 export default function Index({ avaliacoes, filters, stats }) {
+    const { t, i18n } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
     const [processingId, setProcessingId] = useState(null);
     const [searchValue, setSearchValue] = useState(filters.search ?? '');
     const [carregando, setCarregando] = useState(false);
@@ -84,9 +82,10 @@ export default function Index({ avaliacoes, filters, stats }) {
     };
 
     const moderar = (avaliacao, acao) => {
+        const nome = avaliacao.reserva?.utilizador ?? t('reservas.index.utilizadorGenerico');
         const mensagem = acao === 'aprovar'
-            ? `Aprovar esta avaliação de ${avaliacao.reserva?.utilizador ?? 'utilizador'}?`
-            : `Rejeitar esta avaliação de ${avaliacao.reserva?.utilizador ?? 'utilizador'}?`;
+            ? t('avaliacoes.index.confirmarAprovar', { nome })
+            : t('avaliacoes.index.confirmarRejeitar', { nome });
 
         if (!confirm(mensagem)) {
             return;
@@ -107,7 +106,7 @@ export default function Index({ avaliacoes, filters, stats }) {
     const columns = [
         {
             key: 'nota',
-            label: 'Nota',
+            label: t('avaliacoes.index.nota'),
             render: (avaliacao) => (
                 <div className="flex items-center gap-1.5">
                     <div className="flex gap-0.5 text-amber-400">
@@ -129,7 +128,7 @@ export default function Index({ avaliacoes, filters, stats }) {
         },
         {
             key: 'comentario',
-            label: 'Comentário',
+            label: t('avaliacoes.index.comentario'),
             render: (avaliacao) => (
                 <div className="group relative inline-block max-w-xs">
                     <p className="truncate">{avaliacao.comentario}</p>
@@ -145,7 +144,7 @@ export default function Index({ avaliacoes, filters, stats }) {
         },
         {
             key: 'reserva',
-            label: 'Utilizador / Reserva',
+            label: t('avaliacoes.index.utilizadorReserva'),
             render: (avaliacao) => (
                 <div>
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
@@ -160,29 +159,33 @@ export default function Index({ avaliacoes, filters, stats }) {
         },
         {
             key: 'created_at',
-            label: 'Enviada em',
+            label: t('avaliacoes.index.enviadaEm'),
             render: (avaliacao) => (
                 <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {avaliacao.created_at ? new Date(avaliacao.created_at).toLocaleDateString('pt-PT') : '-'}
+                    {avaliacao.created_at
+                        ? new Date(avaliacao.created_at).toLocaleDateString(
+                              i18n.language === 'en' ? 'en-GB' : 'pt-PT',
+                          )
+                        : '-'}
                 </span>
             ),
         },
         {
             key: 'estado',
-            label: 'Estado',
+            label: t('listagem.estado'),
             render: (avaliacao) => (
                 <span
                     className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
                         CORES_ESTADO_AVALIACAO[avaliacao.estado] ?? 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
                     }`}
                 >
-                    {etiqueta(ESTADO_AVALIACAO, avaliacao.estado)}
+                    {etiqueta(ESTADO_AVALIACAO, avaliacao.estado, avaliacao.estado, tc)}
                 </span>
             ),
         },
         {
             key: 'acoes',
-            label: 'Ações',
+            label: t('listagem.acoes'),
             align: 'right',
             render: (avaliacao) => (
                 avaliacao.estado === 'pendente' ? (
@@ -191,8 +194,8 @@ export default function Index({ avaliacoes, filters, stats }) {
                             type="button"
                             onClick={() => moderar(avaliacao, 'aprovar')}
                             disabled={processingId === avaliacao.id}
-                            title="Aprovar avaliação"
-                            aria-label="Aprovar avaliação"
+                            title={t('avaliacoes.index.aprovarAvaliacao')}
+                            aria-label={t('avaliacoes.index.aprovarAvaliacao')}
                             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:hover:bg-teal-500/10"
                         >
                             {processingId === avaliacao.id ? (
@@ -206,8 +209,8 @@ export default function Index({ avaliacoes, filters, stats }) {
                             type="button"
                             onClick={() => moderar(avaliacao, 'rejeitar')}
                             disabled={processingId === avaliacao.id}
-                            title="Rejeitar avaliação"
-                            aria-label="Rejeitar avaliação"
+                            title={t('avaliacoes.index.rejeitarAvaliacao')}
+                            aria-label={t('avaliacoes.index.rejeitarAvaliacao')}
                             className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:hover:bg-red-500/10"
                         >
                             {processingId === avaliacao.id ? (
@@ -218,7 +221,7 @@ export default function Index({ avaliacoes, filters, stats }) {
                         </button>
                     </div>
                 ) : (
-                    <p className="text-right text-xs text-slate-400">Já moderada</p>
+                    <p className="text-right text-xs text-slate-400">{t('avaliacoes.index.jaModerada')}</p>
                 )
             ),
         },
@@ -226,7 +229,7 @@ export default function Index({ avaliacoes, filters, stats }) {
 
     return (
         <DashboardLayout>
-            <Head title="Avaliações" />
+            <Head title={t('avaliacoes.index.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
@@ -237,11 +240,11 @@ export default function Index({ avaliacoes, filters, stats }) {
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Avaliações
+                                {t('avaliacoes.index.titulo')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Consulte e modere as avaliações enviadas pelos utilizadores.
+                                {t('avaliacoes.index.subtitulo')}
                             </p>
                         </div>
                     </div>
@@ -262,7 +265,7 @@ export default function Index({ avaliacoes, filters, stats }) {
                             </div>
 
                             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Total de Avaliações
+                                {t('avaliacoes.index.totalAvaliacoes')}
                             </span>
                         </div>
 
@@ -278,7 +281,7 @@ export default function Index({ avaliacoes, filters, stats }) {
                             </div>
 
                             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Avaliação Média
+                                {t('avaliacoes.index.avaliacaoMedia')}
                             </span>
                         </div>
 
@@ -313,7 +316,7 @@ export default function Index({ avaliacoes, filters, stats }) {
                             </div>
 
                             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Pendentes
+                                {t('avaliacoes.index.pendentes')}
                             </span>
                         </div>
 
@@ -329,7 +332,7 @@ export default function Index({ avaliacoes, filters, stats }) {
                             </div>
 
                             <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                Taxa de Aprovação
+                                {t('avaliacoes.index.taxaAprovacao')}
                             </span>
                         </div>
 
@@ -341,7 +344,7 @@ export default function Index({ avaliacoes, filters, stats }) {
 
                 <div className="flex flex-col gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex flex-wrap gap-2">
-                        {FILTROS_ESTADO.map(({ valor, label }) => (
+                        {FILTROS_ESTADO.map((valor) => (
                             <button
                                 key={valor}
                                 type="button"
@@ -352,7 +355,7 @@ export default function Index({ avaliacoes, filters, stats }) {
                                         : 'border border-slate-200 bg-white text-slate-600 hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:bg-transparent dark:text-slate-300'
                                 }`}
                             >
-                                {label}
+                                {t(`avaliacoes.index.filtros.${valor}`)}
 
                                 <span
                                     className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
@@ -378,7 +381,7 @@ export default function Index({ avaliacoes, filters, stats }) {
                             type="text"
                             value={searchValue}
                             onChange={(event) => setSearchValue(event.target.value)}
-                            placeholder="Pesquisar avaliações…"
+                            placeholder={t('avaliacoes.index.pesquisarPlaceholder')}
                             className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                         />
                     </form>
@@ -388,7 +391,7 @@ export default function Index({ avaliacoes, filters, stats }) {
                     <LoadingOverlay show={carregando} />
 
                     <p className="mb-3 text-xs font-medium text-slate-500 dark:text-slate-400">
-                        {avaliacoes.meta.total} avaliaç{avaliacoes.meta.total === 1 ? 'ão' : 'ões'} encontrada{avaliacoes.meta.total === 1 ? '' : 's'}
+                        {t('avaliacoes.index.encontradas', { count: avaliacoes.meta.total })}
                     </p>
 
                     <Table
@@ -398,21 +401,21 @@ export default function Index({ avaliacoes, filters, stats }) {
                             stats.total === 0 ? (
                                 <div className="flex flex-col items-center gap-1.5">
                                     <p className="font-semibold text-slate-600 dark:text-slate-300">
-                                        Ainda não existem avaliações.
+                                        {t('avaliacoes.index.aindaNaoExistem')}
                                     </p>
 
                                     <p className="text-sm text-slate-400">
-                                        As avaliações enviadas pelos utilizadores aparecerão aqui.
+                                        {t('avaliacoes.index.aparecemAqui')}
                                     </p>
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center gap-1.5">
                                     <p className="font-semibold text-slate-600 dark:text-slate-300">
-                                        Nenhuma avaliação encontrada.
+                                        {t('avaliacoes.index.nenhumaEncontrada')}
                                     </p>
 
                                     <p className="text-sm text-slate-400">
-                                        Experimente alterar os filtros ou a pesquisa.
+                                        {t('avaliacoes.index.experimenteAlterar')}
                                     </p>
 
                                     {filtrosAtivos && (
@@ -421,7 +424,7 @@ export default function Index({ avaliacoes, filters, stats }) {
                                             onClick={limparFiltros}
                                             className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                                         >
-                                            Limpar filtros
+                                            {tc('acoes.limparFiltros')}
                                         </button>
                                     )}
                                 </div>
@@ -436,7 +439,7 @@ export default function Index({ avaliacoes, filters, stats }) {
                         onFinish={() => setCarregando(false)}
                         numbered
                         onNavigate={irParaPagina}
-                        itemLabel="avaliações"
+                        itemLabel={t('avaliacoes.index.itemLabel')}
                     />
                 </div>
             </section>

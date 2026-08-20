@@ -67,7 +67,8 @@ class ReservaDisponibilidadeService
         return Piso::where('ativo', true)
             ->where('numero', '>=', 0)
             ->orderBy('numero')
-            ->get();
+            ->get()
+            ->each(fn (Piso $piso) => $piso->nome = $piso->nome_localizado);
     }
 
     /**
@@ -95,7 +96,14 @@ class ReservaDisponibilidadeService
             )
             ->orderBy('piso_id')
             ->orderBy('nome')
-            ->get();
+            ->get()
+            ->each(function (Setor $setor) {
+                $setor->nome = $setor->nome_localizado;
+
+                if ($setor->relationLoaded('piso') && $setor->piso) {
+                    $setor->piso->nome = $setor->piso->nome_localizado;
+                }
+            });
     }
 
     /**
@@ -550,6 +558,14 @@ class ReservaDisponibilidadeService
                     return [$periodo->id => $disponivel];
                 }
             );
+
+            if ($secretaria->relationLoaded('setor') && $secretaria->setor) {
+                $secretaria->setor->nome = $secretaria->setor->nome_localizado;
+
+                if ($secretaria->setor->relationLoaded('piso') && $secretaria->setor->piso) {
+                    $secretaria->setor->piso->nome = $secretaria->setor->piso->nome_localizado;
+                }
+            }
 
             return $secretaria;
         })->values();

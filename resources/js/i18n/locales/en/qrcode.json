@@ -1,0 +1,93 @@
+{
+    "scan": {
+        "tituloPagina": "Check-in · {{codigo}}",
+        "confirmarCheckin": "Confirm Check-in",
+        "aConfirmar": "Confirming...",
+        "estados": {
+            "pronta": {
+                "label": "Ready to check in",
+                "mensagem": "Confirm your presence at this desk."
+            },
+            "ja_check_in": {
+                "label": "Check-in already done",
+                "mensagem": "You've already confirmed this booking today."
+            },
+            "pendente_pagamento": {
+                "label": "Payment pending",
+                "mensagem": "Complete the payment for this booking to check in."
+            },
+            "fora_da_janela": {
+                "label": "Outside the check-in window",
+                "mensagem": "Check-in is only available close to the start of the reserved period."
+            },
+            "sem_reserva": {
+                "label": "No booking",
+                "mensagem": "You don't have an active booking for this desk today."
+            },
+            "ocupada_por_outro": {
+                "label": "Occupied by another user",
+                "mensagem": "This desk is already booked by someone else today."
+            },
+            "indisponivel": {
+                "label": "Desk unavailable",
+                "mensagem": "This desk isn't available for booking."
+            }
+        }
+    },
+    "camera": {
+        "tituloPagina": "Check-in",
+        "subtitulo": "Confirm your arrival",
+        "reserva": "Booking",
+        "hoje": "Today, {{data}}",
+        "resumoStatus": {
+            "pronta": "Within the check-in window",
+            "ja_check_in": "Check-in confirmed",
+            "pendente_pagamento": "Payment pending",
+            "fora_da_janela": "Outside the check-in window"
+        },
+        "guiaRapido": "Quick guide",
+        "comoFazerCheckin": "How to check in",
+        "passos": {
+            "1": { "titulo": "1. Find the desk", "descricao": "Go to the desk indicated in your booking and locate the QR Code displayed there." },
+            "2": { "titulo": "2. Allow the camera", "descricao": "Click start scanning and allow access to the device's camera." },
+            "3": { "titulo": "3. Scan the QR Code", "descricao": "Keep the code framed in the scan area for a few seconds." },
+            "4": { "titulo": "4. Check-in confirmed", "descricao": "The system validates the booking and automatically confirms your arrival." }
+        },
+        "validacaoReserva": "Booking validation",
+        "validacaoReservaTexto": "Check-in will only be accepted at the correct desk and within the allowed time window.",
+        "lerQrCode": "Scan QR Code",
+        "utilizeCamaraOuImagem": "Use the camera or select an image.",
+        "camaraAtiva": "Camera active",
+        "semReservaTitulo": "No booking available for check-in",
+        "semReservaTexto": "Check your bookings or book a space to check in.",
+        "prontoParaComecar": "Ready to start?",
+        "aponteCamara": "Point the camera at the desk's QR Code.",
+        "aPedirAcessoCamara": "Requesting camera access...",
+        "navegadorVaiPedirAutorizacao": "The browser will ask for your permission.",
+        "aValidarCodigo": "Validating the code...",
+        "aConfirmarReserva": "We're confirming your booking.",
+        "qrLidoComSucesso": "QR Code scanned successfully",
+        "qrLidoAValidar": "QR Code scanned successfully. Validating your booking...",
+        "mantenhaQrEnquadrado": "Keep the QR Code framed within the marker. Detection is automatic.",
+        "pararLeitura": "Stop scanning",
+        "iniciarLeitura": "Start scanning",
+        "selecionarImagem": "Select image",
+        "selecionarImagemAriaLabel": "Select image with QR Code",
+        "verMinhasReservas": "View my bookings",
+        "reservarEspaco": "Book a space",
+        "camaraApenasDuranteLeitura": "The camera will only be used while scanning.",
+        "qrInvalidoAviso": "This code isn't a SpaceHub check-in QR Code. Make sure you're scanning the code displayed at the correct desk.",
+        "erros": {
+            "acessoRecusadoTitulo": "Camera access denied",
+            "acessoRecusadoMensagem": "Allow camera access in your browser settings and try again, or select an image with the QR Code.",
+            "semCamaraTitulo": "No camera found",
+            "semCamaraMensagem": "No camera was detected on this device. You can select an image with the QR Code instead.",
+            "erroGenericoTitulo": "Couldn't start the camera",
+            "erroGenericoMensagem": "There was a problem accessing the camera. Try again or select an image with the QR Code.",
+            "codigoInvalidoTitulo": "Invalid QR Code",
+            "codigoInvalidoMensagem": "This code isn't a SpaceHub check-in QR Code. Make sure you're scanning the code displayed at the correct desk.",
+            "leituraFicheiroTitulo": "Couldn't read the code",
+            "leituraFicheiroMensagem": "No valid QR Code was found in this image. Try another photo."
+        }
+    }
+}

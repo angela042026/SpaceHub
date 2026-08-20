@@ -1,12 +1,14 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ImageOff, Info, Pencil, RotateCcw } from 'lucide-react';
 import PreferenciasPanel from '@/Components/Reservas/PreferenciasPanel';
 import LocalizacaoEspaco from '@/Components/Reservas/LocalizacaoEspaco';
 import { PREFERENCIAS } from '@/Components/Reservas/reservaHelpers';
 import { resolverImagemPorSetor } from '@/utils/imagemSetor';
 import { RESERVA_ALTERACAO_BAR_VISIBILITY_EVENT } from '@/Lib/reservaAlteracaoBar';
+import { etiquetaPeriodo } from '@/utils/estados';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -24,9 +26,6 @@ const PREFERENCIAS_PADRAO = {
     zona_silenciosa: false,
     proximo_copa: false,
 };
-
-const AVISO_ALTERACOES_POR_GUARDAR =
-    'Tens alterações por guardar. Se saíres agora, elas são perdidas. Queres mesmo sair?';
 
 /**
  * Nome do espaço a partir da secretária — a mesma categoria + número que
@@ -48,6 +47,7 @@ function nomeEspaco(secretaria) {
 }
 
 export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro }) {
+    const { t, i18n } = useTranslation('reservas');
     const { errors } = usePage().props;
 
     const [filtros, setFiltros] = useState({
@@ -187,7 +187,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
         selecao.periodoId !== reserva.periodo_id;
 
     const nomePeriodo = (periodoId) =>
-        periodos.find((periodo) => periodo.id === periodoId)?.nome ?? '-';
+        etiquetaPeriodo(periodos.find((periodo) => periodo.id === periodoId)?.nome, i18n.t) ?? '-';
 
     // O espaço do lado "Nova seleção" tanto pode ser a própria reserva
     // (quando só o período muda) como um dos lugares carregados.
@@ -236,7 +236,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                 return;
             }
 
-            if (houveAlteracaoRef.current && !window.confirm(AVISO_ALTERACOES_POR_GUARDAR)) {
+            if (houveAlteracaoRef.current && !window.confirm(t('editar.avisoAlteracoesPorGuardar'))) {
                 event.preventDefault();
             }
         });
@@ -283,7 +283,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
 
     return (
         <DashboardLayout>
-            <Head title="Editar Reserva" />
+            <Head title={t('editar.tituloPagina')} />
 
             <div className={houveAlteracao ? 'pb-72 lg:pb-28' : 'pb-28'}>
                 <section className="dashboard-card overflow-hidden">
@@ -294,11 +294,11 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Editar Reserva
+                                {t('editar.tituloPagina')}
                             </h1>
 
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Escolhe a data e o tipo de espaço, depois seleciona o novo período/lugar.
+                                {t('editar.subtitulo')}
                             </p>
                         </div>
                     </div>
@@ -308,9 +308,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                             <div className="mb-5 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300">
                                 <Info size={18} strokeWidth={1.9} className="mt-0.5 shrink-0" />
                                 <span>
-                                    Esta reserva faz parte de uma reserva de dia inteiro — também tens o
-                                    período <strong>{parDiaInteiro}</strong> reservado nesta secretária. Alterar
-                                    aqui só afeta este período.
+                                    {t('editar.avisoDiaInteiro', { periodo: parDiaInteiro })}
                                 </span>
                             </div>
                         )}
@@ -336,14 +334,14 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                     onClick={limparFiltros}
                                     className="text-xs font-semibold text-teal-600 underline underline-offset-2 transition hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:focus-visible:ring-offset-slate-900"
                                 >
-                                    Limpar filtros
+                                    {t('editar.limparFiltros')}
                                 </button>
                             </div>
                         )}
 
                         <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
                             <div>
-                                <label htmlFor="data" className={labelClass}>Data</label>
+                                <label htmlFor="data" className={labelClass}>{t('editar.data')}</label>
                                 <input
                                     id="data"
                                     type="date"
@@ -355,7 +353,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                             </div>
 
                             <div>
-                                <label htmlFor="piso_id" className={labelClass}>Piso</label>
+                                <label htmlFor="piso_id" className={labelClass}>{t('editar.piso')}</label>
                                 <select
                                     id="piso_id"
                                     value={filtros.piso_id}
@@ -363,7 +361,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                     required
                                     className={fieldClass}
                                 >
-                                    <option value="" disabled>Selecione...</option>
+                                    <option value="" disabled>{t('editar.selecione')}</option>
 
                                     {pisos.map((piso) => (
                                         <option key={piso.id} value={piso.id}>
@@ -374,7 +372,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                             </div>
 
                             <div>
-                                <label htmlFor="setor_id" className={labelClass}>Categoria do Espaço</label>
+                                <label htmlFor="setor_id" className={labelClass}>{t('editar.categoriaDoEspaco')}</label>
                                 <select
                                     id="setor_id"
                                     value={filtros.setor_id}
@@ -384,7 +382,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                     className={fieldClass}
                                 >
                                     <option value="" disabled>
-                                        {filtros.piso_id ? 'Selecione...' : 'Selecione primeiro o piso'}
+                                        {filtros.piso_id ? t('editar.selecione') : t('editar.selecionePrimeiroPiso')}
                                     </option>
 
                                     {setoresFiltrados.map((setor) => (
@@ -410,7 +408,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                         <div className="mt-8">
                             {lugares.length === 0 ? (
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Não existem lugares disponíveis para a data e categoria selecionadas.
+                                    {t('editar.semLugares')}
                                 </p>
                             ) : (
                                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -451,11 +449,11 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
 
                                                     {ehCardNovaSelecao ? (
                                                         <span className="absolute right-2.5 top-2.5 rounded-full bg-teal-500 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
-                                                            Nova seleção
+                                                            {t('editar.novaSelecao')}
                                                         </span>
                                                     ) : ehCardAtual ? (
                                                         <span className="absolute right-2.5 top-2.5 rounded-full bg-navy-900/90 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
-                                                            Atual
+                                                            {t('editar.atual')}
                                                         </span>
                                                     ) : null}
                                                 </div>
@@ -493,7 +491,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                                                                 : 'border-slate-200 text-slate-600 hover:border-teal-500/50 dark:border-slate-700 dark:text-slate-300'
                                                                     }`}
                                                                 >
-                                                                    {periodo.nome}
+                                                                    {etiquetaPeriodo(periodo.nome, i18n.t)}
                                                                 </button>
                                                             );
                                                         })}
@@ -526,7 +524,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                                                                 : 'border-slate-200 text-slate-600 hover:border-teal-500/50 dark:border-slate-700 dark:text-slate-300'
                                                                     }`}
                                                                 >
-                                                                    {periodoDiaInteiro.nome}
+                                                                    {etiquetaPeriodo(periodoDiaInteiro.nome, i18n.t)}
                                                                 </button>
                                                             );
                                                         })()}
@@ -546,7 +544,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
                                             <div className="min-w-0">
                                                 <p className="text-[11px] font-bold uppercase tracking-wide text-blue-600 dark:text-blue-300">
-                                                    Atual
+                                                    {t('editar.atual')}
                                                 </p>
 
                                                 <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
@@ -564,7 +562,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
 
                                             <div className="min-w-0">
                                                 <p className="text-[11px] font-bold uppercase tracking-wide text-teal-600 dark:text-teal-300">
-                                                    Nova seleção
+                                                    {t('editar.novaSelecao')}
                                                 </p>
 
                                                 <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
@@ -584,7 +582,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                                 onClick={descartarAlteracoes}
                                                 className="rounded-xl border border-teal-300 px-5 py-2.5 text-sm font-semibold text-teal-700 transition hover:bg-teal-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-teal-400/30 dark:text-teal-300 dark:hover:bg-teal-400/10"
                                             >
-                                                Descartar alterações
+                                                {t('editar.descartarAlteracoes')}
                                             </button>
 
                                             <button
@@ -595,7 +593,7 @@ export default function Edit({ reserva, periodos, pisos, setores, parDiaInteiro 
                                                 {aGuardar && (
                                                     <RotateCcw size={16} strokeWidth={2} className="animate-spin" />
                                                 )}
-                                                {aGuardar ? 'A guardar...' : 'Guardar alterações'}
+                                                {aGuardar ? t('editar.aGuardar') : t('editar.guardarAlteracoes')}
                                             </button>
                                         </div>
                                     </div>

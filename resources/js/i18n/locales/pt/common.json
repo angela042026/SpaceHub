@@ -1,0 +1,153 @@
+{
+    "app": {
+        "nome": "SpaceHub"
+    },
+    "acoes": {
+        "guardar": "Guardar",
+        "cancelar": "Cancelar",
+        "confirmar": "Confirmar",
+        "fechar": "Fechar",
+        "voltar": "Voltar",
+        "editar": "Editar",
+        "eliminar": "Eliminar",
+        "pesquisar": "Pesquisar",
+        "limparFiltros": "Limpar filtros",
+        "verMais": "Ver mais",
+        "verTodas": "Ver todas",
+        "seguinte": "Seguinte",
+        "anterior": "Anterior",
+        "enviar": "Enviar",
+        "criar": "Criar",
+        "atualizar": "Atualizar",
+        "ativar": "Ativar",
+        "desativar": "Desativar",
+        "sim": "Sim",
+        "nao": "Não"
+    },
+    "estado": {
+        "aCarregar": "A carregar...",
+        "semResultados": "Sem resultados.",
+        "erro": "Ocorreu um erro. Tenta novamente.",
+        "sucesso": "Sucesso"
+    },
+    "paginacao": {
+        "pagina": "Página {{atual}} de {{total}}",
+        "paginaAnterior": "Página anterior",
+        "paginaSeguinte": "Página seguinte",
+        "aMostrar": "A mostrar {{de}}–{{ate}} de {{total}} {{itemLabel}}",
+        "resultados": "resultados"
+    },
+    "idioma": {
+        "seletor": "Selecionar idioma",
+        "pt": "Português",
+        "en": "English"
+    },
+    "tema": {
+        "claro": "Modo claro",
+        "escuro": "Modo escuro"
+    },
+    "nav": {
+        "dashboard": "Dashboard",
+        "reservas": "Reservas",
+        "pagamentos": "Pagamentos",
+        "mapa": "Mapa",
+        "avaliacoes": "Avaliações",
+        "suporte": "Suporte",
+        "ajuda": "Central de ajuda",
+        "perfil": "Perfil",
+        "sair": "Sair",
+        "entrar": "Entrar",
+        "registar": "Registar"
+    },
+    "estados": {
+        "reserva": {
+            "pendente": "Pendente",
+            "confirmada": "Confirmada",
+            "cancelada": "Cancelada",
+            "expirada": "Expirada",
+            "concluida": "Concluída",
+            "nao_compareceu": "Não compareceu"
+        },
+        "avaliacao": {
+            "pendente": "Pendente",
+            "aprovada": "Aprovada",
+            "rejeitada": "Rejeitada"
+        },
+        "pagamento": {
+            "pendente": "Pendente",
+            "pago": "Pago",
+            "recusado": "Recusado",
+            "reembolsado": "Reembolsado",
+            "cancelado": "Cancelado"
+        },
+        "metodoPagamento": {
+            "cartao": "Cartão",
+            "mbway": "MB Way",
+            "transferencia": "Transferência bancária",
+            "paypal": "PayPal"
+        },
+        "suporte": {
+            "Pendente": "Pendente",
+            "Em análise": "Em análise",
+            "Resolvido": "Resolvido"
+        },
+        "utilizador": {
+            "true": "Ativo",
+            "false": "Inativo"
+        },
+        "periodo": {
+            "manha": "Manhã",
+            "tarde": "Tarde",
+            "diaInteiro": "Dia inteiro"
+        },
+        "role": {
+            "administrador": "Administrador",
+            "gestor": "Gestor",
+            "colaborador": "Colaborador",
+            "utilizador": "Utilizador"
+        }
+    },
+    "chat": {
+        "fecharChat": "Fechar chat de suporte",
+        "abrirChat": "Abrir chat de suporte",
+        "saudacao": "Olá!",
+        "comoPodemosAjudar": "Como podemos ajudar?",
+        "assistenteDisponivel": "Assistente disponível",
+        "escolhaUmaOpcao": "Escolha uma opção",
+        "centralDeAjuda": "Central de ajuda",
+        "encontreRespostasRapidas": "Encontre respostas rápidas",
+        "assistenteVirtual": "Assistente virtual",
+        "respostasImediatas": "Respostas imediatas"
+    },
+    "sidebar": {
+        "paginaInicial": "Página Inicial",
+        "dashboard": "Dashboard",
+        "reservarEspaco": "Reservar Espaço",
+        "minhasReservas": "Minhas Reservas",
+        "disponibilidade": "Disponibilidade",
+        "checkin": "Check-in",
+        "mapaDoEscritorio": "Mapa do Escritório",
+        "historico": "Histórico",
+        "pagamentos": "Pagamentos",
+        "minhasAvaliacoes": "Minhas Avaliações",
+        "centralDeAjuda": "Central de ajuda",
+        "definicoes": "Definições",
+        "administracao": "Administração",
+        "utilizadores": "Utilizadores",
+        "edificios": "Edifícios",
+        "pisos": "Pisos",
+        "setores": "Setores",
+        "secretarias": "Secretárias",
+        "reservas": "Reservas",
+        "qrCodes": "QR Codes",
+        "editorDoMapa": "Editor do Mapa",
+        "registoDeAtividade": "Registo de Atividade",
+        "estatisticas": "Estatísticas",
+        "relatorios": "Relatórios",
+        "avaliacoes": "Avaliações",
+        "pedidosDeSuporte": "Pedidos de Suporte",
+        "fecharMenu": "Fechar menu lateral",
+        "terminarSessao": "Terminar sessão",
+        "utilizadorFallback": "Utilizador"
+    }
+}

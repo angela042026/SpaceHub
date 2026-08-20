@@ -1,0 +1,188 @@
+{
+    "cookies": {
+        "titulo": "Política de Cookies",
+        "subtitulo": "Explicamos aqui que cookies e tecnologias semelhantes utilizamos, para que servem, e como pode alterar a sua preferência a qualquer momento.",
+        "atualizadoEm": "23 de julho de 2026",
+        "sections": {
+            "introducao": "O que são cookies",
+            "essenciais": "Cookies essenciais",
+            "opcionais": "Cookies opcionais",
+            "preferencias": "Gerir preferências",
+            "alteracoes": "Alterações a esta política",
+            "contacto": "Contacto"
+        },
+        "introducao": {
+            "parte1": "Cookies são pequenos ficheiros de texto guardados no seu dispositivo quando visita a SpaceHub. Utilizamo-los, juntamente com armazenamento local semelhante (",
+            "parte2": "), para o funcionamento da plataforma e, mediante o seu consentimento, para compreender melhor como a plataforma é utilizada."
+        },
+        "essenciais": {
+            "intro": "Estes cookies estão sempre ativos, pois são estritamente necessários para a plataforma funcionar corretamente. Não pedimos consentimento para estes, porque não recolhem dados para fins de análise, publicidade ou marketing.",
+            "li1Strong": "Sessão e autenticação:",
+            "li1": "mantêm a sua sessão iniciada e protegem o acesso à sua conta;",
+            "li2Strong": "Preferências de interface:",
+            "li2": "guardam, por exemplo, a sua escolha de tema (claro/escuro);",
+            "li3Strong": "Segurança:",
+            "li3": "ajudam a prevenir a utilização abusiva da plataforma.",
+            "cookieSessao": "Mantém a sua sessão de autenticação iniciada.",
+            "cookieXsrf": "Protege os formulários da plataforma contra ataques CSRF.",
+            "cookieTema": "Guarda a sua preferência de tema (claro/escuro).",
+            "cookieConsent": "Guarda a sua escolha no banner de cookies.",
+            "duracaoInatividade": "2 horas de inatividade",
+            "duracaoAteApagado": "Até ser apagado"
+        },
+        "tabela": {
+            "nome": "Nome",
+            "finalidade": "Finalidade",
+            "duracao": "Duração"
+        },
+        "opcionais": {
+            "intro": "Só são ativados se aceitar cookies opcionais no banner apresentado na sua primeira visita. Utilizamos o Google Analytics para perceber, de forma agregada, como a plataforma é utilizada (por exemplo, quais as páginas mais visitadas), o que nos ajuda a melhorar a experiência de utilização. Se rejeitar ou não responder ao banner, este script nunca chega a ser carregado.",
+            "cookieGa": "Google Analytics — distingue utilizadores de forma anónima.",
+            "cookieGaSession": "Google Analytics — mantém o estado da sessão de navegação.",
+            "duracao": "Até 2 anos",
+            "nota": "Estes cookies só existem se aceitar cookies opcionais e se o Google Analytics estiver configurado na plataforma."
+        },
+        "preferencias": {
+            "texto": "Pode alterar a sua escolha a qualquer momento. Ao clicar no botão abaixo, a sua preferência atual é apagada e o banner de cookies volta a ser apresentado na página inicial.",
+            "botao": "Alterar preferências de cookies"
+        },
+        "alteracoes": {
+            "texto": "Esta Política de Cookies pode ser atualizada periodicamente, nomeadamente se adicionarmos novos cookies opcionais. Recomendamos a consulta ocasional desta página."
+        },
+        "contacto": {
+            "texto": "Para esclarecer qualquer dúvida sobre esta Política de Cookies, entre em contacto com a equipa do SpaceHub através do Centro de Ajuda da plataforma."
+        }
+    },
+    "privacy": {
+        "titulo": "Política de Privacidade",
+        "subtitulo": "Explicamos aqui que dados pessoais recolhemos, para que finalidade, e quais os direitos que tem sobre a sua informação enquanto utilizador do SpaceHub.",
+        "atualizadoEm": "17 de julho de 2026",
+        "sections": {
+            "introducao": "Introdução",
+            "dadosRecolhidos": "Dados recolhidos",
+            "finalidade": "Finalidade do tratamento",
+            "baseLegal": "Base legal",
+            "partilha": "Partilha com terceiros",
+            "conservacao": "Conservação dos dados",
+            "direitos": "Os seus direitos",
+            "seguranca": "Segurança",
+            "cookies": "Cookies",
+            "alteracoes": "Alterações a esta política",
+            "contacto": "Contacto"
+        },
+        "introducao": {
+            "texto": "Esta Política de Privacidade descreve como o SpaceHub recolhe, utiliza e protege os dados pessoais dos seus utilizadores, em conformidade com o Regulamento Geral sobre a Proteção de Dados (RGPD). Ao utilizar a plataforma, aceita as práticas aqui descritas."
+        },
+        "dadosRecolhidos": {
+            "intro": "Recolhemos os seguintes tipos de dados:",
+            "li1Strong": "Dados de identificação:",
+            "li1": "nome, endereço de e-mail e, opcionalmente, fotografia de perfil;",
+            "li2Strong": "Dados de autenticação:",
+            "li2": "senha encriptada, ou identificador da conta Google quando o início de sessão é feito através desse serviço;",
+            "li3Strong": "Dados de utilização:",
+            "li3": "reservas efetuadas, datas e períodos reservados, secretárias e espaços utilizados, registos de check-in;",
+            "li4Strong": "Dados técnicos:",
+            "li4": "endereço IP e informação de sessão, utilizados para segurança e prevenção de abuso (ex.: limite de tentativas de login)."
+        },
+        "finalidade": {
+            "intro": "Os dados recolhidos são utilizados para:",
+            "li1": "Criar e gerir a sua conta de utilizador;",
+            "li2": "Processar reservas de espaços e permitir o check-in através de código QR;",
+            "li3": "Enviar comunicações relacionadas com a sua conta (confirmações, recuperação de senha, verificação de e-mail);",
+            "li4": "Garantir a segurança da plataforma e prevenir utilização indevida."
+        },
+        "baseLegal": {
+            "parte1": "Tratamos os seus dados com base em três fundamentos: a",
+            "execucaoContrato": "execução do contrato",
+            "parte2": "de utilização estabelecido ao criar a conta (necessário para gerir reservas e check-ins), o",
+            "cumprimentoObrigacoes": "cumprimento de obrigações legais",
+            "parte3": "a que estamos sujeitos, e o seu",
+            "consentimentoExplicito": "consentimento explícito",
+            "parte4": ", dado ao aceitar estes termos no momento do registo — o qual pode ser retirado a qualquer momento, sem comprometer a licitude do tratamento realizado anteriormente."
+        },
+        "partilha": {
+            "intro": "Não vendemos nem partilhamos os seus dados pessoais com terceiros para fins comerciais. Podemos partilhar dados limitados com:",
+            "li1Strong": "Google:",
+            "li1": "caso opte por iniciar sessão através do Google, este serviço processa a autenticação de acordo com a própria política de privacidade da Google;",
+            "li2Strong": "Administradores da organização:",
+            "li2": "no âmbito da gestão de espaços, reservas e segurança da plataforma."
+        },
+        "conservacao": {
+            "texto": "Os dados pessoais são conservados enquanto a conta se mantiver ativa. Após o encerramento de uma conta, os dados poderão ser conservados por um período adicional limitado, quando exigido por obrigações legais ou para efeitos de segurança e resolução de eventuais litígios."
+        },
+        "direitos": {
+            "paragrafo1": "Nos termos do RGPD, tem direito a aceder, retificar, apagar ou limitar o tratamento dos seus dados pessoais, bem como a solicitar a portabilidade dos mesmos e a opor-se ao seu tratamento em determinadas circunstâncias. Pode exercer estes direitos a qualquer momento através do Centro de Ajuda.",
+            "paragrafo2": "Caso considere que o tratamento dos seus dados viola a legislação aplicável, tem ainda o direito de apresentar reclamação junto da Comissão Nacional de Proteção de Dados (CNPD), enquanto autoridade de controlo competente."
+        },
+        "seguranca": {
+            "texto": "Adotamos medidas técnicas e organizativas adequadas para proteger os seus dados, incluindo encriptação de senhas, controlo de acesso baseado em funções e limitação de tentativas de autenticação. Nenhum sistema é, no entanto, totalmente imune a riscos, pelo que recomendamos a utilização de uma senha forte e exclusiva."
+        },
+        "cookies": {
+            "parte1": "Utilizamos cookies e armazenamento local estritamente necessários ao funcionamento da plataforma, nomeadamente para manter a sua sessão iniciada e guardar a sua preferência de tema (claro/escuro). Mediante o seu consentimento, utilizamos também cookies opcionais de análise de utilização. Não utilizamos cookies de publicidade ou de rastreamento de terceiros. Para mais detalhes e para alterar a sua preferência, consulte a nossa",
+            "linkTexto": "Política de Cookies"
+        },
+        "alteracoes": {
+            "texto": "Esta Política de Privacidade pode ser atualizada periodicamente. Notificaremos alterações relevantes através da plataforma, sendo a utilização continuada do SpaceHub considerada como aceitação da versão mais recente."
+        },
+        "contacto": {
+            "texto": "Para exercer os seus direitos ou esclarecer qualquer dúvida sobre esta Política de Privacidade, entre em contacto com a equipa do SpaceHub através do Centro de Ajuda da plataforma."
+        }
+    },
+    "terms": {
+        "titulo": "Termos de Utilização",
+        "subtitulo": "Estas condições regulam o acesso e a utilização da plataforma SpaceHub. Ao criar uma conta, confirma que leu e aceita os termos abaixo.",
+        "atualizadoEm": "17 de julho de 2026",
+        "sections": {
+            "aceitacao": "Aceitação dos termos",
+            "conta": "Conta de utilizador",
+            "reservas": "Reservas e check-in",
+            "conduta": "Regras de utilização",
+            "propriedade": "Propriedade intelectual",
+            "suspensao": "Suspensão e encerramento",
+            "responsabilidade": "Limitação de responsabilidade",
+            "alteracoes": "Alterações aos termos",
+            "contacto": "Contacto"
+        },
+        "aceitacao": {
+            "parte1": "Ao aceder ou utilizar o SpaceHub, o utilizador declara ter lido, compreendido e aceite estes Termos de Utilização, bem como a nossa",
+            "linkTexto": "Política de Privacidade",
+            "parte2": ". Caso não concorde com alguma destas condições, não deverá utilizar a plataforma."
+        },
+        "conta": {
+            "intro": "Para utilizar a maioria das funcionalidades do SpaceHub é necessário criar uma conta, através de registo direto ou de início de sessão com o Google. O utilizador é responsável por:",
+            "li1": "Fornecer informação verdadeira, completa e atualizada no momento do registo;",
+            "li2": "Manter a confidencialidade da sua senha e de qualquer credencial de acesso;",
+            "li3": "Notificar a equipa responsável em caso de utilização não autorizada da sua conta.",
+            "paragrafo2": "Contas podem ser suspensas ou desativadas por um administrador em caso de incumprimento destes termos, sem prejuízo de outras medidas aplicáveis."
+        },
+        "reservas": {
+            "intro": "O SpaceHub permite reservar secretárias e espaços de trabalho, consultar disponibilidade e efetuar check-in através de código QR. Ao efetuar uma reserva, o utilizador compromete-se a:",
+            "li1": "Utilizar o espaço reservado apenas durante o período confirmado;",
+            "li2": "Cancelar a reserva com a devida antecedência caso não pretenda comparecer;",
+            "li3": "Não efetuar reservas duplicadas ou em nome de terceiros sem autorização.",
+            "paragrafo2": "A organização reserva-se o direito de cancelar reservas em situações excecionais (manutenção, indisponibilidade do espaço ou motivos de força maior), procurando sempre notificar o utilizador com a maior antecedência possível."
+        },
+        "conduta": {
+            "intro": "Ao utilizar o SpaceHub, o utilizador compromete-se a não:",
+            "li1": "Tentar aceder a áreas, contas ou dados a que não tenha autorização;",
+            "li2": "Utilizar a plataforma para fins fraudulentos, ilícitos ou que violem direitos de terceiros;",
+            "li3": "Interferir com o normal funcionamento do serviço, incluindo tentativas de sobrecarga ou exploração de vulnerabilidades."
+        },
+        "propriedade": {
+            "texto": "O nome SpaceHub, o respetivo logótipo, interface e conteúdos originais são propriedade da organização responsável pela plataforma. É proibida a reprodução, distribuição ou modificação destes elementos sem autorização prévia."
+        },
+        "suspensao": {
+            "texto": "Podemos suspender ou encerrar o acesso de um utilizador à plataforma, total ou parcialmente, em caso de violação destes termos, utilização indevida do serviço ou por indicação de um administrador responsável pela gestão dos espaços. O utilizador pode, a qualquer momento, solicitar o encerramento da sua conta através do Centro de Ajuda."
+        },
+        "responsabilidade": {
+            "paragrafo1": "O SpaceHub é disponibilizado \"tal como está\". Envidamos esforços razoáveis para garantir a disponibilidade e o correto funcionamento da plataforma, mas não garantimos que o serviço estará sempre livre de interrupções, atrasos ou erros pontuais, nomeadamente durante operações de manutenção.",
+            "paragrafo2": "Na medida permitida por lei, não nos responsabilizamos por danos indiretos, lucros cessantes ou perdas de oportunidade resultantes da utilização, impossibilidade de utilização ou indisponibilidade temporária do serviço. Esta limitação não afeta quaisquer direitos que não possam ser excluídos ou limitados nos termos da lei aplicável."
+        },
+        "alteracoes": {
+            "texto": "Estes termos podem ser atualizados periodicamente para refletir alterações ao serviço ou a requisitos legais. Alterações significativas serão comunicadas através da plataforma. A utilização continuada do SpaceHub após uma alteração implica a aceitação dos novos termos."
+        },
+        "contacto": {
+            "texto": "Para questões relacionadas com estes Termos de Utilização, entre em contacto com a equipa do SpaceHub através do Centro de Ajuda da plataforma."
+        }
+    }
+}

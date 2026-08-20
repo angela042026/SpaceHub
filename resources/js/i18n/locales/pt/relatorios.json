@@ -1,0 +1,140 @@
+{
+    "index": {
+        "titulo": "Relatórios",
+        "descricao": "Consulte, filtre e exporte os principais dados de gestão do SpaceHub.",
+        "verRelatorio": "Ver relatório",
+        "cards": {
+            "reservas": {
+                "titulo": "Relatório de Reservas",
+                "descricao": "Lista de reservas filtrável por período, estado, espaço e utilizador."
+            },
+            "utilizadores": {
+                "titulo": "Relatório de Utilizadores",
+                "descricao": "Lista de contas do sistema filtrável por papel, estado e registo."
+            },
+            "suporte": {
+                "titulo": "Relatório de Suporte",
+                "descricao": "Pedidos de suporte filtráveis por estado, prioridade e período."
+            },
+            "ocupacao": {
+                "titulo": "Relatório de Ocupação",
+                "descricao": "Analise a utilização dos espaços e identifique períodos de maior ocupação por período, piso, setor e edifício."
+            },
+            "espacos": {
+                "titulo": "Relatório de Espaços",
+                "descricao": "Compare a utilização das secretárias e identifique os espaços mais e menos reservados por período, piso, setor e espaço."
+            },
+            "cancelamentos": {
+                "titulo": "Relatório de Cancelamentos e Ausências",
+                "descricao": "Acompanhe cancelamentos e não comparências para identificar padrões de utilização por período, estado, utilizador e espaço."
+            }
+        }
+    },
+    "suporte": {
+        "titulo": "Relatório de Suporte",
+        "subtituloImpressao_one": "{{count}} pedido listado",
+        "subtituloImpressao_other": "{{count}} pedidos listados",
+        "encontrados_one": "{{count}} pedido encontrado.",
+        "encontrados_other": "{{count}} pedidos encontrados.",
+        "colunas": {
+            "utilizador": "Utilizador",
+            "assunto": "Assunto",
+            "estado": "Estado",
+            "criadoEm": "Criado em"
+        },
+        "todosEstados": "Todos os estados",
+        "semResultados": "Nenhum pedido de suporte encontrado para os filtros selecionados.",
+        "itemLabel": "pedidos"
+    },
+    "filtros": {
+        "data": "Data",
+        "de": "De",
+        "ate": "Até",
+        "piso": "Piso",
+        "setor": "Setor",
+        "todos": "Todos",
+        "filtrar": "Filtrar",
+        "criadoEm": "Criado em"
+    },
+    "ocupacao": {
+        "titulo": "Relatório de Ocupação",
+        "subtituloImpressao_one": "{{count}} dia listado",
+        "subtituloImpressao_other": "{{count}} dias listados",
+        "encontrados_one": "{{count}} dia encontrado.",
+        "encontrados_other": "{{count}} dias encontrados.",
+        "colunas": {
+            "secretariasOcupadas": "Secretárias Ocupadas",
+            "totalSecretarias": "Secretárias Totais",
+            "taxaOcupacao": "Taxa de Ocupação"
+        },
+        "semResultados": "Nenhum dia encontrado para os filtros selecionados.",
+        "itemLabel": "dias"
+    },
+    "utilizadores": {
+        "titulo": "Relatório de Utilizadores",
+        "subtituloImpressao_one": "{{count}} utilizador listado",
+        "subtituloImpressao_other": "{{count}} utilizadores listados",
+        "encontrados_one": "{{count}} utilizador encontrado.",
+        "encontrados_other": "{{count}} utilizadores encontrados.",
+        "colunas": {
+            "nome": "Nome",
+            "email": "E-mail",
+            "papel": "Papel",
+            "estado": "Estado"
+        },
+        "todosPapeis": "Todos os papéis",
+        "todosEstados": "Todos os estados",
+        "ativos": "Ativos",
+        "inativos": "Inativos",
+        "semResultados": "Nenhum utilizador encontrado para os filtros selecionados.",
+        "itemLabel": "utilizadores"
+    },
+    "reservas": {
+        "titulo": "Relatório de Reservas",
+        "subtituloImpressao_one": "{{count}} reserva listada",
+        "subtituloImpressao_other": "{{count}} reservas listadas",
+        "encontrados_one": "{{count}} reserva encontrada.",
+        "encontrados_other": "{{count}} reservas encontradas.",
+        "colunas": {
+            "utilizador": "Utilizador",
+            "secretaria": "Secretária",
+            "localizacao": "Localização",
+            "periodo": "Período",
+            "estado": "Estado"
+        },
+        "semResultados": "Nenhuma reserva encontrada para os filtros selecionados.",
+        "itemLabel": "reservas"
+    },
+    "espacos": {
+        "titulo": "Relatório de Espaços",
+        "subtituloImpressao_one": "{{count}} secretária listada",
+        "subtituloImpressao_other": "{{count}} secretárias listadas",
+        "encontrados_one": "{{count}} secretária encontrada.",
+        "encontrados_other": "{{count}} secretárias encontradas.",
+        "colunas": {
+            "secretaria": "Secretária",
+            "edificio": "Edifício",
+            "diasOcupados": "Dias Ocupados",
+            "percentualTotal": "% do Total"
+        },
+        "semResultados": "Nenhuma secretária encontrada para os filtros selecionados.",
+        "itemLabel": "secretárias"
+    },
+    "cancelamentos": {
+        "titulo": "Relatório de Cancelamentos e Ausências",
+        "subtituloImpressao_one": "{{count}} registo listado",
+        "subtituloImpressao_other": "{{count}} registos listados",
+        "encontrados_one": "{{count}} registo encontrado.",
+        "encontrados_other": "{{count}} registos encontrados.",
+        "colunas": {
+            "utilizador": "Utilizador",
+            "secretaria": "Secretária",
+            "localizacao": "Localização",
+            "estado": "Estado",
+            "observacoes": "Observações"
+        },
+        "nomeUtilizadorPlaceholder": "Nome do utilizador",
+        "semResultados": "Nenhum cancelamento ou ausência encontrado para os filtros selecionados.",
+        "itemLabel": "registos"
+    }
+}

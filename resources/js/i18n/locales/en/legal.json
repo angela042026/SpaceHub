@@ -1,0 +1,188 @@
+{
+    "cookies": {
+        "titulo": "Cookie Policy",
+        "subtitulo": "Here we explain what cookies and similar technologies we use, what they are for, and how you can change your preference at any time.",
+        "atualizadoEm": "23 July 2026",
+        "sections": {
+            "introducao": "What cookies are",
+            "essenciais": "Essential cookies",
+            "opcionais": "Optional cookies",
+            "preferencias": "Manage preferences",
+            "alteracoes": "Changes to this policy",
+            "contacto": "Contact"
+        },
+        "introducao": {
+            "parte1": "Cookies are small text files stored on your device when you visit SpaceHub. We use them, together with similar local storage (",
+            "parte2": "), to run the platform and, with your consent, to better understand how the platform is used."
+        },
+        "essenciais": {
+            "intro": "These cookies are always active, as they are strictly necessary for the platform to work properly. We don't ask for consent for these, because they don't collect data for analytics, advertising or marketing purposes.",
+            "li1Strong": "Session and authentication:",
+            "li1": "keep you signed in and protect access to your account;",
+            "li2Strong": "Interface preferences:",
+            "li2": "store, for example, your theme choice (light/dark);",
+            "li3Strong": "Security:",
+            "li3": "help prevent abusive use of the platform.",
+            "cookieSessao": "Keeps your authentication session signed in.",
+            "cookieXsrf": "Protects the platform's forms against CSRF attacks.",
+            "cookieTema": "Stores your theme preference (light/dark).",
+            "cookieConsent": "Stores your choice on the cookie banner.",
+            "duracaoInatividade": "2 hours of inactivity",
+            "duracaoAteApagado": "Until deleted"
+        },
+        "tabela": {
+            "nome": "Name",
+            "finalidade": "Purpose",
+            "duracao": "Duration"
+        },
+        "opcionais": {
+            "intro": "Only activated if you accept optional cookies on the banner shown on your first visit. We use Google Analytics to understand, in aggregate, how the platform is used (for example, which pages are most visited), which helps us improve the user experience. If you reject or don't respond to the banner, this script is never loaded.",
+            "cookieGa": "Google Analytics — anonymously distinguishes users.",
+            "cookieGaSession": "Google Analytics — keeps track of the browsing session state.",
+            "duracao": "Up to 2 years",
+            "nota": "These cookies only exist if you accept optional cookies and Google Analytics is configured on the platform."
+        },
+        "preferencias": {
+            "texto": "You can change your choice at any time. Clicking the button below clears your current preference and the cookie banner is shown again on the home page.",
+            "botao": "Change cookie preferences"
+        },
+        "alteracoes": {
+            "texto": "This Cookie Policy may be updated periodically, particularly if we add new optional cookies. We recommend checking this page occasionally."
+        },
+        "contacto": {
+            "texto": "To clarify any question about this Cookie Policy, contact the SpaceHub team through the platform's Help Centre."
+        }
+    },
+    "privacy": {
+        "titulo": "Privacy Policy",
+        "subtitulo": "Here we explain what personal data we collect, for what purpose, and what rights you have over your information as a SpaceHub user.",
+        "atualizadoEm": "17 July 2026",
+        "sections": {
+            "introducao": "Introduction",
+            "dadosRecolhidos": "Data collected",
+            "finalidade": "Purpose of processing",
+            "baseLegal": "Legal basis",
+            "partilha": "Sharing with third parties",
+            "conservacao": "Data retention",
+            "direitos": "Your rights",
+            "seguranca": "Security",
+            "cookies": "Cookies",
+            "alteracoes": "Changes to this policy",
+            "contacto": "Contact"
+        },
+        "introducao": {
+            "texto": "This Privacy Policy describes how SpaceHub collects, uses and protects the personal data of its users, in compliance with the General Data Protection Regulation (GDPR). By using the platform, you accept the practices described here."
+        },
+        "dadosRecolhidos": {
+            "intro": "We collect the following types of data:",
+            "li1Strong": "Identification data:",
+            "li1": "name, email address and, optionally, profile photo;",
+            "li2Strong": "Authentication data:",
+            "li2": "encrypted password, or Google account identifier when sign-in is done through that service;",
+            "li3Strong": "Usage data:",
+            "li3": "reservations made, dates and periods booked, desks and spaces used, check-in records;",
+            "li4Strong": "Technical data:",
+            "li4": "IP address and session information, used for security and abuse prevention (e.g. login attempt limits)."
+        },
+        "finalidade": {
+            "intro": "The data collected is used to:",
+            "li1": "Create and manage your user account;",
+            "li2": "Process space reservations and enable check-in via QR code;",
+            "li3": "Send communications related to your account (confirmations, password recovery, email verification);",
+            "li4": "Ensure platform security and prevent misuse."
+        },
+        "baseLegal": {
+            "parte1": "We process your data on the basis of three grounds: the",
+            "execucaoContrato": "performance of the usage contract",
+            "parte2": "established when you create the account (necessary to manage reservations and check-ins), the",
+            "cumprimentoObrigacoes": "compliance with legal obligations",
+            "parte3": "we are subject to, and your",
+            "consentimentoExplicito": "explicit consent",
+            "parte4": ", given when accepting these terms at the time of registration — which can be withdrawn at any time, without affecting the lawfulness of processing carried out previously."
+        },
+        "partilha": {
+            "intro": "We do not sell or share your personal data with third parties for commercial purposes. We may share limited data with:",
+            "li1Strong": "Google:",
+            "li1": "if you choose to sign in through Google, this service processes authentication according to Google's own privacy policy;",
+            "li2Strong": "Organisation administrators:",
+            "li2": "as part of managing spaces, reservations and platform security."
+        },
+        "conservacao": {
+            "texto": "Personal data is retained for as long as the account remains active. After an account is closed, data may be retained for a limited additional period, when required by legal obligations or for security purposes and resolution of potential disputes."
+        },
+        "direitos": {
+            "paragrafo1": "Under the GDPR, you have the right to access, rectify, erase or restrict the processing of your personal data, as well as to request its portability and to object to its processing in certain circumstances. You can exercise these rights at any time through the Help Centre.",
+            "paragrafo2": "If you consider that the processing of your data violates applicable legislation, you also have the right to lodge a complaint with the National Data Protection Commission (CNPD), as the competent supervisory authority."
+        },
+        "seguranca": {
+            "texto": "We adopt appropriate technical and organisational measures to protect your data, including password encryption, role-based access control and authentication attempt limiting. However, no system is completely immune to risk, so we recommend using a strong, unique password."
+        },
+        "cookies": {
+            "parte1": "We use cookies and local storage strictly necessary for the platform to function, namely to keep you signed in and store your theme preference (light/dark). With your consent, we also use optional usage-analysis cookies. We do not use third-party advertising or tracking cookies. For more details and to change your preference, see our",
+            "linkTexto": "Cookie Policy"
+        },
+        "alteracoes": {
+            "texto": "This Privacy Policy may be updated periodically. We will notify relevant changes through the platform, with continued use of SpaceHub considered acceptance of the latest version."
+        },
+        "contacto": {
+            "texto": "To exercise your rights or clarify any question about this Privacy Policy, contact the SpaceHub team through the platform's Help Centre."
+        }
+    },
+    "terms": {
+        "titulo": "Terms of Use",
+        "subtitulo": "These conditions govern access to and use of the SpaceHub platform. By creating an account, you confirm that you have read and accept the terms below.",
+        "atualizadoEm": "17 July 2026",
+        "sections": {
+            "aceitacao": "Acceptance of terms",
+            "conta": "User account",
+            "reservas": "Reservations and check-in",
+            "conduta": "Rules of use",
+            "propriedade": "Intellectual property",
+            "suspensao": "Suspension and termination",
+            "responsabilidade": "Limitation of liability",
+            "alteracoes": "Changes to the terms",
+            "contacto": "Contact"
+        },
+        "aceitacao": {
+            "parte1": "By accessing or using SpaceHub, the user declares to have read, understood and accepted these Terms of Use, as well as our",
+            "linkTexto": "Privacy Policy",
+            "parte2": ". If you do not agree with any of these conditions, you should not use the platform."
+        },
+        "conta": {
+            "intro": "To use most of SpaceHub's features, you need to create an account, either through direct registration or by signing in with Google. The user is responsible for:",
+            "li1": "Providing true, complete and up-to-date information at the time of registration;",
+            "li2": "Keeping their password and any access credentials confidential;",
+            "li3": "Notifying the responsible team in case of unauthorised use of their account.",
+            "paragrafo2": "Accounts may be suspended or deactivated by an administrator in case of breach of these terms, without prejudice to other applicable measures."
+        },
+        "reservas": {
+            "intro": "SpaceHub allows you to book desks and workspaces, check availability and check in via QR code. By making a reservation, the user commits to:",
+            "li1": "Use the reserved space only during the confirmed period;",
+            "li2": "Cancel the reservation with due notice if they do not intend to attend;",
+            "li3": "Not make duplicate reservations or reservations on behalf of third parties without authorisation.",
+            "paragrafo2": "The organisation reserves the right to cancel reservations in exceptional situations (maintenance, space unavailability or force majeure), always seeking to notify the user as far in advance as possible."
+        },
+        "conduta": {
+            "intro": "When using SpaceHub, the user commits not to:",
+            "li1": "Attempt to access areas, accounts or data they are not authorised to access;",
+            "li2": "Use the platform for fraudulent, unlawful purposes or purposes that violate third-party rights;",
+            "li3": "Interfere with the normal operation of the service, including attempts to overload it or exploit vulnerabilities."
+        },
+        "propriedade": {
+            "texto": "The SpaceHub name, its logo, interface and original content are the property of the organisation responsible for the platform. Reproduction, distribution or modification of these elements without prior authorisation is prohibited."
+        },
+        "suspensao": {
+            "texto": "We may suspend or terminate a user's access to the platform, in whole or in part, in case of breach of these terms, misuse of the service, or at the direction of an administrator responsible for space management. The user may, at any time, request the closure of their account through the Help Centre."
+        },
+        "responsabilidade": {
+            "paragrafo1": "SpaceHub is provided \"as is\". We make reasonable efforts to ensure the availability and proper functioning of the platform, but we do not guarantee that the service will always be free of interruptions, delays or occasional errors, particularly during maintenance operations.",
+            "paragrafo2": "To the extent permitted by law, we are not liable for indirect damages, lost profits or loss of opportunity resulting from the use, inability to use, or temporary unavailability of the service. This limitation does not affect any rights that cannot be excluded or limited under applicable law."
+        },
+        "alteracoes": {
+            "texto": "These terms may be updated periodically to reflect changes to the service or legal requirements. Significant changes will be communicated through the platform. Continued use of SpaceHub after a change implies acceptance of the new terms."
+        },
+        "contacto": {
+            "texto": "For questions related to these Terms of Use, contact the SpaceHub team through the platform's Help Centre."
+        }
+    }
+}

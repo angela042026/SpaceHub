@@ -1,15 +1,14 @@
 import { Link } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    ChevronDown,
-    Globe2,
-} from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import ThemeToggle from './ThemeToggle';
+import LanguageSwitcher from '@/Components/LanguageSwitcher';
 
 export default function AuthHeader({
     theme,
     toggleTheme,
 }) {
+    const { t } = useTranslation('auth');
     const darkMode = theme === 'dark';
 
     return (
@@ -26,7 +25,7 @@ export default function AuthHeader({
                 <Link
                     href="/"
                     className="flex items-center"
-                    aria-label="Voltar à página inicial"
+                    aria-label={t('layout.voltarAPaginaInicial')}
                 >
                     <img
                         src={
@@ -45,30 +44,9 @@ export default function AuthHeader({
                         onToggle={toggleTheme}
                     />
 
-                    <button
-                        type="button"
-                        aria-label="Selecionar idioma"
-                        className="
-                            hidden h-11 items-center gap-2
-                            rounded-xl border border-slate-200
-                            bg-white px-3
-                            text-sm font-semibold
-                            text-[#102E55]
-                            shadow-sm transition
-                            hover:border-[#14B8A6]
-                            hover:text-[#0F9E90]
-                            dark:border-white/15
-                            dark:bg-white/5
-                            dark:text-slate-200
-                            dark:hover:border-[#5EEAD4]
-                            dark:hover:text-[#5EEAD4]
-                            sm:flex
-                        "
-                    >
-                        <Globe2 size={18} />
-                        <span>PT</span>
-                        <ChevronDown size={14} />
-                    </button>
+                    <div className="hidden sm:block">
+                        <LanguageSwitcher variant="light" />
+                    </div>
 
                     <Link
                         href="/"
@@ -93,7 +71,7 @@ export default function AuthHeader({
                         <ArrowLeft size={17} />
 
                         <span className="hidden sm:inline">
-                            Voltar ao site
+                            {t('layout.voltarAoSite')}
                         </span>
                     </Link>
                 </div>

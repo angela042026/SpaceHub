@@ -21,7 +21,7 @@ class AvaliacaoResource extends JsonResource
                 'data' => $this->reserva->data?->format('Y-m-d'),
                 'utilizador' => $this->reserva->user?->name,
                 'secretaria' => $this->reserva->secretaria?->codigo,
-                'setor' => $this->reserva->secretaria?->setor?->nome,
+                'setor' => $this->reserva->secretaria?->setor?->nome_localizado,
                 'periodo' => $this->reserva->periodo?->nome,
             ]),
         ];

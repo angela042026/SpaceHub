@@ -1,14 +1,17 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import GoogleCalendarForm from './Partials/GoogleCalendarForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
 export default function Edit({ mustVerifyEmail, status, googleCalendarConectado }) {
+    const { t } = useTranslation('profile');
+
     return (
         <DashboardLayout>
-            <Head title="Definições" />
+            <Head title={t('tituloPagina')} />
 
             <div className="space-y-6">
                 <UpdateProfileInformationForm

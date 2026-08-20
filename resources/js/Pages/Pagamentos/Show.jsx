@@ -1,6 +1,7 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import LocalizacaoEspaco from '@/Components/Reservas/LocalizacaoEspaco';
 import { Head, Link } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowLeft,
     Building2,
@@ -11,7 +12,7 @@ import {
     RotateCcw,
     XCircle,
 } from 'lucide-react';
-import { ESTADO_PAGAMENTO, METODO_PAGAMENTO, badge, etiqueta } from '@/utils/estados';
+import { ESTADO_PAGAMENTO, METODO_PAGAMENTO, badge, etiqueta, etiquetaPeriodo } from '@/utils/estados';
 import { formatarDataCurta, formatarDataHora, formatarValorEuro } from '@/utils/formatacaoPagamento';
 
 const ESTADO_ICONE = {
@@ -22,60 +23,54 @@ const ESTADO_ICONE = {
     cancelado: XCircle,
 };
 
-const FAIXA_CONFIG = {
+const FAIXA_ESTILOS = {
     pago: {
         moldura: 'border-teal-100 dark:border-teal-900/50',
         icone: 'text-teal-600 dark:text-teal-400',
         titulo: 'text-teal-800 dark:text-teal-300',
         texto: 'text-teal-700 dark:text-teal-400',
-        tituloTexto: 'Pagamento confirmado',
-        mensagem: 'Este pagamento já se encontra concluído.',
     },
     pendente: {
         moldura: 'border-amber-100 dark:border-amber-900/40',
         icone: 'text-amber-600 dark:text-amber-400',
         titulo: 'text-amber-800 dark:text-amber-300',
         texto: 'text-amber-700 dark:text-amber-400',
-        tituloTexto: 'Pagamento pendente',
-        mensagem: 'Escolhe um método para confirmar o pagamento simulado.',
     },
     recusado: {
         moldura: 'border-red-100 dark:border-red-900/40',
         icone: 'text-red-600 dark:text-red-400',
         titulo: 'text-red-800 dark:text-red-300',
         texto: 'text-red-700 dark:text-red-400',
-        tituloTexto: 'Pagamento recusado',
-        mensagem: 'Este pagamento não foi concluído.',
     },
     cancelado: {
         moldura: 'border-slate-200 dark:border-slate-700',
         icone: 'text-slate-500 dark:text-slate-400',
         titulo: 'text-slate-700 dark:text-slate-300',
         texto: 'text-slate-500 dark:text-slate-400',
-        tituloTexto: 'Pagamento cancelado',
-        mensagem: 'Este pagamento foi cancelado.',
     },
     reembolsado: {
         moldura: 'border-blue-100 dark:border-blue-900/40',
         icone: 'text-blue-600 dark:text-blue-400',
         titulo: 'text-blue-800 dark:text-blue-300',
         texto: 'text-blue-700 dark:text-blue-400',
-        tituloTexto: 'Pagamento reembolsado',
-        mensagem: 'O valor deste pagamento foi reembolsado.',
     },
 };
 
 export default function Show({ pagamento }) {
+    const { t, i18n } = useTranslation('pagamentos');
+    const { t: tc } = useTranslation('common');
+
     const reserva = pagamento.reserva;
     const secretaria = reserva?.secretaria;
     const temDataPagamento = Boolean(pagamento.data_pagamento);
 
     const IconeEstado = ESTADO_ICONE[pagamento.estado] ?? XCircle;
-    const faixa = FAIXA_CONFIG[pagamento.estado] ?? FAIXA_CONFIG.cancelado;
+    const estadoFaixa = FAIXA_ESTILOS[pagamento.estado] ? pagamento.estado : 'cancelado';
+    const faixaEstilo = FAIXA_ESTILOS[estadoFaixa];
 
     return (
         <DashboardLayout>
-            <Head title="Detalhe do Pagamento" />
+            <Head title={t('show.tituloPagina')} />
 
             <section className="dashboard-card mx-auto w-full max-w-[1600px] overflow-hidden">
                 <div className="flex flex-col gap-4 border-b border-slate-100 px-[clamp(24px,2vw,40px)] py-[clamp(20px,1.8vw,32px)] dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
@@ -86,7 +81,7 @@ export default function Show({ pagamento }) {
 
                         <div>
                             <h1 className="text-[clamp(1.25rem,1.4vw,1.5rem)] font-bold text-slate-900 dark:text-white">
-                                Detalhes do pagamento
+                                {t('show.tituloCabecalho')}
                             </h1>
 
                             <p className="break-all text-sm text-slate-500 dark:text-slate-400">
@@ -100,7 +95,7 @@ export default function Show({ pagamento }) {
                         className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500 hover:bg-teal-50 hover:text-teal-600 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-teal-500 dark:hover:bg-slate-800 dark:hover:text-teal-400 dark:focus-visible:ring-offset-slate-950"
                     >
                         <ArrowLeft size={18} />
-                        Voltar
+                        {t('show.voltar')}
                     </Link>
                 </div>
 
@@ -109,11 +104,11 @@ export default function Show({ pagamento }) {
                         <div className="absolute inset-x-0 top-0 h-1 bg-teal-500 dark:bg-teal-400" />
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Valor pago
+                            {t('show.valorPago')}
                         </p>
 
                         <p className="mt-1.5 text-[clamp(1.875rem,2.4vw,2.5rem)] font-bold text-slate-900 dark:text-white">
-                            {formatarValorEuro(pagamento.valor)}
+                            {formatarValorEuro(pagamento.valor, i18n.language)}
                         </p>
 
                         <span
@@ -123,7 +118,7 @@ export default function Show({ pagamento }) {
                             )}`}
                         >
                             <IconeEstado size={14} strokeWidth={2.2} />
-                            {etiqueta(ESTADO_PAGAMENTO, pagamento.estado)}
+                            {etiqueta(ESTADO_PAGAMENTO, pagamento.estado, pagamento.estado, tc)}
                         </span>
 
                         <div className="mt-[clamp(24px,2.2vw,36px)] divide-y divide-teal-100/80 border-t border-teal-100/80 dark:divide-teal-900/40 dark:border-teal-900/40">
@@ -131,7 +126,7 @@ export default function Show({ pagamento }) {
                                 {METODO_PAGAMENTO[pagamento.metodo_pagamento]?.imagem ? (
                                     <img
                                         src={METODO_PAGAMENTO[pagamento.metodo_pagamento].imagem}
-                                        alt={etiqueta(METODO_PAGAMENTO, pagamento.metodo_pagamento)}
+                                        alt={etiqueta(METODO_PAGAMENTO, pagamento.metodo_pagamento, pagamento.metodo_pagamento, tc)}
                                         className="h-9 w-9 shrink-0 rounded-xl object-cover"
                                     />
                                 ) : (
@@ -142,14 +137,15 @@ export default function Show({ pagamento }) {
 
                                 <div className="min-w-0">
                                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                                        Método
+                                        {t('show.metodo')}
                                     </p>
 
                                     <p className="truncate font-semibold text-slate-800 dark:text-slate-100">
                                         {etiqueta(
                                             METODO_PAGAMENTO,
                                             pagamento.metodo_pagamento,
-                                            'Por definir',
+                                            t('show.porDefinir'),
+                                            tc,
                                         )}
                                     </p>
                                 </div>
@@ -163,13 +159,13 @@ export default function Show({ pagamento }) {
                                 <div className="min-w-0">
                                     <p className="text-xs text-slate-500 dark:text-slate-400">
                                         {temDataPagamento
-                                            ? 'Data do pagamento'
-                                            : 'Data da reserva'}
+                                            ? t('show.dataDoPagamento')
+                                            : t('show.dataDaReserva')}
                                     </p>
 
                                     <p className="truncate font-semibold text-slate-800 dark:text-slate-100">
                                         {temDataPagamento
-                                            ? formatarDataHora(pagamento.data_pagamento)
+                                            ? formatarDataHora(pagamento.data_pagamento, i18n.language)
                                             : formatarDataCurta(reserva?.data)}
                                     </p>
                                 </div>
@@ -186,14 +182,14 @@ export default function Show({ pagamento }) {
                             />
 
                             <h2 className="text-[clamp(1rem,1.1vw,1.125rem)] font-bold text-slate-900 dark:text-slate-100">
-                                Dados da reserva
+                                {t('show.dadosDaReserva')}
                             </h2>
                         </div>
 
                         <div className="grid grid-cols-1 gap-x-[clamp(24px,2vw,36px)] gap-y-[clamp(18px,1.6vw,26px)] sm:grid-cols-2">
                             <div>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Reserva
+                                    {t('show.reserva')}
                                 </p>
 
                                 <p className="font-semibold text-slate-900 dark:text-slate-100">
@@ -203,7 +199,7 @@ export default function Show({ pagamento }) {
 
                             <div>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Data da reserva
+                                    {t('show.dataDaReserva')}
                                 </p>
 
                                 <p className="font-semibold text-slate-900 dark:text-slate-100">
@@ -213,7 +209,7 @@ export default function Show({ pagamento }) {
 
                             <div>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Data de fim
+                                    {t('show.dataFim')}
                                 </p>
 
                                 <p className="font-semibold text-slate-900 dark:text-slate-100">
@@ -223,11 +219,11 @@ export default function Show({ pagamento }) {
 
                             <div>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Período
+                                    {t('show.periodo')}
                                 </p>
 
                                 <p className="font-semibold text-slate-900 dark:text-slate-100">
-                                    {reserva?.periodo?.nome ?? '-'}
+                                    {etiquetaPeriodo(reserva?.periodo?.nome, tc) || '-'}
                                 </p>
                             </div>
                         </div>
@@ -242,7 +238,7 @@ export default function Show({ pagamento }) {
                             />
 
                             <h2 className="text-[clamp(1rem,1.1vw,1.125rem)] font-bold text-slate-900 dark:text-slate-100">
-                                Espaço reservado
+                                {t('show.espacoReservado')}
                             </h2>
                         </div>
 
@@ -265,22 +261,22 @@ export default function Show({ pagamento }) {
                 </div>
 
                 <div
-                    className={`border-t bg-[#F7FDFC] px-[clamp(24px,2vw,40px)] py-[clamp(20px,1.8vw,32px)] dark:bg-slate-900/60 ${faixa.moldura}`}
+                    className={`border-t bg-[#F7FDFC] px-[clamp(24px,2vw,40px)] py-[clamp(20px,1.8vw,32px)] dark:bg-slate-900/60 ${faixaEstilo.moldura}`}
                 >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-start gap-3">
                             <IconeEstado
                                 size={22}
-                                className={`mt-0.5 shrink-0 ${faixa.icone}`}
+                                className={`mt-0.5 shrink-0 ${faixaEstilo.icone}`}
                             />
 
                             <div>
-                                <p className={`font-semibold ${faixa.titulo}`}>
-                                    {faixa.tituloTexto}
+                                <p className={`font-semibold ${faixaEstilo.titulo}`}>
+                                    {t(`show.faixa.${estadoFaixa}.titulo`)}
                                 </p>
 
-                                <p className={`text-sm ${faixa.texto}`}>
-                                    {faixa.mensagem}
+                                <p className={`text-sm ${faixaEstilo.texto}`}>
+                                    {t(`show.faixa.${estadoFaixa}.mensagem`)}
                                 </p>
                             </div>
                         </div>
@@ -291,7 +287,7 @@ export default function Show({ pagamento }) {
                                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white outline-none transition hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                             >
                                 <CheckCircle2 size={19} />
-                                Efetuar pagamento
+                                {t('show.efetuarPagamento')}
                             </Link>
                         )}
 
@@ -300,7 +296,7 @@ export default function Show({ pagamento }) {
                                 href={route('pagamentos.comprovativo', pagamento.id)}
                                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-3 font-semibold text-white outline-none transition hover:bg-teal-700 focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                             >
-                                Ver comprovativo
+                                {t('show.verComprovativo')}
                             </Link>
                         )}
                     </div>

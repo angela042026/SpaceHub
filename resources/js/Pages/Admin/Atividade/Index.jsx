@@ -9,6 +9,7 @@ import {
     X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import Table from '@/Components/Table';
@@ -16,23 +17,26 @@ import Pagination from '@/Components/Pagination';
 import { LoadingOverlay } from '@/Components/Loading';
 import {
     ACAO_ATIVIDADE,
-    ENTIDADE_LABELS,
+    acaoLabel,
+    entidadeLabel,
+    resultadoLabel,
     RESULTADO_ATIVIDADE,
 } from '@/utils/atividade';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
-function formatarDataHora(iso) {
+function formatarDataHora(iso, locale = 'pt') {
     const data = new Date(iso);
+    const localeIntl = locale === 'en' ? 'en-GB' : 'pt-PT';
 
-    return `${data.toLocaleDateString('pt-PT')} · ${data.toLocaleTimeString('pt-PT', {
+    return `${data.toLocaleDateString(localeIntl)} · ${data.toLocaleTimeString(localeIntl, {
         hour: '2-digit',
         minute: '2-digit',
     })}`;
 }
 
-function BadgeAcao({ acao }) {
+function BadgeAcao({ acao, t }) {
     const info = ACAO_ATIVIDADE[acao] ?? null;
     const Icon = info?.icon;
 
@@ -43,26 +47,24 @@ function BadgeAcao({ acao }) {
             }`}
         >
             {Icon ? <Icon size={13} strokeWidth={2} /> : null}
-            {info?.label ?? acao}
+            {acaoLabel(acao, t)}
         </span>
     );
 }
 
-function BadgeResultado({ resultado }) {
-    const info = RESULTADO_ATIVIDADE[resultado] ?? null;
-
+function BadgeResultado({ resultado, t }) {
     return (
         <span
             className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-bold ${
-                info?.badge ?? 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
+                RESULTADO_ATIVIDADE[resultado]?.badge ?? 'bg-slate-500/10 text-slate-600 dark:text-slate-400'
             }`}
         >
-            {info?.label ?? resultado}
+            {resultadoLabel(resultado, t)}
         </span>
     );
 }
 
-function DetalheModal({ registo, onClose }) {
+function DetalheModal({ registo, onClose, t, locale }) {
     useEffect(() => {
         const previousOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
@@ -102,13 +104,13 @@ function DetalheModal({ registo, onClose }) {
                         id="detalhe-atividade-title"
                         className="text-lg font-bold text-slate-900 dark:text-white"
                     >
-                        Detalhes da atividade
+                        {t('atividade.detalhesDaAtividade')}
                     </h2>
 
                     <button
                         type="button"
                         onClick={onClose}
-                        aria-label="Fechar"
+                        aria-label={t('atividade.fechar')}
                         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
                     >
                         <X size={16} strokeWidth={1.9} />
@@ -118,20 +120,20 @@ function DetalheModal({ registo, onClose }) {
                 <dl className="mt-5 space-y-4 text-sm">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Data e hora</dt>
-                            <dd className="mt-1 font-medium text-slate-700 dark:text-slate-200">{formatarDataHora(registo.created_at)}</dd>
+                            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t('atividade.dataEHora')}</dt>
+                            <dd className="mt-1 font-medium text-slate-700 dark:text-slate-200">{formatarDataHora(registo.created_at, locale)}</dd>
                         </div>
 
                         <div>
-                            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Resultado</dt>
-                            <dd className="mt-1"><BadgeResultado resultado={registo.result} /></dd>
+                            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t('atividade.resultado')}</dt>
+                            <dd className="mt-1"><BadgeResultado resultado={registo.result} t={t} /></dd>
                         </div>
                     </div>
 
                     <div>
-                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Utilizador responsável</dt>
+                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t('atividade.utilizadorResponsavel')}</dt>
                         <dd className="mt-1 font-medium text-slate-700 dark:text-slate-200">
-                            {registo.actor_name ?? 'Sistema'}
+                            {registo.actor_name ?? t('atividade.sistema')}
                             {registo.actor_email ? (
                                 <span className="ml-1.5 text-xs font-normal text-slate-400">{registo.actor_email}</span>
                             ) : null}
@@ -139,26 +141,26 @@ function DetalheModal({ registo, onClose }) {
                     </div>
 
                     <div>
-                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Ação</dt>
-                        <dd className="mt-1"><BadgeAcao acao={registo.action} /></dd>
+                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t('atividade.acao')}</dt>
+                        <dd className="mt-1"><BadgeAcao acao={registo.action} t={t} /></dd>
                     </div>
 
                     <div>
-                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Entidade afetada</dt>
+                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t('atividade.entidadeAfetada')}</dt>
                         <dd className="mt-1 font-medium text-slate-700 dark:text-slate-200">
                             {registo.subject_type
-                                ? `${ENTIDADE_LABELS[registo.subject_type] ?? registo.subject_type} #${registo.subject_id}`
+                                ? `${entidadeLabel(registo.subject_type, t)} #${registo.subject_id}`
                                 : '—'}
                         </dd>
                     </div>
 
                     <div>
-                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Descrição</dt>
+                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t('atividade.descricao')}</dt>
                         <dd className="mt-1 leading-relaxed text-slate-700 dark:text-slate-200">{registo.description}</dd>
                     </div>
 
                     <div>
-                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Metadados</dt>
+                        <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t('atividade.metadados')}</dt>
                         <dd className="mt-1">
                             {metadados ? (
                                 <ul className="space-y-1 rounded-xl bg-slate-50 p-3 text-xs text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">
@@ -170,7 +172,7 @@ function DetalheModal({ registo, onClose }) {
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="text-sm text-slate-400">Sem metadados adicionais.</p>
+                                <p className="text-sm text-slate-400">{t('atividade.semMetadados')}</p>
                             )}
                         </dd>
                     </div>
@@ -181,6 +183,8 @@ function DetalheModal({ registo, onClose }) {
 }
 
 export default function Index({ registos, acoes, utilizadores, periodos, filters, existemRegistos }) {
+    const { t, i18n } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
     const [carregando, setCarregando] = useState(false);
     const [erro, setErro] = useState(false);
     const [registoSelecionado, setRegistoSelecionado] = useState(null);
@@ -222,20 +226,20 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
     const columns = [
         {
             key: 'data',
-            label: 'Data e hora',
+            label: t('atividade.dataEHora'),
             render: (registo) => (
                 <span className="whitespace-nowrap text-slate-600 dark:text-slate-300">
-                    {formatarDataHora(registo.created_at)}
+                    {formatarDataHora(registo.created_at, i18n.language)}
                 </span>
             ),
         },
         {
             key: 'utilizador',
-            label: 'Utilizador',
+            label: t('reservas.index.utilizador'),
             render: (registo) => (
                 <div>
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
-                        {registo.actor_name ?? 'Sistema'}
+                        {registo.actor_name ?? t('atividade.sistema')}
                     </p>
                     {registo.actor_email ? (
                         <p className="text-xs text-slate-400">{registo.actor_email}</p>
@@ -245,12 +249,12 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
         },
         {
             key: 'acao',
-            label: 'Ação',
-            render: (registo) => <BadgeAcao acao={registo.action} />,
+            label: t('atividade.acao'),
+            render: (registo) => <BadgeAcao acao={registo.action} t={t} />,
         },
         {
             key: 'detalhes',
-            label: 'Detalhes',
+            label: t('atividade.detalhes'),
             render: (registo) => (
                 <span className="line-clamp-1 text-slate-600 dark:text-slate-300" title={registo.description}>
                     {registo.description}
@@ -259,8 +263,8 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
         },
         {
             key: 'resultado',
-            label: 'Resultado',
-            render: (registo) => <BadgeResultado resultado={registo.result} />,
+            label: t('atividade.resultado'),
+            render: (registo) => <BadgeResultado resultado={registo.result} t={t} />,
         },
         {
             key: 'ver',
@@ -270,8 +274,8 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                 <button
                     type="button"
                     onClick={() => setRegistoSelecionado(registo)}
-                    title="Ver detalhes da atividade"
-                    aria-label="Ver detalhes da atividade"
+                    title={t('atividade.verDetalhes')}
+                    aria-label={t('atividade.verDetalhes')}
                     className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50 focus-visible:ring-offset-1 dark:border-slate-700 dark:hover:bg-teal-500/10"
                 >
                     <Eye size={16} strokeWidth={1.9} />
@@ -282,7 +286,7 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
 
     return (
         <DashboardLayout>
-            <Head title="Registo de Atividade" />
+            <Head title={t('atividade.titulo')} />
 
             <section className="dashboard-card overflow-hidden pb-10 sm:pr-2 lg:pr-6">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -292,15 +296,15 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Registo de Atividade
+                            {t('atividade.titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Consulte as ações recentes realizadas no sistema.
+                            {t('atividade.subtitulo')}
                         </p>
 
                         <span className="mt-1.5 inline-flex w-fit items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-                            {total} registo{total === 1 ? '' : 's'} encontrado{total === 1 ? '' : 's'}
+                            {t('atividade.registosEncontrados', { count: total })}
                         </span>
                     </div>
                 </div>
@@ -318,8 +322,8 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                                 type="text"
                                 value={data.search}
                                 onChange={(event) => setData('search', event.target.value)}
-                                placeholder="Pesquisar utilizador ou descrição…"
-                                aria-label="Pesquisar utilizador ou descrição"
+                                placeholder={t('atividade.pesquisarPlaceholder')}
+                                aria-label={t('atividade.pesquisarPlaceholder')}
                                 className={`${fieldClass} pl-9`}
                             />
                         </div>
@@ -327,10 +331,10 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                         <select
                             value={data.acao}
                             onChange={(event) => setData('acao', event.target.value)}
-                            aria-label="Filtrar por ação"
+                            aria-label={t('atividade.filtrarPorAcao')}
                             className={`w-full sm:w-48 ${fieldClass}`}
                         >
-                            <option value="">Todas as ações</option>
+                            <option value="">{t('atividade.todasAsAcoes')}</option>
 
                             {acoes.map((acao) => (
                                 <option key={acao.codigo} value={acao.codigo}>
@@ -342,10 +346,10 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                         <select
                             value={data.utilizador}
                             onChange={(event) => setData('utilizador', event.target.value)}
-                            aria-label="Filtrar por utilizador"
+                            aria-label={t('atividade.filtrarPorUtilizador')}
                             className={`w-full sm:w-48 ${fieldClass}`}
                         >
-                            <option value="">Todos os utilizadores</option>
+                            <option value="">{t('atividade.todosOsUtilizadores')}</option>
 
                             {utilizadores.map((utilizador) => (
                                 <option key={utilizador.id} value={utilizador.id}>
@@ -357,7 +361,7 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                         <select
                             value={data.periodo}
                             onChange={(event) => setData('periodo', event.target.value)}
-                            aria-label="Filtrar por período"
+                            aria-label={t('atividade.filtrarPorPeriodo')}
                             className={`w-full sm:w-48 ${fieldClass}`}
                         >
                             {periodos.map((periodo) => (
@@ -372,7 +376,7 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                                 type="submit"
                                 className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-navy-900 px-5 text-sm font-bold text-white transition hover:bg-navy-950 sm:flex-none"
                             >
-                                Pesquisar
+                                {tc('acoes.pesquisar')}
                             </button>
 
                             <button
@@ -380,21 +384,21 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                                 onClick={limpar}
                                 className="h-11 flex-1 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-500 transition hover:border-slate-300 dark:border-slate-700 dark:bg-transparent sm:flex-none"
                             >
-                                Limpar
+                                {t('listagem.limpar')}
                             </button>
                         </div>
                     </form>
                 </div>
 
                 <div className="relative p-6 pb-10">
-                    <LoadingOverlay show={carregando} label="A carregar…" />
+                    <LoadingOverlay show={carregando} label={t('atividade.aCarregar')} />
 
                     {erro ? (
                         <div className="flex flex-col items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-6 py-10 text-center dark:border-red-900/50 dark:bg-red-950/30">
                             <AlertTriangle size={22} strokeWidth={1.9} className="text-red-500" />
 
                             <p className="text-sm font-semibold text-red-700 dark:text-red-300">
-                                Não foi possível carregar os registos.
+                                {t('atividade.erroCarregar')}
                             </p>
 
                             <button
@@ -403,7 +407,7 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                                 className="inline-flex items-center gap-1.5 rounded-xl border border-red-300 bg-white px-4 py-2 text-xs font-bold text-red-600 transition hover:bg-red-50 dark:border-red-800 dark:bg-transparent"
                             >
                                 <RotateCcw size={14} strokeWidth={2} />
-                                Tentar novamente
+                                {t('atividade.tentarNovamente')}
                             </button>
                         </div>
                     ) : registos.data.length === 0 ? (
@@ -418,14 +422,14 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
 
                             <p className="mt-1 text-sm font-semibold text-slate-600 dark:text-slate-300">
                                 {existemRegistos
-                                    ? 'Nenhuma atividade corresponde aos filtros aplicados.'
-                                    : 'Ainda não existem atividades registadas.'}
+                                    ? t('atividade.nenhumaCorrespondeFiltros')
+                                    : t('atividade.aindaNaoExistem')}
                             </p>
 
                             {existemRegistos && (
                                 <>
                                     <p className="text-xs text-slate-400">
-                                        Tenta alterar ou limpar os filtros aplicados.
+                                        {t('atividade.tentaAlterarFiltros')}
                                     </p>
 
                                     <button
@@ -433,7 +437,7 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                                         onClick={limpar}
                                         className="mt-1 text-xs font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400"
                                     >
-                                        Limpar filtros
+                                        {tc('acoes.limparFiltros')}
                                     </button>
                                 </>
                             )}
@@ -455,12 +459,12 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                                         className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"
                                     >
                                         <div className="flex items-start justify-between gap-2">
-                                            <BadgeAcao acao={registo.action} />
-                                            <BadgeResultado resultado={registo.result} />
+                                            <BadgeAcao acao={registo.action} t={t} />
+                                            <BadgeResultado resultado={registo.result} t={t} />
                                         </div>
 
                                         <p className="mt-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
-                                            {registo.actor_name ?? 'Sistema'}
+                                            {registo.actor_name ?? t('atividade.sistema')}
                                         </p>
 
                                         <p className="line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
@@ -469,14 +473,14 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
 
                                         <div className="mt-3 flex items-center justify-between">
                                             <span className="text-xs text-slate-400">
-                                                {formatarDataHora(registo.created_at)}
+                                                {formatarDataHora(registo.created_at, i18n.language)}
                                             </span>
 
                                             <button
                                                 type="button"
                                                 onClick={() => setRegistoSelecionado(registo)}
-                                                title="Ver detalhes da atividade"
-                                                aria-label="Ver detalhes da atividade"
+                                                title={t('atividade.verDetalhes')}
+                                                aria-label={t('atividade.verDetalhes')}
                                                 className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 dark:border-slate-700"
                                             >
                                                 <Eye size={14} strokeWidth={1.9} />
@@ -494,7 +498,7 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                             disabled={carregando}
                             onStart={() => setCarregando(true)}
                             onFinish={() => setCarregando(false)}
-                            itemLabel="registos"
+                            itemLabel={t('atividade.itemLabel')}
                         />
                     )}
                 </div>
@@ -504,6 +508,8 @@ export default function Index({ registos, acoes, utilizadores, periodos, filters
                 <DetalheModal
                     registo={registoSelecionado}
                     onClose={() => setRegistoSelecionado(null)}
+                    t={t}
+                    locale={i18n.language}
                 />
             )}
         </DashboardLayout>

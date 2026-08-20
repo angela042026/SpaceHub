@@ -18,7 +18,10 @@ import {
     XCircle,
 } from 'lucide-react';
 
+import { useTranslation } from 'react-i18next';
 import useTheme from '@/Hooks/useTheme';
+import LanguageSwitcher from '@/Components/LanguageSwitcher';
+import { formatarData, formatarHora } from '@/utils/formatadores';
 
 // Ícone por tipo de notificação real (guardada na base de dados).
 const ICONE_POR_TIPO = {
@@ -30,9 +33,9 @@ const ICONE_POR_TIPO = {
     avaliacao_rejeitada: XCircle,
 };
 
-function getFirstAndLastName(name) {
+function getFirstAndLastName(name, t) {
     if (!name) {
-        return 'Utilizador';
+        return t('header.utilizadorFallback');
     }
 
     const parts = name.trim().split(' ');
@@ -44,18 +47,18 @@ function getFirstAndLastName(name) {
     return `${parts[0]} ${parts[parts.length - 1]}`;
 }
 
-function saudacaoPorHora(agora) {
+function saudacaoPorHora(agora, t) {
     const hora = agora.getHours();
 
     if (hora >= 5 && hora < 12) {
-        return 'Bom dia';
+        return t('header.bomDia');
     }
 
     if (hora >= 12 && hora < 18) {
-        return 'Boa tarde';
+        return t('header.boaTarde');
     }
 
-    return 'Boa noite';
+    return t('header.boaNoite');
 }
 
 const NOTIFICACOES_VISTAS_KEY = 'spacehub-notificacoes-vistas';
@@ -101,7 +104,7 @@ function minutosAte(data, hora, agora) {
     return (alvo.getTime() - agora.getTime()) / 60000;
 }
 
-function construirNotificacoesAdmin(stats) {
+function construirNotificacoesAdmin(stats, t) {
     if (!stats) {
         return [];
     }
@@ -113,8 +116,8 @@ function construirNotificacoesAdmin(stats) {
         notificacoes.push({
             id: `cancelamentos-hoje-${hoje}-${stats.cancelamentosHoje.value}`,
             icon: XCircle,
-            titulo: 'Cancelamentos hoje',
-            mensagem: `${stats.cancelamentosHoje.value} reserva(s) foram canceladas hoje.`,
+            titulo: t('header.notificacoesSinteticas.cancelamentosHojeTitulo'),
+            mensagem: t('header.notificacoesSinteticas.cancelamentosHojeMensagem', { quantidade: stats.cancelamentosHoje.value }),
         });
     }
 
@@ -122,8 +125,8 @@ function construirNotificacoesAdmin(stats) {
         notificacoes.push({
             id: `reservas-expiradas-hoje-${hoje}-${stats.reservasExpiradasHoje.value}`,
             icon: TimerOff,
-            titulo: 'Reservas expiradas',
-            mensagem: `${stats.reservasExpiradasHoje.value} reserva(s) expiraram hoje sem check-in.`,
+            titulo: t('header.notificacoesSinteticas.reservasExpiradasTitulo'),
+            mensagem: t('header.notificacoesSinteticas.reservasExpiradasMensagem', { quantidade: stats.reservasExpiradasHoje.value }),
         });
     }
 
@@ -131,15 +134,15 @@ function construirNotificacoesAdmin(stats) {
         notificacoes.push({
             id: `ocupacao-alta-${hoje}-${stats.taxaOcupacao.value}`,
             icon: AlertTriangle,
-            titulo: 'Ocupação quase no limite',
-            mensagem: `A taxa de ocupação está em ${stats.taxaOcupacao.value}%.`,
+            titulo: t('header.notificacoesSinteticas.ocupacaoAltaTitulo'),
+            mensagem: t('header.notificacoesSinteticas.ocupacaoAltaMensagem', { valor: stats.taxaOcupacao.value }),
         });
     }
 
     return notificacoes;
 }
 
-function construirNotificacoesColaborador(stats) {
+function construirNotificacoesColaborador(stats, t) {
     if (!stats) {
         return [];
     }
@@ -150,8 +153,8 @@ function construirNotificacoesColaborador(stats) {
         return [{
             id: `secretarias-ocupadas-${hojeString()}-${secretariasOcupadas}`,
             icon: Users,
-            titulo: 'Secretárias em uso',
-            mensagem: `${secretariasOcupadas} secretária(s) ocupada(s) agora — vale a pena verificar a limpeza depois do uso.`,
+            titulo: t('header.notificacoesSinteticas.secretariasEmUsoTitulo'),
+            mensagem: t('header.notificacoesSinteticas.secretariasEmUsoMensagem', { quantidade: secretariasOcupadas }),
         }];
     }
 
@@ -189,9 +192,10 @@ function construirNotificacoesUtilizador(
     proximasReservas,
     agora,
     toleranciaCheckinMinutos,
+    t,
 ) {
     if (reservaHojeUtilizador) {
-        const codigo = reservaHojeUtilizador.secretaria?.codigo ?? 'a tua secretária';
+        const codigo = reservaHojeUtilizador.secretaria?.codigo ?? t('header.notificacoesSinteticas.secretariaGenerica');
         const notificacoes = [];
 
         const minutosParaFim = minutosAte(
@@ -210,15 +214,15 @@ function construirNotificacoesUtilizador(
             notificacoes.push({
                 id: `reserva-termina-${reservaHojeUtilizador.id}`,
                 icon: Clock3,
-                titulo: 'A tua reserva está a terminar',
-                mensagem: `A reserva na secretária ${codigo} termina às ${reservaHojeUtilizador.periodo.hora_fim}.`,
+                titulo: t('header.notificacoesSinteticas.reservaTerminaTitulo'),
+                mensagem: t('header.notificacoesSinteticas.reservaTerminaMensagem', { codigo, hora: reservaHojeUtilizador.periodo.hora_fim }),
             });
         } else if (minutosParaInicio !== null && minutosParaInicio > 0 && minutosParaInicio <= 5) {
             notificacoes.push({
                 id: `reserva-comeca-${reservaHojeUtilizador.id}`,
                 icon: Clock3,
-                titulo: 'A tua reserva começa em breve',
-                mensagem: `A reserva na secretária ${codigo} começa às ${reservaHojeUtilizador.periodo.hora_inicio}.`,
+                titulo: t('header.notificacoesSinteticas.reservaComecaTitulo'),
+                mensagem: t('header.notificacoesSinteticas.reservaComecaMensagem', { codigo, hora: reservaHojeUtilizador.periodo.hora_inicio }),
             });
         }
 
@@ -226,8 +230,8 @@ function construirNotificacoesUtilizador(
             notificacoes.push({
                 id: `checkin-confirmado-${reservaHojeUtilizador.id}`,
                 icon: CheckCircle2,
-                titulo: 'Check-in confirmado',
-                mensagem: `Já fizeste check-in na secretária ${codigo} para hoje.`,
+                titulo: t('header.notificacoesSinteticas.checkinConfirmadoTitulo'),
+                mensagem: t('header.notificacoesSinteticas.checkinConfirmadoMensagem', { codigo }),
             });
         } else if (
             reservaHojeUtilizador.estado_reserva?.codigo ===
@@ -241,8 +245,8 @@ function construirNotificacoesUtilizador(
             notificacoes.push({
                 id: `checkin-disponivel-${reservaHojeUtilizador.id}`,
                 icon: CalendarCheck2,
-                titulo: 'Check-in disponível',
-                mensagem: `Tens uma reserva hoje na secretária ${codigo}. Não te esqueças do check-in!`,
+                titulo: t('header.notificacoesSinteticas.checkinDisponivelTitulo'),
+                mensagem: t('header.notificacoesSinteticas.checkinDisponivelMensagem', { codigo }),
             });
         }
 
@@ -251,13 +255,13 @@ function construirNotificacoesUtilizador(
 
     if (proximasReservas?.length > 0) {
         const proxima = proximasReservas[0];
-        const codigo = proxima.secretaria?.codigo ?? 'uma secretária';
+        const codigo = proxima.secretaria?.codigo ?? t('header.notificacoesSinteticas.secretariaGenericaProxima');
 
         return [{
             id: `proxima-reserva-${proxima.id}`,
             icon: CalendarCheck2,
-            titulo: 'Próxima reserva',
-            mensagem: `Tens uma reserva agendada na secretária ${codigo}.`,
+            titulo: t('header.notificacoesSinteticas.proximaReservaTitulo'),
+            mensagem: t('header.notificacoesSinteticas.proximaReservaMensagem', { codigo }),
         }];
     }
 
@@ -265,6 +269,7 @@ function construirNotificacoesUtilizador(
 }
 
 export default function DashboardHeader({ onOpenNav = () => {} }) {
+    const { t, i18n } = useTranslation('dashboard');
     const {
         auth,
         reservaHojeUtilizador,
@@ -293,8 +298,8 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
     }, []);
 
     const user = auth?.user;
-    const displayName = getFirstAndLastName(user?.name);
-    const saudacao = saudacaoPorHora(agora);
+    const displayName = getFirstAndLastName(user?.name, t);
+    const saudacao = saudacaoPorHora(agora, t);
     const papel = user?.role?.nome;
 
     // Mesma lógica de "resto" que o DashboardController usa para
@@ -313,44 +318,42 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
     // nas outras roles mantém-se a frase genérica de sempre, exceto em
     // páginas administrativas específicas que já têm um subtítulo mais
     // adequado ao que se está a fazer ali.
-    let subtituloHeader = 'Bem-vindo ao seu Dashboard.';
+    let subtituloHeader = t('header.subtitulos.default');
 
     if (route().current('admin.reservas.index')) {
-        subtituloHeader = 'Consulte e faça a gestão de todas as reservas do SpaceHub.';
+        subtituloHeader = t('header.subtitulos.adminReservas');
     } else if (route().current('secretarias.qrcodes')) {
         // Mensagem genérica de propósito — a descrição específica sobre
         // imprimir/transferir QR Codes já está no cabeçalho interno do
         // card desta página, e repeti-la aqui era redundante.
-        subtituloHeader = 'Faça a gestão dos espaços e recursos do SpaceHub.';
+        subtituloHeader = t('header.subtitulos.qrCodes');
     } else if (route().current('setores.mapa.edit')) {
-        subtituloHeader = 'Organize a localização dos espaços no mapa.';
+        subtituloHeader = t('header.subtitulos.editorDoMapa');
     } else if (route().current('admin.atividade.index')) {
-        subtituloHeader = 'Acompanhe as ações realizadas no SpaceHub.';
+        subtituloHeader = t('header.subtitulos.registoDeAtividade');
     } else if (ehDashboardUtilizador) {
         if (!reservaHojeUtilizador) {
-            subtituloHeader =
-                'Encontre o espaço certo para cada momento.';
+            subtituloHeader = t('header.subtitulos.utilizadorSemReserva');
         } else if (reservaHojeUtilizador.check_in_at) {
-            subtituloHeader =
-                'A sua secretária está pronta. Bom trabalho!';
+            subtituloHeader = t('header.subtitulos.utilizadorComCheckin');
         } else {
-            subtituloHeader =
-                'A sua secretária está pronta. Faça o check-in quando chegar.';
+            subtituloHeader = t('header.subtitulos.utilizadorSemCheckin');
         }
     }
 
     let notificacoesSinteticas = [];
 
     if (papel === 'Administrador' || papel === 'Gestor') {
-        notificacoesSinteticas = construirNotificacoesAdmin(stats);
+        notificacoesSinteticas = construirNotificacoesAdmin(stats, t);
     } else if (papel === 'Colaborador') {
-        notificacoesSinteticas = construirNotificacoesColaborador(stats);
+        notificacoesSinteticas = construirNotificacoesColaborador(stats, t);
     } else if (ehDashboardUtilizador) {
         notificacoesSinteticas = construirNotificacoesUtilizador(
             reservaHojeUtilizador,
             proximasReservas,
             agora,
             toleranciaCheckinMinutos,
+            t,
         );
     }
 
@@ -417,7 +420,7 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
                 <button
                     type="button"
                     onClick={onOpenNav}
-                    aria-label="Abrir menu lateral"
+                    aria-label={t('header.abrirMenuLateral')}
                     className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-card text-navy-900 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-teal-500 hover:text-teal-500 hover:shadow-card-hover dark:border-[#2a5069] dark:text-[#f8fafc] lg:hidden"
                 >
                     <Menu size={22} strokeWidth={1.8} />
@@ -440,21 +443,21 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
 
                     <div className="leading-tight">
                         <p className="text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
-                            {agora.toLocaleTimeString('pt-PT', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                            })}
+                            {formatarHora(agora, i18n.language)}
                         </p>
 
                         <p className="text-[11px] capitalize text-slate-400 dark:text-[#8fa7bd]">
-                            {agora.toLocaleDateString('pt-PT', {
+                            {formatarData(agora, i18n.language, {
                                 weekday: 'short',
                                 day: '2-digit',
                                 month: 'short',
+                                year: undefined,
                             })}
                         </p>
                     </div>
                 </div>
+
+                <LanguageSwitcher variant="light" />
 
                 <button
                     type="button"
@@ -482,7 +485,7 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
                 <button
                     type="button"
                     onClick={handleNotifications}
-                    aria-label="Ver notificações"
+                    aria-label={t('header.verNotificacoes')}
                     aria-expanded={notificationsOpen}
                     className={`relative flex h-12 w-12 items-center justify-center rounded-xl border shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover ${notificationButtonClass}`}
                 >
@@ -497,12 +500,12 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
                     <div className="absolute right-0 top-16 z-50 w-[calc(100vw-2.5rem)] max-w-80 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl dark:border-[#2a5069] dark:bg-[#101f34]">
                         <div className="flex items-center justify-between">
                             <h2 className="font-bold text-slate-900 dark:text-[#f8fafc]">
-                                Notificações
+                                {t('header.notificacoes')}
                             </h2>
 
                             {notificacoes.length > 0 && (
                                 <span className="rounded-full bg-teal-500/10 px-2.5 py-1 text-xs font-semibold text-teal-600 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
-                                    {notificacoes.length} nova{notificacoes.length > 1 ? 's' : ''}
+                                    {notificacoes.length} {notificacoes.length > 1 ? t('header.novasPlural') : t('header.novas')}
                                 </span>
                             )}
                         </div>
@@ -534,7 +537,7 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
                             </div>
                         ) : (
                             <p className="mt-4 text-sm text-slate-500 dark:text-[#8fa7bd]">
-                                Sem notificações no momento.
+                                {t('header.semNotificacoes')}
                             </p>
                         )}
                     </div>

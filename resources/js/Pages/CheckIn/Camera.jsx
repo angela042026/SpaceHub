@@ -18,6 +18,7 @@ import {
     Smartphone,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import LocalizacaoEspaco from '@/Components/Reservas/LocalizacaoEspaco';
@@ -65,80 +66,48 @@ function nomeEspaco(secretaria) {
         : secretaria.codigo;
 }
 
-function classificarErroCamara(erro) {
+function classificarErroCamara(erro, t) {
     const nome = erro?.name ?? '';
     const texto = String(erro?.message ?? erro ?? '').toLowerCase();
 
     if (nome === 'NotAllowedError' || texto.includes('permission')) {
         return {
-            title: 'Acesso à câmara recusado',
-            message:
-                'Autoriza o acesso à câmara nas definições do navegador e tenta novamente, ou seleciona uma imagem com o QR Code.',
+            title: t('camera.erros.acessoRecusadoTitulo'),
+            message: t('camera.erros.acessoRecusadoMensagem'),
         };
     }
 
     if (nome === 'NotFoundError' || nome === 'OverconstrainedError') {
         return {
-            title: 'Nenhuma câmara encontrada',
-            message:
-                'Não foi detetada nenhuma câmara neste dispositivo. Podes selecionar uma imagem com o QR Code em alternativa.',
+            title: t('camera.erros.semCamaraTitulo'),
+            message: t('camera.erros.semCamaraMensagem'),
         };
     }
 
     return {
-        title: 'Não foi possível iniciar a câmara',
-        message:
-            'Ocorreu um problema ao aceder à câmara. Tenta novamente ou seleciona uma imagem com o QR Code.',
+        title: t('camera.erros.erroGenericoTitulo'),
+        message: t('camera.erros.erroGenericoMensagem'),
     };
 }
 
-const RESUMO_STATUS = {
-    pronta: {
-        label: 'Dentro do horário',
-        className: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
-    },
-    ja_check_in: {
-        label: 'Check-in confirmado',
-        className: 'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-300',
-    },
-    pendente_pagamento: {
-        label: 'Pagamento pendente',
-        className: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
-    },
-    fora_da_janela: {
-        label: 'Fora do horário',
-        className: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
-    },
+const RESUMO_STATUS_CLASSES = {
+    pronta: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
+    ja_check_in: 'bg-slate-100 text-slate-600 dark:bg-slate-500/10 dark:text-slate-300',
+    pendente_pagamento: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
+    fora_da_janela: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
 };
 
-const steps = [
-    {
-        icon: LocateFixed,
-        title: '1. Encontre a secretária',
-        description:
-            'Dirija-se à secretária indicada na sua reserva e localize o QR Code afixado.',
-    },
-    {
-        icon: Smartphone,
-        title: '2. Autorize a câmara',
-        description:
-            'Clique em iniciar leitura e permita o acesso à câmara do dispositivo.',
-    },
-    {
-        icon: ScanLine,
-        title: '3. Leia o QR Code',
-        description:
-            'Mantenha o código enquadrado na área de leitura durante alguns segundos.',
-    },
-    {
-        icon: CircleCheck,
-        title: '4. Check-in confirmado',
-        description:
-            'O sistema valida a reserva e confirma automaticamente a sua chegada.',
-    },
-];
+const STEP_ICONS = [LocateFixed, Smartphone, ScanLine, CircleCheck];
 
 export default function Camera({ reservas }) {
+    const { t, i18n } = useTranslation('qrcode');
+
+    const steps = STEP_ICONS.map((icon, indice) => ({
+        icon,
+        title: t(`camera.passos.${indice + 1}.titulo`),
+        description: t(`camera.passos.${indice + 1}.descricao`),
+    }));
+
     const scannerRef = useRef(null);
     const redirectTimeoutRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -221,9 +190,8 @@ export default function Camera({ reservas }) {
 
             setStatus('error');
             setErrorInfo({
-                title: 'Código QR inválido',
-                message:
-                    'Este código não é um QR Code de check-in do SpaceHub. Confirma que estás a ler o código afixado na secretária correta.',
+                title: t('camera.erros.codigoInvalidoTitulo'),
+                message: t('camera.erros.codigoInvalidoMensagem'),
             });
             return;
         }
@@ -235,7 +203,7 @@ export default function Camera({ reservas }) {
         }
 
         setStatus('success');
-        setMessage('QR Code lido com sucesso. Estamos a validar a sua reserva...');
+        setMessage(t('camera.qrLidoAValidar'));
 
         redirectTimeoutRef.current = window.setTimeout(() => {
             window.location.assign(decodedText);
@@ -274,7 +242,7 @@ export default function Camera({ reservas }) {
         } catch (erro) {
             scannerRef.current = null;
             setStatus('error');
-            setErrorInfo(classificarErroCamara(erro));
+            setErrorInfo(classificarErroCamara(erro, t));
         }
     }
 
@@ -305,9 +273,8 @@ export default function Camera({ reservas }) {
         } catch {
             setStatus('error');
             setErrorInfo({
-                title: 'Não foi possível ler o código',
-                message:
-                    'Não foi encontrado nenhum QR Code válido nesta imagem. Tenta outra fotografia.',
+                title: t('camera.erros.leituraFicheiroTitulo'),
+                message: t('camera.erros.leituraFicheiroMensagem'),
             });
         } finally {
             try {
@@ -321,16 +288,19 @@ export default function Camera({ reservas }) {
     const aLerOuAPedir = status === 'scanning' || status === 'requesting';
     const acoesDesativadas = status === 'processing' || status === 'success';
 
-    const resumo = reservaSelecionada
-        ? RESUMO_STATUS[reservaSelecionada.status]
+    const resumo = reservaSelecionada && RESUMO_STATUS_CLASSES[reservaSelecionada.status]
+        ? {
+            className: RESUMO_STATUS_CLASSES[reservaSelecionada.status],
+            label: t(`camera.resumoStatus.${reservaSelecionada.status}`),
+        }
         : null;
     const dataFormatada = reservaSelecionada
-        ? new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })
+        ? new Date().toLocaleDateString(i18n.language === 'en' ? 'en-GB' : 'pt-PT', { day: '2-digit', month: '2-digit' })
         : null;
 
     return (
         <>
-            <Head title="Check-in" />
+            <Head title={t('camera.tituloPagina')} />
 
             <DashboardLayout>
                 <main className="mx-auto max-w-6xl pb-28">
@@ -343,11 +313,11 @@ export default function Camera({ reservas }) {
 
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Check-in
+                                {t('camera.tituloPagina')}
                             </h1>
 
                             <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                                Confirme a sua chegada
+                                {t('camera.subtitulo')}
                             </p>
                         </div>
                     </header>
@@ -360,7 +330,7 @@ export default function Camera({ reservas }) {
                             {reservas.length > 1 && (
                                 <div className="flex items-center gap-2">
                                     <label htmlFor="reserva-selecionada" className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                                        Reserva
+                                        {t('camera.reserva')}
                                     </label>
 
                                     <select
@@ -395,7 +365,7 @@ export default function Camera({ reservas }) {
                                 <div className="flex items-center gap-2 lg:px-5">
                                     <CalendarDays size={16} strokeWidth={1.9} className="shrink-0 text-slate-400" />
                                     <span className="whitespace-nowrap text-sm text-slate-600 dark:text-slate-300">
-                                        Hoje, {dataFormatada}
+                                        {t('camera.hoje', { data: dataFormatada })}
                                     </span>
                                 </div>
 
@@ -422,11 +392,11 @@ export default function Camera({ reservas }) {
                         {/* Passo a passo */}
                         <div className="order-2 rounded-2xl border border-slate-100 p-4 dark:border-slate-800 sm:p-5 lg:order-1">
                             <p className="text-xs font-bold uppercase tracking-[0.14em] text-teal-600 dark:text-teal-400">
-                                Guia rápido
+                                {t('camera.guiaRapido')}
                             </p>
 
                             <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-white">
-                                Como fazer o check-in
+                                {t('camera.comoFazerCheckin')}
                             </h2>
 
                             <div className="mt-6">
@@ -459,11 +429,11 @@ export default function Camera({ reservas }) {
 
                                     <div>
                                         <p className="text-xs font-bold text-sky-900 dark:text-sky-200">
-                                            Validação da reserva
+                                            {t('camera.validacaoReserva')}
                                         </p>
 
                                         <p className="mt-0.5 text-xs leading-5 text-sky-700 dark:text-sky-300">
-                                            O check-in só será aceite na secretária correta e dentro do horário permitido.
+                                            {t('camera.validacaoReservaTexto')}
                                         </p>
                                     </div>
                                 </div>
@@ -479,11 +449,11 @@ export default function Camera({ reservas }) {
 
                                 <div>
                                     <h2 className="text-xl font-black text-slate-900 dark:text-white">
-                                        Ler QR Code
+                                        {t('camera.lerQrCode')}
                                     </h2>
 
                                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                        Utilize a câmara ou selecione uma imagem.
+                                        {t('camera.utilizeCamaraOuImagem')}
                                     </p>
                                 </div>
                             </div>
@@ -522,7 +492,7 @@ export default function Camera({ reservas }) {
                                             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                                             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                                         </span>
-                                        Câmara ativa
+                                        {t('camera.camaraAtiva')}
                                     </div>
                                 )}
 
@@ -533,11 +503,11 @@ export default function Camera({ reservas }) {
                                         </div>
 
                                         <h3 className="mt-4 text-lg font-black text-slate-900 dark:text-white sm:text-xl">
-                                            Nenhuma reserva disponível para check-in
+                                            {t('camera.semReservaTitulo')}
                                         </h3>
 
                                         <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                            Consulta as tuas reservas ou reserva um espaço para realizar o check-in.
+                                            {t('camera.semReservaTexto')}
                                         </p>
                                     </div>
                                 )}
@@ -549,11 +519,11 @@ export default function Camera({ reservas }) {
                                         </div>
 
                                         <h3 className="mt-4 text-lg font-black text-slate-900 dark:text-white sm:text-xl">
-                                            Pronto para começar?
+                                            {t('camera.prontoParaComecar')}
                                         </h3>
 
                                         <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                            Aponte a câmara para o QR Code da secretária.
+                                            {t('camera.aponteCamara')}
                                         </p>
                                     </div>
                                 )}
@@ -563,11 +533,11 @@ export default function Camera({ reservas }) {
                                         <Loader2 size={36} className="animate-spin text-[#14B8A6]" strokeWidth={1.9} />
 
                                         <h3 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">
-                                            A pedir acesso à câmara...
+                                            {t('camera.aPedirAcessoCamara')}
                                         </h3>
 
                                         <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                            O navegador vai pedir a tua autorização.
+                                            {t('camera.navegadorVaiPedirAutorizacao')}
                                         </p>
                                     </div>
                                 )}
@@ -577,11 +547,11 @@ export default function Camera({ reservas }) {
                                         <Loader2 size={36} className="animate-spin text-[#14B8A6]" strokeWidth={1.9} />
 
                                         <h3 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">
-                                            A validar o código...
+                                            {t('camera.aValidarCodigo')}
                                         </h3>
 
                                         <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                            Estamos a confirmar a tua reserva.
+                                            {t('camera.aConfirmarReserva')}
                                         </p>
                                     </div>
                                 )}
@@ -593,7 +563,7 @@ export default function Camera({ reservas }) {
                                         </div>
 
                                         <h3 className="mt-4 text-lg font-black text-emerald-900 dark:text-emerald-200">
-                                            QR Code lido com sucesso
+                                            {t('camera.qrLidoComSucesso')}
                                         </h3>
 
                                         <p className="mx-auto mt-1.5 max-w-xs text-sm leading-6 text-emerald-700 dark:text-emerald-300">
@@ -628,14 +598,14 @@ export default function Camera({ reservas }) {
                                     <AlertTriangle size={16} strokeWidth={1.9} className="mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
 
                                     <p className="text-xs leading-5 text-amber-700 dark:text-amber-300">
-                                        Este código não é um QR Code de check-in do SpaceHub. Confirma que estás a ler o código afixado na secretária correta.
+                                        {t('camera.qrInvalidoAviso')}
                                     </p>
                                 </div>
                             )}
 
                             {status === 'scanning' && !qrInvalido && (
                                 <p className="mt-3 text-center text-xs leading-5 text-slate-400 dark:text-slate-500">
-                                    Mantenha o QR Code enquadrado dentro da moldura. A deteção é automática.
+                                    {t('camera.mantenhaQrEnquadrado')}
                                 </p>
                             )}
 
@@ -649,7 +619,7 @@ export default function Camera({ reservas }) {
                                         className="group inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#14B8A6] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(20,184,166,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0F9C8E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 dark:focus-visible:ring-offset-slate-900"
                                     >
                                         <CameraIcon size={18} strokeWidth={1.9} className="transition-transform duration-200 group-hover:scale-110" />
-                                        {aLerOuAPedir ? 'Parar leitura' : 'Iniciar leitura'}
+                                        {aLerOuAPedir ? t('camera.pararLeitura') : t('camera.iniciarLeitura')}
                                     </button>
 
                                     <button
@@ -659,7 +629,7 @@ export default function Camera({ reservas }) {
                                         className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-navy-900 transition-colors duration-200 hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
                                     >
                                         <ImageUp size={18} strokeWidth={1.9} />
-                                        Selecionar imagem
+                                        {t('camera.selecionarImagem')}
                                     </button>
 
                                     <input
@@ -668,7 +638,7 @@ export default function Camera({ reservas }) {
                                         accept="image/*"
                                         onChange={aoSelecionarImagem}
                                         className="hidden"
-                                        aria-label="Selecionar imagem com QR Code"
+                                        aria-label={t('camera.selecionarImagemAriaLabel')}
                                     />
                                 </div>
                             ) : (
@@ -678,7 +648,7 @@ export default function Camera({ reservas }) {
                                         className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl bg-[#14B8A6] px-6 py-3 text-sm font-bold text-white shadow-[0_12px_28px_rgba(20,184,166,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#0F9C8E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                                     >
                                         <CalendarDays size={18} strokeWidth={1.9} />
-                                        Ver minhas reservas
+                                        {t('camera.verMinhasReservas')}
                                     </Link>
 
                                     <Link
@@ -686,7 +656,7 @@ export default function Camera({ reservas }) {
                                         className="inline-flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-bold text-navy-900 transition-colors duration-200 hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800 dark:focus-visible:ring-offset-slate-900"
                                     >
                                         <CalendarPlus size={18} strokeWidth={1.9} />
-                                        Reservar espaço
+                                        {t('camera.reservarEspaco')}
                                     </Link>
                                 </div>
                             )}
@@ -694,7 +664,7 @@ export default function Camera({ reservas }) {
                             {temReservaElegivel && (
                                 <p className="mt-4 flex items-center justify-center gap-1.5 text-center text-xs text-slate-400 dark:text-slate-500">
                                     <Lock size={12} strokeWidth={2} />
-                                    A câmara só será utilizada durante a leitura.
+                                    {t('camera.camaraApenasDuranteLeitura')}
                                 </p>
                             )}
 

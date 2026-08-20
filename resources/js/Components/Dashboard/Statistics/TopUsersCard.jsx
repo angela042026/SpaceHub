@@ -1,5 +1,6 @@
 import { ArrowDownAZ, Trophy, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 function iniciais(nome) {
     const partes = String(nome ?? '').trim().split(' ').filter(Boolean);
@@ -28,15 +29,16 @@ const AVATAR_CORES = [
  * repetir o padrão de vários cards enormes individuais.
  */
 export default function TopUsersCard({ data = [] }) {
+    const { t, i18n } = useTranslation('dashboard');
     const [ordem, setOrdem] = useState('reservas');
 
     const utilizadores = useMemo(() => {
         if (ordem === 'nome') {
-            return [...data].sort((a, b) => a.nome.localeCompare(b.nome, 'pt'));
+            return [...data].sort((a, b) => a.nome.localeCompare(b.nome, i18n.language));
         }
 
         return data;
-    }, [data, ordem]);
+    }, [data, ordem, i18n.language]);
 
     return (
         <section className="dashboard-card flex h-full flex-col overflow-hidden">
@@ -48,11 +50,11 @@ export default function TopUsersCard({ data = [] }) {
 
                     <div>
                         <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                            Top Utilizadores
+                            {t('statistics.topUsersCard.titulo')}
                         </h3>
 
                         <p className="mt-0.5 text-xs text-slate-500">
-                            Os 5 com mais reservas no período
+                            {t('statistics.topUsersCard.subtitulo')}
                         </p>
                     </div>
                 </div>
@@ -60,8 +62,8 @@ export default function TopUsersCard({ data = [] }) {
                 <button
                     type="button"
                     onClick={() => setOrdem((atual) => (atual === 'reservas' ? 'nome' : 'reservas'))}
-                    title={ordem === 'reservas' ? 'Ordenar por nome' : 'Ordenar por reservas'}
-                    aria-label={ordem === 'reservas' ? 'Ordenar por nome' : 'Ordenar por reservas'}
+                    title={ordem === 'reservas' ? t('statistics.topUsersCard.ordenarPorNome') : t('statistics.topUsersCard.ordenarPorReservas')}
+                    aria-label={ordem === 'reservas' ? t('statistics.topUsersCard.ordenarPorNome') : t('statistics.topUsersCard.ordenarPorReservas')}
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-400 transition hover:border-teal-300 hover:text-teal-600 dark:border-slate-700"
                 >
                     <ArrowDownAZ size={15} strokeWidth={1.9} />
@@ -99,7 +101,7 @@ export default function TopUsersCard({ data = [] }) {
                 ) : (
                     <div className="flex min-h-[150px] flex-1 flex-col items-center justify-center gap-2 text-center">
                         <Users size={22} strokeWidth={1.8} className="text-slate-300" />
-                        <p className="text-sm text-slate-400">Sem reservas neste período.</p>
+                        <p className="text-sm text-slate-400">{t('statistics.semReservasPeriodo')}</p>
                     </div>
                 )}
             </div>

@@ -26,7 +26,7 @@ class DashboardRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'periodo.in' => 'O período selecionado é inválido.',
+            'periodo.in' => __('O período selecionado é inválido.'),
         ];
     }
 }

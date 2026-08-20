@@ -4,6 +4,7 @@ import {
     CheckCircle2,
     Minus,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const COLOR_STYLES = {
     turquesa: {
@@ -466,6 +467,8 @@ export default function StatCard({
     mensagemZero,
     textoTendencia,
 }) {
+    const { t, i18n } = useTranslation('dashboard');
+
     const estilo =
         COLOR_STYLES[color] ??
         COLOR_STYLES.turquesa;
@@ -496,8 +499,7 @@ export default function StatCard({
     const estadoZeroPositivo =
         invertido && numericValue === 0;
 
-    let changeText =
-        'Sem dados de ontem';
+    let changeText = t('statCard.semDadosOntem');
 
     if (hasChange) {
         const signal =
@@ -507,17 +509,22 @@ export default function StatCard({
                     ? '−'
                     : '';
 
-        // Formatação portuguesa: vírgula nos decimais (ex: −4,9%),
-        // não o ponto por omissão do JS.
+        const localeNumerico =
+            i18n.language === 'en'
+                ? 'en-GB'
+                : 'pt-PT';
+
         const numeroFormatado = Math.abs(
             numericChange,
-        ).toLocaleString('pt-PT', {
+        ).toLocaleString(localeNumerico, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1,
         });
 
-        changeText =
-            `${signal}${numeroFormatado}% vs ontem`;
+        changeText = t('statCard.vsOntem', {
+            signal,
+            valor: numeroFormatado,
+        });
     }
 
     // Cor da tendência: por omissão, subir é bom (verde) e descer é mau
@@ -748,7 +755,7 @@ export default function StatCard({
                                     "
                                 >
                                     {mensagemZero ??
-                                        'Sem ocorrências hoje'}
+                                        t('statCard.semOcorrenciasHoje')}
                                 </span>
                             </div>
 

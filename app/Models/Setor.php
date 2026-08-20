@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +14,7 @@ class Setor extends Model
     protected $fillable = [
         'piso_id',
         'nome',
+        'nome_en',
         'codigo',
         'tipo',
         'reservavel',
@@ -54,6 +56,22 @@ class Setor extends Model
             'avaliacao_total' => 'integer',
             'avaliacao_media' => 'float',
         ];
+    }
+
+    /**
+     * Nome a apresentar no idioma ativo — cai em `nome` (PT) sempre que
+     * `nome_en` não estiver preenchido, tal como Faq::pergunta/resposta.
+     * Ao contrário dessas colunas, aqui é um accessor (não resolvido só
+     * num controller) porque o nome do setor é lido a partir de dezenas
+     * de sítios diferentes (dashboard, relatórios, mapa, reservas...).
+     */
+    protected function nomeLocalizado(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => app()->getLocale() === 'en' && $this->nome_en
+                ? $this->nome_en
+                : $this->nome,
+        );
     }
 
     public function piso(): BelongsTo

@@ -1,3 +1,5 @@
+import i18n from '@/i18n';
+
 /**
  * Cores e etiquetas dos estados apresentados em badges.
  *
@@ -7,7 +9,10 @@
  *
  * Todos os mapas têm a mesma forma, { badge, label }, para o sítio onde
  * são usados ser sempre igual. Os estados de reserva acrescentam um
- * "dot", usado pelo cartão do dashboard.
+ * "dot", usado pelo cartão do dashboard. `label` guarda uma CHAVE de
+ * tradução (namespace "common"), não o texto em si — os valores
+ * persistidos na BD continuam em português, só a apresentação muda
+ * (ver etiqueta()).
  */
 
 /** Cor de recurso para um estado que o mapa não conhece. */
@@ -19,32 +24,32 @@ export const ESTADO_RESERVA = {
     pendente: {
         badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
         dot: 'bg-amber-500',
-        label: 'Pendente',
+        label: 'estados.reserva.pendente',
     },
     confirmada: {
         badge: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
         dot: 'bg-teal-500',
-        label: 'Confirmada',
+        label: 'estados.reserva.confirmada',
     },
     cancelada: {
         badge: 'bg-red-500/10 text-red-600 dark:text-red-400',
         dot: 'bg-red-500',
-        label: 'Cancelada',
+        label: 'estados.reserva.cancelada',
     },
     expirada: {
         badge: BADGE_NEUTRO,
         dot: 'bg-slate-400',
-        label: 'Expirada',
+        label: 'estados.reserva.expirada',
     },
     concluida: {
         badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
         dot: 'bg-blue-500',
-        label: 'Concluída',
+        label: 'estados.reserva.concluida',
     },
     nao_compareceu: {
         badge: BADGE_NEUTRO,
         dot: 'bg-slate-400',
-        label: 'Não compareceu',
+        label: 'estados.reserva.nao_compareceu',
     },
 };
 
@@ -52,15 +57,15 @@ export const ESTADO_RESERVA = {
 export const ESTADO_AVALIACAO = {
     pendente: {
         badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-        label: 'Pendente',
+        label: 'estados.avaliacao.pendente',
     },
     aprovada: {
         badge: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-        label: 'Aprovada',
+        label: 'estados.avaliacao.aprovada',
     },
     rejeitada: {
         badge: 'bg-red-500/10 text-red-600 dark:text-red-400',
-        label: 'Rejeitada',
+        label: 'estados.avaliacao.rejeitada',
     },
 };
 
@@ -68,23 +73,23 @@ export const ESTADO_AVALIACAO = {
 export const ESTADO_PAGAMENTO = {
     pendente: {
         badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-        label: 'Pendente',
+        label: 'estados.pagamento.pendente',
     },
     pago: {
         badge: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-        label: 'Pago',
+        label: 'estados.pagamento.pago',
     },
     recusado: {
         badge: 'bg-red-500/10 text-red-600 dark:text-red-400',
-        label: 'Recusado',
+        label: 'estados.pagamento.recusado',
     },
     reembolsado: {
         badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-        label: 'Reembolsado',
+        label: 'estados.pagamento.reembolsado',
     },
     cancelado: {
         badge: BADGE_NEUTRO,
-        label: 'Cancelado',
+        label: 'estados.pagamento.cancelado',
     },
 };
 
@@ -96,15 +101,16 @@ export const ESTADO_PAGAMENTO = {
  * últimos, que é a mais explícita.
  */
 export const METODO_PAGAMENTO = {
-    cartao: { label: 'Cartão', imagem: '/images/payment/cartao.jpeg' },
-    mbway: { label: 'MB Way', imagem: '/images/payment/mbway.jpeg' },
-    transferencia: { label: 'Transferência bancária', imagem: '/images/payment/transferencia.jpeg' },
-    paypal: { label: 'PayPal', imagem: '/images/payment/paypal.jpeg' },
+    cartao: { label: 'estados.metodoPagamento.cartao', imagem: '/images/payment/cartao.jpeg' },
+    mbway: { label: 'estados.metodoPagamento.mbway', imagem: '/images/payment/mbway.jpeg' },
+    transferencia: { label: 'estados.metodoPagamento.transferencia', imagem: '/images/payment/transferencia.jpeg' },
+    paypal: { label: 'estados.metodoPagamento.paypal', imagem: '/images/payment/paypal.jpeg' },
 };
 
 /**
  * Estados de um pedido de suporte. Ao contrário dos outros, a chave é o
- * próprio texto guardado na base de dados.
+ * próprio texto guardado na base de dados (em português) — só o texto
+ * apresentado muda com o idioma, o valor persistido mantém-se.
  *
  * "Em análise" só estava definido no formulário de suporte; a listagem e
  * o detalhe não o conheciam e mostravam-no a cinzento. Passa a ter a cor
@@ -113,15 +119,15 @@ export const METODO_PAGAMENTO = {
 export const ESTADO_SUPORTE = {
     Pendente: {
         badge: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-        label: 'Pendente',
+        label: 'estados.suporte.Pendente',
     },
     'Em análise': {
         badge: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-        label: 'Em análise',
+        label: 'estados.suporte.Em análise',
     },
     Resolvido: {
         badge: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-        label: 'Resolvido',
+        label: 'estados.suporte.Resolvido',
     },
 };
 
@@ -129,12 +135,61 @@ export const ESTADO_SUPORTE = {
 export const ESTADO_UTILIZADOR = {
     true: {
         badge: 'bg-teal-500/10 text-teal-600 dark:text-teal-400',
-        label: 'Ativo',
+        label: 'estados.utilizador.true',
     },
     false: {
         badge: 'bg-red-500/10 text-red-600 dark:text-red-400',
-        label: 'Inativo',
+        label: 'estados.utilizador.false',
     },
+};
+
+/**
+ * Nome do papel (coluna `nome` da tabela `roles` — "Administrador",
+ * "Gestor", "Colaborador", "Utilizador"). Conjunto fixo, definido pelo
+ * RoleSeeder e usado também em comparações de autorização no backend
+ * (ex.: User::hasRole()), por isso a chave de tradução é o próprio
+ * texto em português — só a apresentação muda com o idioma, o valor
+ * persistido mantém-se.
+ */
+export const ROLE_LABEL = {
+    Administrador: 'estados.role.administrador',
+    Gestor: 'estados.role.gestor',
+    Colaborador: 'estados.role.colaborador',
+    Utilizador: 'estados.role.utilizador',
+};
+
+/** Traduz o nome de um papel, devolvendo o valor original se for desconhecido. */
+export const etiquetaRole = (nome, t) => {
+    const chaveTraducao = ROLE_LABEL[nome];
+
+    if (!chaveTraducao) {
+        return nome;
+    }
+
+    return (t ?? i18n.t.bind(i18n))(chaveTraducao);
+};
+
+/**
+ * Nome do período (coluna `nome` da tabela `periodos` — "Manhã",
+ * "Tarde", "Dia inteiro"). Ao contrário dos outros mapas, a chave de
+ * tradução é o próprio texto em português, porque a tabela não tem um
+ * `codigo` estável separado do nome apresentado.
+ */
+export const PERIODO_LABEL = {
+    Manhã: 'estados.periodo.manha',
+    Tarde: 'estados.periodo.tarde',
+    'Dia inteiro': 'estados.periodo.diaInteiro',
+};
+
+/** Traduz o nome de um período, devolvendo o valor original se for desconhecido. */
+export const etiquetaPeriodo = (nome, t) => {
+    const chaveTraducao = PERIODO_LABEL[nome];
+
+    if (!chaveTraducao) {
+        return nome;
+    }
+
+    return (t ?? i18n.t.bind(i18n))(chaveTraducao);
 };
 
 /** Classes do badge de um estado, ou a cor neutra se for desconhecido. */
@@ -144,6 +199,19 @@ export const badge = (mapa, chave) => mapa[chave]?.badge ?? BADGE_NEUTRO;
  * Texto de um estado. Sem correspondência devolve a própria chave, que
  * é mais útil do que um espaço em branco; passa-se `omissao` para
  * escolher outro texto.
+ *
+ * `t` é opcional — passa a função devolvida por `useTranslation('common')`
+ * do componente que chama isto, para o texto atualizar de imediato
+ * quando o idioma muda (o componente já está subscrito a essa mudança
+ * por usar o hook). Sem `t`, cai para a instância global do i18next —
+ * funciona, mas só atualiza no próximo re-render do componente.
  */
-export const etiqueta = (mapa, chave, omissao = chave) =>
-    mapa[chave]?.label ?? omissao;
+export const etiqueta = (mapa, chave, omissao = chave, t) => {
+    const chaveTraducao = mapa[chave]?.label;
+
+    if (!chaveTraducao) {
+        return omissao;
+    }
+
+    return (t ?? i18n.t.bind(i18n))(chaveTraducao);
+};

@@ -31,6 +31,13 @@ class UpdateSetorRequest extends FormRequest
                 'max:100',
             ],
 
+            'nome_en' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
             'codigo' => [
                 'sometimes',
                 'required',

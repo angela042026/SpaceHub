@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 import {
     Home,
@@ -62,6 +63,7 @@ export default function Sidebar({
     open = false,
     onClose = () => {},
 }) {
+    const { t } = useTranslation('common');
     const { auth } = usePage().props;
     const user = auth?.user;
     const roleName = user?.role?.nome;
@@ -81,7 +83,7 @@ export default function Sidebar({
             {open && (
                 <button
                     type="button"
-                    aria-label="Fechar menu lateral"
+                    aria-label={t('sidebar.fecharMenu')}
                     className="fixed inset-0 z-30 bg-slate-950/60 lg:hidden"
                     onClick={onClose}
                 />
@@ -119,7 +121,7 @@ export default function Sidebar({
                     <nav className="space-y-2">
                         <SidebarItem
                             icon={Home}
-                            label="Página Inicial"
+                            label={t('sidebar.paginaInicial')}
                             href={route('home')}
                             active={route().current('home')}
                             onNavigate={onClose}
@@ -127,7 +129,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={LayoutDashboard}
-                            label="Dashboard"
+                            label={t('sidebar.dashboard')}
                             href={route('dashboard')}
                             active={route().current('dashboard')}
                             onNavigate={onClose}
@@ -135,7 +137,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={CalendarPlus}
-                            label="Reservar Espaço"
+                            label={t('sidebar.reservarEspaco')}
                             href={route('reservas.create')}
                             active={route().current(
                                 'reservas.create',
@@ -145,7 +147,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={CalendarDays}
-                            label="Minhas Reservas"
+                            label={t('sidebar.minhasReservas')}
                             href={route('reservas.index')}
                             active={route().current(
                                 'reservas.index',
@@ -155,7 +157,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={Search}
-                            label="Disponibilidade"
+                            label={t('sidebar.disponibilidade')}
                             href={route(
                                 'reservas.availability',
                             )}
@@ -167,7 +169,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={QrCode}
-                            label="Check-in"
+                            label={t('sidebar.checkin')}
                             href={route('checkin.camera')}
                             active={route().current('checkin.*')}
                             onNavigate={onClose}
@@ -175,7 +177,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={Map}
-                            label="Mapa do Escritório"
+                            label={t('sidebar.mapaDoEscritorio')}
                             href={route('mapa.index')}
                             active={route().current(
                                 'mapa.index',
@@ -187,7 +189,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={History}
-                            label="Histórico"
+                            label={t('sidebar.historico')}
                             href={route('reservas.history')}
                             active={route().current(
                                 'reservas.history',
@@ -197,7 +199,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={CreditCard}
-                            label="Pagamentos"
+                            label={t('sidebar.pagamentos')}
                             href={route('pagamentos.index')}
                             active={route().current(
                                 'pagamentos.*',
@@ -207,7 +209,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={Star}
-                            label="Minhas Avaliações"
+                            label={t('sidebar.minhasAvaliacoes')}
                             href={route('avaliacoes.index')}
                             active={route().current(
                                 'avaliacoes.index',
@@ -217,7 +219,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={HelpCircle}
-                            label="Central de ajuda"
+                            label={t('sidebar.centralDeAjuda')}
                             href={route('faqs.index')}
                             active={route().current(
                                 'faqs.index',
@@ -229,7 +231,7 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={Settings}
-                            label="Definições"
+                            label={t('sidebar.definicoes')}
                             href={route('profile.edit')}
                             active={route().current(
                                 'profile.edit',
@@ -243,13 +245,13 @@ export default function Sidebar({
                             <div className="my-6 border-t border-white/10" />
 
                             <p className="mb-3 px-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                                Administração
+                                {t('sidebar.administracao')}
                             </p>
 
                             <nav className="space-y-2">
                                 <SidebarItem
                                     icon={Users}
-                                    label="Utilizadores"
+                                    label={t('sidebar.utilizadores')}
                                     href={route(
                                         'admin.users.index',
                                     )}
@@ -261,7 +263,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={Building2}
-                                    label="Edifícios"
+                                    label={t('sidebar.edificios')}
                                     href={route(
                                         'admin.edificios.index',
                                     )}
@@ -273,7 +275,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={Layers}
-                                    label="Pisos"
+                                    label={t('sidebar.pisos')}
                                     href={route(
                                         'admin.pisos.index',
                                     )}
@@ -285,7 +287,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={MapPinned}
-                                    label="Setores"
+                                    label={t('sidebar.setores')}
                                     href={route(
                                         'admin.setores.index',
                                     )}
@@ -297,7 +299,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={Armchair}
-                                    label="Secretárias"
+                                    label={t('sidebar.secretarias')}
                                     href={route(
                                         'admin.secretarias.index',
                                     )}
@@ -309,7 +311,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={CalendarDays}
-                                    label="Reservas"
+                                    label={t('sidebar.reservas')}
                                     href={route(
                                         'admin.reservas.index',
                                     )}
@@ -321,7 +323,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={QrCode}
-                                    label="QR Codes"
+                                    label={t('sidebar.qrCodes')}
                                     href={route(
                                         'secretarias.qrcodes',
                                     )}
@@ -333,7 +335,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={MapPinned}
-                                    label="Editor do Mapa"
+                                    label={t('sidebar.editorDoMapa')}
                                     href={route(
                                         'setores.mapa.edit',
                                     )}
@@ -346,7 +348,7 @@ export default function Sidebar({
                                 {isAdministrador && (
                                     <SidebarItem
                                         icon={History}
-                                        label="Registo de Atividade"
+                                        label={t('sidebar.registoDeAtividade')}
                                         href={route(
                                             'admin.atividade.index',
                                         )}
@@ -359,7 +361,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={BarChart3}
-                                    label="Estatísticas"
+                                    label={t('sidebar.estatisticas')}
                                     href={route(
                                         'admin.statistics.index',
                                     )}
@@ -371,7 +373,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={FileText}
-                                    label="Relatórios"
+                                    label={t('sidebar.relatorios')}
                                     href={route(
                                         'admin.reports.index',
                                     )}
@@ -383,7 +385,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={Star}
-                                    label="Avaliações"
+                                    label={t('sidebar.avaliacoes')}
                                     href={route(
                                         'admin.avaliacoes.index',
                                     )}
@@ -395,7 +397,7 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={LifeBuoy}
-                                    label="Pedidos de Suporte"
+                                    label={t('sidebar.pedidosDeSuporte')}
                                     href={route(
                                         'support.index',
                                     )}
@@ -428,7 +430,7 @@ export default function Sidebar({
 
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">
-                            {user?.name ?? 'Utilizador'}
+                            {user?.name ?? t('sidebar.utilizadorFallback')}
                         </p>
 
                         <p className="truncate text-xs text-slate-400">
@@ -440,7 +442,7 @@ export default function Sidebar({
                         href={route('logout')}
                         method="post"
                         as="button"
-                        title="Terminar sessão"
+                        title={t('sidebar.terminarSessao')}
                         className="rounded-lg p-2 text-slate-400 transition hover:bg-white/10 hover:text-white"
                     >
                         <LogOut

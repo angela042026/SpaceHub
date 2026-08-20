@@ -2,6 +2,7 @@ import InputError from '@/Components/InputError';
 import { Transition } from '@headlessui/react';
 import { useForm } from '@inertiajs/react';
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertCircle, CheckCircle2, Eye, EyeOff, KeyRound } from 'lucide-react';
 
 const fieldClass =
@@ -11,6 +12,7 @@ const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
 function CampoPalavraPasse({ id, label, value, onChange, autoComplete, inputRef, erro, colSpan, hint }) {
+    const { t } = useTranslation('profile');
     const [visivel, setVisivel] = useState(false);
 
     return (
@@ -33,7 +35,7 @@ function CampoPalavraPasse({ id, label, value, onChange, autoComplete, inputRef,
                 <button
                     type="button"
                     onClick={() => setVisivel((atual) => !atual)}
-                    aria-label={visivel ? 'Ocultar palavra-passe' : 'Mostrar palavra-passe'}
+                    aria-label={visivel ? t('alterarPassword.ocultarPassword') : t('alterarPassword.mostrarPassword')}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 dark:hover:text-slate-200"
                 >
                     {visivel ? <EyeOff size={17} strokeWidth={1.9} /> : <Eye size={17} strokeWidth={1.9} />}
@@ -50,6 +52,7 @@ function CampoPalavraPasse({ id, label, value, onChange, autoComplete, inputRef,
 }
 
 export default function UpdatePasswordForm() {
+    const { t } = useTranslation('profile');
     const passwordInput = useRef();
     const currentPasswordInput = useRef();
 
@@ -99,11 +102,11 @@ export default function UpdatePasswordForm() {
 
                 <div>
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                        Alterar palavra-passe
+                        {t('alterarPassword.titulo')}
                     </h2>
 
                     <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Utiliza uma palavra-passe longa e única para manter a conta segura.
+                        {t('alterarPassword.subtitulo')}
                     </p>
                 </div>
             </div>
@@ -112,7 +115,7 @@ export default function UpdatePasswordForm() {
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <CampoPalavraPasse
                         id="current_password"
-                        label="Palavra-passe atual"
+                        label={t('alterarPassword.atual')}
                         value={data.current_password}
                         onChange={(e) => setData('current_password', e.target.value)}
                         autoComplete="current-password"
@@ -123,18 +126,18 @@ export default function UpdatePasswordForm() {
 
                     <CampoPalavraPasse
                         id="password"
-                        label="Nova palavra-passe"
+                        label={t('alterarPassword.nova')}
                         value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
                         autoComplete="new-password"
                         inputRef={passwordInput}
                         erro={errors.password}
-                        hint="Mínimo de 8 caracteres."
+                        hint={t('alterarPassword.minimoCaracteres')}
                     />
 
                     <CampoPalavraPasse
                         id="password_confirmation"
-                        label="Confirmar palavra-passe"
+                        label={t('alterarPassword.confirmar')}
                         value={data.password_confirmation}
                         onChange={(e) => setData('password_confirmation', e.target.value)}
                         autoComplete="new-password"
@@ -143,7 +146,7 @@ export default function UpdatePasswordForm() {
                             naoCoincide ? (
                                 <span className="flex items-center gap-1 text-red-500">
                                     <AlertCircle size={13} strokeWidth={2} />
-                                    As palavras-passe não coincidem.
+                                    {t('alterarPassword.naoCoincidem')}
                                 </span>
                             ) : null
                         }
@@ -160,7 +163,7 @@ export default function UpdatePasswordForm() {
                     >
                         <span className="flex items-center gap-1.5 text-sm font-semibold text-teal-600 dark:text-teal-400">
                             <CheckCircle2 size={16} strokeWidth={2} />
-                            Guardado.
+                            {t('alterarPassword.guardado')}
                         </span>
                     </Transition>
 
@@ -169,7 +172,7 @@ export default function UpdatePasswordForm() {
                         disabled={processing}
                         className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        {processing ? 'A atualizar...' : 'Atualizar palavra-passe'}
+                        {processing ? t('alterarPassword.aAtualizar') : t('alterarPassword.atualizar')}
                     </button>
                 </div>
             </form>

@@ -21,8 +21,11 @@ class PagamentoExpiradoNotification extends Notification implements ShouldQueue
     {
         return [
             'tipo' => 'pagamento_expirado',
-            'titulo' => 'Reserva cancelada por falta de pagamento',
-            'mensagem' => "O pagamento da tua reserva para a secretária {$this->reserva->secretaria->codigo} no dia {$this->reserva->data->format('d/m/Y')} não foi concluído a tempo e a reserva foi cancelada.",
+            'titulo' => __('Reserva cancelada por falta de pagamento'),
+            'mensagem' => __('O pagamento da tua reserva para a secretária :secretaria no dia :data não foi concluído a tempo e a reserva foi cancelada.', [
+                'secretaria' => $this->reserva->secretaria->codigo,
+                'data' => $this->reserva->data->format('d/m/Y'),
+            ]),
             'reserva_id' => $this->reserva->id,
         ];
     }

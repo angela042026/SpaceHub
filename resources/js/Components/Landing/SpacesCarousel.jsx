@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Building2,
     ChevronLeft,
@@ -6,74 +7,28 @@ import {
     MapPin,
 } from 'lucide-react';
 
-const spaces = [
-    {
-        title: 'Espaço de trabalho',
-        description:
-            'Um ambiente moderno, confortável e preparado para promover a produtividade ao longo do dia.',
-        image: '/images/landing/espaco-trabalho.png',
-        category: 'Coworking',
-        location: 'Piso 1 · Setor A',
-    },
-    {
-        title: 'Espaço comum',
-        description:
-            'Uma área aberta e versátil para trabalhar, colaborar com a equipa e partilhar novas ideias.',
-        image: '/images/landing/espaco-comum.png',
-        category: 'Colaboração',
-        location: 'Piso 0 · Área comum',
-    },
-    {
-        title: 'Sala de reunião',
-        description:
-            'Salas totalmente equipadas para reuniões, apresentações e momentos de trabalho em equipa.',
-        image: '/images/landing/saladereuniao.png',
-        category: 'Reuniões',
-        location: 'Piso 2 · Setor B',
-    },
-    {
-        title: 'Lounge',
-        description:
-            'Um ambiente descontraído para fazer uma pausa, conversar e criar novas ligações profissionais.',
-        image: '/images/landing/lounge.png',
-        category: 'Conforto',
-        location: 'Piso 0 · Lounge',
-    },
-    {
-        title: 'Receção',
-        description:
-            'Uma entrada moderna, profissional e acolhedora para receber utilizadores e visitantes.',
-        image: '/images/landing/rececao.png',
-        category: 'Acolhimento',
-        location: 'Piso 0 · Entrada',
-    },
-    {
-        title: 'Escritório privado',
-        description:
-            'Mais privacidade, concentração e conforto para equipas e profissionais que precisam de foco.',
-        image: '/images/landing/escritorio-privado.png',
-        category: 'Privacidade',
-        location: 'Piso 3 · Setor C',
-    },
-    {
-        title: 'Phone Booth',
-        description:
-            'Cabines silenciosas preparadas para chamadas, videoconferências e reuniões individuais.',
-        image: '/images/landing/phone-booth.png',
-        category: 'Chamadas',
-        location: 'Piso 1 · Setor B',
-    },
-    {
-        title: 'Terraço',
-        description:
-            'Um espaço exterior agradável para trabalhar, relaxar ou fazer uma pausa durante o dia.',
-        image: '/images/landing/terraco.png',
-        category: 'Exterior',
-        location: 'Piso 4 · Terraço',
-    },
-];
-
 export default function SpacesCarousel() {
+    const { t } = useTranslation('landing');
+
+    const spaceImages = [
+        '/images/landing/espaco-trabalho.png',
+        '/images/landing/espaco-comum.png',
+        '/images/landing/saladereuniao.png',
+        '/images/landing/lounge.png',
+        '/images/landing/rececao.png',
+        '/images/landing/escritorio-privado.png',
+        '/images/landing/phone-booth.png',
+        '/images/landing/terraco.png',
+    ];
+
+    const spaces = t('spaces.itens', { returnObjects: true }).map((item, indice) => ({
+        title: item.titulo,
+        description: item.descricao,
+        image: spaceImages[indice],
+        category: item.categoria,
+        location: item.localizacao,
+    }));
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
 
@@ -124,19 +79,18 @@ export default function SpacesCarousel() {
             <div className="relative mx-auto max-w-[1450px]">
                 <div className="mx-auto mb-14 max-w-3xl text-center">
                     <span className="text-sm font-bold uppercase tracking-[0.2em] text-[#14B8A6]">
-                        Os nossos espaços
+                        {t('spaces.eyebrow')}
                     </span>
 
                     <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.04em] text-[#071A33] sm:text-4xl lg:text-5xl">
-                        Ambientes pensados para{' '}
+                        {t('spaces.titulo')}{' '}
                         <span className="text-[#14B8A6]">
-                            trabalhar melhor
+                            {t('spaces.tituloDestaque')}
                         </span>
                     </h2>
 
                     <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600">
-                        Descubra espaços modernos, confortáveis e preparados
-                        para diferentes formas de trabalhar.
+                        {t('spaces.descricao')}
                     </p>
                 </div>
 
@@ -176,7 +130,7 @@ export default function SpacesCarousel() {
                                 <button
                                     type="button"
                                     onClick={goToPrevious}
-                                    aria-label="Ver espaço anterior"
+                                    aria-label={t('spaces.anterior')}
                                     className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-[#071A33] transition-all duration-300 hover:border-[#14B8A6] hover:bg-[#14B8A6] hover:text-white"
                                 >
                                     <ChevronLeft size={21} />
@@ -185,7 +139,7 @@ export default function SpacesCarousel() {
                                 <button
                                     type="button"
                                     onClick={goToNext}
-                                    aria-label="Ver próximo espaço"
+                                    aria-label={t('spaces.seguinte')}
                                     className="grid h-11 w-11 place-items-center rounded-full border border-slate-200 bg-white text-[#071A33] transition-all duration-300 hover:border-[#14B8A6] hover:bg-[#14B8A6] hover:text-white"
                                 >
                                     <ChevronRight size={21} />
@@ -236,7 +190,7 @@ export default function SpacesCarousel() {
                             key={space.title}
                             type="button"
                             onClick={() => setCurrentIndex(index)}
-                            aria-label={`Ver ${space.title}`}
+                            aria-label={t('spaces.verEspaco', { titulo: space.title })}
                             className={`h-2 rounded-full transition-all duration-300 ${
                                 currentIndex === index
                                     ? 'w-8 bg-[#14B8A6]'

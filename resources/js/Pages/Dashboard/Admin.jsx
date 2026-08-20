@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 
@@ -32,6 +33,8 @@ export default function Admin({
     reservasPorPiso,
     tendenciaOcupacao,
 }) {
+    const { t } = useTranslation('dashboard');
+
     const pisoDaReserva =
         reservaHojeUtilizador?.secretaria?.setor?.piso;
 
@@ -169,13 +172,13 @@ export default function Admin({
 
     return (
         <>
-            <Head title="Dashboard" />
+            <Head title={t('titulo')} />
 
             <DashboardLayout>
                 {/* Indicadores principais */}
                 <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                     <StatCard
-                        title="Reservas Hoje"
+                        title={t('admin.reservasHoje')}
                         value={
                             stats?.reservasHoje?.value ?? 0
                         }
@@ -189,7 +192,7 @@ export default function Admin({
                     />
 
                     <StatCard
-                        title="Check-ins realizados"
+                        title={t('admin.checkinsRealizados')}
                         value={
                             stats?.checkinsHoje?.value ?? 0
                         }
@@ -201,13 +204,13 @@ export default function Admin({
                         }
                         textoTendencia={`${
                             stats?.checkinsHoje?.value ?? 0
-                        } de ${
+                        } ${t('admin.deTexto')} ${
                             stats?.reservasHoje?.value ?? 0
                         } · ${percentualCheckins}%`}
                     />
 
                     <StatCard
-                        title="Secretárias Livres"
+                        title={t('admin.secretariasLivres')}
                         value={
                             stats?.mesasLivres?.value ?? 0
                         }
@@ -221,8 +224,8 @@ export default function Admin({
                     />
 
                     <StatCard
-                        title="Ocupação Atual"
-                        subtitulo="Todos os pisos"
+                        title={t('admin.ocupacaoAtual')}
+                        subtitulo={t('admin.todosOsPisos')}
                         value={`${
                             stats?.taxaOcupacao?.value ?? 0
                         }%`}
@@ -241,7 +244,7 @@ export default function Admin({
                     />
 
                     <StatCard
-                        title="Reservas Expiradas"
+                        title={t('admin.reservasExpiradas')}
                         value={
                             stats
                                 ?.reservasExpiradasHoje
@@ -256,11 +259,11 @@ export default function Admin({
                         color="azulMedio"
                         decoracao="expired"
                         invertido
-                        mensagemZero="Nenhuma expirou hoje"
+                        mensagemZero={t('admin.nenhumaExpirouHoje')}
                     />
 
                     <StatCard
-    title="Cancelamentos"
+    title={t('admin.cancelamentos')}
     value={
         stats?.cancelamentosHoje?.value ?? 0
     }
@@ -272,7 +275,7 @@ export default function Admin({
     color="azulMarinho"
     decoracao="cancelSteps"
     invertido
-    mensagemZero="Nenhum cancelamento hoje"
+    mensagemZero={t('admin.nenhumCancelamentoHoje')}
 />
                 </section>
 

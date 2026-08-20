@@ -15,10 +15,12 @@ class SetorResource extends JsonResource
 
             'piso' => $this->whenLoaded(
                 'piso',
-                fn () => $this->piso->nome
+                fn () => $this->piso->nome_localizado
             ),
 
             'nome' => $this->nome,
+            'nome_en' => $this->nome_en,
+            'nome_localizado' => $this->nome_localizado,
             'codigo' => $this->codigo,
             'tipo' => $this->tipo,
 

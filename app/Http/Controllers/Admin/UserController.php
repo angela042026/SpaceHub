@@ -144,7 +144,7 @@ class UserController extends Controller
 
         return redirect()
             ->route('admin.users.index')
-            ->with('success', 'Utilizador criado com sucesso.');
+            ->with('success', __('Utilizador criado com sucesso.'));
     }
 
     /**
@@ -192,7 +192,7 @@ class UserController extends Controller
         ) {
             return redirect()
                 ->back()
-                ->withErrors(['role_id' => 'Não pode retirar a si próprio a role de Administrador.'])
+                ->withErrors(['role_id' => __('Não pode retirar a si próprio a role de Administrador.')])
                 ->withInput();
         }
 
@@ -245,7 +245,7 @@ class UserController extends Controller
 
         return redirect()
             ->route('admin.users.index')
-            ->with('success', 'Utilizador atualizado com sucesso.');
+            ->with('success', __('Utilizador atualizado com sucesso.'));
     }
 
     /**
@@ -258,7 +258,7 @@ class UserController extends Controller
         if ($user->ativo && $user->id === $request->user()->id) {
             return redirect()
                 ->back()
-                ->with('error', 'Não pode desativar a sua própria conta.');
+                ->with('error', __('Não pode desativar a sua própria conta.'));
         }
 
         $user->ativo = ! $user->ativo;
@@ -274,7 +274,7 @@ class UserController extends Controller
         return redirect()
             ->back()
             ->with('success', $user->ativo
-                ? 'Utilizador ativado.'
-                : 'Utilizador desativado.');
+                ? __('Utilizador ativado.')
+                : __('Utilizador desativado.'));
     }
 }

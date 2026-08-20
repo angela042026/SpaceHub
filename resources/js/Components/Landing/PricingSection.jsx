@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     CalendarCheck,
     CalendarDays,
@@ -10,106 +11,77 @@ import {
     UserPlus,
 } from 'lucide-react';
 
-const periods = [
-    {
-        id: 'daily',
-        label: 'Diário',
-    },
-    {
-        id: 'weekly',
-        label: 'Semanal',
-    },
-    {
-        id: 'monthly',
-        label: 'Mensal',
-    },
-    {
-        id: 'annual',
-        label: 'Anual',
-    },
-];
-
-const dailyPeriods = [
-    {
-        id: 'morning',
-        label: 'Manhã',
-        schedule: '08:00 – 13:00',
-    },
-    {
-        id: 'afternoon',
-        label: 'Tarde',
-        schedule: '13:00 – 18:00',
-    },
-    {
-        id: 'fullDay',
-        label: 'Dia inteiro',
-        schedule: '08:00 – 18:00',
-    },
-];
-
-const pricing = {
-    daily: {
-        morning: {
-            price: '5',
-            suffix: '/ manhã',
-            title: 'Passe diário — Manhã',
-            description:
-                'Ideal para quem precisa de um espaço durante o período da manhã.',
-        },
-
-        afternoon: {
-            price: '5',
-            suffix: '/ tarde',
-            title: 'Passe diário — Tarde',
-            description:
-                'Uma opção flexível para trabalhar durante o período da tarde.',
-        },
-
-        fullDay: {
-            price: '9',
-            suffix: '/ dia',
-            title: 'Passe diário — Dia inteiro',
-            description:
-                'Acesso ao espaço durante todo o horário de funcionamento.',
-        },
-    },
-
-    weekly: {
-        price: '45',
-        suffix: '/ semana',
-        title: 'Plano semanal',
-        description:
-            'A partir de €45 por semana para utilização durante o dia inteiro.',
-    },
-
-    monthly: {
-        price: '179',
-        suffix: '/ mês',
-        title: 'Plano mensal',
-        description:
-            'Plano mensal com 10% de desconto.',
-    },
-
-    annual: {
-        price: '1 899',
-        suffix: '/ ano',
-        title: 'Plano anual',
-        description:
-            'Plano anual com 20% de desconto.',
-    },
-};
-
-const benefits = [
-    'Reserva de secretárias e espaços de trabalho',
-    'Check-in rápido através de QR Code',
-    'Acesso ao mapa de disponibilidade',
-    'Gestão das reservas numa única plataforma',
-    'Cancelamento e consulta do histórico',
-    'Suporte SpaceHub',
-];
-
 export default function PricingSection() {
+    const { t } = useTranslation('landing');
     const { auth } = usePage().props;
+
+    const periods = [
+        { id: 'daily', label: t('pricing.periodos.daily') },
+        { id: 'weekly', label: t('pricing.periodos.weekly') },
+        { id: 'monthly', label: t('pricing.periodos.monthly') },
+        { id: 'annual', label: t('pricing.periodos.annual') },
+    ];
+
+    const dailyPeriods = [
+        {
+            id: 'morning',
+            label: t('pricing.periodosDiarios.morning.label'),
+            schedule: t('pricing.periodosDiarios.morning.horario'),
+        },
+        {
+            id: 'afternoon',
+            label: t('pricing.periodosDiarios.afternoon.label'),
+            schedule: t('pricing.periodosDiarios.afternoon.horario'),
+        },
+        {
+            id: 'fullDay',
+            label: t('pricing.periodosDiarios.fullDay.label'),
+            schedule: t('pricing.periodosDiarios.fullDay.horario'),
+        },
+    ];
+
+    const pricing = {
+        daily: {
+            morning: {
+                price: '5',
+                suffix: t('pricing.planos.dailyMorning.sufixo'),
+                title: t('pricing.planos.dailyMorning.titulo'),
+                description: t('pricing.planos.dailyMorning.descricao'),
+            },
+            afternoon: {
+                price: '5',
+                suffix: t('pricing.planos.dailyAfternoon.sufixo'),
+                title: t('pricing.planos.dailyAfternoon.titulo'),
+                description: t('pricing.planos.dailyAfternoon.descricao'),
+            },
+            fullDay: {
+                price: '9',
+                suffix: t('pricing.planos.dailyFullDay.sufixo'),
+                title: t('pricing.planos.dailyFullDay.titulo'),
+                description: t('pricing.planos.dailyFullDay.descricao'),
+            },
+        },
+        weekly: {
+            price: '45',
+            suffix: t('pricing.planos.weekly.sufixo'),
+            title: t('pricing.planos.weekly.titulo'),
+            description: t('pricing.planos.weekly.descricao'),
+        },
+        monthly: {
+            price: '179',
+            suffix: t('pricing.planos.monthly.sufixo'),
+            title: t('pricing.planos.monthly.titulo'),
+            description: t('pricing.planos.monthly.descricao'),
+        },
+        annual: {
+            price: '1 899',
+            suffix: t('pricing.planos.annual.sufixo'),
+            title: t('pricing.planos.annual.titulo'),
+            description: t('pricing.planos.annual.descricao'),
+        },
+    };
+
+    const benefits = t('pricing.beneficios', { returnObjects: true });
 
     const [selectedPeriod, setSelectedPeriod] = useState('daily');
 
@@ -134,17 +106,16 @@ export default function PricingSection() {
                 {/* Cabeçalho */}
                 <div className="mx-auto max-w-3xl text-center">
                     <span className="text-sm font-bold uppercase tracking-[0.2em] text-[#14B8A6]">
-                        Preços
+                        {t('pricing.eyebrow')}
                     </span>
 
                     <h2 className="mt-3 text-3xl font-black leading-[1.05] tracking-[-0.04em] text-[#071A33] sm:text-4xl lg:text-[46px]">
-                        Escolha a opção ideal para{' '}
-                        <span className="text-[#14B8A6]">a sua rotina</span>
+                        {t('pricing.tituloPrefixo')}{' '}
+                        <span className="text-[#14B8A6]">{t('pricing.tituloDestaque')}</span>
                     </h2>
 
                     <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-600">
-                        Utilize o SpaceHub por um período, durante alguns dias
-                        ou através de um plano de utilização regular.
+                        {t('pricing.descricao')}
                     </p>
                 </div>
 
@@ -209,7 +180,7 @@ export default function PricingSection() {
 
                             <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[#14B8A6]/20 bg-[#14B8A6]/10 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#5EEAD4]">
                                 <Sparkles size={14} />
-                                Plano selecionado
+                                {t('pricing.planoSelecionado')}
                             </div>
 
                             <h3 className="mt-6 text-2xl font-black leading-tight tracking-tight sm:text-[28px]">
@@ -232,7 +203,7 @@ export default function PricingSection() {
                             )}
 
                             <p className="mt-7 text-sm font-semibold uppercase tracking-wider text-[#5EEAD4]">
-                                A partir de
+                                {t('pricing.aPartirDe')}
                             </p>
 
                             <div className="mt-2 flex items-end gap-2">
@@ -251,7 +222,7 @@ export default function PricingSection() {
 
                             {selectedPeriod === 'annual' && (
                                 <p className="mt-3 text-sm text-slate-300">
-                                    Equivale a aproximadamente €158 por mês.
+                                    {t('pricing.equivaleAnual')}
                                 </p>
 
                             )}
@@ -269,12 +240,11 @@ export default function PricingSection() {
 
                                 <div>
                                     <h3 className="text-xl font-black text-[#071A33]">
-                                        Incluído nesta opção
+                                        {t('pricing.incluidoTitulo')}
                                     </h3>
 
                                     <p className="mt-1 text-sm text-slate-500">
-                                        Tudo o que precisa para trabalhar com
-                                        conforto.
+                                        {t('pricing.incluidoDescricao')}
                                     </p>
                                 </div>
                             </div>
@@ -308,7 +278,7 @@ export default function PricingSection() {
                                         className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-base font-black text-[#071A33] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#14B8A6]/50 hover:bg-[#EAFBF8] sm:whitespace-nowrap"
                                     >
                                         <Search size={19} />
-                                        Consultar disponibilidade
+                                        {t('pricing.ctaConsultarDisponibilidade')}
                                     </Link>
                                 ) : (
                                     <Link
@@ -316,7 +286,7 @@ export default function PricingSection() {
                                         className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-base font-black text-[#071A33] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#14B8A6]/50 hover:bg-[#EAFBF8] sm:whitespace-nowrap"
                                     >
                                         <UserPlus size={19} />
-                                        Criar conta
+                                        {t('pricing.ctaCriarConta')}
                                     </Link>
                                 )}
 
@@ -325,13 +295,12 @@ export default function PricingSection() {
                                     className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#14B8A6]/80 px-6 py-3.5 text-base font-black text-[#03172B] shadow-lg shadow-[#14B8A6]/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#14B8A6] hover:shadow-[#14B8A6]/35 sm:whitespace-nowrap"
                                 >
                                     <CalendarCheck size={19} />
-                                    Reservar agora
+                                    {t('pricing.ctaReservarAgora')}
                                 </Link>
                             </div>
 
                             <p className="mt-3 text-xs leading-5 text-slate-400">
-                                Pode consultar a disponibilidade antes de
-                                confirmar a reserva.
+                                {t('pricing.avisoDisponibilidade')}
                             </p>
                         </div>
                     </div>

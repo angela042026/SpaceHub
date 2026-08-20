@@ -33,6 +33,17 @@ class EstatisticasService
     ) {
     }
 
+    /**
+     * Resolve o nome a apresentar (PT/EN) a partir de colunas cruas de
+     * queries com join/selectRaw a pisos/setores — mesma lógica de
+     * Setor::nomeLocalizado()/Piso::nomeLocalizado(), repetida aqui porque
+     * estas linhas não são hidratadas como modelos Setor/Piso.
+     */
+    private function resolverNome(?string $nome, ?string $nomeEn): ?string
+    {
+        return app()->getLocale() === 'en' && $nomeEn ? $nomeEn : $nome;
+    }
+
     public function obterDataInicio(string $periodo): ?Carbon
     {
         return match ($periodo) {
@@ -113,27 +124,29 @@ class EstatisticasService
             ->get();
 
         $pisosPorUtilizacao = Reserva::query()
-            ->selectRaw('pisos.id, pisos.nome, pisos.codigo, COUNT(reservas.id) as total')
+            ->selectRaw('pisos.id, pisos.nome, pisos.nome_en, pisos.codigo, COUNT(reservas.id) as total')
             ->join('secretarias', 'reservas.secretaria_id', '=', 'secretarias.id')
             ->join('setores', 'secretarias.setor_id', '=', 'setores.id')
             ->join('pisos', 'setores.piso_id', '=', 'pisos.id')
             ->whereIn('reservas.estado_reserva_id', $idsEstadosValidos)
             ->whereNull('reservas.cancelada_at')
             ->tap(fn (Builder $query) => $limitarPeriodo($query, 'reservas.data'))
-            ->groupBy('pisos.id', 'pisos.nome', 'pisos.codigo')
+            ->groupBy('pisos.id', 'pisos.nome', 'pisos.nome_en', 'pisos.codigo')
             ->orderByDesc('total')
-            ->get();
+            ->get()
+            ->each(fn ($piso) => $piso->nome = $this->resolverNome($piso->nome, $piso->nome_en));
 
         $setoresPorUtilizacao = Reserva::query()
-            ->selectRaw('setores.id, setores.nome, COUNT(reservas.id) as total')
+            ->selectRaw('setores.id, setores.nome, setores.nome_en, COUNT(reservas.id) as total')
             ->join('secretarias', 'reservas.secretaria_id', '=', 'secretarias.id')
             ->join('setores', 'secretarias.setor_id', '=', 'setores.id')
             ->whereIn('reservas.estado_reserva_id', $idsEstadosValidos)
             ->whereNull('reservas.cancelada_at')
             ->tap(fn (Builder $query) => $limitarPeriodo($query, 'reservas.data'))
-            ->groupBy('setores.id', 'setores.nome')
+            ->groupBy('setores.id', 'setores.nome', 'setores.nome_en')
             ->orderByDesc('total')
-            ->get();
+            ->get()
+            ->each(fn ($setor) => $setor->nome = $this->resolverNome($setor->nome, $setor->nome_en));
 
         $utilizadoresComMaisReservas = Reserva::query()
             ->selectRaw('user_id, COUNT(*) as total')
@@ -480,8 +493,8 @@ class EstatisticasService
             ->whereDate('reservas.data', '<=', $hoje)
             ->whereIn('reservas.estado_reserva_id', $idsEstadosValidos)
             ->when($edificioId, fn (Builder $q) => $q->where('pisos.edificio_id', $edificioId))
-            ->selectRaw('pisos.id, pisos.nome, COUNT(reservas.id) as total')
-            ->groupBy('pisos.id', 'pisos.nome')
+            ->selectRaw('pisos.id, pisos.nome, pisos.nome_en, COUNT(reservas.id) as total')
+            ->groupBy('pisos.id', 'pisos.nome', 'pisos.nome_en')
             ->orderByDesc('total')
             ->get();
 
@@ -490,7 +503,7 @@ class EstatisticasService
         $reservasPorPiso = $queryPiso
             ->map(fn ($linha) => [
                 'id' => $linha->id,
-                'nome' => $linha->nome,
+                'nome' => $this->resolverNome($linha->nome, $linha->nome_en),
                 'total' => (int) $linha->total,
                 'percentual' => $totalPisos > 0 ? round($linha->total / $totalPisos * 100, 1) : 0.0,
             ])
@@ -506,8 +519,8 @@ class EstatisticasService
             ->whereDate('reservas.data', '>=', $inicio)
             ->whereDate('reservas.data', '<=', $hoje)
             ->whereIn('reservas.estado_reserva_id', $idsEstadosValidos)
-            ->selectRaw('setores.id, setores.nome, pisos.id as piso_id, pisos.nome as piso_nome, pisos.numero as piso_numero, COUNT(reservas.id) as total')
-            ->groupBy('setores.id', 'setores.nome', 'pisos.id', 'pisos.nome', 'pisos.numero')
+            ->selectRaw('setores.id, setores.nome, setores.nome_en, pisos.id as piso_id, pisos.nome as piso_nome, pisos.nome_en as piso_nome_en, pisos.numero as piso_numero, COUNT(reservas.id) as total')
+            ->groupBy('setores.id', 'setores.nome', 'setores.nome_en', 'pisos.id', 'pisos.nome', 'pisos.nome_en', 'pisos.numero')
             ->orderByDesc('total')
             ->get();
 
@@ -516,11 +529,11 @@ class EstatisticasService
         $reservasPorSetor = $querySetor
             ->map(fn ($linha) => [
                 'id' => $linha->id,
-                'nome' => $linha->nome,
+                'nome' => $this->resolverNome($linha->nome, $linha->nome_en),
                 'total' => (int) $linha->total,
                 'percentual' => $totalSetores > 0 ? round($linha->total / $totalSetores * 100, 1) : 0.0,
                 'pisoId' => $linha->piso_id,
-                'pisoNome' => $linha->piso_nome,
+                'pisoNome' => $this->resolverNome($linha->piso_nome, $linha->piso_nome_en),
                 'pisoNumero' => (int) $linha->piso_numero,
             ])
             ->values();

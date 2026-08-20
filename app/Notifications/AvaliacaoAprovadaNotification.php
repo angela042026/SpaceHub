@@ -25,18 +25,18 @@ class AvaliacaoAprovadaNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject($dados['titulo'])
-            ->greeting('Olá, ' . $notifiable->name . '!')
+            ->greeting(__('Olá, :name!', ['name' => $notifiable->name]))
             ->line($dados['mensagem'])
-            ->action('Ver as minhas reservas', route('reservas.index'))
-            ->line('Obrigado por utilizares o SpaceHub.');
+            ->action(__('Ver as minhas reservas'), route('reservas.index'))
+            ->line(__('Obrigado por utilizares o SpaceHub.'));
     }
 
     public function toArray($notifiable): array
     {
         return [
             'tipo' => 'avaliacao_aprovada',
-            'titulo' => 'Avaliação aprovada',
-            'mensagem' => 'A tua avaliação foi aprovada. Obrigado pelo feedback!',
+            'titulo' => __('Avaliação aprovada'),
+            'mensagem' => __('A tua avaliação foi aprovada. Obrigado pelo feedback!'),
             'reserva_id' => $this->avaliacao->reserva_id,
         ];
     }

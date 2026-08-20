@@ -4,6 +4,7 @@ import {
     ShieldCheck,
     Timer,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import AuthFooter from './AuthFooter';
 import AuthHeader from './AuthHeader';
 import FeatureItem from './FeatureItem';
@@ -13,13 +14,19 @@ export default function AuthLayout({
     highlightedTitle,
     subtitle,
     children,
-    heroTitle = 'Acesso seguro.',
-    heroPrefix = 'Gestão',
-    heroHighlightedTitle = 'inteligente.',
-    heroDescription = 'Os seus dados e espaços estão protegidos com a máxima segurança.',
+    heroTitle,
+    heroPrefix,
+    heroHighlightedTitle,
+    heroDescription,
     wideForm = false,
 }) {
+    const { t } = useTranslation('auth');
     const { theme, toggleTheme } = useTheme();
+
+    heroTitle ??= t('layout.heroTituloOmissao');
+    heroPrefix ??= t('layout.heroPrefixoOmissao');
+    heroHighlightedTitle ??= t('layout.heroTituloDestaqueOmissao');
+    heroDescription ??= t('layout.heroDescricaoOmissao');
 
     const gridColumns = wideForm
         ? 'lg:grid-cols-[590px_1fr]'
@@ -118,7 +125,7 @@ export default function AuthLayout({
                     <section className="relative hidden min-h-full overflow-hidden lg:block">
                         <img
                             src="/images/landing/hero-spacehub.jpg"
-                            alt="Espaço de trabalho SpaceHub"
+                            alt={t('layout.imagemAlt')}
                             className="absolute inset-0 h-full w-full object-cover"
                         />
 
@@ -225,20 +232,20 @@ export default function AuthLayout({
                             >
                                 <FeatureItem
                                     icon={ShieldCheck}
-                                    title="Dados protegidos"
-                                    description="Encriptação de ponta a ponta"
+                                    title={t('layout.featureDadosProtegidos.titulo')}
+                                    description={t('layout.featureDadosProtegidos.descricao')}
                                 />
 
                                 <FeatureItem
                                     icon={QrCode}
-                                    title="Check-in por QR Code"
-                                    description="Entre no escritório em segundos através do QR Code da sua reserva."
+                                    title={t('layout.featureCheckinQr.titulo')}
+                                    description={t('layout.featureCheckinQr.descricao')}
                                 />
 
                                 <FeatureItem
                                     icon={Timer}
-                                    title="Sempre disponível"
-                                    description="Aceda de qualquer lugar, a qualquer hora"
+                                    title={t('layout.featureSempreDisponivel.titulo')}
+                                    description={t('layout.featureSempreDisponivel.descricao')}
                                 />
                             </div>
                         </div>

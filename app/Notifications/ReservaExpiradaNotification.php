@@ -21,8 +21,10 @@ class ReservaExpiradaNotification extends Notification implements ShouldQueue
     {
         return [
             'tipo' => 'reserva_expirada',
-            'titulo' => 'Reserva expirada',
-            'mensagem' => "A tua reserva para o dia {$this->reserva->data->format('d/m/Y')} expirou por falta de check-in.",
+            'titulo' => __('Reserva expirada'),
+            'mensagem' => __('A tua reserva para o dia :data expirou por falta de check-in.', [
+                'data' => $this->reserva->data->format('d/m/Y'),
+            ]),
             'reserva_id' => $this->reserva->id,
         ];
     }

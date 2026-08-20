@@ -8,14 +8,11 @@ import {
     UserRound,
     Trophy,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const OPCOES_PERIODO = [
-    { valor: '30dias', label: '30 dias' },
-    { valor: '90dias', label: '90 dias' },
-    { valor: 'ano', label: 'Ano' },
-];
+const OPCOES_PERIODO = ['30dias', '90dias', 'ano'];
 
-const DIAS_SEMANA = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'];
+const DIAS_SEMANA_CHAVES = ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom'];
 
 // Mesmo degradê das barras de "Reservas por piso", para os gráficos
 // deste card terem a mesma linguagem visual.
@@ -45,6 +42,7 @@ function CardDestaque({ icon: Icon, label, badge, children }) {
 }
 
 function MiniBarrasPisos({ pisos }) {
+    const { t } = useTranslation('dashboard');
     const topPisos = (pisos ?? []).slice(0, 3);
     const maiorTotal = Math.max(
         ...topPisos.map((piso) => Number(piso.total ?? 0)),
@@ -54,7 +52,7 @@ function MiniBarrasPisos({ pisos }) {
     if (topPisos.length === 0) {
         return (
             <p className="text-xs text-slate-400 dark:text-[#8fa7bd]">
-                Sem dados suficientes.
+                {t('destaques.semDadosSuficientes')}
             </p>
         );
     }
@@ -96,13 +94,14 @@ function MiniBarrasPisos({ pisos }) {
 }
 
 function MiniSparklineSetor({ tendencia, label }) {
+    const { t } = useTranslation('dashboard');
     const pontos = tendencia?.pontos ?? [];
     const [aExibirTooltip, setExibirTooltip] = useState(false);
 
     if (pontos.length < 2) {
         return (
             <p className="text-xs text-slate-400 dark:text-[#8fa7bd]">
-                Sem dados suficientes.
+                {t('destaques.semDadosSuficientes')}
             </p>
         );
     }
@@ -181,7 +180,7 @@ function MiniSparklineSetor({ tendencia, label }) {
 
             {aExibirTooltip && (
                 <div className="absolute right-0 top-0 z-10 w-max max-w-[160px] rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-slate-600 shadow-lg dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#b5c5d5]">
-                    {tendencia.total} reservas {label}
+                    {t('statistics.reservasCount', { count: tendencia.total })} {label}
                 </div>
             )}
         </div>
@@ -189,13 +188,14 @@ function MiniSparklineSetor({ tendencia, label }) {
 }
 
 function MiniBarrasSemana({ distribuicao }) {
+    const { t } = useTranslation('dashboard');
     const valores = distribuicao ?? [];
     const maximo = Math.max(...valores, 1);
 
     if (valores.length === 0) {
         return (
             <p className="text-xs text-slate-400 dark:text-[#8fa7bd]">
-                Sem dados suficientes.
+                {t('destaques.semDadosSuficientes')}
             </p>
         );
     }
@@ -224,7 +224,7 @@ function MiniBarrasSemana({ distribuicao }) {
                         </div>
 
                         <span className="text-[9px] font-semibold text-slate-400 dark:text-[#8fa7bd]">
-                            {DIAS_SEMANA[indice]}
+                            {t(`destaques.diasSemanaAbrev.${DIAS_SEMANA_CHAVES[indice]}`)}
                         </span>
                     </div>
                 );
@@ -241,13 +241,14 @@ function MiniBarrasSemana({ distribuicao }) {
 const SEGMENTOS_POR_BARRA = 3;
 
 function MiniBarrasSegmentadas({ distribuicao }) {
+    const { t } = useTranslation('dashboard');
     const valores = distribuicao ?? [];
     const maximo = Math.max(...valores, 1);
 
     if (valores.length === 0) {
         return (
             <p className="text-xs text-slate-400 dark:text-[#8fa7bd]">
-                Sem dados suficientes.
+                {t('destaques.semDadosSuficientes')}
             </p>
         );
     }
@@ -286,7 +287,7 @@ function MiniBarrasSegmentadas({ distribuicao }) {
                         </div>
 
                         <span className="text-[9px] font-semibold text-slate-400 dark:text-[#8fa7bd]">
-                            {DIAS_SEMANA[indice]}
+                            {t(`destaques.diasSemanaAbrev.${DIAS_SEMANA_CHAVES[indice]}`)}
                         </span>
                     </div>
                 );
@@ -296,6 +297,7 @@ function MiniBarrasSegmentadas({ distribuicao }) {
 }
 
 export default function StatisticsSummary({ estatisticas }) {
+    const { t } = useTranslation('dashboard');
     const [periodo, setPeriodo] = useState('30dias');
     const [dados, setDados] = useState(estatisticas);
     const [aCarregar, setACarregar] = useState(false);
@@ -349,9 +351,7 @@ export default function StatisticsSummary({ estatisticas }) {
               )
             : null;
 
-    const labelPeriodo = OPCOES_PERIODO.find(
-        (opcao) => opcao.valor === periodo,
-    )?.label;
+    const labelPeriodo = t(`destaques.periodos.${periodo}`);
 
     return (
         <section className="dashboard-card flex h-full flex-col overflow-hidden">
@@ -363,30 +363,30 @@ export default function StatisticsSummary({ estatisticas }) {
 
                     <div>
                         <h2 className="text-lg font-bold text-slate-900 dark:text-[#f8fafc]">
-                            Destaques do período
+                            {t('destaques.titulo')}
                         </h2>
 
                         <p className="text-sm text-slate-500 dark:text-[#8fa7bd]">
-                            Últimos {labelPeriodo}
+                            {t('destaques.ultimosLabel', { periodo: labelPeriodo })}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 dark:border-[#2a5069] dark:bg-[#101f34]">
-                    {OPCOES_PERIODO.map((opcao) => (
+                    {OPCOES_PERIODO.map((valor) => (
                         <button
-                            key={opcao.valor}
+                            key={valor}
                             type="button"
                             onClick={() =>
-                                setPeriodo(opcao.valor)
+                                setPeriodo(valor)
                             }
                             className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                                periodo === opcao.valor
+                                periodo === valor
                                     ? 'bg-teal-500 text-white dark:bg-[#18c3b3]'
                                     : 'text-slate-500 hover:text-teal-600 dark:text-[#afc0d0] dark:hover:text-[#18c3b3]'
                             }`}
                         >
-                            {opcao.label}
+                            {t(`destaques.periodos.${valor}`)}
                         </button>
                     ))}
                 </div>
@@ -400,14 +400,14 @@ export default function StatisticsSummary({ estatisticas }) {
                 >
                     <CardDestaque
                         icon={Building2}
-                        label="Piso líder"
+                        label={t('destaques.pisoLider')}
                     >
                         <p className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
-                            {pisoTop?.nome ?? 'Sem dados'}
+                            {pisoTop?.nome ?? t('destaques.semDados')}
                         </p>
 
                         <p className="-mt-1.5 text-xs font-semibold text-slate-400 dark:text-[#8fa7bd]">
-                            {pisoTop?.total ?? 0} reservas
+                            {t('statistics.reservasCount', { count: pisoTop?.total ?? 0 })}
                             {percentualPiso !== null
                                 ? ` · ${percentualPiso}%`
                                 : ''}
@@ -420,25 +420,25 @@ export default function StatisticsSummary({ estatisticas }) {
 
                     <CardDestaque
                         icon={Layers3}
-                        label="Setor mais procurado"
+                        label={t('destaques.setorMaisProcurado')}
                     >
                         <p className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
-                            {setorTop?.nome ?? 'Sem dados'}
+                            {setorTop?.nome ?? t('destaques.semDados')}
                         </p>
 
                         <p className="-mt-1.5 text-xs font-semibold text-slate-400 dark:text-[#8fa7bd]">
-                            {setorTop?.total ?? 0} reservas
+                            {t('statistics.reservasCount', { count: setorTop?.total ?? 0 })}
                         </p>
 
                         <MiniSparklineSetor
                             tendencia={tendenciaSetorTop}
-                            label={`nos últimos ${labelPeriodo}`}
+                            label={t('destaques.nosUltimos', { periodo: labelPeriodo })}
                         />
                     </CardDestaque>
 
                     <CardDestaque
                         icon={UserRound}
-                        label="Utilizador mais ativo"
+                        label={t('destaques.utilizadorMaisAtivo')}
                     >
                         <div className="flex items-center gap-2.5">
                             {utilizadorTop?.user
@@ -462,12 +462,11 @@ export default function StatisticsSummary({ estatisticas }) {
                             <div className="min-w-0">
                                 <p className="truncate text-sm font-bold text-slate-900 dark:text-[#f8fafc]">
                                     {utilizadorTop?.user
-                                        ?.name ?? 'Sem dados'}
+                                        ?.name ?? t('destaques.semDados')}
                                 </p>
 
                                 <p className="text-xs font-semibold text-slate-400 dark:text-[#8fa7bd]">
-                                    {utilizadorTop?.total ?? 0}{' '}
-                                    reservas
+                                    {t('statistics.reservasCount', { count: utilizadorTop?.total ?? 0 })}
                                 </p>
                             </div>
                         </div>
@@ -481,22 +480,22 @@ export default function StatisticsSummary({ estatisticas }) {
 
                     <CardDestaque
                         icon={Armchair}
-                        label="Secretária destaque"
+                        label={t('destaques.secretariaDestaque')}
                         badge={
                             secretariaTop ? (
                                 <span className="shrink-0 rounded-full bg-teal-500/10 px-2 py-0.5 text-[10px] font-bold text-teal-600 dark:bg-[#18c3b3]/15 dark:text-[#18c3b3]">
-                                    Top 1
+                                    {t('destaques.top1')}
                                 </span>
                             ) : null
                         }
                     >
                         <p className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
                             {secretariaTop?.secretaria
-                                ?.codigo ?? 'Sem dados'}
+                                ?.codigo ?? t('destaques.semDados')}
                         </p>
 
                         <p className="-mt-1.5 text-xs font-semibold text-slate-400 dark:text-[#8fa7bd]">
-                            {secretariaTop?.total ?? 0} reservas
+                            {t('statistics.reservasCount', { count: secretariaTop?.total ?? 0 })}
                         </p>
 
                         <MiniBarrasSegmentadas
@@ -511,7 +510,7 @@ export default function StatisticsSummary({ estatisticas }) {
                     href={route('admin.statistics.index')}
                     className="mt-5 flex items-center justify-center gap-2 rounded-xl border border-teal-500 bg-white py-2.5 text-sm font-bold text-teal-600 transition hover:bg-gradient-to-r hover:from-teal-50 hover:to-teal-100 hover:text-teal-700 dark:border-[#36566f] dark:bg-transparent dark:text-[#d7e3ed] dark:hover:border-[#18c3b3] dark:hover:bg-none dark:hover:bg-[#18c3b3]/[0.06] dark:hover:text-[#18c3b3]"
                 >
-                    Ver estatísticas completas
+                    {t('destaques.verEstatisticasCompletas')}
                     <ArrowRight size={15} strokeWidth={1.9} />
                 </Link>
             </div>

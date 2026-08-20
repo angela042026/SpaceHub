@@ -30,11 +30,11 @@ class SecretariaQrCodeController extends Controller
             ->get()
             ->map(fn ($piso) => [
                 'id' => $piso->id,
-                'nome' => $piso->nome,
+                'nome' => $piso->nome_localizado,
                 'secretarias' => $piso->setores->flatMap(fn ($setor) => $setor->secretarias->map(fn ($secretaria) => [
                     'id' => $secretaria->id,
                     'codigo' => $secretaria->codigo,
-                    'setor' => $setor->nome,
+                    'setor' => $setor->nome_localizado,
                     'qrUrl' => route('secretarias.qrcode', $secretaria->id),
                 ]))->values(),
             ]);

@@ -1,0 +1,9 @@
+{
+    "tituloPagina": "My Reviews",
+    "titulo": "My Reviews",
+    "descricao_one": "{{count}} review submitted.",
+    "descricao_other": "{{count}} reviews submitted.",
+    "semAvaliacoes": "You haven't submitted any reviews yet.",
+    "aAguardarModeracao": "Awaiting moderation",
+    "pagina": "Page {{atual}} of {{total}}"
+}

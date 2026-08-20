@@ -1,8 +1,9 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import InputError from '@/Components/InputError';
 import { Head, useForm, usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Clock3, LifeBuoy } from 'lucide-react';
-import { ESTADO_SUPORTE, badge } from '@/utils/estados';
+import { ESTADO_SUPORTE, badge, etiqueta } from '@/utils/estados';
 
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
@@ -14,6 +15,8 @@ const labelClass =
     'mb-1.5 block text-sm font-bold text-slate-700 dark:text-slate-200';
 
 export default function Create({ meusPedidos = [] }) {
+    const { t } = useTranslation('suporte');
+    const { t: tc } = useTranslation('common');
 
     // Dados do utilizador autenticado
     const { auth } = usePage().props;
@@ -32,7 +35,7 @@ export default function Create({ meusPedidos = [] }) {
 
     return (
         <DashboardLayout>
-            <Head title="Contactar Suporte" />
+            <Head title={t('criar.tituloPagina')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -42,11 +45,11 @@ export default function Create({ meusPedidos = [] }) {
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Contactar Suporte
+                            {t('criar.titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Não encontrou a resposta que procurava? Envie-nos a sua questão e responderemos com a maior brevidade possível.
+                            {t('criar.subtitulo')}
                         </p>
                     </div>
                 </div>
@@ -54,35 +57,35 @@ export default function Create({ meusPedidos = [] }) {
                 <form onSubmit={submit} className="p-6" noValidate>
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
-                            <label className={labelClass}>Nome</label>
+                            <label className={labelClass}>{t('criar.nome')}</label>
                             <input type="text" value={auth.user.name} disabled className={disabledFieldClass} />
                         </div>
 
                         <div>
-                            <label className={labelClass}>Email</label>
+                            <label className={labelClass}>{t('criar.email')}</label>
                             <input type="email" value={auth.user.email} disabled className={disabledFieldClass} />
                         </div>
 
                         <div className="sm:col-span-2">
-                            <label htmlFor="assunto" className={labelClass}>Assunto</label>
+                            <label htmlFor="assunto" className={labelClass}>{t('criar.assunto')}</label>
                             <select
                                 id="assunto"
                                 value={data.assunto}
                                 onChange={(e) => setData('assunto', e.target.value)}
                                 className={fieldClass}
                             >
-                                <option value="">Selecione...</option>
-                                <option>Reservas</option>
-                                <option>Check-in</option>
-                                <option>Conta</option>
-                                <option>Problema Técnico</option>
-                                <option>Outro</option>
+                                <option value="">{t('criar.selecione')}</option>
+                                <option value="Reservas">{t('criar.assuntoOpcoes.reservas')}</option>
+                                <option value="Check-in">{t('criar.assuntoOpcoes.checkin')}</option>
+                                <option value="Conta">{t('criar.assuntoOpcoes.conta')}</option>
+                                <option value="Problema Técnico">{t('criar.assuntoOpcoes.problemaTecnico')}</option>
+                                <option value="Outro">{t('criar.assuntoOpcoes.outro')}</option>
                             </select>
                             <InputError message={errors.assunto} className="mt-2" />
                         </div>
 
                         <div className="sm:col-span-2">
-                            <label htmlFor="mensagem" className={labelClass}>Mensagem</label>
+                            <label htmlFor="mensagem" className={labelClass}>{t('criar.mensagem')}</label>
                             <textarea
                                 id="mensagem"
                                 rows={6}
@@ -100,7 +103,7 @@ export default function Create({ meusPedidos = [] }) {
                             disabled={processing}
                             className="inline-flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            {processing ? 'A enviar...' : 'Enviar Pedido'}
+                            {processing ? t('criar.aEnviar') : t('criar.enviarPedido')}
                         </button>
                     </div>
                 </form>
@@ -110,7 +113,7 @@ export default function Create({ meusPedidos = [] }) {
                 <section className="dashboard-card mt-6 overflow-hidden">
                     <div className="border-b border-slate-100 px-6 py-5 dark:border-slate-800">
                         <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                            Os teus pedidos anteriores
+                            {t('criar.pedidosAnteriores')}
                         </h2>
                     </div>
 
@@ -132,7 +135,7 @@ export default function Create({ meusPedidos = [] }) {
                                         ) : (
                                             <Clock3 size={13} strokeWidth={2} />
                                         )}
-                                        {pedido.estado}
+                                        {etiqueta(ESTADO_SUPORTE, pedido.estado, pedido.estado, tc)}
                                     </span>
                                 </div>
 
@@ -143,7 +146,7 @@ export default function Create({ meusPedidos = [] }) {
                                 {pedido.resposta && (
                                     <div className="mt-3 rounded-xl border border-teal-100 bg-teal-500/5 p-3 dark:border-teal-400/20">
                                         <p className="text-xs font-bold uppercase tracking-wide text-teal-600 dark:text-teal-400">
-                                            Resposta
+                                            {t('criar.resposta')}
                                         </p>
 
                                         <p className="mt-1 whitespace-pre-line text-sm text-slate-700 dark:text-slate-200">

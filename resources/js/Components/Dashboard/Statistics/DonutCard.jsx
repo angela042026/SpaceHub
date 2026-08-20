@@ -1,4 +1,5 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Donut genérico com total ao centro + legenda — usado por "Reservas por
@@ -19,6 +20,8 @@ function formatarPercentual(valor) {
     return `${valor}`.replace('.', ',');
 }
 function DonutTooltip({ active, payload }) {
+    const { t } = useTranslation('dashboard');
+
     if (!active || !payload?.length) {
         return null;
     }
@@ -32,7 +35,7 @@ function DonutTooltip({ active, payload }) {
             </p>
 
             <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
-                {item.value} reserva{item.value === 1 ? '' : 's'}
+                {t('statistics.reservasCount', { count: item.value })}
             </p>
         </div>
     );
@@ -43,7 +46,7 @@ export default function DonutCard({
     title,
     subtitle,
     data = [],
-    emptyMessage = 'Sem reservas neste período.',
+    emptyMessage,
     headerExtra,
     legendaDuasColunas = false,
     // Tamanho do donut em píxeis — só afeta o card que o define
@@ -57,6 +60,8 @@ export default function DonutCard({
     // forçava o truncate a cortar os nomes dos estados para 1-2 letras.
     empilhado = false,
 }) {
+    const { t } = useTranslation('dashboard');
+    const mensagemVazia = emptyMessage ?? t('statistics.semReservasPeriodo');
     const total = data.reduce((soma, item) => soma + item.total, 0);
     const innerRadius = Math.round(tamanhoDonut * 0.314);
     const outerRadius = Math.round(tamanhoDonut * 0.457);
@@ -91,7 +96,7 @@ export default function DonutCard({
 
             {total === 0 ? (
                 <div className="flex min-h-[150px] flex-1 items-center justify-center px-5 py-8">
-                    <p className="text-sm text-slate-400">{emptyMessage}</p>
+                    <p className="text-sm text-slate-400">{mensagemVazia}</p>
                 </div>
             ) : (
                 <div
@@ -130,7 +135,7 @@ export default function DonutCard({
                             </strong>
 
                             <span className="mt-0.5 text-[9px] font-semibold uppercase tracking-wider text-slate-500">
-                                Total
+                                {t('statistics.total')}
                             </span>
                         </div>
                     </div>

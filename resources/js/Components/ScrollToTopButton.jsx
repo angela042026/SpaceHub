@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronUp } from 'lucide-react';
 
 // Só cuida da própria visibilidade e aparência — a posição fixa e o
@@ -12,6 +13,7 @@ import { ChevronUp } from 'lucide-react';
 // (inclui Contacto e rodapé, que vêm depois); só volta a esconder-se
 // se o utilizador subir de novo para antes da secção Benefícios.
 export default function ScrollToTopButton() {
+    const { t } = useTranslation('landing');
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
@@ -58,7 +60,7 @@ export default function ScrollToTopButton() {
             <button
                 type="button"
                 onClick={scrollToTop}
-                aria-label="Voltar ao topo"
+                aria-label={t('cookies.voltarAoTopo')}
                 tabIndex={visible ? 0 : -1}
                 className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-[#03172B]/95 text-white shadow-2xl shadow-black/30 backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-[#14B8A6]/40 hover:bg-[#14B8A6] hover:text-[#03172B] hover:shadow-[#14B8A6]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#14B8A6] focus-visible:ring-offset-2 focus-visible:ring-offset-[#03172B] active:scale-95 motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${
                     visible
@@ -73,7 +75,7 @@ export default function ScrollToTopButton() {
                 role="tooltip"
                 className="pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 whitespace-nowrap rounded-md bg-[#03172B] px-2 py-1 text-xs font-medium text-white opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
             >
-                Voltar ao topo
+                {t('cookies.voltarAoTopo')}
             </span>
         </div>
     );

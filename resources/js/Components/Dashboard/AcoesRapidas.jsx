@@ -7,6 +7,7 @@ import {
     CalendarDays,
     Map,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // Tons muito suaves da mesma paleta (turquesa / azul suave / turquesa
 // azulado / azul-marinho claro) — nunca cores novas, só variação de
@@ -18,30 +19,32 @@ const TONS_ICONE = [
     'bg-[#1e3a5f]/[0.06] text-navy-900 dark:bg-white/10 dark:text-[#d7e3ed]',
 ];
 
-const ACOES_SEM_RESERVA = [
-    { icon: CalendarDays, label: 'Reservas', labelCompleto: 'Minhas reservas', route: 'reservas.index' },
-    {
-        icon: QrCode,
-        label: 'Check-in',
-        labelCompleto: 'Fazer check-in',
-        route: 'checkin.camera',
-        disabled: true,
-        motivoDesativado: 'Não existe uma reserva elegível para check-in',
-    },
-    { icon: CreditCard, label: 'Pagamentos', labelCompleto: 'Pagamentos', route: 'pagamentos.index' },
-    { icon: History, label: 'Histórico', labelCompleto: 'Histórico de reservas', route: 'reservas.history' },
-];
-
-const ACOES_COM_RESERVA = [
-    { icon: QrCode, label: 'Mostrar QR', labelCompleto: 'Mostrar QR Code', route: 'checkin.camera' },
-    { icon: Map, label: 'Trajeto', labelCompleto: 'Ver trajeto no mapa', route: 'mapa.index' },
-    { icon: CalendarDays, label: 'Reservas', labelCompleto: 'Minhas reservas', route: 'reservas.index' },
-    { icon: History, label: 'Histórico', labelCompleto: 'Histórico de reservas', route: 'reservas.history' },
-];
-
 export default function AcoesRapidas({
     temReservaHojeConfirmada = false,
 }) {
+    const { t } = useTranslation('dashboard');
+
+    const ACOES_SEM_RESERVA = [
+        { icon: CalendarDays, label: t('acoesRapidas.reservas.label'), labelCompleto: t('acoesRapidas.reservas.completo'), route: 'reservas.index' },
+        {
+            icon: QrCode,
+            label: t('acoesRapidas.checkin.label'),
+            labelCompleto: t('acoesRapidas.checkin.completo'),
+            route: 'checkin.camera',
+            disabled: true,
+            motivoDesativado: t('acoesRapidas.motivoDesativadoCheckin'),
+        },
+        { icon: CreditCard, label: t('acoesRapidas.pagamentos.label'), labelCompleto: t('acoesRapidas.pagamentos.completo'), route: 'pagamentos.index' },
+        { icon: History, label: t('acoesRapidas.historico.label'), labelCompleto: t('acoesRapidas.historico.completo'), route: 'reservas.history' },
+    ];
+
+    const ACOES_COM_RESERVA = [
+        { icon: QrCode, label: t('acoesRapidas.mostrarQr.label'), labelCompleto: t('acoesRapidas.mostrarQr.completo'), route: 'checkin.camera' },
+        { icon: Map, label: t('acoesRapidas.trajeto.label'), labelCompleto: t('acoesRapidas.trajeto.completo'), route: 'mapa.index' },
+        { icon: CalendarDays, label: t('acoesRapidas.reservas.label'), labelCompleto: t('acoesRapidas.reservas.completo'), route: 'reservas.index' },
+        { icon: History, label: t('acoesRapidas.historico.label'), labelCompleto: t('acoesRapidas.historico.completo'), route: 'reservas.history' },
+    ];
+
     const acoes = temReservaHojeConfirmada
         ? ACOES_COM_RESERVA
         : ACOES_SEM_RESERVA;
@@ -49,7 +52,7 @@ export default function AcoesRapidas({
     return (
         <section className="dashboard-card flex h-full flex-col justify-center p-5">
             <h2 className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
-                Ações rápidas
+                {t('acoesRapidas.titulo')}
             </h2>
 
             <div className="mt-4 grid grid-cols-2 gap-3">

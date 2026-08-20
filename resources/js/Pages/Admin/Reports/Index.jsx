@@ -10,50 +10,23 @@ import {
     TrendingUp,
     UserRound,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const RELATORIOS = [
-    {
-        titulo: 'Relatório de Reservas',
-        descricao: 'Lista de reservas filtrável por período, estado, espaço e utilizador.',
-        icon: CalendarDays,
-        route: 'admin.reports.reservas',
-    },
-    {
-        titulo: 'Relatório de Utilizadores',
-        descricao: 'Lista de contas do sistema filtrável por papel, estado e registo.',
-        icon: UserRound,
-        route: 'admin.reports.utilizadores',
-    },
-    {
-        titulo: 'Relatório de Suporte',
-        descricao: 'Pedidos de suporte filtráveis por estado, prioridade e período.',
-        icon: LifeBuoy,
-        route: 'admin.reports.suporte',
-    },
-    {
-        titulo: 'Relatório de Ocupação',
-        descricao: 'Analise a utilização dos espaços e identifique períodos de maior ocupação por período, piso, setor e edifício.',
-        icon: TrendingUp,
-        route: 'admin.reports.ocupacao',
-    },
-    {
-        titulo: 'Relatório de Espaços',
-        descricao: 'Compare a utilização das secretárias e identifique os espaços mais e menos reservados por período, piso, setor e espaço.',
-        icon: Armchair,
-        route: 'admin.reports.espacos',
-    },
-    {
-        titulo: 'Relatório de Cancelamentos e Ausências',
-        descricao: 'Acompanhe cancelamentos e não comparências para identificar padrões de utilização por período, estado, utilizador e espaço.',
-        icon: CircleX,
-        route: 'admin.reports.cancelamentos',
-    },
+    { chave: 'reservas', icon: CalendarDays, route: 'admin.reports.reservas' },
+    { chave: 'utilizadores', icon: UserRound, route: 'admin.reports.utilizadores' },
+    { chave: 'suporte', icon: LifeBuoy, route: 'admin.reports.suporte' },
+    { chave: 'ocupacao', icon: TrendingUp, route: 'admin.reports.ocupacao' },
+    { chave: 'espacos', icon: Armchair, route: 'admin.reports.espacos' },
+    { chave: 'cancelamentos', icon: CircleX, route: 'admin.reports.cancelamentos' },
 ];
 
 export default function Index() {
+    const { t } = useTranslation('relatorios');
+
     return (
         <DashboardLayout>
-            <Head title="Relatórios" />
+            <Head title={t('index.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -63,11 +36,11 @@ export default function Index() {
 
                     <div>
                         <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                            Relatórios
+                            {t('index.titulo')}
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Consulte, filtre e exporte os principais dados de gestão do SpaceHub.
+                            {t('index.descricao')}
                         </p>
                     </div>
                 </div>
@@ -94,16 +67,16 @@ export default function Index() {
 
                             <div>
                                 <h2 className="font-bold text-slate-800 dark:text-slate-100">
-                                    {relatorio.titulo}
+                                    {t(`index.cards.${relatorio.chave}.titulo`)}
                                 </h2>
 
                                 <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                    {relatorio.descricao}
+                                    {t(`index.cards.${relatorio.chave}.descricao`)}
                                 </p>
                             </div>
 
                             <span className="mt-auto flex items-center gap-1.5 text-sm font-semibold text-teal-600 transition group-hover:gap-2.5 dark:text-teal-400">
-                                Ver relatório
+                                {t('index.verRelatorio')}
                                 <ArrowRight size={15} strokeWidth={1.9} />
                             </span>
                         </Link>

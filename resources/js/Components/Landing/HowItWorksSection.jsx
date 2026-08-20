@@ -1,35 +1,24 @@
-const steps = [
-    {
-        number: '01',
-        title: 'Escolha o espaço',
-        description:
-            'Consulte os espaços disponíveis e encontre a opção ideal para o seu dia de trabalho.',
-        image: '/images/landing/espaco-trabalho.png',
-    },
-    {
-        number: '02',
-        title: 'Faça a reserva',
-        description:
-            'Selecione a data, o período e confirme a sua reserva em poucos segundos.',
-        image: '/images/landing/rececao.png',
-    },
-    {
-        number: '03',
-        title: 'Faça o check-in',
-        description:
-            'Utilize o QR Code para confirmar a sua chegada de forma rápida e segura.',
-        image: '/images/landing/checkin.png',
-    },
-    {
-        number: '04',
-        title: 'Aproveite o espaço',
-        description:
-            'Trabalhe num ambiente confortável, moderno e preparado para si.',
-        image: '/images/landing/lounge.png',
-    },
+import { useTranslation } from 'react-i18next';
+
+const stepImages = [
+    '/images/landing/espaco-trabalho.png',
+    '/images/landing/rececao.png',
+    '/images/landing/checkin.png',
+    '/images/landing/lounge.png',
 ];
 
 export default function HowItWorksSection() {
+    const { t } = useTranslation('landing');
+
+    const steps = t('howItWorks.passos', { returnObjects: true }).map(
+        (passo, indice) => ({
+            number: String(indice + 1).padStart(2, '0'),
+            title: passo.titulo,
+            description: passo.descricao,
+            image: stepImages[indice],
+        }),
+    );
+
     return (
         <section
             id="como-funciona"
@@ -44,19 +33,18 @@ export default function HowItWorksSection() {
                 {/* Cabeçalho */}
                 <div className="mx-auto mb-16 max-w-3xl text-center">
                     <span className="text-sm font-bold uppercase tracking-[0.2em] text-[#14B8A6]">
-                        Como reservar
+                        {t('howItWorks.eyebrow')}
                     </span>
 
                     <h2 className="mt-4 text-3xl font-black leading-tight tracking-[-0.035em] text-[#071A33] sm:text-4xl lg:text-5xl">
-                        Comece a trabalhar em{' '}
+                        {t('howItWorks.titulo')}{' '}
                         <span className="text-[#14B8A6]">
-                            poucos minutos
+                            {t('howItWorks.tituloDestaque')}
                         </span>
                     </h2>
 
                     <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600">
-                        Da escolha do espaço ao check-in, todo o processo foi
-                        pensado para ser rápido, intuitivo e sem complicações.
+                        {t('howItWorks.descricao')}
                     </p>
                 </div>
 
@@ -120,7 +108,7 @@ export default function HowItWorksSection() {
                                                 <span className="h-px flex-1 bg-slate-200" />
 
                                                 <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#14B8A6]">
-                                                    Passo {number}
+                                                    {t('howItWorks.passoLabel', { numero: number })}
                                                 </span>
                                             </div>
                                         </div>

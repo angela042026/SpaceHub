@@ -1,8 +1,9 @@
 import { Link } from '@inertiajs/react';
 import { Armchair, Plus } from 'lucide-react';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
-const ABREVIACOES = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const CHAVES_DIAS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'];
 
 function dataLocalIso(data) {
     return [
@@ -34,6 +35,8 @@ export default function WeeklySchedule({
     reservaHojeUtilizador,
     proximasReservas = [],
 }) {
+    const { t } = useTranslation('dashboard');
+
     const dias = useMemo(() => {
         const hoje = new Date();
         const isoHoje = dataLocalIso(hoje);
@@ -51,18 +54,18 @@ export default function WeeklySchedule({
 
             return {
                 iso: isoData,
-                abreviacao: ABREVIACOES[dia.getDay()],
+                abreviacao: t(`asuaSemana.dias.${CHAVES_DIAS[dia.getDay()]}`),
                 numero: dia.getDate(),
                 hoje: isoData === isoHoje,
                 reserva,
             };
         });
-    }, [reservaHojeUtilizador, proximasReservas]);
+    }, [reservaHojeUtilizador, proximasReservas, t]);
 
     return (
         <section className="dashboard-card flex h-full flex-col p-5">
             <h2 className="text-base font-bold text-slate-900 dark:text-[#f8fafc]">
-                A sua semana
+                {t('asuaSemana.titulo')}
             </h2>
 
             <div className="mt-4 grid flex-1 grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-2.5">
@@ -104,7 +107,7 @@ export default function WeeklySchedule({
                                 </div>
                             ) : (
                                 <p className="flex items-center gap-0.5 text-[10px] font-bold text-teal-700 transition-colors duration-200 group-hover/dia:text-teal-600 dark:text-[#18c3b3]">
-                                    Reservar
+                                    {t('asuaSemana.reservar')}
                                 </p>
                             )}
                         </>

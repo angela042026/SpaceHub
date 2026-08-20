@@ -4,6 +4,7 @@ import AuthField from '@/Components/Auth/AuthField';
 import AuthLayout from '@/Components/Auth/AuthLayout';
 import PasswordField from '@/Components/Auth/PasswordField';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 import {
     CheckCircle2,
     Mail,
@@ -37,7 +38,7 @@ function calculatePasswordStrength(password) {
 
     if (score <= 2) {
         return {
-            label: 'Fraca',
+            key: 'fraca',
             percentage: 33,
             barClass: 'bg-red-500',
             textClass: 'text-red-500',
@@ -46,7 +47,7 @@ function calculatePasswordStrength(password) {
 
     if (score <= 4) {
         return {
-            label: 'Média',
+            key: 'media',
             percentage: 66,
             barClass: 'bg-amber-500',
             textClass: 'text-amber-500',
@@ -54,7 +55,7 @@ function calculatePasswordStrength(password) {
     }
 
     return {
-        label: 'Forte',
+        key: 'forte',
         percentage: 100,
         barClass: 'bg-emerald-500',
         textClass: 'text-emerald-500',
@@ -62,6 +63,8 @@ function calculatePasswordStrength(password) {
 }
 
 function PasswordStrength({ password }) {
+    const { t } = useTranslation('auth');
+
     const strength = useMemo(
         () => calculatePasswordStrength(password),
         [password],
@@ -93,13 +96,12 @@ function PasswordStrength({ password }) {
                         ${strength.textClass}
                     `}
                 >
-                    {strength.label}
+                    {t(`forcaSenha.${strength.key}`)}
                 </span>
             </div>
 
             <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                Use pelo menos 8 caracteres, incluindo maiúsculas,
-                minúsculas, números e símbolos.
+                {t('forcaSenha.dica')}
             </p>
         </div>
     );
@@ -109,6 +111,8 @@ function PasswordMatchMessage({
     confirmation,
     matches,
 }) {
+    const { t } = useTranslation('auth');
+
     if (!confirmation) {
         return null;
     }
@@ -120,14 +124,14 @@ function PasswordMatchMessage({
                     size={14}
                     aria-hidden="true"
                 />
-                As senhas coincidem.
+                {t('confirmacaoSenha.coincidem')}
             </p>
         );
     }
 
     return (
         <p className="mt-2 text-xs font-medium text-red-500">
-            As senhas não coincidem.
+            {t('confirmacaoSenha.naoCoincidem')}
         </p>
     );
 }
@@ -137,6 +141,8 @@ function TermsAgreement({
     onChange,
     showError,
 }) {
+    const { t } = useTranslation('auth');
+
     return (
         <div className="mt-5">
             <label
@@ -165,7 +171,7 @@ function TermsAgreement({
                 />
 
                 <span>
-                    Aceito os{' '}
+                    {t('registo.aceitoOs')}{' '}
                     <Link
                         href={route('legal.terms')}
                         target="_blank"
@@ -179,9 +185,9 @@ function TermsAgreement({
                             dark:text-[#5EEAD4]
                         "
                     >
-                        Termos de Utilização
+                        {t('registo.termosDeUtilizacao')}
                     </Link>
-                    <span> e a </span>
+                    <span> {t('registo.ea')} </span>
                     <Link
                         href={route('legal.privacy')}
                         target="_blank"
@@ -195,7 +201,7 @@ function TermsAgreement({
                             dark:text-[#5EEAD4]
                         "
                     >
-                        Política de Privacidade
+                        {t('registo.politicaDePrivacidade')}
                     </Link>
                     <span>.</span>
                 </span>
@@ -203,7 +209,7 @@ function TermsAgreement({
 
             {showError && (
                 <p className="mt-2 text-xs text-red-500">
-                    É necessário aceitar os termos para criar a conta.
+                    {t('registo.termosErro')}
                 </p>
             )}
         </div>
@@ -211,6 +217,7 @@ function TermsAgreement({
 }
 
 export default function Register() {
+    const { t } = useTranslation('auth');
     const [attemptedSubmit, setAttemptedSubmit] =
         useState(false);
 
@@ -276,16 +283,16 @@ export default function Register() {
 
     return (
         <>
-            <Head title="Criar conta" />
+            <Head title={t('registo.criarConta')} />
 
             <AuthLayout
-                title="Crie a sua"
-                highlightedTitle="conta"
-                subtitle="Junte-se ao SpaceHub e comece a gerir os seus espaços de trabalho de forma inteligente."
-                heroTitle="Comece a trabalhar"
-                heroPrefix="de forma"
-                heroHighlightedTitle="inteligente."
-                heroDescription="Tudo o que precisa para gerir reservas, espaços e check-ins num único lugar."
+                title={t('registo.titulo')}
+                highlightedTitle={t('registo.tituloDestaque')}
+                subtitle={t('registo.subtitulo')}
+                heroTitle={t('registo.heroTitulo')}
+                heroPrefix={t('registo.heroPrefixo')}
+                heroHighlightedTitle={t('registo.heroTituloDestaque')}
+                heroDescription={t('registo.heroDescricao')}
             >
                 <form
                     onSubmit={submit}
@@ -294,11 +301,11 @@ export default function Register() {
                     <AuthCard>
                         <AuthField
                             id="name"
-                            label="Nome completo"
+                            label={t('campos.nome')}
                             name="name"
                             icon={User}
                             value={data.name}
-                            placeholder="Ex.: Hanna Sampaio"
+                            placeholder={t('campos.nomePlaceholder')}
                             autoComplete="name"
                             autoFocus
                             error={errors.name}
@@ -312,12 +319,12 @@ export default function Register() {
 
                         <AuthField
                             id="email"
-                            label="E-mail"
+                            label={t('campos.email')}
                             name="email"
                             type="email"
                             icon={Mail}
                             value={data.email}
-                            placeholder="Ex.: hanna@empresa.pt"
+                            placeholder={t('campos.emailPlaceholder')}
                             autoComplete="username"
                             error={errors.email}
                             className="mt-5"
@@ -331,10 +338,10 @@ export default function Register() {
 
                         <PasswordField
                             id="password"
-                            label="Senha"
+                            label={t('campos.senha')}
                             name="password"
                             value={data.password}
-                            placeholder="Crie uma senha segura"
+                            placeholder={t('campos.criarSenhaPlaceholder')}
                             error={errors.password}
                             className="mt-5"
                             onChange={(event) =>
@@ -351,12 +358,12 @@ export default function Register() {
 
                         <PasswordField
                             id="password_confirmation"
-                            label="Confirmar senha"
+                            label={t('campos.confirmarSenha')}
                             name="password_confirmation"
                             value={
                                 data.password_confirmation
                             }
-                            placeholder="Repita a sua senha"
+                            placeholder={t('campos.confirmarSenhaPlaceholder')}
                             validationState={
                                 confirmationState
                             }
@@ -391,10 +398,10 @@ export default function Register() {
                         <AuthActions
                             processing={processing}
                             disabled={!data.terms}
-                            submitText="Criar conta"
-                            processingText="A criar conta..."
+                            submitText={t('registo.criarConta')}
+                            processingText={t('registo.aCriarConta')}
                             submitIcon={UserPlus}
-                            googleText="Registar com Google"
+                            googleText={t('registo.registarComGoogle')}
                             onGoogleClick={() => {
                                 window.location.href = route('google.redirect');
                             }}
@@ -403,7 +410,7 @@ export default function Register() {
                 </form>
 
                 <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-300">
-                    Já possui uma conta?{' '}
+                    {t('registo.jaTemConta')}{' '}
 
                     <Link
                         href={route('login')}
@@ -416,7 +423,7 @@ export default function Register() {
                             dark:text-[#5EEAD4]
                         "
                     >
-                        Iniciar sessão
+                        {t('registo.iniciarSessao')}
                     </Link>
                 </p>
             </AuthLayout>
