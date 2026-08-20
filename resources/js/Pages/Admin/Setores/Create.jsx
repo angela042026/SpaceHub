@@ -18,6 +18,7 @@ export default function Create({ pisos }) {
     const { data, setData, post, processing, errors } = useForm({
         piso_id: '',
         nome: '',
+        nome_en: '',
         codigo: '',
         tipo: 'outro',
         reservavel: false,
@@ -74,6 +75,12 @@ export default function Create({ pisos }) {
                             <label htmlFor="nome" className={labelClass}>{t('campos.nome')}</label>
                             <input id="nome" type="text" value={data.nome} onChange={(e) => setData('nome', e.target.value)} autoFocus required className={fieldClass} />
                             <InputError message={errors.nome} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <label htmlFor="nome_en" className={labelClass}>{t('campos.nomeEn')}</label>
+                            <input id="nome_en" type="text" value={data.nome_en} onChange={(e) => setData('nome_en', e.target.value)} placeholder={t('campos.nomeEnPlaceholder')} className={fieldClass} />
+                            <InputError message={errors.nome_en} className="mt-2" />
                         </div>
 
                         <div>

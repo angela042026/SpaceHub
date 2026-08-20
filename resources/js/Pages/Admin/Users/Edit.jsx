@@ -9,6 +9,8 @@ import {
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { etiquetaRole } from '@/utils/estados';
+
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
@@ -17,6 +19,7 @@ const labelClass =
 
 export default function Edit({ user, roles }) {
     const { t } = useTranslation('admin');
+    const { t: tc } = useTranslation('common');
     const [preview, setPreview] = useState(null);
 
     const { data, setData, put, processing, errors } = useForm({
@@ -212,7 +215,7 @@ export default function Edit({ user, roles }) {
                             >
                                 {roles.map((role) => (
                                     <option key={role.id} value={role.id}>
-                                        {role.nome}
+                                        {etiquetaRole(role.nome, tc)}
                                     </option>
                                 ))}
                             </select>

@@ -71,8 +71,8 @@ export default function Index({ setores, pisos, filters }) {
 
     const alternarAtivo = (setor) => {
         const mensagem = setor.ativo
-            ? t('setores.index.confirmarDesativar', { nome: setor.nome })
-            : t('setores.index.confirmarAtivar', { nome: setor.nome });
+            ? t('setores.index.confirmarDesativar', { nome: setor.nome_localizado })
+            : t('setores.index.confirmarAtivar', { nome: setor.nome_localizado });
 
         if (!confirm(mensagem)) {
             return;
@@ -97,7 +97,7 @@ export default function Index({ setores, pisos, filters }) {
             render: (setor) => (
                 <div>
                     <p className="font-semibold text-slate-800 dark:text-slate-100">
-                        {setor.nome}
+                        {setor.nome_localizado}
                     </p>
                     <p className="text-xs text-slate-400">{setor.codigo}</p>
                 </div>

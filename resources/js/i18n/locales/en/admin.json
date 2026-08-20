@@ -1,6 +1,8 @@
 {
     "campos": {
         "nome": "Name",
+        "nomeEn": "Name (EN)",
+        "nomeEnPlaceholder": "Optional — used when the language is English",
         "codigo": "Code",
         "morada": "Address",
         "codigoPostal": "Postal code",
@@ -32,6 +34,7 @@
         "localizacao": "Location",
         "estado": "Status",
         "acoes": "Actions",
+        "todos": "All",
         "todosOsEstados": "All statuses",
         "ativos": "Active",
         "inativos": "Inactive",
@@ -186,7 +189,51 @@
             "desativarSecretaria": "Deactivate desk",
             "confirmarAtivar": "Activate desk {{codigo}}?",
             "confirmarDesativar": "Deactivate desk {{codigo}}?"
+        },
+        "qrcodes": {
+            "titulo": "Desk QR Codes",
+            "subtitulo": "Print or download each desk's code to display in the physical space.",
+            "voltarAsSecretarias": "Back to desks",
+            "imprimirTudo": "Print all",
+            "pesquisarPlaceholder": "Search by code or desk name…",
+            "todosOsPisos": "All floors",
+            "encontradas_one": "{{count}} desk found",
+            "encontradas_other": "{{count}} desks found",
+            "limparPesquisa": "Clear search",
+            "qrCodeAlt": "QR Code {{codigo}}",
+            "transferir": "Download QR Code",
+            "transferirDe": "Download QR Code for {{codigo}}",
+            "abrirParaImprimir": "Open to print",
+            "abrirParaImprimirDe": "Open to print the QR Code for {{codigo}}"
         }
+    },
+    "mapaEditor": {
+        "titulo": "Map Editor",
+        "subtitulo": "Position zones and desks directly on the floor plan.",
+        "passos": {
+            "selecionaZona": "Select a zone",
+            "clicaNaPlanta": "Click on the plan",
+            "guardadaAutomaticamente": "Saved automatically"
+        },
+        "lugares_one": "{{count}} spot",
+        "lugares_other": "{{count}} spots",
+        "aGuardar": "Saving…",
+        "erroAoGuardar": "Error saving",
+        "alteracoesGuardadas": "Changes saved",
+        "erroGuardar": "Could not save the position. Try again.",
+        "deTotalPosicionadas": "{{posicionados}} of {{total}} positioned",
+        "posicionada": "Positioned",
+        "secretariaCodigo": "Desk {{codigo}}",
+        "aPosicionar": "Positioning: {{rotulo}}",
+        "selecionaZonaParaComecar": "Select a zone to get started",
+        "diminuirZoom": "Zoom out",
+        "aumentarZoom": "Zoom in",
+        "reporVisualizacao": "Reset view",
+        "ecraInteiro": "Full screen",
+        "sairDeEcraInteiro": "Exit full screen",
+        "secretariasPosicionadasEmZona": "{{posicionadas}} / {{total}} desks positioned in {{zona}}",
+        "pisoSemPlanta": "This floor doesn't have a plan associated yet.",
+        "posicaoGuardada": "Position saved"
     },
     "users": {
         "create": {

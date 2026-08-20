@@ -223,19 +223,22 @@ class GoogleCalendarService
 
         $localizacao = collect([
             $edificio,
-            $piso !== null ? "Piso {$piso}" : null,
+            $piso !== null ? __('Piso :numero', ['numero' => $piso]) : null,
         ])->filter()->join(' · ');
 
         return [
             'summary' => sprintf(
-                'Reserva - %s (%s)',
-                $setor?->nome ?? 'Espaço',
+                '%s - %s (%s)',
+                __('Reserva'),
+                $setor?->nome_localizado ?? __('Espaço'),
                 $secretaria?->codigo ?? '-'
             ),
             'location' => $localizacao,
             'description' => sprintf(
-                "Código: %s\nPeríodo: %s",
+                "%s: %s\n%s: %s",
+                __('Código'),
                 $secretaria?->codigo ?? '-',
+                __('Período'),
                 $periodo->nome ?? '-'
             ),
             'start' => [

@@ -89,6 +89,12 @@ class PagamentoController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $pagamentos->getCollection()->each(function (Pagamento $pagamento): void {
+            if ($pagamento->reserva?->secretaria?->setor) {
+                $pagamento->reserva->secretaria->setor->nome = $pagamento->reserva->secretaria->setor->nome_localizado;
+            }
+        });
+
         return Inertia::render('Pagamentos/Index', [
             'pagamentos' => $pagamentos,
             'totalGeral' => $totalGeral,
@@ -114,6 +120,9 @@ class PagamentoController extends Controller
             'reserva.periodo',
             'reserva.secretaria.setor.piso.edificio',
         ]);
+
+        $pagamento->reserva->secretaria->setor->nome = $pagamento->reserva->secretaria->setor->nome_localizado;
+        $pagamento->reserva->secretaria->setor->piso->nome = $pagamento->reserva->secretaria->setor->piso->nome_localizado;
 
         return Inertia::render('Pagamentos/Show', [
             'pagamento' => $pagamento,

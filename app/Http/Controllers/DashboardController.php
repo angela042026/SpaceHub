@@ -264,8 +264,8 @@ class DashboardController extends Controller
 
             'secretariaFavorita' => $secretariaFavorita ? [
                 'codigo' => $secretariaFavorita->codigo,
-                'piso' => $secretariaFavorita->setor?->piso?->nome,
-                'setor' => $secretariaFavorita->setor?->nome,
+                'piso' => $secretariaFavorita->setor?->piso?->nome_localizado,
+                'setor' => $secretariaFavorita->setor?->nome_localizado,
             ] : null,
 
             'ultimosDias' => $ultimosDias,

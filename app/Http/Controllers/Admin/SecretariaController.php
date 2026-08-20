@@ -35,7 +35,8 @@ class SecretariaController extends Controller
                     ->where('codigo', 'like', "%{$search}%")
                     ->orWhere('descricao', 'like', "%{$search}%")
                     ->orWhereHas('setor', function ($query) use ($search): void {
-                        $query->where('nome', 'like', "%{$search}%");
+                        $query->where('nome', 'like', "%{$search}%")
+                            ->orWhere('nome_en', 'like', "%{$search}%");
                     });
             });
         }
@@ -72,7 +73,8 @@ class SecretariaController extends Controller
 
         return Inertia::render('Admin/Secretarias/Index', [
             'secretarias' => SecretariaResource::collection($secretarias)->response()->getData(true),
-            'setores' => Setor::orderBy('nome')->get(['id', 'nome']),
+            'setores' => Setor::orderBy('nome')->get(['id', 'nome', 'nome_en'])
+                ->map(fn (Setor $setor) => ['id' => $setor->id, 'nome' => $setor->nome_localizado]),
             'filters' => $request->only(['search', 'setor_id', 'reservavel', 'ativo', 'sort_by', 'sort_direction']),
         ]);
     }
@@ -82,8 +84,10 @@ class SecretariaController extends Controller
         Gate::authorize('create', Secretaria::class);
 
         return Inertia::render('Admin/Secretarias/Create', [
-            'pisos' => Piso::orderBy('numero')->get(['id', 'nome']),
-            'setores' => Setor::where('reservavel', true)->orderBy('nome')->get(['id', 'nome', 'piso_id']),
+            'pisos' => Piso::orderBy('numero')->get(['id', 'nome', 'nome_en'])
+                ->map(fn (Piso $piso) => ['id' => $piso->id, 'nome' => $piso->nome_localizado]),
+            'setores' => Setor::where('reservavel', true)->orderBy('nome')->get(['id', 'nome', 'nome_en', 'piso_id'])
+                ->map(fn (Setor $setor) => ['id' => $setor->id, 'nome' => $setor->nome_localizado, 'piso_id' => $setor->piso_id]),
         ]);
     }
 
@@ -135,8 +139,10 @@ class SecretariaController extends Controller
             // secretaria.data.codigo em vez de secretaria.codigo e o
             // formulário ficava vazio.
             'secretaria' => (new SecretariaResource($secretaria))->resolve(),
-            'pisos' => Piso::orderBy('numero')->get(['id', 'nome']),
-            'setores' => Setor::where('reservavel', true)->orderBy('nome')->get(['id', 'nome', 'piso_id']),
+            'pisos' => Piso::orderBy('numero')->get(['id', 'nome', 'nome_en'])
+                ->map(fn (Piso $piso) => ['id' => $piso->id, 'nome' => $piso->nome_localizado]),
+            'setores' => Setor::where('reservavel', true)->orderBy('nome')->get(['id', 'nome', 'nome_en', 'piso_id'])
+                ->map(fn (Setor $setor) => ['id' => $setor->id, 'nome' => $setor->nome_localizado, 'piso_id' => $setor->piso_id]),
         ]);
     }
 

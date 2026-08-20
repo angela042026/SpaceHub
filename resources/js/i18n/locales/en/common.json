@@ -99,6 +99,12 @@
             "manha": "Morning",
             "tarde": "Afternoon",
             "diaInteiro": "Full day"
+        },
+        "role": {
+            "administrador": "Administrator",
+            "gestor": "Manager",
+            "colaborador": "Employee",
+            "utilizador": "User"
         }
     },
     "chat": {

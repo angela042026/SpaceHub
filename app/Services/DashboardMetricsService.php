@@ -219,9 +219,9 @@ class DashboardMetricsService
                 ->whereDate('reservas.data', '<=', $fim)
                 ->where('reservas.estado_reserva_id', $estadoConfirmadaId)
                 ->whereNull('reservas.cancelada_at')
-                ->select(['pisos.id', 'pisos.nome'])
+                ->select(['pisos.id', 'pisos.nome', 'pisos.nome_en'])
                 ->selectRaw('COUNT(reservas.id) as total')
-                ->groupBy('pisos.id', 'pisos.nome')
+                ->groupBy('pisos.id', 'pisos.nome', 'pisos.nome_en')
                 ->get()
                 ->keyBy('id');
         };
@@ -242,7 +242,7 @@ class DashboardMetricsService
             )
             ->map(fn ($piso) => [
                 'id' => $piso->id,
-                'nome' => $piso->nome,
+                'nome' => app()->getLocale() === 'en' && $piso->nome_en ? $piso->nome_en : $piso->nome,
                 'atual' => (int) ($atuais->get($piso->id)->total ?? 0),
                 'anterior' => (int) ($anteriores->get($piso->id)->total ?? 0),
             ])

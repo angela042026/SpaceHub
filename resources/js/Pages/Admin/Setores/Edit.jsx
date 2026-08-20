@@ -16,6 +16,7 @@ export default function Edit({ setor, pisos }) {
     const { data, setData, put, processing, errors } = useForm({
         piso_id: setor.piso_id ?? '',
         nome: setor.nome ?? '',
+        nome_en: setor.nome_en ?? '',
         codigo: setor.codigo ?? '',
         tipo: setor.tipo ?? 'outro',
         reservavel: setor.reservavel ?? false,
@@ -30,7 +31,7 @@ export default function Edit({ setor, pisos }) {
 
     return (
         <DashboardLayout>
-            <Head title={t('setores.edit.headTitle', { nome: setor.nome })} />
+            <Head title={t('setores.edit.headTitle', { nome: setor.nome_localizado })} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -44,7 +45,7 @@ export default function Edit({ setor, pisos }) {
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {setor.nome}
+                            {setor.nome_localizado}
                         </p>
                     </div>
                 </div>
@@ -71,6 +72,12 @@ export default function Edit({ setor, pisos }) {
                             <label htmlFor="nome" className={labelClass}>{t('campos.nome')}</label>
                             <input id="nome" type="text" value={data.nome} onChange={(e) => setData('nome', e.target.value)} autoFocus required className={fieldClass} />
                             <InputError message={errors.nome} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <label htmlFor="nome_en" className={labelClass}>{t('campos.nomeEn')}</label>
+                            <input id="nome_en" type="text" value={data.nome_en} onChange={(e) => setData('nome_en', e.target.value)} placeholder={t('campos.nomeEnPlaceholder')} className={fieldClass} />
+                            <InputError message={errors.nome_en} className="mt-2" />
                         </div>
 
                         <div>

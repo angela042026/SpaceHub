@@ -15,6 +15,7 @@ import {
     ZoomOut,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { formatarNomePiso } from '@/utils/formatarNomePiso';
@@ -23,17 +24,18 @@ const ZOOM_MIN = 0.75;
 const ZOOM_MAX = 2;
 const ZOOM_PASSO = 0.1;
 
-const PASSOS = [
-    'Seleciona uma zona',
-    'Clica na planta',
-    'Guardada automaticamente',
-];
-
-function rotuloLugares(numero) {
-    return `${numero} ${numero === 1 ? 'lugar' : 'lugares'}`;
-}
-
 export default function MapaEditor({ pisos }) {
+    const { t } = useTranslation('admin');
+
+    const PASSOS = [
+        t('mapaEditor.passos.selecionaZona'),
+        t('mapaEditor.passos.clicaNaPlanta'),
+        t('mapaEditor.passos.guardadaAutomaticamente'),
+    ];
+
+    const rotuloLugares = (numero) =>
+        t('mapaEditor.lugares', { count: numero });
+
     const [dadosPisos, setDadosPisos] = useState(pisos);
     const [pisoSelecionado, setPisoSelecionado] = useState(pisos?.[0]?.codigo ?? '');
     const [setorAtivo, setSetorAtivo] = useState(null);
@@ -202,7 +204,7 @@ export default function MapaEditor({ pisos }) {
             setEstadoGravacao('erro');
             setMensagemErro(
                 error.response?.data?.message ??
-                    'Não foi possível guardar a posição. Tenta novamente.',
+                    t('mapaEditor.erroGuardar'),
             );
         }
     }
@@ -216,14 +218,14 @@ export default function MapaEditor({ pisos }) {
     const secretariasTotal = zonaExpandida?.secretarias?.length ?? 0;
 
     const rotuloSelecao = secretariaAtiva
-        ? `Secretária ${secretariaAtiva.codigo}`
+        ? t('mapaEditor.secretariaCodigo', { codigo: secretariaAtiva.codigo })
         : setorAtivo
             ? `${setorAtivo.numero}. ${setorAtivo.nome}`
             : null;
 
     return (
         <>
-            <Head title="Editor do Mapa" />
+            <Head title={t('mapaEditor.titulo')} />
 
             <DashboardLayout>
                 <section className="dashboard-card overflow-hidden pb-10 sm:pr-2 lg:pr-6">
@@ -235,11 +237,11 @@ export default function MapaEditor({ pisos }) {
 
                             <div>
                                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                    Editor do Mapa
+                                    {t('mapaEditor.titulo')}
                                 </h1>
 
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Posicione as zonas e secretárias diretamente na planta.
+                                    {t('mapaEditor.subtitulo')}
                                 </p>
                             </div>
                         </div>
@@ -248,17 +250,17 @@ export default function MapaEditor({ pisos }) {
                             {estadoGravacao === 'a-guardar' ? (
                                 <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                                     <Loader2 size={13} strokeWidth={2} className="animate-spin" />
-                                    A guardar…
+                                    {t('mapaEditor.aGuardar')}
                                 </span>
                             ) : estadoGravacao === 'erro' ? (
                                 <span className="inline-flex items-center gap-1.5 text-red-500 dark:text-red-400">
                                     <AlertTriangle size={13} strokeWidth={1.9} />
-                                    Erro ao guardar
+                                    {t('mapaEditor.erroAoGuardar')}
                                 </span>
                             ) : estadoGravacao === 'guardado' ? (
                                 <span className="inline-flex items-center gap-1.5 text-emerald-600/90 dark:text-emerald-400/90">
                                     <CheckCircle2 size={13} strokeWidth={1.9} />
-                                    Alterações guardadas
+                                    {t('mapaEditor.alteracoesGuardadas')}
                                 </span>
                             ) : null}
                         </div>
@@ -298,13 +300,15 @@ export default function MapaEditor({ pisos }) {
                             >
                                 {dadosPisos?.map((p) => (
                                     <option key={p.id} value={p.codigo}>
-                                        {formatarNomePiso(p.nome)}
+                                        {Number(p.numero) === -1
+                                            ? t('officeMap.pisoFallback', { numero: p.numero, ns: 'dashboard' })
+                                            : formatarNomePiso(p.nome)}
                                     </option>
                                 ))}
                             </select>
 
                             <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                {posicionados} de {total} posicionadas
+                                {t('mapaEditor.deTotalPosicionadas', { posicionados, total })}
                             </p>
 
                             <div className="mb-4 h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
@@ -411,14 +415,16 @@ export default function MapaEditor({ pisos }) {
 
                             <div className="mt-4 flex items-center gap-1.5 border-t border-slate-100 pt-3 text-xs text-slate-400 dark:border-slate-800">
                                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                                Posicionada
+                                {t('mapaEditor.posicionada')}
                             </div>
                         </div>
 
                         <div className={emEcraCompleto ? 'fixed inset-0 z-[60] flex flex-col bg-white p-6 dark:bg-slate-900' : ''}>
                             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                                 <p className={`text-sm font-semibold ${rotuloSelecao ? 'text-teal-600 dark:text-teal-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                                    {rotuloSelecao ? `A posicionar: ${rotuloSelecao}` : 'Seleciona uma zona para começar'}
+                                    {rotuloSelecao
+                                        ? t('mapaEditor.aPosicionar', { rotulo: rotuloSelecao })
+                                        : t('mapaEditor.selecionaZonaParaComecar')}
                                 </p>
 
                                 <div className="flex items-center gap-1.5">
@@ -426,8 +432,8 @@ export default function MapaEditor({ pisos }) {
                                         type="button"
                                         onClick={() => alterarZoom(-ZOOM_PASSO)}
                                         disabled={zoom <= ZOOM_MIN}
-                                        title="Diminuir zoom"
-                                        aria-label="Diminuir zoom"
+                                        title={t('mapaEditor.diminuirZoom')}
+                                        aria-label={t('mapaEditor.diminuirZoom')}
                                         className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
                                     >
                                         <ZoomOut size={15} strokeWidth={1.9} />
@@ -437,8 +443,8 @@ export default function MapaEditor({ pisos }) {
                                         type="button"
                                         onClick={() => alterarZoom(ZOOM_PASSO)}
                                         disabled={zoom >= ZOOM_MAX}
-                                        title="Aumentar zoom"
-                                        aria-label="Aumentar zoom"
+                                        title={t('mapaEditor.aumentarZoom')}
+                                        aria-label={t('mapaEditor.aumentarZoom')}
                                         className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700"
                                     >
                                         <ZoomIn size={15} strokeWidth={1.9} />
@@ -447,8 +453,8 @@ export default function MapaEditor({ pisos }) {
                                     <button
                                         type="button"
                                         onClick={() => setZoom(1)}
-                                        title="Repor visualização"
-                                        aria-label="Repor visualização"
+                                        title={t('mapaEditor.reporVisualizacao')}
+                                        aria-label={t('mapaEditor.reporVisualizacao')}
                                         className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
                                     >
                                         <RotateCcw size={15} strokeWidth={1.9} />
@@ -457,8 +463,8 @@ export default function MapaEditor({ pisos }) {
                                     <button
                                         type="button"
                                         onClick={() => setEmEcraCompleto((atual) => !atual)}
-                                        title={emEcraCompleto ? 'Sair de ecrã inteiro' : 'Ecrã inteiro'}
-                                        aria-label={emEcraCompleto ? 'Sair de ecrã inteiro' : 'Ecrã inteiro'}
+                                        title={emEcraCompleto ? t('mapaEditor.sairDeEcraInteiro') : t('mapaEditor.ecraInteiro')}
+                                        aria-label={emEcraCompleto ? t('mapaEditor.sairDeEcraInteiro') : t('mapaEditor.ecraInteiro')}
                                         className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700"
                                     >
                                         {emEcraCompleto ? <Minimize2 size={15} strokeWidth={1.9} /> : <Maximize2 size={15} strokeWidth={1.9} />}
@@ -468,7 +474,11 @@ export default function MapaEditor({ pisos }) {
 
                             {zonaExpandida && (
                                 <p className="mb-3 -mt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                                    {secretariasPosicionadas} / {secretariasTotal} secretárias posicionadas em {zonaExpandida.nome}
+                                    {t('mapaEditor.secretariasPosicionadasEmZona', {
+                                        posicionadas: secretariasPosicionadas,
+                                        total: secretariasTotal,
+                                        zona: zonaExpandida.nome,
+                                    })}
                                 </p>
                             )}
 
@@ -492,7 +502,7 @@ export default function MapaEditor({ pisos }) {
                                         />
                                     ) : (
                                         <div className="flex h-[560px] w-[680px] max-w-full items-center justify-center bg-slate-50 text-sm text-slate-400 dark:bg-slate-800">
-                                            Este piso ainda não tem planta associada.
+                                            {t('mapaEditor.pisoSemPlanta')}
                                         </div>
                                     )}
 
@@ -542,7 +552,7 @@ export default function MapaEditor({ pisos }) {
                                 {mostrarToast && (
                                     <div className="pointer-events-none absolute right-3 top-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-700 shadow-lg dark:border-emerald-900/50 dark:bg-slate-900 dark:text-emerald-400">
                                         <CheckCircle2 size={15} strokeWidth={2} />
-                                        Posição guardada
+                                        {t('mapaEditor.posicaoGuardada')}
                                     </div>
                                 )}
                             </div>

@@ -1,6 +1,8 @@
 {
     "campos": {
         "nome": "Nome",
+        "nomeEn": "Nome (EN)",
+        "nomeEnPlaceholder": "Opcional — usado quando o idioma é inglês",
         "codigo": "Código",
         "morada": "Morada",
         "codigoPostal": "Código postal",
@@ -32,6 +34,7 @@
         "localizacao": "Localização",
         "estado": "Estado",
         "acoes": "Ações",
+        "todos": "Todos",
         "todosOsEstados": "Todos os estados",
         "ativos": "Ativos",
         "inativos": "Inativos",
@@ -186,7 +189,51 @@
             "desativarSecretaria": "Desativar secretária",
             "confirmarAtivar": "Ativar a secretária {{codigo}}?",
             "confirmarDesativar": "Desativar a secretária {{codigo}}?"
+        },
+        "qrcodes": {
+            "titulo": "QR Codes das Secretárias",
+            "subtitulo": "Imprime ou transfere o código de cada secretária para afixar no espaço físico.",
+            "voltarAsSecretarias": "Voltar às secretárias",
+            "imprimirTudo": "Imprimir tudo",
+            "pesquisarPlaceholder": "Pesquisar por código ou nome da secretária…",
+            "todosOsPisos": "Todos os pisos",
+            "encontradas_one": "{{count}} secretária encontrada",
+            "encontradas_other": "{{count}} secretárias encontradas",
+            "limparPesquisa": "Limpar pesquisa",
+            "qrCodeAlt": "QR Code {{codigo}}",
+            "transferir": "Transferir QR Code",
+            "transferirDe": "Transferir QR Code de {{codigo}}",
+            "abrirParaImprimir": "Abrir para imprimir",
+            "abrirParaImprimirDe": "Abrir para imprimir o QR Code de {{codigo}}"
         }
+    },
+    "mapaEditor": {
+        "titulo": "Editor do Mapa",
+        "subtitulo": "Posicione as zonas e secretárias diretamente na planta.",
+        "passos": {
+            "selecionaZona": "Seleciona uma zona",
+            "clicaNaPlanta": "Clica na planta",
+            "guardadaAutomaticamente": "Guardada automaticamente"
+        },
+        "lugares_one": "{{count}} lugar",
+        "lugares_other": "{{count}} lugares",
+        "aGuardar": "A guardar…",
+        "erroAoGuardar": "Erro ao guardar",
+        "alteracoesGuardadas": "Alterações guardadas",
+        "erroGuardar": "Não foi possível guardar a posição. Tenta novamente.",
+        "deTotalPosicionadas": "{{posicionados}} de {{total}} posicionadas",
+        "posicionada": "Posicionada",
+        "secretariaCodigo": "Secretária {{codigo}}",
+        "aPosicionar": "A posicionar: {{rotulo}}",
+        "selecionaZonaParaComecar": "Seleciona uma zona para começar",
+        "diminuirZoom": "Diminuir zoom",
+        "aumentarZoom": "Aumentar zoom",
+        "reporVisualizacao": "Repor visualização",
+        "ecraInteiro": "Ecrã inteiro",
+        "sairDeEcraInteiro": "Sair de ecrã inteiro",
+        "secretariasPosicionadasEmZona": "{{posicionadas}} / {{total}} secretárias posicionadas em {{zona}}",
+        "pisoSemPlanta": "Este piso ainda não tem planta associada.",
+        "posicaoGuardada": "Posição guardada"
     },
     "users": {
         "create": {

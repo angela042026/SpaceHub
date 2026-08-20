@@ -102,8 +102,10 @@ class ReservaController extends Controller
             'reservas' => $reservas,
             'estados' => EstadoReserva::orderBy('nome')->get(['id', 'nome', 'codigo']),
             'edificios' => Edificio::where('ativo', true)->orderBy('nome')->get(),
-            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(),
-            'setores' => Setor::where('reservavel', true)->orderBy('nome')->get(),
+            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get()
+                ->each(fn (Piso $piso) => $piso->nome = $piso->nome_localizado),
+            'setores' => Setor::where('reservavel', true)->orderBy('nome')->get()
+                ->each(fn (Setor $setor) => $setor->nome = $setor->nome_localizado),
             'filters' => $request->only([
                 'search',
                 'estado',
@@ -127,8 +129,10 @@ class ReservaController extends Controller
         return Inertia::render('Admin/Reservas/Edit', [
             'reserva' => $reserva,
             'periodos' => Periodo::where('ativo', true)->orderBy('hora_inicio')->get(),
-            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get(),
-            'setores' => Setor::where('reservavel', true)->with('piso')->orderBy('piso_id')->orderBy('nome')->get(),
+            'pisos' => Piso::where('ativo', true)->orderBy('numero')->get()
+                ->each(fn (Piso $piso) => $piso->nome = $piso->nome_localizado),
+            'setores' => Setor::where('reservavel', true)->with('piso')->orderBy('piso_id')->orderBy('nome')->get()
+                ->each(fn (Setor $setor) => $setor->nome = $setor->nome_localizado),
             'secretarias' => Secretaria::where('reservavel', true)
                 ->where('ativo', true)
                 ->with('setor.piso')

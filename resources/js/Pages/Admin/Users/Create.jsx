@@ -9,6 +9,8 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { etiquetaRole } from '@/utils/estados';
+
 const fieldClass =
     'h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
@@ -202,7 +204,7 @@ export default function Create({ roles }) {
 
                                 {roles.map((role) => (
                                     <option key={role.id} value={role.id}>
-                                        {role.nome}
+                                        {etiquetaRole(role.nome, tc)}
                                     </option>
                                 ))}
                             </select>

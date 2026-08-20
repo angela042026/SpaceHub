@@ -32,6 +32,7 @@ class PisoController extends Controller
             $query->where(function ($query) use ($search): void {
                 $query
                     ->where('nome', 'like', "%{$search}%")
+                    ->orWhere('nome_en', 'like', "%{$search}%")
                     ->orWhere('codigo', 'like', "%{$search}%")
                     ->orWhereHas('edificio', function ($query) use ($search): void {
                         $query->where('nome', 'like', "%{$search}%");

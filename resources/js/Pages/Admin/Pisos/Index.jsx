@@ -70,8 +70,8 @@ export default function Index({ pisos, edificios, filters }) {
 
     const alternarAtivo = (piso) => {
         const mensagem = piso.ativo
-            ? t('pisos.index.confirmarDesativar', { nome: piso.nome })
-            : t('pisos.index.confirmarAtivar', { nome: piso.nome });
+            ? t('pisos.index.confirmarDesativar', { nome: piso.nome_localizado ?? piso.nome })
+            : t('pisos.index.confirmarAtivar', { nome: piso.nome_localizado ?? piso.nome });
 
         if (!confirm(mensagem)) {
             return;
@@ -93,14 +93,15 @@ export default function Index({ pisos, edificios, filters }) {
     // (prefixo + designação colados só por um espaço). Sem tocar nos dados
     // guardados, insere-se um separador visual entre as duas partes.
     const formatarNomePiso = (piso) => {
+        const nome = piso.nome_localizado ?? piso.nome;
         const prefixo = `Piso ${piso.numero}`;
 
-        if (typeof piso.nome === 'string' && piso.nome.startsWith(prefixo)) {
-            const resto = piso.nome.slice(prefixo.length).trim();
+        if (typeof nome === 'string' && nome.startsWith(prefixo)) {
+            const resto = nome.slice(prefixo.length).trim();
             return resto ? `${prefixo} · ${resto}` : prefixo;
         }
 
-        return piso.nome;
+        return nome;
     };
 
     const columns = [

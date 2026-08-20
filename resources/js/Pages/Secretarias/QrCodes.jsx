@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Download, ExternalLink, Printer, QrCode as QrCodeIcon, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { formatarNomePiso } from '@/utils/formatarNomePiso';
@@ -10,6 +11,7 @@ import { formatarNomePiso } from '@/utils/formatarNomePiso';
 const LIMITE_PISOS_PARA_PASTILHAS = 5;
 
 export default function QrCodes({ pisos }) {
+    const { t } = useTranslation('admin');
     const [busca, setBusca] = useState('');
     const [pisoSelecionado, setPisoSelecionado] = useState('todos');
 
@@ -59,7 +61,7 @@ export default function QrCodes({ pisos }) {
 
     return (
         <>
-            <Head title="QR Codes das Secretárias" />
+            <Head title={t('secretarias.qrcodes.titulo')} />
 
             <DashboardLayout>
                 <section className="dashboard-card overflow-hidden pb-16 sm:pr-1 lg:pr-4 print:border-none print:pb-0 print:pr-0 print:shadow-none">
@@ -71,11 +73,11 @@ export default function QrCodes({ pisos }) {
 
                             <div>
                                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                    QR Codes das Secretárias
+                                    {t('secretarias.qrcodes.titulo')}
                                 </h1>
 
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Imprime ou transfere o código de cada secretária para afixar no espaço físico.
+                                    {t('secretarias.qrcodes.subtitulo')}
                                 </p>
                             </div>
                         </div>
@@ -86,7 +88,7 @@ export default function QrCodes({ pisos }) {
                                 className="inline-flex h-11 items-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-600 transition hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:text-slate-300"
                             >
                                 <ArrowLeft size={16} strokeWidth={1.9} />
-                                Voltar às secretárias
+                                {t('secretarias.qrcodes.voltarAsSecretarias')}
                             </Link>
 
                             <button
@@ -95,7 +97,7 @@ export default function QrCodes({ pisos }) {
                                 className="inline-flex h-11 items-center gap-2 rounded-xl bg-navy-900 px-4 text-sm font-bold text-white transition hover:bg-navy-950"
                             >
                                 <Printer size={16} strokeWidth={1.9} />
-                                Imprimir tudo
+                                {t('secretarias.qrcodes.imprimirTudo')}
                             </button>
                         </div>
                     </div>
@@ -112,7 +114,7 @@ export default function QrCodes({ pisos }) {
                                 type="text"
                                 value={busca}
                                 onChange={(event) => setBusca(event.target.value)}
-                                placeholder="Pesquisar por código ou nome da secretária…"
+                                placeholder={t('secretarias.qrcodes.pesquisarPlaceholder')}
                                 className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-teal-400 focus:ring-2 focus:ring-teal-400/15 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                             />
                         </div>
@@ -123,7 +125,7 @@ export default function QrCodes({ pisos }) {
                                 onChange={(event) => setPisoSelecionado(event.target.value)}
                                 className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 shadow-sm outline-none transition hover:border-teal-500/50 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                             >
-                                <option value="todos">Todos os pisos</option>
+                                <option value="todos">{t('secretarias.qrcodes.todosOsPisos')}</option>
 
                                 {pisosComSecretarias.map((piso) => (
                                     <option key={piso.id} value={piso.id}>
@@ -142,7 +144,7 @@ export default function QrCodes({ pisos }) {
                                             : 'border border-slate-200 bg-white text-slate-600 hover:border-teal-500 hover:text-teal-500 dark:border-slate-700 dark:bg-transparent dark:text-slate-300'
                                     }`}
                                 >
-                                    Todos
+                                    {t('listagem.todos')}
                                 </button>
 
                                 {pisosComSecretarias.map((piso) => (
@@ -164,13 +166,13 @@ export default function QrCodes({ pisos }) {
                     </div>
 
                     <p className="px-6 pb-1 pt-3 text-xs text-slate-400 print:hidden">
-                        {totalEncontradas} secretária{totalEncontradas === 1 ? '' : 's'} encontrada{totalEncontradas === 1 ? '' : 's'}
+                        {t('secretarias.qrcodes.encontradas', { count: totalEncontradas })}
                     </p>
 
                     {pisosFiltrados.length === 0 ? (
                         <div className="mx-6 my-6 flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-12 text-center dark:border-slate-700 dark:bg-slate-900/40 print:hidden">
                             <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
-                                Nenhuma secretária encontrada.
+                                {t('secretarias.index.semResultados')}
                             </p>
 
                             <button
@@ -178,7 +180,7 @@ export default function QrCodes({ pisos }) {
                                 onClick={limparPesquisa}
                                 className="text-xs font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400"
                             >
-                                Limpar pesquisa
+                                {t('secretarias.qrcodes.limparPesquisa')}
                             </button>
                         </div>
                     ) : (
@@ -197,7 +199,7 @@ export default function QrCodes({ pisos }) {
                                             >
                                                 <img
                                                     src={secretaria.qrUrl}
-                                                    alt={`QR Code ${secretaria.codigo}`}
+                                                    alt={t('secretarias.qrcodes.qrCodeAlt', { codigo: secretaria.codigo })}
                                                     className="h-24 w-24"
                                                 />
 
@@ -218,8 +220,8 @@ export default function QrCodes({ pisos }) {
                                                     <a
                                                         href={secretaria.qrUrl}
                                                         download={`qrcode-${secretaria.codigo}.svg`}
-                                                        title="Transferir QR Code"
-                                                        aria-label={`Transferir QR Code de ${secretaria.codigo}`}
+                                                        title={t('secretarias.qrcodes.transferir')}
+                                                        aria-label={t('secretarias.qrcodes.transferirDe', { codigo: secretaria.codigo })}
                                                         className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40 focus-visible:ring-offset-1 dark:border-slate-700 dark:hover:bg-teal-500/10"
                                                     >
                                                         <Download size={14} strokeWidth={1.9} />
@@ -229,8 +231,8 @@ export default function QrCodes({ pisos }) {
                                                         href={secretaria.qrUrl}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        title="Abrir para imprimir"
-                                                        aria-label={`Abrir para imprimir o QR Code de ${secretaria.codigo}`}
+                                                        title={t('secretarias.qrcodes.abrirParaImprimir')}
+                                                        aria-label={t('secretarias.qrcodes.abrirParaImprimirDe', { codigo: secretaria.codigo })}
                                                         className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/40 focus-visible:ring-offset-1 dark:border-slate-700 dark:hover:bg-teal-500/10"
                                                     >
                                                         <ExternalLink size={14} strokeWidth={1.9} />

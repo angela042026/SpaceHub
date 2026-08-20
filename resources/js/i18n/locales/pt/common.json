@@ -99,6 +99,12 @@
             "manha": "Manhã",
             "tarde": "Tarde",
             "diaInteiro": "Dia inteiro"
+        },
+        "role": {
+            "administrador": "Administrador",
+            "gestor": "Gestor",
+            "colaborador": "Colaborador",
+            "utilizador": "Utilizador"
         }
     },
     "chat": {

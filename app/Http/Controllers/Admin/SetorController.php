@@ -30,9 +30,11 @@ class SetorController extends Controller
             $query->where(function ($query) use ($search): void {
                 $query
                     ->where('nome', 'like', "%{$search}%")
+                    ->orWhere('nome_en', 'like', "%{$search}%")
                     ->orWhere('codigo', 'like', "%{$search}%")
                     ->orWhereHas('piso', function ($query) use ($search): void {
-                        $query->where('nome', 'like', "%{$search}%");
+                        $query->where('nome', 'like', "%{$search}%")
+                            ->orWhere('nome_en', 'like', "%{$search}%");
                     });
             });
         }
@@ -69,7 +71,8 @@ class SetorController extends Controller
 
         return Inertia::render('Admin/Setores/Index', [
             'setores' => SetorResource::collection($setores)->response()->getData(true),
-            'pisos' => Piso::orderBy('nome')->get(['id', 'nome']),
+            'pisos' => Piso::orderBy('nome')->get(['id', 'nome', 'nome_en'])
+                ->map(fn (Piso $piso) => ['id' => $piso->id, 'nome' => $piso->nome_localizado]),
             'filters' => $request->only(['search', 'piso_id', 'tipo', 'ativo', 'sort_by', 'sort_direction']),
         ]);
     }
@@ -79,7 +82,8 @@ class SetorController extends Controller
         Gate::authorize('create', Setor::class);
 
         return Inertia::render('Admin/Setores/Create', [
-            'pisos' => Piso::orderBy('nome')->get(['id', 'nome']),
+            'pisos' => Piso::orderBy('nome')->get(['id', 'nome', 'nome_en'])
+                ->map(fn (Piso $piso) => ['id' => $piso->id, 'nome' => $piso->nome_localizado]),
         ]);
     }
 
@@ -114,7 +118,8 @@ class SetorController extends Controller
             // JsonResource::$wrap = 'data'). Sem isto, o React recebia
             // setor.data.nome em vez de setor.nome e o formulário ficava vazio.
             'setor' => (new SetorResource($setor))->resolve(),
-            'pisos' => Piso::orderBy('nome')->get(['id', 'nome']),
+            'pisos' => Piso::orderBy('nome')->get(['id', 'nome', 'nome_en'])
+                ->map(fn (Piso $piso) => ['id' => $piso->id, 'nome' => $piso->nome_localizado]),
         ]);
     }
 

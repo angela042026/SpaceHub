@@ -100,11 +100,13 @@ class ReservaController extends Controller
 
             'setores' => Setor::where('reservavel', true)
                 ->orderBy('nome')
-                ->get(),
+                ->get()
+                ->each(fn (Setor $setor) => $setor->nome = $setor->nome_localizado),
 
             'pisos' => Piso::where('ativo', true)
                 ->orderBy('numero')
-                ->get(),
+                ->get()
+                ->each(fn (Piso $piso) => $piso->nome = $piso->nome_localizado),
 
             'edificios' => Edificio::where('ativo', true)
                 ->orderBy('nome')
@@ -290,6 +292,8 @@ class ReservaController extends Controller
         }
 
         $reserva->load('secretaria.setor.piso');
+        $reserva->secretaria->setor->nome = $reserva->secretaria->setor->nome_localizado;
+        $reserva->secretaria->setor->piso->nome = $reserva->secretaria->setor->piso->nome_localizado;
         $reservaData = $reserva->toArray();
         $reservaData['data'] = $reserva->data->format('Y-m-d');
 

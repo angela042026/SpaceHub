@@ -18,6 +18,7 @@ export default function Edit({ piso, edificios }) {
     const { data, setData, put, processing, errors } = useForm({
         edificio_id: piso.edificio_id ?? '',
         nome: piso.nome ?? '',
+        nome_en: piso.nome_en ?? '',
         codigo: piso.codigo ?? '',
         numero: piso.numero ?? '',
         planta: null,
@@ -38,7 +39,7 @@ export default function Edit({ piso, edificios }) {
 
     return (
         <DashboardLayout>
-            <Head title={t('pisos.edit.headTitle', { nome: piso.nome })} />
+            <Head title={t('pisos.edit.headTitle', { nome: piso.nome_localizado })} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -52,7 +53,7 @@ export default function Edit({ piso, edificios }) {
                         </h1>
 
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {piso.nome}
+                            {piso.nome_localizado}
                         </p>
                     </div>
                 </div>
@@ -79,6 +80,12 @@ export default function Edit({ piso, edificios }) {
                             <label htmlFor="nome" className={labelClass}>{t('campos.nome')}</label>
                             <input id="nome" type="text" value={data.nome} onChange={(e) => setData('nome', e.target.value)} autoFocus required className={fieldClass} />
                             <InputError message={errors.nome} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <label htmlFor="nome_en" className={labelClass}>{t('campos.nomeEn')}</label>
+                            <input id="nome_en" type="text" value={data.nome_en} onChange={(e) => setData('nome_en', e.target.value)} placeholder={t('campos.nomeEnPlaceholder')} className={fieldClass} />
+                            <InputError message={errors.nome_en} className="mt-2" />
                         </div>
 
                         <div>
@@ -110,7 +117,7 @@ export default function Edit({ piso, edificios }) {
                             <div className="sm:col-span-2">
                                 <img
                                     src={preview ?? piso.planta_url}
-                                    alt={t('pisos.edit.plantaAlt', { nome: piso.nome })}
+                                    alt={t('pisos.edit.plantaAlt', { nome: piso.nome_localizado })}
                                     className="max-h-48 rounded-xl border border-slate-200 object-contain dark:border-slate-700"
                                 />
                             </div>

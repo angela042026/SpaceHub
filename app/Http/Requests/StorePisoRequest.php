@@ -27,6 +27,12 @@ class StorePisoRequest extends FormRequest
                 'max:100',
             ],
 
+            'nome_en' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
             'codigo' => [
                 'required',
                 'string',

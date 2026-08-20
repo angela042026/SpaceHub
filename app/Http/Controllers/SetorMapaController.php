@@ -33,13 +33,14 @@ class SetorMapaController extends Controller
             ->get()
             ->map(fn ($piso) => [
                 'id' => $piso->id,
-                'nome' => $piso->nome,
+                'nome' => $piso->nome_localizado,
+                'numero' => $piso->numero,
                 'codigo' => $piso->codigo,
                 'planta' => $piso->planta,
                 'setores' => $piso->setores->values()->map(fn ($setor, $indice) => [
                     'id' => $setor->id,
                     'numero' => $indice + 1,
-                    'nome' => $setor->nome,
+                    'nome' => $setor->nome_localizado,
                     'codigo' => $setor->codigo,
                     'planta_x' => $setor->planta_x,
                     'planta_y' => $setor->planta_y,

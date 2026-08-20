@@ -15,12 +15,12 @@ class SecretariaResource extends JsonResource
 
             'setor' => $this->whenLoaded(
                 'setor',
-                fn () => $this->setor->nome
+                fn () => $this->setor->nome_localizado
             ),
 
             'piso' => $this->whenLoaded(
                 'setor',
-                fn () => $this->setor->piso?->nome
+                fn () => $this->setor->piso?->nome_localizado
             ),
 
             'codigo' => $this->codigo,

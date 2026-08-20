@@ -8,7 +8,7 @@ import { Head, useForm } from '@inertiajs/react';
 import { UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { ESTADO_UTILIZADOR, etiqueta } from '@/utils/estados';
+import { ESTADO_UTILIZADOR, etiqueta, etiquetaRole } from '@/utils/estados';
 
 export default function Utilizadores({ utilizadores, roles, filters, geradoEm }) {
     const { t, i18n } = useTranslation('relatorios');
@@ -39,7 +39,7 @@ export default function Utilizadores({ utilizadores, roles, filters, geradoEm })
         {
             key: 'role',
             label: t('utilizadores.colunas.papel'),
-            render: (user) => user.role?.nome ?? '-',
+            render: (user) => (user.role?.nome ? etiquetaRole(user.role.nome, tc) : '-'),
         },
         {
             key: 'ativo',
@@ -116,7 +116,7 @@ export default function Utilizadores({ utilizadores, roles, filters, geradoEm })
                         >
                             <option value="">{t('utilizadores.todosPapeis')}</option>
                             {roles.map((role) => (
-                                <option key={role.id} value={role.id}>{role.nome}</option>
+                                <option key={role.id} value={role.id}>{etiquetaRole(role.nome, tc)}</option>
                             ))}
                         </select>
                     </div>

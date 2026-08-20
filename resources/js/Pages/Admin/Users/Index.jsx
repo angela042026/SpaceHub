@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ESTADO_UTILIZADOR, badge, etiqueta } from '@/utils/estados';
+import { ESTADO_UTILIZADOR, badge, etiqueta, etiquetaRole } from '@/utils/estados';
 
 export default function Index({ users, roles, filters }) {
     const { auth } = usePage().props;
@@ -138,7 +138,7 @@ export default function Index({ users, roles, filters }) {
         {
             key: 'role',
             label: t('users.create.papel'),
-            render: (user) => user.role ?? '-',
+            render: (user) => (user.role ? etiquetaRole(user.role, tc) : '-'),
         },
         {
             key: 'ativo',
@@ -280,7 +280,7 @@ export default function Index({ users, roles, filters }) {
 
                         {roles.map((role) => (
                             <option key={role.id} value={role.id}>
-                                {role.nome}
+                                {etiquetaRole(role.nome, tc)}
                             </option>
                         ))}
                     </select>

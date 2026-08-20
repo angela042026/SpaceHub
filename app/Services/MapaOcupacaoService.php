@@ -138,7 +138,7 @@ class MapaOcupacaoService
                     return [
                         'id' => $setor->id,
                         'numero' => $indice + 1,
-                        'nome' => $setor->nome,
+                        'nome' => $setor->nome_localizado,
                         'codigo' => $setor->codigo,
                         'tipo' => $setor->tipo,
                         'planta_x' => $setor->planta_x,
@@ -161,7 +161,7 @@ class MapaOcupacaoService
 
         return [
             'id' => $piso->id,
-            'nome' => $piso->nome,
+            'nome' => $piso->nome_localizado,
             'codigo' => $piso->codigo,
             'numero' => $piso->numero,
             'planta' => $piso->planta,

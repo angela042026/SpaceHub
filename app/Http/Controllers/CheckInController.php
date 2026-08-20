@@ -41,10 +41,15 @@ class CheckInController extends Controller
             ->get();
 
         return Inertia::render('CheckIn/Camera', [
-            'reservas' => $reservas->map(fn (Reserva $reserva) => [
-                ...$reserva->toArray(),
-                'status' => $this->statusDaReserva($reserva),
-            ]),
+            'reservas' => $reservas->map(function (Reserva $reserva) {
+                $reserva->secretaria->setor->nome = $reserva->secretaria->setor->nome_localizado;
+                $reserva->secretaria->setor->piso->nome = $reserva->secretaria->setor->piso->nome_localizado;
+
+                return [
+                    ...$reserva->toArray(),
+                    'status' => $this->statusDaReserva($reserva),
+                ];
+            }),
         ]);
     }
 
@@ -56,6 +61,9 @@ class CheckInController extends Controller
         $secretaria = Secretaria::with('setor.piso.edificio')
             ->where('qr_token', $qrToken)
             ->firstOrFail();
+
+        $secretaria->setor->nome = $secretaria->setor->nome_localizado;
+        $secretaria->setor->piso->nome = $secretaria->setor->piso->nome_localizado;
 
         $hoje = Carbon::today();
 

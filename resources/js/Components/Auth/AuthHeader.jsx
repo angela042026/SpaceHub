@@ -1,5 +1,6 @@
 import { Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import ThemeToggle from './ThemeToggle';
 import LanguageSwitcher from '@/Components/LanguageSwitcher';
 
@@ -7,6 +8,7 @@ export default function AuthHeader({
     theme,
     toggleTheme,
 }) {
+    const { t } = useTranslation('auth');
     const darkMode = theme === 'dark';
 
     return (
@@ -23,7 +25,7 @@ export default function AuthHeader({
                 <Link
                     href="/"
                     className="flex items-center"
-                    aria-label="Voltar à página inicial"
+                    aria-label={t('layout.voltarAPaginaInicial')}
                 >
                     <img
                         src={
@@ -69,7 +71,7 @@ export default function AuthHeader({
                         <ArrowLeft size={17} />
 
                         <span className="hidden sm:inline">
-                            Voltar ao site
+                            {t('layout.voltarAoSite')}
                         </span>
                     </Link>
                 </div>

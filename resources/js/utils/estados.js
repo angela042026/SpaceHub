@@ -144,6 +144,32 @@ export const ESTADO_UTILIZADOR = {
 };
 
 /**
+ * Nome do papel (coluna `nome` da tabela `roles` — "Administrador",
+ * "Gestor", "Colaborador", "Utilizador"). Conjunto fixo, definido pelo
+ * RoleSeeder e usado também em comparações de autorização no backend
+ * (ex.: User::hasRole()), por isso a chave de tradução é o próprio
+ * texto em português — só a apresentação muda com o idioma, o valor
+ * persistido mantém-se.
+ */
+export const ROLE_LABEL = {
+    Administrador: 'estados.role.administrador',
+    Gestor: 'estados.role.gestor',
+    Colaborador: 'estados.role.colaborador',
+    Utilizador: 'estados.role.utilizador',
+};
+
+/** Traduz o nome de um papel, devolvendo o valor original se for desconhecido. */
+export const etiquetaRole = (nome, t) => {
+    const chaveTraducao = ROLE_LABEL[nome];
+
+    if (!chaveTraducao) {
+        return nome;
+    }
+
+    return (t ?? i18n.t.bind(i18n))(chaveTraducao);
+};
+
+/**
  * Nome do período (coluna `nome` da tabela `periodos` — "Manhã",
  * "Tarde", "Dia inteiro"). Ao contrário dos outros mapas, a chave de
  * tradução é o próprio texto em português, porque a tabela não tem um
