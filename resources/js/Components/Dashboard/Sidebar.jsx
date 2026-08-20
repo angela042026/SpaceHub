@@ -22,6 +22,7 @@ import {
     CreditCard,
     HelpCircle,
     LifeBuoy,
+    HelpCircle as FaqIcon,
 } from 'lucide-react';
 
 function SidebarItem({
@@ -358,6 +359,18 @@ export default function Sidebar({
                                         'support.index',
                                     ) || route().current(
                                         'support.show',
+                                    )}
+                                    onNavigate={onClose}
+                                />
+
+                                <SidebarItem
+                                    icon={FaqIcon}
+                                    label="Gestão de FAQs"
+                                    href={route(
+                                        'admin.faqs.index',
+                                    )}
+                                    active={route().current(
+                                        'admin.faqs.*',
                                     )}
                                     onNavigate={onClose}
                                 />

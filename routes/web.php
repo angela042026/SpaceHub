@@ -25,6 +25,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\PagamentoController;
+use App\Http\Controllers\Admin\AdminFaqController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -92,10 +93,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/pagamentos/{pagamento}/pagar', [PagamentoController::class, 'pagar'])
         ->name('pagamentos.pagar');
 
-  Route::patch(
-    '/pagamentos/{pagamento}/confirmar',
-    [PagamentoController::class, 'confirmar']
-)->name('pagamentos.confirmar');
+    Route::patch(
+        '/pagamentos/{pagamento}/confirmar',
+        [PagamentoController::class, 'confirmar']
+    )->name('pagamentos.confirmar');
 
     Route::get(
         '/pagamentos/{pagamento}/comprovativo',
@@ -344,6 +345,36 @@ Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
             ->name('reports.suporte');
     });
 
+    // Gestão de FAQs (acessível a Administrador e Gestor, ver *Policy::before()).
+    Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function () {
+
+            // Listagem
+            Route::get('/faqs', [AdminFaqController::class, 'index'])
+                ->name('faqs.index');
+
+            // Criar FAQ
+            Route::get('/faqs/create', [AdminFaqController::class, 'create'])
+                ->name('faqs.create');
+
+            Route::post('/faqs', [AdminFaqController::class, 'store'])
+                ->name('faqs.store');
+
+            // Editar FAQ
+            Route::get('/faqs/{faq}/edit', [AdminFaqController::class, 'edit'])
+                ->name('faqs.edit');
+
+            Route::put('/faqs/{faq}', [AdminFaqController::class, 'update'])
+                ->name('faqs.update');
+
+            // Eliminar FAQ
+            Route::delete('/faqs/{faq}', [AdminFaqController::class, 'destroy'])
+                ->name('faqs.destroy');
+
+        });
+        
 require __DIR__ . '/auth.php';
 
 /*

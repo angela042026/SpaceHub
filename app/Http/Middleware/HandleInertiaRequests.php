@@ -13,7 +13,7 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
-    
+
     /**
      * Determine the current asset version.
      */
@@ -41,6 +41,7 @@ class HandleInertiaRequests extends Middleware
                     : 0,
             ],
             'flash' => [
+                'message' => fn() => $request->session()->get('message'),
                 'success' => fn() => $request->session()->get('success'),
                 'error' => fn() => $request->session()->get('error'),
             ],
