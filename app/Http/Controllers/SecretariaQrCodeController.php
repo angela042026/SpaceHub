@@ -56,13 +56,36 @@ class SecretariaQrCodeController extends Controller
      * middleware, bootstrap do Laravel) até restar só o Response::send().
      * O envio manual e imediato evita esse caminho de código.
      */
-    public function show(Secretaria $secretaria): never
+    public function show(Secretaria $secretaria)
     {
         Gate::authorize('update', $secretaria);
 
         ob_start();
         $svg = (string) QrCode::format('svg')->size(300)->margin(1)->generate($secretaria->checkinUrl());
         ob_end_clean();
+
+        // Em testes não há rede real a enviar — o TestResponse do Laravel
+        // captura o Response devolvido sem passar por Response::send(), por
+        // isso o bug do servidor de desenvolvimento descrito abaixo nunca se
+        // manifesta aqui. Um exit() a meio do pedido, por outro lado, mata o
+        // próprio processo do PHPUnit/Pest e para toda a suite de testes.
+        if (app()->runningUnitTests()) {
+            return response($svg, 200, [
+                'Content-Type' => 'image/svg+xml',
+                'Cache-Control' => 'no-store, must-revalidate',
+            ]);
+        }
+
+        // Não devolve um Illuminate\Http\Response normal de propósito: neste
+        // ambiente (servidor embutido do PHP, SAPI cli-server), o
+        // Response::send() do Symfony chama closeOutputBuffers(), que insere 4
+        // bytes de espaço antes do corpo da resposta. Inofensivo em HTML (os
+        // browsers ignoram espaço antes de <!DOCTYPE>), mas inválido em SVG —
+        // a declaração XML deixa de estar no início do documento e o browser
+        // recusa-se a renderizar ("XML declaration allowed only at the start
+        // of the document"). Confirmado isolando cada camada (geração do SVG,
+        // middleware, bootstrap do Laravel) até restar só o Response::send().
+        // O envio manual e imediato evita esse caminho de código.
 
         // Drena qualquer buffer de output que o próprio Laravel ainda
         // tenha ativo neste ponto do pedido. Sem isto, o echo() abaixo
