@@ -31,7 +31,7 @@ class GoogleAuthController extends Controller
                 return redirect()
                     ->route('login')
                     ->withErrors([
-                        'email' => 'O Google não forneceu um endereço de e-mail.',
+                        'email' => __('O Google não forneceu um endereço de e-mail.'),
                     ]);
             }
 
@@ -63,7 +63,7 @@ class GoogleAuthController extends Controller
                     return redirect()
                         ->route('login')
                         ->withErrors([
-                            'email' => 'Esta conta encontra-se desativada. Contacte um administrador.',
+                            'email' => __('Esta conta encontra-se desativada. Contacte um administrador.'),
                         ]);
                 }
 
@@ -100,7 +100,7 @@ class GoogleAuthController extends Controller
             return redirect()
                 ->route('login')
                 ->withErrors([
-                    'email' => 'Não foi possível iniciar sessão com o Google. Tente novamente.',
+                    'email' => __('Não foi possível iniciar sessão com o Google. Tente novamente.'),
                 ]);
         }
     }

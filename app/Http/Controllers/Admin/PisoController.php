@@ -112,7 +112,7 @@ class PisoController extends Controller
 
         return redirect()
             ->route('admin.pisos.index')
-            ->with('success', 'Piso criado com sucesso.');
+            ->with('success', __('Piso criado com sucesso.'));
     }
 
     public function edit(Piso $piso): Response
@@ -168,7 +168,7 @@ class PisoController extends Controller
 
         return redirect()
             ->route('admin.pisos.index')
-            ->with('success', 'Piso atualizado com sucesso.');
+            ->with('success', __('Piso atualizado com sucesso.'));
     }
 
     public function toggleAtivo(Piso $piso): RedirectResponse
@@ -187,7 +187,7 @@ class PisoController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', $piso->ativo ? 'Piso ativado.' : 'Piso desativado.');
+            ->with('success', $piso->ativo ? __('Piso ativado.') : __('Piso desativado.'));
     }
 
     /**

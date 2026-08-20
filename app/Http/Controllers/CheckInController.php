@@ -100,21 +100,21 @@ class CheckInController extends Controller
         $reserva->load(['periodo', 'estadoReserva', 'secretaria']);
 
         if (! in_array($reserva->estadoReserva?->codigo, EstadoReserva::codigosAtivos(), true)) {
-            return back()->withErrors(['reserva' => 'Esta reserva já não está ativa.']);
+            return back()->withErrors(['reserva' => __('Esta reserva já não está ativa.')]);
         }
 
         $status = $this->statusDaReserva($reserva);
 
         if ($status === 'ja_check_in') {
-            return back()->withErrors(['reserva' => 'Já fizeste check-in nesta reserva.']);
+            return back()->withErrors(['reserva' => __('Já fizeste check-in nesta reserva.')]);
         }
 
         if ($status === 'pendente_pagamento') {
-            return back()->withErrors(['reserva' => 'Esta reserva está pendente de pagamento. Conclui o pagamento para poderes fazer o check-in.']);
+            return back()->withErrors(['reserva' => __('Esta reserva está pendente de pagamento. Conclui o pagamento para poderes fazer o check-in.')]);
         }
 
         if ($status === 'fora_da_janela') {
-            return back()->withErrors(['reserva' => 'Fora da janela horária permitida para check-in.']);
+            return back()->withErrors(['reserva' => __('Fora da janela horária permitida para check-in.')]);
         }
 
         $utilizador = $request->user();
@@ -133,7 +133,7 @@ class CheckInController extends Controller
          */
         if (! $ehStaff && ! $viaQr) {
             return back()->withErrors([
-                'reserva' => 'É necessário ler o QR Code da secretária para confirmar o check-in.',
+                'reserva' => __('É necessário ler o QR Code da secretária para confirmar o check-in.'),
             ]);
         }
 
@@ -159,7 +159,7 @@ class CheckInController extends Controller
         broadcast(new MapaAtualizado());
         DashboardMetricsService::limparCacheDoDia();
 
-        return back()->with('success', 'Check-in confirmado com sucesso.');
+        return back()->with('success', __('Check-in confirmado com sucesso.'));
     }
 
     /**

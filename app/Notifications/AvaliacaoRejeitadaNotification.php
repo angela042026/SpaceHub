@@ -25,18 +25,18 @@ class AvaliacaoRejeitadaNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject($dados['titulo'])
-            ->greeting('Olá, ' . $notifiable->name . '!')
+            ->greeting(__('Olá, :name!', ['name' => $notifiable->name]))
             ->line($dados['mensagem'])
-            ->action('Ver as minhas reservas', route('reservas.index'))
-            ->line('Obrigado por utilizares o SpaceHub.');
+            ->action(__('Ver as minhas reservas'), route('reservas.index'))
+            ->line(__('Obrigado por utilizares o SpaceHub.'));
     }
 
     public function toArray($notifiable): array
     {
         return [
             'tipo' => 'avaliacao_rejeitada',
-            'titulo' => 'Avaliação rejeitada',
-            'mensagem' => 'A tua avaliação não foi aprovada para publicação.',
+            'titulo' => __('Avaliação rejeitada'),
+            'mensagem' => __('A tua avaliação não foi aprovada para publicação.'),
             'reserva_id' => $this->avaliacao->reserva_id,
         ];
     }

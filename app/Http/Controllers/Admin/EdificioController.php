@@ -113,7 +113,7 @@ class EdificioController extends Controller
 
         return redirect()
             ->route('admin.edificios.index')
-            ->with('success', 'Edifício criado com sucesso.');
+            ->with('success', __('Edifício criado com sucesso.'));
     }
 
     public function edit(Edificio $edificio): Response
@@ -166,7 +166,7 @@ class EdificioController extends Controller
 
         return redirect()
             ->route('admin.edificios.index')
-            ->with('success', 'Edifício atualizado com sucesso.');
+            ->with('success', __('Edifício atualizado com sucesso.'));
     }
 
     public function toggleAtivo(Edificio $edificio): RedirectResponse
@@ -185,6 +185,6 @@ class EdificioController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', $edificio->ativo ? 'Edifício ativado.' : 'Edifício desativado.');
+            ->with('success', $edificio->ativo ? __('Edifício ativado.') : __('Edifício desativado.'));
     }
 }

@@ -98,7 +98,7 @@ class SetorController extends Controller
 
         return redirect()
             ->route('admin.setores.index')
-            ->with('success', 'Setor criado com sucesso.');
+            ->with('success', __('Setor criado com sucesso.'));
     }
 
     public function edit(Setor $setor): Response
@@ -133,7 +133,7 @@ class SetorController extends Controller
 
         return redirect()
             ->route('admin.setores.index')
-            ->with('success', 'Setor atualizado com sucesso.');
+            ->with('success', __('Setor atualizado com sucesso.'));
     }
 
     public function toggleAtivo(Setor $setor): RedirectResponse
@@ -152,7 +152,7 @@ class SetorController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', $setor->ativo ? 'Setor ativado.' : 'Setor desativado.');
+            ->with('success', $setor->ativo ? __('Setor ativado.') : __('Setor desativado.'));
     }
 
     /**

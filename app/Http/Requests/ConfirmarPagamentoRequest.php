@@ -41,10 +41,10 @@ class ConfirmarPagamentoRequest extends FormRequest
     {
         return [
             'metodo_pagamento.required' =>
-                'Seleciona um método de pagamento.',
+                __('Seleciona um método de pagamento.'),
 
             'metodo_pagamento.in' =>
-                'O método de pagamento selecionado não é válido.',
+                __('O método de pagamento selecionado não é válido.'),
         ];
     }
 }

@@ -118,7 +118,7 @@ class SecretariaController extends Controller
 
         return redirect()
             ->route('admin.secretarias.index')
-            ->with('success', 'Secretária criada com sucesso.');
+            ->with('success', __('Secretária criada com sucesso.'));
     }
 
     public function edit(Secretaria $secretaria): Response
@@ -176,7 +176,7 @@ class SecretariaController extends Controller
 
         return redirect()
             ->route('admin.secretarias.index')
-            ->with('success', 'Secretária atualizada com sucesso.');
+            ->with('success', __('Secretária atualizada com sucesso.'));
     }
 
     public function toggleAtivo(Secretaria $secretaria): RedirectResponse
@@ -195,7 +195,7 @@ class SecretariaController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', $secretaria->ativo ? 'Secretária ativada.' : 'Secretária desativada.');
+            ->with('success', $secretaria->ativo ? __('Secretária ativada.') : __('Secretária desativada.'));
     }
 
     /**

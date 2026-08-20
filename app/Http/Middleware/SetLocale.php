@@ -13,16 +13,25 @@ class SetLocale
 
     public const COOKIE = 'locale';
 
+    public const LOCALE_OMISSAO = 'pt';
+
     /**
      * Handle an incoming request.
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Sessão e cookie vêm sempre primeiro — são a escolha mais
+        // recente, feita explicitamente através do seletor de idioma
+        // (LocaleController), mesmo que divirja da preferência guardada
+        // no utilizador. Só se nenhuma delas existir (ex.: login num
+        // browser/dispositivo novo, sem sessão nem cookie anteriores) é
+        // que se recorre à preferência gravada em User::locale.
         $locale = $request->session()->get('locale')
-            ?? $request->cookie(self::COOKIE);
+            ?? $request->cookie(self::COOKIE)
+            ?? $request->user()?->locale;
 
         if (! in_array($locale, self::LOCALES_SUPORTADOS, true)) {
-            $locale = 'pt';
+            $locale = self::LOCALE_OMISSAO;
         }
 
         $request->session()->put('locale', $locale);

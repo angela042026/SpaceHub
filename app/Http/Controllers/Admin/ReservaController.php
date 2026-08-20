@@ -180,7 +180,7 @@ class ReservaController extends Controller
         )) {
             return back()
                 ->withErrors([
-                    'secretaria_id' => 'Esta secretária já se encontra reservada para a data e período selecionados.',
+                    'secretaria_id' => __('Esta secretária já se encontra reservada para a data e período selecionados.'),
                 ])
                 ->withInput();
         }
@@ -195,7 +195,7 @@ class ReservaController extends Controller
         )) {
             return back()
                 ->withErrors([
-                    'data' => 'Este utilizador já possui outra reserva para esta data e período.',
+                    'data' => __('Este utilizador já possui outra reserva para esta data e período.'),
                 ])
                 ->withInput();
         }
@@ -272,7 +272,7 @@ class ReservaController extends Controller
 
         return redirect()
             ->route('admin.reservas.index')
-            ->with('success', 'Reserva atualizada com sucesso.');
+            ->with('success', __('Reserva atualizada com sucesso.'));
     }
 
     /**
@@ -290,7 +290,7 @@ class ReservaController extends Controller
         if ($reserva->cancelada_at !== null) {
             return redirect()
                 ->route('admin.reservas.index')
-                ->with('error', 'Esta reserva já se encontra cancelada.');
+                ->with('error', __('Esta reserva já se encontra cancelada.'));
         }
 
         $estadoCanceladaId = EstadoReserva::idPorCodigo('cancelada');
@@ -368,7 +368,7 @@ class ReservaController extends Controller
 
         return back()
             ->withErrors([
-                'secretaria_id' => 'Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.',
+                'secretaria_id' => __('Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.'),
             ])
             ->withInput();
     }

@@ -51,12 +51,12 @@ class GoogleCalendarAuthController extends Controller
             );
 
             return Redirect::route('profile.edit')
-                ->with('success', 'Google Calendar ligado com sucesso.');
+                ->with('success', __('Google Calendar ligado com sucesso.'));
         } catch (Throwable $e) {
             report($e);
 
             return Redirect::route('profile.edit')
-                ->with('error', 'Não foi possível ligar o Google Calendar. Tenta novamente.');
+                ->with('error', __('Não foi possível ligar o Google Calendar. Tenta novamente.'));
         }
     }
 
@@ -65,6 +65,6 @@ class GoogleCalendarAuthController extends Controller
         $calendario->desconectar(Auth::user());
 
         return Redirect::route('profile.edit')
-            ->with('success', 'Google Calendar desligado.');
+            ->with('success', __('Google Calendar desligado.'));
     }
 }

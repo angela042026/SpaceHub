@@ -86,14 +86,14 @@ class AvaliacaoController extends Controller
         Gate::authorize('moderar', $avaliacao);
 
         if ($avaliacao->estado !== 'pendente') {
-            return back()->with('error', 'Esta avaliação já foi moderada.');
+            return back()->with('error', __('Esta avaliação já foi moderada.'));
         }
 
         $avaliacao->update(['estado' => 'aprovada']);
 
         $avaliacao->reserva->user?->notify(new AvaliacaoAprovadaNotification($avaliacao));
 
-        return back()->with('success', 'Avaliação aprovada.');
+        return back()->with('success', __('Avaliação aprovada.'));
     }
 
     public function rejeitar(Avaliacao $avaliacao): RedirectResponse
@@ -101,13 +101,13 @@ class AvaliacaoController extends Controller
         Gate::authorize('moderar', $avaliacao);
 
         if ($avaliacao->estado !== 'pendente') {
-            return back()->with('error', 'Esta avaliação já foi moderada.');
+            return back()->with('error', __('Esta avaliação já foi moderada.'));
         }
 
         $avaliacao->update(['estado' => 'rejeitada']);
 
         $avaliacao->reserva->user?->notify(new AvaliacaoRejeitadaNotification($avaliacao));
 
-        return back()->with('success', 'Avaliação rejeitada.');
+        return back()->with('success', __('Avaliação rejeitada.'));
     }
 }

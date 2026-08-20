@@ -21,8 +21,10 @@ class ReservaCanceladaNotification extends Notification implements ShouldQueue
     {
         return [
             'tipo' => 'reserva_cancelada',
-            'titulo' => 'Reserva cancelada',
-            'mensagem' => "A tua reserva para o dia {$this->reserva->data->format('d/m/Y')} foi cancelada com sucesso.",
+            'titulo' => __('Reserva cancelada'),
+            'mensagem' => __('A tua reserva para o dia :data foi cancelada com sucesso.', [
+                'data' => $this->reserva->data->format('d/m/Y'),
+            ]),
             'reserva_id' => $this->reserva->id,
         ];
     }
