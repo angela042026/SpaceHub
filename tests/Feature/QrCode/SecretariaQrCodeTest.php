@@ -49,5 +49,9 @@ class SecretariaQrCodeTest extends TestCase
 
         $response->assertOk();
         $response->assertHeader('Content-Type', 'image/svg+xml');
+        $cacheControl = (string) $response->headers->get('Cache-Control');
+        $this->assertStringContainsString('no-store', $cacheControl);
+        $this->assertStringContainsString('must-revalidate', $cacheControl);
+        $this->assertStringStartsWith('<?xml', $response->getContent());
     }
 }

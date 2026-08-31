@@ -146,7 +146,7 @@
     },
     "disponibilidade": {
         "tituloPagina": "Check Availability",
-        "subtitulo": "See which desks are free before you make a booking.",
+        "subtitulo": "See which desks are available before you make a booking.",
         "limparFiltros": "Clear filters",
         "pesquisar": "Search",
         "pesquisarPlaceholder": "Search by name or code…",
@@ -177,7 +177,7 @@
         "colunaAcao": "Action",
         "reservar": "Book",
         "reservarAriaLabel": "Book {{espaco}} — choose a period",
-        "livre": "Free",
+        "livre": "Available",
         "espacoDisponivelLegenda": "Space available",
         "ocupado": "Occupied",
         "espacoNaoDisponivelLegenda": "Space not available",

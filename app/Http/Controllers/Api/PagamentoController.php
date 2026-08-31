@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ConfirmarPagamentoRequest;
+use App\Http\Requests\ListarPagamentosRequest;
 use App\Http\Resources\PagamentoResource;
 use App\Models\Pagamento;
 use App\Services\PagamentoService;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -18,7 +18,7 @@ class PagamentoController extends Controller
      * Lista os pagamentos do utilizador autenticado.
      */
     public function index(
-        Request $request
+        ListarPagamentosRequest $request
     ): AnonymousResourceCollection {
         Gate::authorize('viewAny', Pagamento::class);
 

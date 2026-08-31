@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ListarPagamentosRequest;
 use App\Models\Pagamento;
 use App\Services\ActivityLogger;
 use App\Services\PagamentoService;
@@ -26,7 +27,7 @@ class PagamentoController extends Controller
     /**
      * Lista os pagamentos do utilizador autenticado.
      */
-    public function index(Request $request): Response
+    public function index(ListarPagamentosRequest $request): Response
     {
         Gate::authorize('viewAny', Pagamento::class);
 

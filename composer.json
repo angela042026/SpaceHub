@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "spacehub/spacehub",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Plataforma académica para gestão e reserva de espaços de trabalho.",
+    "keywords": ["laravel", "react", "inertia", "reservas", "coworking"],
     "license": "MIT",
     "require": {
         "php": "^8.2",

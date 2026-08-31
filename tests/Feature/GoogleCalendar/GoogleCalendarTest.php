@@ -136,4 +136,26 @@ class GoogleCalendarTest extends TestCase
                 ->component('Profile/Edit')
                 ->where('googleCalendarConectado', false));
     }
+
+    public function test_tokens_do_calendario_nao_sao_expostos_ao_frontend(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $user->update([
+            'google_calendar_access_token' => 'access-token-secreto',
+            'google_calendar_refresh_token' => 'refresh-token-secreto',
+            'google_calendar_token_expira_em' => now()->addHour(),
+        ]);
+
+        $userSerializado = $user->fresh()->toArray();
+
+        $this->assertArrayNotHasKey('google_calendar_access_token', $userSerializado);
+        $this->assertArrayNotHasKey('google_calendar_refresh_token', $userSerializado);
+
+        $this->actingAs($user)
+            ->get(route('profile.edit'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->missing('auth.user.google_calendar_access_token')
+                ->missing('auth.user.google_calendar_refresh_token'));
+    }
 }
