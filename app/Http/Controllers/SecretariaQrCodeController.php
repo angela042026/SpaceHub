@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Piso;
 use App\Models\Secretaria;
+use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -12,11 +13,6 @@ class SecretariaQrCodeController extends Controller
 {
     /**
      * Listagem administrativa de QR Codes por secretária, agrupada por piso.
-     *
-     * Sem uma Secretaria específica para autorizar contra, reutiliza a
-     * ability `create` do SecretariaPolicy — já restrita a Administrador
-     * (via before()) ou Gestor — em vez de reimplementar a mesma regra
-     * num helper próprio.
      */
     public function index()
     {
@@ -43,63 +39,20 @@ class SecretariaQrCodeController extends Controller
     }
 
     /**
-     * Gera a imagem SVG do QR Code de uma secretária, apontando para a página de check-in.
-     *
-     * Não devolve um Illuminate\Http\Response normal de propósito: neste
-     * ambiente (servidor embutido do PHP, SAPI cli-server), o
-     * Response::send() do Symfony chama closeOutputBuffers(), que insere 4
-     * bytes de espaço antes do corpo da resposta. Inofensivo em HTML (os
-     * browsers ignoram espaço antes de <!DOCTYPE>), mas inválido em SVG —
-     * a declaração XML deixa de estar no início do documento e o browser
-     * recusa-se a renderizar ("XML declaration allowed only at the start
-     * of the document"). Confirmado isolando cada camada (geração do SVG,
-     * middleware, bootstrap do Laravel) até restar só o Response::send().
-     * O envio manual e imediato evita esse caminho de código.
+     * Gera o QR Code de uma secretária em SVG.
      */
-    public function show(Secretaria $secretaria)
+    public function show(Secretaria $secretaria): HttpResponse
     {
         Gate::authorize('update', $secretaria);
 
-        ob_start();
-        $svg = (string) QrCode::format('svg')->size(300)->margin(1)->generate($secretaria->checkinUrl());
-        ob_end_clean();
+        $svg = (string) QrCode::format('svg')
+            ->size(300)
+            ->margin(1)
+            ->generate($secretaria->checkinUrl());
 
-        // Em testes não há rede real a enviar — o TestResponse do Laravel
-        // captura o Response devolvido sem passar por Response::send(), por
-        // isso o bug do servidor de desenvolvimento descrito abaixo nunca se
-        // manifesta aqui. Um exit() a meio do pedido, por outro lado, mata o
-        // próprio processo do PHPUnit/Pest e para toda a suite de testes.
-        if (app()->runningUnitTests()) {
-            return response($svg, 200, [
-                'Content-Type' => 'image/svg+xml',
-                'Cache-Control' => 'no-store, must-revalidate',
-            ]);
-        }
-
-        // Não devolve um Illuminate\Http\Response normal de propósito: neste
-        // ambiente (servidor embutido do PHP, SAPI cli-server), o
-        // Response::send() do Symfony chama closeOutputBuffers(), que insere 4
-        // bytes de espaço antes do corpo da resposta. Inofensivo em HTML (os
-        // browsers ignoram espaço antes de <!DOCTYPE>), mas inválido em SVG —
-        // a declaração XML deixa de estar no início do documento e o browser
-        // recusa-se a renderizar ("XML declaration allowed only at the start
-        // of the document"). Confirmado isolando cada camada (geração do SVG,
-        // middleware, bootstrap do Laravel) até restar só o Response::send().
-        // O envio manual e imediato evita esse caminho de código.
-
-        // Drena qualquer buffer de output que o próprio Laravel ainda
-        // tenha ativo neste ponto do pedido. Sem isto, o echo() abaixo
-        // escreve para dentro desse buffer em vez de ir direto para a
-        // rede — e é precisamente quando esse buffer do Laravel é
-        // enviado (via Response::send()/closeOutputBuffers()) que os 4
-        // bytes de espaço voltam a ser inseridos antes do SVG.
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-
-        header('Content-Type: image/svg+xml');
-        header('Cache-Control: no-store, must-revalidate');
-        echo $svg;
-        exit;
+        return response($svg, 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Cache-Control' => 'no-store, must-revalidate',
+        ]);
     }
 }

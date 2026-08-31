@@ -69,7 +69,7 @@
     },
     "officeMap": {
         "estados": {
-            "livre": "Free",
+            "livre": "Available",
             "reservada": "Reserved",
             "ocupada": "Occupied",
             "indisponivel": "Unavailable"
@@ -86,7 +86,7 @@
         },
         "filtros": {
             "todas": "All",
-            "livres": "Free",
+            "livres": "Available",
             "reservadas": "Reserved",
             "ocupadas": "Occupied",
             "indisponiveis": "Unavailable"
@@ -173,7 +173,7 @@
         "secretariasDisponiveisAgora_other": "{{count}} desks available now",
         "reservarEspaco": "Book a space",
         "recomendacaoParaSi": "Recommended for you",
-        "livre": "Free",
+        "livre": "Available",
         "reservaDeHoje": "Today's booking",
         "semEstado": "No status",
         "hojePeriodo": "Today · {{periodo}}",
@@ -240,7 +240,7 @@
     },
     "disponibilidadeAgora": {
         "titulo": "Availability now",
-        "livres": "free"
+        "livres": "available"
     },
     "acoesRapidas": {
         "titulo": "Quick actions",
@@ -376,10 +376,10 @@
         "passoReservar": "Book",
         "setoresDisponiveis": "Available sectors",
         "maisOpcoes": "More options",
-        "livresDeTotal": "{{livres}} free out of {{total}}",
+        "livresDeTotal": "{{livres}} available out of {{total}}",
         "avisoSetorMapa": "Once you choose a sector, the available desks appear on the map.",
         "setorSelecionado": "Selected sector",
-        "deTotalLivres": "{{livres}} of {{total}} free",
+        "deTotalLivres": "{{livres}} of {{total}} available",
         "alterarSetor": "Change sector",
         "escolhaNoMapa": "Choose on the map",
         "selecioneSecretariaNumerada": "Select a numbered desk",

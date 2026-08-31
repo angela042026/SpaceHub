@@ -217,6 +217,35 @@ class CheckInTest extends TestCase
             ->where('status', 'pronta'));
     }
 
+    public function test_um_check_in_cobre_toda_a_reserva_semanal(): void
+    {
+        $user = $this->criarUsuarioComRole('Utilizador');
+        $secretaria = $this->criarSecretaria();
+        $periodo = $this->criarPeriodo('08:00:00', '18:00:00');
+        $estadoConfirmada = $this->criarEstadoReserva('confirmada');
+        $ontem = Carbon::today()->subDay();
+
+        Reserva::create([
+            'user_id' => $user->id,
+            'secretaria_id' => $secretaria->id,
+            'periodo_id' => $periodo->id,
+            'estado_reserva_id' => $estadoConfirmada->id,
+            'data' => $ontem->format('Y-m-d'),
+            'data_fim' => $ontem->copy()->addDays(6)->format('Y-m-d'),
+            'tipo_duracao' => 'semanal',
+            'check_in_at' => $ontem->copy()->setTime(9, 0),
+        ]);
+
+        $this->travelTo(Carbon::today()->setTime(9, 0));
+
+        $this->actingAs($user)
+            ->get(route('checkin.scan', $secretaria->qr_token))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('CheckIn/Scan')
+                ->where('status', 'ja_check_in'));
+    }
+
     public function test_camera_lista_reserva_multidia_no_terceiro_dia(): void
     {
         $user = $this->criarUsuarioComRole('Utilizador');

@@ -53,6 +53,8 @@ class User extends Authenticatable implements HasLocalePreference
     protected $hidden = [
         'password',
         'remember_token',
+        'google_calendar_access_token',
+        'google_calendar_refresh_token',
     ];
 
     protected function casts(): array

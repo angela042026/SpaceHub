@@ -10,6 +10,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\Sanctum;
 use Tests\Feature\Concerns\CriaEstruturaEspacial;
 use Tests\TestCase;
 
@@ -107,6 +108,16 @@ class PagamentoPolicyTest extends TestCase
 
         // ...mas não pode voltar a confirmar um pagamento já concluído.
         $this->assertFalse(Gate::forUser($dono)->allows('confirmar', $pagamento));
+    }
+
+    public function test_api_rejeita_filtros_de_pagamento_invalidos(): void
+    {
+        $user = $this->createUser($this->utilizadorRole);
+        Sanctum::actingAs($user);
+
+        $this->getJson('/api/pagamentos?estado=inexistente&per_page=101')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['estado', 'per_page']);
     }
 
     private function createUser(Role $role): User

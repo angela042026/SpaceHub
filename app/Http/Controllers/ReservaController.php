@@ -269,8 +269,6 @@ class ReservaController extends Controller
         );
         $googleCalendar->removerEvento($reserva->fresh(['user']));
 
-        $googleCalendar->removerEvento($reserva->fresh(['user']));
-
         return redirect()
             ->route('reservas.index')
             ->with(
