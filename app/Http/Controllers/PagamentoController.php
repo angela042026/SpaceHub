@@ -249,53 +249,37 @@ class PagamentoController extends Controller
                 'max:255',
             ],
         ], [
-            'metodo_pagamento.required' =>
-            'Seleciona um método de pagamento.',
+            'metodo_pagamento.required' => 'Seleciona um método de pagamento.',
 
-            'metodo_pagamento.in' =>
-            'O método de pagamento selecionado não é válido.',
+            'metodo_pagamento.in' => 'O método de pagamento selecionado não é válido.',
 
-            'nome_titular.required_if' =>
-            'Indica o nome do titular do cartão.',
+            'nome_titular.required_if' => 'Indica o nome do titular do cartão.',
 
-            'nome_titular.min' =>
-            'O nome do titular deve ter pelo menos 3 caracteres.',
+            'nome_titular.min' => 'O nome do titular deve ter pelo menos 3 caracteres.',
 
-            'numero_cartao.required_if' =>
-            'Indica o número do cartão.',
+            'numero_cartao.required_if' => 'Indica o número do cartão.',
 
-            'numero_cartao.regex' =>
-            'O número do cartão deve conter exatamente 16 algarismos.',
+            'numero_cartao.regex' => 'O número do cartão deve conter exatamente 16 algarismos.',
 
-            'validade_cartao.required_if' =>
-            'Indica a validade do cartão.',
+            'validade_cartao.required_if' => 'Indica a validade do cartão.',
 
-            'validade_cartao.regex' =>
-            'A validade deve estar no formato MM/AA.',
+            'validade_cartao.regex' => 'A validade deve estar no formato MM/AA.',
 
-            'cvv.required_if' =>
-            'Indica o código de segurança do cartão.',
+            'cvv.required_if' => 'Indica o código de segurança do cartão.',
 
-            'cvv.regex' =>
-            'O CVV deve conter 3 ou 4 algarismos.',
+            'cvv.regex' => 'O CVV deve conter 3 ou 4 algarismos.',
 
-            'telefone_mbway.required_if' =>
-            'Indica o número de telemóvel associado ao MB Way.',
+            'telefone_mbway.required_if' => 'Indica o número de telemóvel associado ao MB Way.',
 
-            'telefone_mbway.regex' =>
-            'Introduz um número de telemóvel português válido.',
+            'telefone_mbway.regex' => 'Introduz um número de telemóvel português válido.',
 
-            'confirmacao_transferencia.required' =>
-            'Confirma que compreendeste as instruções da transferência.',
+            'confirmacao_transferencia.required' => 'Confirma que compreendeste as instruções da transferência.',
 
-            'confirmacao_transferencia.accepted' =>
-            'É necessário confirmar as instruções da transferência.',
+            'confirmacao_transferencia.accepted' => 'É necessário confirmar as instruções da transferência.',
 
-            'email_paypal.required_if' =>
-            'Indica o email associado à conta PayPal.',
+            'email_paypal.required_if' => 'Indica o email associado à conta PayPal.',
 
-            'email_paypal.email' =>
-            'Introduz um endereço de email válido.',
+            'email_paypal.email' => 'Introduz um endereço de email válido.',
         ]);
 
         /*
@@ -327,6 +311,7 @@ class PagamentoController extends Controller
                 'Pagamento confirmado com sucesso.'
             );
     }
+
     public function comprovativo(Pagamento $pagamento): Response
     {
         Gate::authorize('view', $pagamento);

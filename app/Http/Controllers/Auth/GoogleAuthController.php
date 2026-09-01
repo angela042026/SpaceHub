@@ -27,7 +27,7 @@ class GoogleAuthController extends Controller
             $googleId = $googleUser->getId();
             $email = $googleUser->getEmail();
 
-            if (!$email) {
+            if (! $email) {
                 return redirect()
                     ->route('login')
                     ->withErrors([
@@ -42,13 +42,13 @@ class GoogleAuthController extends Controller
                 ->where('google_id', $googleId)
                 ->first();
 
-            if (!$user) {
+            if (! $user) {
                 $user = User::query()
                     ->where('email', $email)
                     ->first();
             }
 
-            if (!$user) {
+            if (! $user) {
                 $user = User::create([
                     'name' => $googleUser->getName() ?: 'Utilizador Google',
                     'email' => $email,

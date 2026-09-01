@@ -25,8 +25,7 @@ class StatisticsController extends Controller
     public function __construct(
         private readonly EstatisticasService $estatisticasService,
         private readonly MapaOcupacaoService $mapaOcupacaoService,
-    ) {
-    }
+    ) {}
 
     public function index(Request $request): Response
     {

@@ -18,8 +18,7 @@ class ReservaDisponibilidadeController extends Controller
 {
     public function __construct(
         private ReservaDisponibilidadeService $disponibilidade
-    ) {
-    }
+    ) {}
 
     /**
      * Consultar disponibilidade dos lugares.

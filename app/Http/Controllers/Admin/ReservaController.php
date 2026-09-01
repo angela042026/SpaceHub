@@ -30,8 +30,7 @@ class ReservaController extends Controller
 {
     public function __construct(
         private ReservaDisponibilidadeService $disponibilidade
-    ) {
-    }
+    ) {}
 
     /**
      * Lista todas as reservas da plataforma, com pesquisa e filtros.

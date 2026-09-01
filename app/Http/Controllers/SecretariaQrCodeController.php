@@ -50,6 +50,9 @@ class SecretariaQrCodeController extends Controller
             ->margin(1)
             ->generate($secretaria->checkinUrl());
 
+        $svg = ltrim($svg);
+        $svg = preg_replace('/<\?xml[^?]*\?>\s*/', '', $svg, 1);
+
         return response($svg, 200, [
             'Content-Type' => 'image/svg+xml',
             'Cache-Control' => 'no-store, must-revalidate',

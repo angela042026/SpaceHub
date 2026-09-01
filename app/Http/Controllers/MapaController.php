@@ -10,8 +10,7 @@ class MapaController extends Controller
 {
     public function __construct(
         private readonly MapaOcupacaoService $mapaOcupacaoService
-    ) {
-    }
+    ) {}
 
     public function index(): Response
     {

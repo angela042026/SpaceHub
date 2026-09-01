@@ -64,6 +64,12 @@
             "mensagemBot": "Olá! Como podemos ajudar?",
             "mensagemUtilizador": "Quero alterar a minha reserva.",
             "online": "Estamos online"
+        },
+        "googleCalendar": {
+            "titulo": "Google Calendar",
+            "descricao": "Sincronize automaticamente as suas reservas com o Google Calendar.",
+            "exemploEspaco": "Espaço de coworking",
+            "sincronizado": "Sincronizado com o Google Calendar"
         }
     },
     "howItWorks": {

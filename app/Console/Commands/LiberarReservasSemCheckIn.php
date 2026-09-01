@@ -147,7 +147,7 @@ class LiberarReservasSemCheckIn extends Command
         }
 
         if ($diasLibertados > 0) {
-            broadcast(new MapaAtualizado());
+            broadcast(new MapaAtualizado);
             DashboardMetricsService::limparCacheDoDia();
         }
 

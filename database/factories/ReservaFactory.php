@@ -27,12 +27,25 @@ class ReservaFactory extends Factory
 
     public function definition(): array
     {
-        $data = fake()->dateTimeBetween('+1 day', '+60 days')->format('Y-m-d');
+        $secretaria = $this->secretariaPadrao();
+        $periodo = $this->periodoPadrao();
+        $data = now()->addDay()->startOfDay();
+
+        while (Reserva::query()
+            ->where('secretaria_id', $secretaria->id)
+            ->where('periodo_id', $periodo->id)
+            ->whereDate('data', $data)
+            ->whereNull('cancelada_at')
+            ->exists()) {
+            $data->addDay();
+        }
+
+        $data = $data->format('Y-m-d');
 
         return [
             'user_id' => User::factory(),
-            'secretaria_id' => $this->secretariaPadrao()->id,
-            'periodo_id' => $this->periodoPadrao()->id,
+            'secretaria_id' => $secretaria->id,
+            'periodo_id' => $periodo->id,
             'estado_reserva_id' => $this->estadoPadrao()->id,
             'data' => $data,
             'tipo_duracao' => 'diaria',

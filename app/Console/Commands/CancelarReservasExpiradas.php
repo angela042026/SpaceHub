@@ -138,7 +138,7 @@ class CancelarReservasExpiradas extends Command
 
         if ($expiradas > 0) {
             // Atualiza o mapa em tempo real para todos os utilizadores
-            broadcast(new MapaAtualizado());
+            broadcast(new MapaAtualizado);
             DashboardMetricsService::limparCacheDoDia();
         }
 

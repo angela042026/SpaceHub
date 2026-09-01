@@ -169,7 +169,6 @@ class PedidoSuporteController extends Controller
             'estado' => 'Pendente',
         ]);
 
-
         return redirect()
             ->route('faqs.index')
             ->with('success', __('Pedido de suporte enviado com sucesso.'));
