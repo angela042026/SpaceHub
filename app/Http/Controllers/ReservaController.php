@@ -6,7 +6,6 @@ use App\Models\Avaliacao;
 use App\Models\Edificio;
 use App\Models\EstadoReserva;
 use App\Models\Periodo;
-use App\Models\Piso;
 use App\Models\Reserva;
 use App\Models\ReservaDia;
 use App\Models\Setor;
@@ -103,10 +102,7 @@ class ReservaController extends Controller
                 ->get()
                 ->each(fn (Setor $setor) => $setor->nome = $setor->nome_localizado),
 
-            'pisos' => Piso::where('ativo', true)
-                ->orderBy('numero')
-                ->get()
-                ->each(fn (Piso $piso) => $piso->nome = $piso->nome_localizado),
+            'pisos' => $this->disponibilidade->pisosAtivosParaReserva(),
 
             'edificios' => Edificio::where('ativo', true)
                 ->orderBy('nome')

@@ -557,9 +557,27 @@
         margin: 12mm;
     }
 
+    html,
+    body,
+    #app {
+        width: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        background: #fff !important;
+    }
+
     * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+    }
+
+    .min-h-screen,
+    .spacehub-main,
+    .spacehub-page-bg {
+        min-height: 0 !important;
+        background: #fff !important;
+        background-image: none !important;
     }
 
     /*
@@ -569,6 +587,70 @@
         salta inteiro para a página seguinte em vez de ser fatiado.
     */
     .dashboard-card {
+        border-color: #cbd5e1 !important;
+        background: #fff !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .print-header,
+    .print-footer {
+        position: static !important;
+        max-height: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    .print-report-card {
+        display: block !important;
+        overflow: visible !important;
+        border-color: #cbd5e1 !important;
+        background: #fff !important;
+        background-image: none !important;
+        box-shadow: none !important;
+        break-inside: auto !important;
+        page-break-inside: auto !important;
+    }
+
+    .print-statistics-report {
+        border-color: transparent !important;
+        background: #fff !important;
+        background-image: none !important;
+    }
+
+    .print-header,
+    .print-header *,
+    .print-report-card,
+    .print-report-card *,
+    .print-statistics-report,
+    .print-statistics-report * {
+        color: #0f172a !important;
+    }
+
+    .print-footer,
+    .print-footer * {
+        color: #94a3b8 !important;
+    }
+
+    .print-report-card > .p-6 {
+        padding: 0 !important;
+    }
+
+    table {
+        border-collapse: collapse !important;
+    }
+
+    thead {
+        display: table-header-group;
+        background: #f8fafc !important;
+    }
+
+    tr,
+    th,
+    td {
+        color: #0f172a !important;
         break-inside: avoid;
         page-break-inside: avoid;
     }

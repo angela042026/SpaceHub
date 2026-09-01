@@ -72,7 +72,7 @@ export default function Espacos({ linhas, pisos, setores, filters, geradoEm }) {
                 geradoEm={geradoEm}
             />
 
-            <section className="dashboard-card overflow-hidden">
+            <section className="dashboard-card print-report-card overflow-hidden">
                 <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-6 py-5 dark:border-slate-800 print:hidden">
                     <div className="flex items-center gap-3">
                         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-500">
