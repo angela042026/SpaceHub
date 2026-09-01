@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\EnviarMensagem;
+use App\Http\Controllers\Admin\AdminFaqController;
 use App\Http\Controllers\Admin\EdificioController as AdminEdificioController;
 use App\Http\Controllers\Admin\PisoController as AdminPisoController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\MapaController;
 use App\Http\Controllers\NotificacaoController;
+use App\Http\Controllers\PagamentoController;
 use App\Http\Controllers\PedidoSuporteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservaController;
@@ -24,8 +26,6 @@ use App\Http\Controllers\SetorMapaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\PagamentoController;
-use App\Http\Controllers\Admin\AdminFaqController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -65,6 +65,21 @@ Route::middleware('guest')->group(function () {
         ->name('google.callback');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Rotas do Sistema de Chat e WebSockets (Acessíveis a Visitantes)
+|--------------------------------------------------------------------------
+*/
+Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
+    ->middleware('throttle:30,1')
+    ->name('chat.enviar');
+
+/*
+|--------------------------------------------------------------------------
+| Painel do Utilizador Autenticado
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'active'])
     ->name('dashboard');
@@ -81,6 +96,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+
     // ==========================
     // Pagamentos
     // ==========================
@@ -102,7 +118,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         '/pagamentos/{pagamento}/comprovativo',
         [PagamentoController::class, 'comprovativo']
     )->name('pagamentos.comprovativo');
-
 
     // ==========================
     // Check-in
@@ -203,9 +218,6 @@ Route::middleware(['auth', 'active'])->group(function () {
         Route::patch('/suporte/pedidos/{id}', [PedidoSuporteController::class, 'update'])
             ->name('support.update');
     });
-
-    Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
-        ->name('chat.enviar');
 
     // ==========================
     // Notificações
@@ -345,45 +357,34 @@ Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
             ->name('reports.suporte');
     });
 
-    // Gestão de FAQs (acessível a Administrador e Gestor, ver *Policy::before()).
-    Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
-        ->prefix('admin')
-        ->name('admin.')
-        ->group(function () {
+// Gestão de FAQs (acessível a Administrador e Gestor, ver *Policy::before()).
+Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
 
-            // Listagem
-            Route::get('/faqs', [AdminFaqController::class, 'index'])
-                ->name('faqs.index');
+        // Listagem
+        Route::get('/faqs', [AdminFaqController::class, 'index'])
+            ->name('faqs.index');
 
-            // Criar FAQ
-            Route::get('/faqs/create', [AdminFaqController::class, 'create'])
-                ->name('faqs.create');
+        // Criar FAQ
+        Route::get('/faqs/create', [AdminFaqController::class, 'create'])
+            ->name('faqs.create');
 
-            Route::post('/faqs', [AdminFaqController::class, 'store'])
-                ->name('faqs.store');
+        Route::post('/faqs', [AdminFaqController::class, 'store'])
+            ->name('faqs.store');
 
-            // Editar FAQ
-            Route::get('/faqs/{faq}/edit', [AdminFaqController::class, 'edit'])
-                ->name('faqs.edit');
+        // Editar FAQ
+        Route::get('/faqs/{faq}/edit', [AdminFaqController::class, 'edit'])
+            ->name('faqs.edit');
 
-            Route::put('/faqs/{faq}', [AdminFaqController::class, 'update'])
-                ->name('faqs.update');
+        Route::put('/faqs/{faq}', [AdminFaqController::class, 'update'])
+            ->name('faqs.update');
 
-            // Eliminar FAQ
-            Route::delete('/faqs/{faq}', [AdminFaqController::class, 'destroy'])
-                ->name('faqs.destroy');
+        // Eliminar FAQ
+        Route::delete('/faqs/{faq}', [AdminFaqController::class, 'destroy'])
+            ->name('faqs.destroy');
 
-        });
-        
+    });
+
 require __DIR__ . '/auth.php';
-
-/*
-|--------------------------------------------------------------------------
-| Rotas do Sistema de Chat e WebSockets
-|--------------------------------------------------------------------------
-*/
-
-// Envio de mensagens seguro (lê o utilizador da sessão e aciona o Bot)
-Route::post('/chat/enviar', [ChatController::class, 'enviarMensagem'])
-    ->name('chat.enviar')
-    ->middleware('auth'); // Garante que só utilizadores autenticados usam o chat real
