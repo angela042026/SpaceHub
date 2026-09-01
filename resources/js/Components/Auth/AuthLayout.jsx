@@ -7,6 +7,7 @@ import {
 import AuthFooter from './AuthFooter';
 import AuthHeader from './AuthHeader';
 import FeatureItem from './FeatureItem';
+import ChatWidget from '@/Components/Chat/ChatWidget';
 
 export default function AuthLayout({
     title,
@@ -247,6 +248,8 @@ export default function AuthLayout({
             </main>
 
             <AuthFooter />
+
+            <ChatWidget />
         </div>
     );
 }
