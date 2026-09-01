@@ -119,7 +119,7 @@ export default function Index({ dashboard, periodo, edificioId, edificios, gerad
                 contentor que não vinha de nenhum estilo visível aqui.
             */}
             <section
-                className="-mt-6 flex flex-col gap-5 rounded-[22px] border p-6 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.10)] sm:p-7 dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.45)]"
+                className="print-statistics-report -mt-6 flex flex-col gap-5 rounded-[22px] border p-6 shadow-[0_20px_50px_-12px_rgba(15,23,42,0.10)] print:mt-0 print:block print:space-y-4 print:overflow-visible print:rounded-none print:border-0 print:bg-white print:p-0 print:shadow-none sm:p-7 dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.45)]"
                 style={{ borderColor: 'var(--color-border)', background: 'var(--color-card)' }}
             >
                 <div className="flex flex-col gap-4 border-b border-slate-100 pb-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">

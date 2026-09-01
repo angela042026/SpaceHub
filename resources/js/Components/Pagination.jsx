@@ -72,7 +72,7 @@ export default function Pagination({
     const numerosPagina = numbered ? gerarNumerosPagina(meta.current_page, meta.last_page) : null;
 
     return (
-        <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-5 flex flex-col items-center gap-3 print:hidden sm:flex-row sm:items-center sm:justify-between">
             <p className="text-center text-xs text-slate-400 sm:text-left">
                 {t('paginacao.aMostrar', {
                     de: meta.from ?? 0,

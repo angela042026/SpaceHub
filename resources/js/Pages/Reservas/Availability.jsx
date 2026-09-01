@@ -421,8 +421,8 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                         )}
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-                        <div>
+                    <div className="grid grid-cols-1 gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800 sm:grid-cols-2 xl:grid-cols-[minmax(18rem,1.45fr)_repeat(5,minmax(10rem,1fr))]">
+                        <div className="sm:col-span-2 xl:col-span-1">
                             <label htmlFor="pesquisa" className={labelClass}>{t('disponibilidade.pesquisar')}</label>
                             <div className="relative">
                                 <Search

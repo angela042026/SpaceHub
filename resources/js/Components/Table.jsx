@@ -25,8 +25,8 @@ export default function Table({
     }
 
     return (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
-            <table className="w-full min-w-[560px] text-left text-sm">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 print:overflow-visible print:rounded-none print:border-slate-300 dark:border-slate-800">
+            <table className="w-full min-w-[560px] text-left text-sm print:min-w-0 print:text-[10px]">
                 <thead
                     className={
                         stickyHeader
@@ -38,7 +38,7 @@ export default function Table({
                         {columns.map((coluna) => (
                             <th
                                 key={coluna.key}
-                                className={`px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 ${
+                                className={`px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 print:px-2 print:py-2 print:text-[8px] print:tracking-normal dark:text-slate-400 ${
                                     coluna.align === 'right' ? 'text-right' : 'text-left'
                                 }`}
                             >
@@ -84,7 +84,7 @@ export default function Table({
                                   {columns.map((coluna) => (
                                       <td
                                           key={coluna.key}
-                                          className={`px-4 py-3 align-middle text-slate-700 dark:text-slate-200 ${
+                                          className={`px-4 py-3 align-middle text-slate-700 print:px-2 print:py-2 print:align-top dark:text-slate-200 ${
                                               coluna.align === 'right' ? 'text-right' : 'text-left'
                                           }`}
                                       >
