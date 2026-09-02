@@ -14,5 +14,7 @@ class Faq extends Model
         'resposta_en',
         'ordem',
         'ativo',
+        'keywords_pt',
+        'keywords_en',
     ];
 }

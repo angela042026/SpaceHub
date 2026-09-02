@@ -26,7 +26,7 @@ import {
     Star,
 } from 'lucide-react';
 
-function SidebarItem({
+/* function SidebarItem({
     icon: Icon,
     label,
     href,
@@ -57,11 +57,43 @@ function SidebarItem({
             {content}
         </Link>
     );
-}
+} */
+
+    function SidebarItem({
+        icon: Icon,
+        label,
+        href,
+        active = false,
+        onNavigate,
+    }) {
+        const content = (
+            <>
+                <Icon size={20} strokeWidth={1.8} />
+                <span>{label}</span>
+            </>
+        );
+
+        if (!href) {
+            return (
+                <div className="sidebar-link cursor-not-allowed opacity-60 hover:bg-white/5">
+                    {content}
+                </div>
+            );
+        }
+
+        return (
+            <a
+                href={href}
+                className={active ? 'sidebar-link-active' : 'sidebar-link'}
+            >
+                {content}
+            </a>
+        );
+    }
 
 export default function Sidebar({
     open = false,
-    onClose = () => {},
+    onClose = () => { },
 }) {
     const { t } = useTranslation('common');
     const { auth } = usePage().props;
@@ -90,11 +122,10 @@ export default function Sidebar({
             )}
 
             <aside
-                className={`fixed left-0 top-0 z-40 flex h-screen w-72 shrink-0 flex-col bg-navy-950 px-5 py-7 text-white shadow-2xl transition-transform duration-300 print:hidden lg:sticky lg:top-0 lg:w-[272px] lg:self-start lg:translate-x-0 ${
-                    open
+                className={`fixed left-0 top-0 z-40 flex h-screen w-72 shrink-0 flex-col bg-navy-950 px-5 py-7 text-white shadow-2xl transition-transform duration-300 print:hidden lg:sticky lg:top-0 lg:w-[272px] lg:self-start lg:translate-x-0 ${open
                         ? 'translate-x-0'
                         : '-translate-x-full'
-                }`}
+                    }`}
             >
                 <div className="mb-6 border-b border-white/5 pb-6">
                     <Link
@@ -406,6 +437,14 @@ export default function Sidebar({
                                     ) || route().current(
                                         'support.show',
                                     )}
+                                    onNavigate={onClose}
+                                />
+
+                                <SidebarItem
+                                    icon={HelpCircle}
+                                    label={t('sidebar.gerirFaqs', 'Gerir FAQs')}
+                                    href="/admin/faqs"
+                                    active={window.location.pathname.startsWith('/admin/faqs')}
                                     onNavigate={onClose}
                                 />
                             </nav>

@@ -148,6 +148,7 @@
         "pedidosDeSuporte": "Pedidos de Suporte",
         "fecharMenu": "Fechar menu lateral",
         "terminarSessao": "Terminar sessão",
-        "utilizadorFallback": "Utilizador"
+        "utilizadorFallback": "Utilizador",
+        "gerirFaqs": "Gerir FAQs"
     }
 }
