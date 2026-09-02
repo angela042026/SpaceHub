@@ -13,7 +13,7 @@ return new class extends Migration
                 'admin',
                 'gestor',
                 'colaborador',
-                'utilizador'
+                'utilizador',
             ])->default('utilizador')->after('password');
 
             $table->boolean('ativo')->default(true)->after('role');

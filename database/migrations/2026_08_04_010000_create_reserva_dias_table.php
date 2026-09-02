@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -34,16 +35,16 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('reserva_id')
-                  ->constrained('reservas')
-                  ->cascadeOnDelete();
+                ->constrained('reservas')
+                ->cascadeOnDelete();
 
             $table->foreignId('secretaria_id')
-                  ->constrained('secretarias')
-                  ->restrictOnDelete();
+                ->constrained('secretarias')
+                ->restrictOnDelete();
 
             $table->foreignId('user_id')
-                  ->constrained('users')
-                  ->restrictOnDelete();
+                ->constrained('users')
+                ->restrictOnDelete();
 
             $table->date('dia');
             $table->enum('slot', ['manha', 'tarde']);
@@ -101,8 +102,8 @@ return new class extends Migration
                 default => ['manha', 'tarde'],
             };
 
-            $dia = \Carbon\Carbon::parse($reserva->data);
-            $dataFim = \Carbon\Carbon::parse($reserva->data_fim ?? $reserva->data);
+            $dia = Carbon::parse($reserva->data);
+            $dataFim = Carbon::parse($reserva->data_fim ?? $reserva->data);
 
             while ($dia->lte($dataFim)) {
                 foreach ($slots as $slot) {

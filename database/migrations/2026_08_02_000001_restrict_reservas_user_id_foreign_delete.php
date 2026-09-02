@@ -14,8 +14,8 @@ return new class extends Migration
 
         Schema::table('reservas', function (Blueprint $table) {
             $table->foreign('user_id')
-                  ->references('id')->on('users')
-                  ->restrictOnDelete();
+                ->references('id')->on('users')
+                ->restrictOnDelete();
         });
     }
 
@@ -27,8 +27,8 @@ return new class extends Migration
 
         Schema::table('reservas', function (Blueprint $table) {
             $table->foreign('user_id')
-                  ->references('id')->on('users')
-                  ->cascadeOnDelete();
+                ->references('id')->on('users')
+                ->cascadeOnDelete();
         });
     }
 };
