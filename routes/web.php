@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AtividadeController as AdminAtividadeController;
 use App\Http\Controllers\Admin\AvaliacaoController as AdminAvaliacaoController;
 use App\Http\Controllers\Admin\EdificioController as AdminEdificioController;
+use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Admin\PisoController as AdminPisoController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ReservaController as AdminReservaController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Admin\SecretariaController as AdminSecretariaController
 use App\Http\Controllers\Admin\SetorController as AdminSetorController;
 use App\Http\Controllers\Admin\StatisticsController as AdminStatisticsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\CheckInController;
@@ -119,6 +121,7 @@ Route::middleware(['auth', 'active'])->group(function () {
 
     Route::delete('/perfil/google-calendar', [GoogleCalendarAuthController::class, 'desconectar'])
         ->name('google-calendar.desconectar');
+
     // ==========================
     // Pagamentos
     // ==========================
@@ -178,6 +181,12 @@ Route::middleware(['auth', 'active'])->group(function () {
     // ==========================
     Route::get('/mapa', [MapaController::class, 'index'])
         ->name('mapa.index');
+
+    // ==========================
+    // Chat
+    // ==========================
+    Route::post('/chat/mensagem', [ChatController::class, 'enviarMensagem'])
+        ->name('chat.mensagem');
 
     // ==========================
     // Mapa dos Setores
@@ -306,11 +315,19 @@ Route::middleware(['auth', 'active', 'role:Administrador'])
             ->name('atividade.index');
     });
 
-// Gestão de espaços: acessível a Administrador e Gestor (ver *Policy::before()).
+// Gestão de espaços e FAQs: acessível a Administrador e Gestor
 Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        // Gestão de FAQs
+        Route::get('/faqs', [AdminFaqController::class, 'index'])->name('faqs.index');
+        Route::get('/faqs/criar', [AdminFaqController::class, 'create'])->name('faqs.create');
+        Route::post('/faqs', [AdminFaqController::class, 'store'])->name('faqs.store');
+        Route::get('/faqs/{faq}/editar', [AdminFaqController::class, 'edit'])->name('faqs.edit');
+        Route::put('/faqs/{faq}', [AdminFaqController::class, 'update'])->name('faqs.update');
+        Route::delete('/faqs/{faq}', [AdminFaqController::class, 'destroy'])->name('faqs.destroy');
+
         Route::get('/edificios', [AdminEdificioController::class, 'index'])
             ->name('edificios.index');
 

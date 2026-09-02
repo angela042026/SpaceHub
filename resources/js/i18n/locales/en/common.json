@@ -149,7 +149,8 @@
         "pedidosDeSuporte": "Support Requests",
         "fecharMenu": "Close sidebar menu",
         "terminarSessao": "Log out",
-        "utilizadorFallback": "User"
+        "utilizadorFallback": "User",
+        "gerirFaqs": "Edit FAQs"
     },
     "checkinRececao": {
         "titulo": "Reception check-in",
