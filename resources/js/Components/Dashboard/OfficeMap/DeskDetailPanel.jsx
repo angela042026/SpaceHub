@@ -481,7 +481,7 @@ function SetoresDoPisoPanel({ piso, setores, onSelecionarSetor }) {
     const passoAtual = 1;
 
     return (
-        <aside className="dashboard-card flex h-[460px] flex-col p-5 sm:h-[550px] xl:h-[585px]">
+        <aside className="dashboard-card flex h-auto min-h-[460px] flex-col p-5 sm:h-[550px] sm:min-h-0 xl:h-[585px]">
             <div className="flex shrink-0 items-start justify-between gap-3">
                 <div className="min-w-0">
                     <p className="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-[#18c3b3]">
@@ -637,7 +637,7 @@ function SetorSelecionadoPanel({ setor, piso, onAlterarSetor }) {
     );
 
     return (
-        <aside className="dashboard-card flex h-[460px] flex-col p-5 sm:h-[550px] xl:h-[585px]">
+        <aside className="dashboard-card flex h-auto min-h-[460px] flex-col p-5 sm:h-[550px] sm:min-h-0 xl:h-[585px]">
             <div className="flex shrink-0 items-start justify-between gap-3">
                 <div className="min-w-0">
                     <p className="text-[11px] font-bold uppercase tracking-wider text-teal-600 dark:text-[#18c3b3]">

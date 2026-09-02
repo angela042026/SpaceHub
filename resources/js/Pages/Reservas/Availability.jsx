@@ -44,7 +44,7 @@ const botaoReservarDesktopClass =
     'inline-flex items-center justify-center rounded-lg border border-teal-500 px-4 py-1.5 text-xs font-bold text-teal-600 transition-colors duration-200 hover:bg-teal-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:text-teal-400 dark:hover:text-white dark:focus-visible:ring-offset-slate-900';
 
 const botaoReservarMobileClass =
-    'mt-3 flex w-full items-center justify-center rounded-xl bg-teal-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors duration-200 hover:bg-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900';
+    'flex w-full shrink-0 items-center justify-center rounded-xl bg-teal-500 px-3 py-2 text-sm font-bold text-white shadow-sm transition-colors duration-200 hover:bg-teal-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 sm:w-auto sm:min-w-32 sm:px-5 dark:focus-visible:ring-offset-slate-900';
 
 /**
  * Nome de exibição de um espaço — igual em toda a área de reservas
@@ -628,7 +628,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                             </div>
                         ) : mostrarSkeleton ? (
                             <>
-                                <div className="hidden overflow-x-auto sm:block">
+                                <div className="hidden overflow-x-auto lg:block">
                                     <table className="w-full border-collapse text-sm">
                                         <tbody>
                                             {Array.from({ length: 6 }).map((_, indice) => (
@@ -645,7 +645,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                     </table>
                                 </div>
 
-                                <div className="space-y-3 sm:hidden">
+                                <div className="space-y-3 lg:hidden">
                                     {Array.from({ length: 4 }).map((_, indice) => (
                                         <div key={indice} className="animate-pulse rounded-2xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
                                             <div className="h-4 w-40 rounded bg-slate-100 dark:bg-slate-800" />
@@ -682,7 +682,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                             </div>
                         ) : (
                             <div>
-                                <div className="hidden overflow-x-auto sm:block">
+                                <div className="hidden overflow-x-auto lg:block">
                                     <table className="w-full border-collapse text-sm">
                                         <thead className="sticky top-0 z-10 bg-white dark:bg-slate-900">
                                             <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 dark:border-slate-800">
@@ -766,7 +766,7 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
                                     </table>
                                 </div>
 
-                                <div className="space-y-3 sm:hidden">
+                                <div className="space-y-3 lg:hidden">
                                     {lugaresPaginados.map((secretaria) => (
                                         <div
                                             key={secretaria.id}
@@ -783,49 +783,51 @@ export default function Availability({ periodos, pisos, setores, edificios, filt
 
                                             <LocalizacaoEspaco secretaria={secretaria} className="mt-1.5" />
 
-                                            <div className="mt-3 flex flex-wrap items-center gap-2">
-                                                {periodoManha && (
-                                                    <PillPeriodoRotulada
-                                                        nome={etiquetaPeriodo(periodoManha.nome, tc)}
-                                                        disponivel={Boolean(secretaria.periodos_disponiveis[periodoManha.id])}
-                                                    />
-                                                )}
+                                            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    {periodoManha && (
+                                                        <PillPeriodoRotulada
+                                                            nome={etiquetaPeriodo(periodoManha.nome, tc)}
+                                                            disponivel={Boolean(secretaria.periodos_disponiveis[periodoManha.id])}
+                                                        />
+                                                    )}
 
-                                                {periodoTarde && (
-                                                    <PillPeriodoRotulada
-                                                        nome={etiquetaPeriodo(periodoTarde.nome, tc)}
-                                                        disponivel={Boolean(secretaria.periodos_disponiveis[periodoTarde.id])}
-                                                    />
-                                                )}
+                                                    {periodoTarde && (
+                                                        <PillPeriodoRotulada
+                                                            nome={etiquetaPeriodo(periodoTarde.nome, tc)}
+                                                            disponivel={Boolean(secretaria.periodos_disponiveis[periodoTarde.id])}
+                                                        />
+                                                    )}
 
-                                                {periodoDiaInteiro && (
-                                                    <PillPeriodoRotulada
-                                                        nome={etiquetaPeriodo(periodoDiaInteiro.nome, tc)}
-                                                        disponivel={periodosMeioDia.every(
-                                                            (periodo) => secretaria.periodos_disponiveis[periodo.id],
-                                                        )}
-                                                    />
+                                                    {periodoDiaInteiro && (
+                                                        <PillPeriodoRotulada
+                                                            nome={etiquetaPeriodo(periodoDiaInteiro.nome, tc)}
+                                                            disponivel={periodosMeioDia.every(
+                                                                (periodo) => secretaria.periodos_disponiveis[periodo.id],
+                                                            )}
+                                                        />
+                                                    )}
+                                                </div>
+
+                                                {filtros.periodo_id ? (
+                                                    <Link
+                                                        href={construirLinkReservar(secretaria)}
+                                                        className={botaoReservarMobileClass}
+                                                    >
+                                                        {t('disponibilidade.reservar')}
+                                                    </Link>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setSecretariaParaEscolherPeriodo(secretaria)}
+                                                        aria-haspopup="dialog"
+                                                        aria-label={t('disponibilidade.reservarAriaLabel', { espaco: nomeEspaco(secretaria) })}
+                                                        className={botaoReservarMobileClass}
+                                                    >
+                                                        {t('disponibilidade.reservar')}
+                                                    </button>
                                                 )}
                                             </div>
-
-                                            {filtros.periodo_id ? (
-                                                <Link
-                                                    href={construirLinkReservar(secretaria)}
-                                                    className={botaoReservarMobileClass}
-                                                >
-                                                    {t('disponibilidade.reservar')}
-                                                </Link>
-                                            ) : (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setSecretariaParaEscolherPeriodo(secretaria)}
-                                                    aria-haspopup="dialog"
-                                                    aria-label={t('disponibilidade.reservarAriaLabel', { espaco: nomeEspaco(secretaria) })}
-                                                    className={botaoReservarMobileClass}
-                                                >
-                                                    {t('disponibilidade.reservar')}
-                                                </button>
-                                            )}
                                         </div>
                                     ))}
                                 </div>

@@ -16,7 +16,10 @@
         "tituloLinha1": "Reserve o espaço ideal",
         "tituloLinha2": "para trabalhar",
         "tituloDestaque": "melhor.",
+        "tituloMobileLinha1": "Reserve o espaço",
+        "tituloMobileLinha2": "ideal para trabalhar",
         "descricao": "Reserve secretárias, salas de reunião e espaços de coworking em segundos. Faça check-in por QR Code e acompanhe toda a ocupação em tempo real numa única plataforma.",
+        "descricaoMobile": "Reserve espaços de trabalho em segundos, faça check-in por QR Code e acompanhe a ocupação em tempo real.",
         "ctaReservar": "Reservar um espaço",
         "ctaEntrarReservar": "Entrar para reservar",
         "ctaConhecerEspacos": "Conhecer os espaços"
