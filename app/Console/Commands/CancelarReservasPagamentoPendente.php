@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Pagamento;
 use App\Models\Reserva;
@@ -10,6 +9,7 @@ use App\Models\ReservaDia;
 use App\Notifications\PagamentoExpiradoNotification;
 use App\Services\ActivityLogger;
 use App\Services\DashboardMetricsService;
+use App\Services\MapaAtualizadoBroadcaster;
 use App\Services\PagamentoService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -128,7 +128,7 @@ class CancelarReservasPagamentoPendente extends Command
         }
 
         if ($canceladas > 0) {
-            broadcast(new MapaAtualizado);
+            MapaAtualizadoBroadcaster::broadcast();
             DashboardMetricsService::limparCacheDoDia();
         }
 

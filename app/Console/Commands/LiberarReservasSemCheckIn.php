@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Models\ReservaDia;
 use App\Services\ActivityLogger;
 use App\Services\DashboardMetricsService;
+use App\Services\MapaAtualizadoBroadcaster;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
@@ -147,7 +147,7 @@ class LiberarReservasSemCheckIn extends Command
         }
 
         if ($diasLibertados > 0) {
-            broadcast(new MapaAtualizado);
+            MapaAtualizadoBroadcaster::broadcast();
             DashboardMetricsService::limparCacheDoDia();
         }
 

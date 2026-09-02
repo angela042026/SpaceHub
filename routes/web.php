@@ -153,6 +153,17 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/checkin/confirm/{reserva}', [CheckInController::class, 'confirm'])
         ->name('checkin.confirm');
 
+    Route::middleware('role:Administrador,Gestor,Colaborador')
+        ->prefix('rececao')
+        ->name('checkin.recepcao.')
+        ->group(function () {
+            Route::get('/checkins', [CheckInController::class, 'rececao'])
+                ->name('index');
+
+            Route::post('/checkins/{reserva}', [CheckInController::class, 'confirmarNaRececao'])
+                ->name('confirmar');
+        });
+
     // ==========================
     // QR Codes das Secretárias
     // ==========================

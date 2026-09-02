@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Services\ActivityLogger;
 use App\Services\DashboardMetricsService;
+use App\Services\MapaAtualizadoBroadcaster;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -51,6 +51,115 @@ class CheckInController extends Controller
                 ];
             }),
         ]);
+    }
+
+    /**
+     * Lista as reservas de hoje para check-in assistido na receção.
+     */
+    public function rececao(Request $request): Response
+    {
+        $pesquisa = trim((string) $request->query('pesquisa', ''));
+
+        $reservas = Reserva::query()
+            ->with([
+                'user:id,name,email',
+                'secretaria.setor.piso.edificio',
+                'periodo',
+                'estadoReserva',
+            ])
+            ->noIntervalo(Carbon::today())
+            ->whereIn('estado_reserva_id', EstadoReserva::idsAtivos())
+            ->whereNull('check_in_at')
+            ->when($pesquisa !== '', function ($query) use ($pesquisa) {
+                $query->where(function ($query) use ($pesquisa) {
+                    $query
+                        ->whereHas('user', fn ($query) => $query
+                            ->where('name', 'like', "%{$pesquisa}%")
+                            ->orWhere('email', 'like', "%{$pesquisa}%"))
+                        ->orWhereHas('secretaria', fn ($query) => $query
+                            ->where('codigo', 'like', "%{$pesquisa}%"));
+                });
+            })
+            ->orderBy('periodo_id')
+            ->paginate(15)
+            ->withQueryString()
+            ->through(function (Reserva $reserva) {
+                $reserva->secretaria->setor->nome = $reserva->secretaria->setor->nome_localizado;
+                $reserva->secretaria->setor->piso->nome = $reserva->secretaria->setor->piso->nome_localizado;
+
+                return [
+                    'id' => $reserva->id,
+                    'utilizador' => $reserva->user?->name,
+                    'email' => $reserva->user?->email,
+                    'secretaria' => $reserva->secretaria?->codigo,
+                    'setor' => $reserva->secretaria?->setor?->nome,
+                    'piso' => $reserva->secretaria?->setor?->piso?->nome,
+                    'periodo' => $reserva->periodo?->nome,
+                    'hora_inicio' => $reserva->periodo?->hora_inicio?->format('H:i'),
+                    'hora_fim' => $reserva->periodo?->hora_fim?->format('H:i'),
+                    'status' => $this->statusDaReserva($reserva),
+                ];
+            });
+
+        return Inertia::render('CheckIn/Rececao', [
+            'reservas' => $reservas,
+            'filters' => ['pesquisa' => $pesquisa],
+        ]);
+    }
+
+    /**
+     * Confirma presencialmente o check-in de uma reserva em nome do cliente.
+     */
+    public function confirmarNaRececao(Request $request, Reserva $reserva): RedirectResponse
+    {
+        $funcionario = $request->user();
+        abort_unless(
+            $funcionario->isAdministrador()
+                || $funcionario->isGestor()
+                || $funcionario->isColaborador(),
+            403
+        );
+
+        $reserva->load(['user', 'periodo', 'estadoReserva', 'secretaria.setor']);
+
+        if (! in_array($reserva->estadoReserva?->codigo, EstadoReserva::codigosAtivos(), true)) {
+            return back()->withErrors(['reserva' => __('Esta reserva já não está ativa.')]);
+        }
+
+        $status = $this->statusDaReserva($reserva);
+        $mensagens = [
+            'ja_check_in' => __('Esta reserva já tem check-in.'),
+            'pendente_pagamento' => __('O pagamento desta reserva ainda está pendente.'),
+            'fora_da_janela' => __('A reserva está fora da janela horária permitida para check-in.'),
+        ];
+
+        if (isset($mensagens[$status])) {
+            return back()->withErrors(['reserva' => $mensagens[$status]]);
+        }
+
+        $reserva->update(['check_in_at' => now()]);
+
+        ActivityLogger::log(
+            $funcionario,
+            'checkin_efetuado',
+            sprintf(
+                '%s · %s · receção por %s',
+                $reserva->user?->name ?? '-',
+                $reserva->secretaria?->codigo ?? '-',
+                $funcionario->name
+            ),
+            $reserva,
+            [
+                'via' => 'rececao',
+                'utilizador_id' => $reserva->user_id,
+                'funcionario_id' => $funcionario->id,
+            ]
+        );
+
+        MapaAtualizadoBroadcaster::broadcast();
+        DashboardMetricsService::limparCacheDoDia();
+
+        return back()->with('success', __('Check-in realizado na receção com sucesso.'));
     }
 
     /**
@@ -164,7 +273,7 @@ class CheckInController extends Controller
             ['via' => $viaQr ? 'qr' : 'manual']
         );
 
-        broadcast(new MapaAtualizado);
+        MapaAtualizadoBroadcaster::broadcast();
         DashboardMetricsService::limparCacheDoDia();
 
         return back()->with('success', __('Check-in confirmado com sucesso.'));

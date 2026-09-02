@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\MapaAtualizado;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DisponibilidadeReservaRequest;
 use App\Http\Requests\StoreReservaRequest;
@@ -16,6 +15,7 @@ use App\Models\ReservaDia;
 use App\Models\Secretaria;
 use App\Notifications\ReservaCanceladaNotification;
 use App\Services\DashboardMetricsService;
+use App\Services\MapaAtualizadoBroadcaster;
 use App\Services\PagamentoService;
 use App\Services\ReservaCriacaoService;
 use App\Services\ReservaDisponibilidadeService;
@@ -120,7 +120,7 @@ class ReservaController extends Controller
 
         $this->carregarRelacoes($reserva);
 
-        broadcast(new MapaAtualizado);
+        MapaAtualizadoBroadcaster::broadcast();
         DashboardMetricsService::limparCacheDoDia();
 
         return new ReservaResource($reserva);
@@ -297,7 +297,7 @@ class ReservaController extends Controller
 
         $this->carregarRelacoes($reserva);
 
-        broadcast(new MapaAtualizado);
+        MapaAtualizadoBroadcaster::broadcast();
         DashboardMetricsService::limparCacheDoDia();
 
         return new ReservaResource($reserva);
@@ -397,7 +397,7 @@ class ReservaController extends Controller
 
         $reserva->user?->notify(new ReservaCanceladaNotification($reserva));
 
-        broadcast(new MapaAtualizado);
+        MapaAtualizadoBroadcaster::broadcast();
         DashboardMetricsService::limparCacheDoDia();
 
         return new ReservaResource($reserva);

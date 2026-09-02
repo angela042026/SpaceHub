@@ -126,6 +126,7 @@
         "minhasReservas": "Minhas Reservas",
         "disponibilidade": "Disponibilidade",
         "checkin": "Check-in",
+        "checkinRececao": "Check-in na receção",
         "mapaDoEscritorio": "Mapa do Escritório",
         "historico": "Histórico",
         "pagamentos": "Pagamentos",
@@ -149,5 +150,28 @@
         "fecharMenu": "Fechar menu lateral",
         "terminarSessao": "Terminar sessão",
         "utilizadorFallback": "Utilizador"
+    },
+    "checkinRececao": {
+        "titulo": "Check-in na receção",
+        "subtitulo": "Confirme presencialmente a chegada dos utilizadores com reserva para hoje.",
+        "pesquisar": "Pesquisar por nome, e-mail ou código da secretária...",
+        "semReservas": "Não existem reservas por tratar com estes critérios.",
+        "utilizador": "Utilizador",
+        "espaco": "Espaço",
+        "horario": "Horário",
+        "estado": "Estado",
+        "acao": "Ação",
+        "confirmar": "Confirmar check-in",
+        "confirmarTitulo": "Confirmar check-in presencial",
+        "confirmacao": "Confirmar o check-in presencial de {{nome}}?",
+        "cancelar": "Cancelar",
+        "aConfirmar": "A confirmar...",
+        "pronta": "Pronta",
+        "pendente_pagamento": "Pagamento pendente",
+        "fora_da_janela": "Fora da janela",
+        "ja_check_in": "Check-in efetuado",
+        "pagina": "Página {{atual}} de {{total}}",
+        "anterior": "Anterior",
+        "seguinte": "Seguinte"
     }
 }

@@ -24,6 +24,7 @@ import {
     HelpCircle,
     LifeBuoy,
     Star,
+    ClipboardCheck,
 } from 'lucide-react';
 
 function SidebarItem({
@@ -52,7 +53,11 @@ function SidebarItem({
         <Link
             href={href}
             onClick={onNavigate}
-            className={active ? 'sidebar-link-active' : 'sidebar-link'}
+            className={
+                active
+                    ? 'sidebar-link-active'
+                    : 'sidebar-link'
+            }
         >
             {content}
         </Link>
@@ -77,6 +82,11 @@ export default function Sidebar({
     // também inclui Gestor. Gestor não vê o item, para não apontar para
     // uma página que lhe devolveria 403.
     const isAdministrador = roleName === 'Administrador';
+    const isStaffRececao = [
+        'Administrador',
+        'Gestor',
+        'Colaborador',
+    ].includes(roleName);
 
     return (
         <>
@@ -121,7 +131,9 @@ export default function Sidebar({
                     <nav className="space-y-2">
                         <SidebarItem
                             icon={Home}
-                            label={t('sidebar.paginaInicial')}
+                            label={t(
+                                'sidebar.paginaInicial',
+                            )}
                             href={route('home')}
                             active={route().current('home')}
                             onNavigate={onClose}
@@ -131,13 +143,17 @@ export default function Sidebar({
                             icon={LayoutDashboard}
                             label={t('sidebar.dashboard')}
                             href={route('dashboard')}
-                            active={route().current('dashboard')}
+                            active={route().current(
+                                'dashboard',
+                            )}
                             onNavigate={onClose}
                         />
 
                         <SidebarItem
                             icon={CalendarPlus}
-                            label={t('sidebar.reservarEspaco')}
+                            label={t(
+                                'sidebar.reservarEspaco',
+                            )}
                             href={route('reservas.create')}
                             active={route().current(
                                 'reservas.create',
@@ -147,7 +163,9 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={CalendarDays}
-                            label={t('sidebar.minhasReservas')}
+                            label={t(
+                                'sidebar.minhasReservas',
+                            )}
                             href={route('reservas.index')}
                             active={route().current(
                                 'reservas.index',
@@ -157,7 +175,9 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={Search}
-                            label={t('sidebar.disponibilidade')}
+                            label={t(
+                                'sidebar.disponibilidade',
+                            )}
                             href={route(
                                 'reservas.availability',
                             )}
@@ -171,19 +191,47 @@ export default function Sidebar({
                             icon={QrCode}
                             label={t('sidebar.checkin')}
                             href={route('checkin.camera')}
-                            active={route().current('checkin.*')}
+                            active={
+                                route().current(
+                                    'checkin.camera',
+                                ) ||
+                                route().current(
+                                    'checkin.scan',
+                                )
+                            }
                             onNavigate={onClose}
                         />
 
+                        {isStaffRececao && (
+                            <SidebarItem
+                                icon={ClipboardCheck}
+                                label={t(
+                                    'sidebar.checkinRececao',
+                                )}
+                                href={route(
+                                    'checkin.recepcao.index',
+                                )}
+                                active={route().current(
+                                    'checkin.recepcao.*',
+                                )}
+                                onNavigate={onClose}
+                            />
+                        )}
+
                         <SidebarItem
                             icon={Map}
-                            label={t('sidebar.mapaDoEscritorio')}
-                            href={route('mapa.index')}
-                            active={route().current(
-                                'mapa.index',
-                            ) || route().current(
-                                'setores.mapa.edit',
+                            label={t(
+                                'sidebar.mapaDoEscritorio',
                             )}
+                            href={route('mapa.index')}
+                            active={
+                                route().current(
+                                    'mapa.index',
+                                ) ||
+                                route().current(
+                                    'setores.mapa.edit',
+                                )
+                            }
                             onNavigate={onClose}
                         />
 
@@ -209,7 +257,9 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={Star}
-                            label={t('sidebar.minhasAvaliacoes')}
+                            label={t(
+                                'sidebar.minhasAvaliacoes',
+                            )}
                             href={route('avaliacoes.index')}
                             active={route().current(
                                 'avaliacoes.index',
@@ -219,13 +269,18 @@ export default function Sidebar({
 
                         <SidebarItem
                             icon={HelpCircle}
-                            label={t('sidebar.centralDeAjuda')}
-                            href={route('faqs.index')}
-                            active={route().current(
-                                'faqs.index',
-                            ) || route().current(
-                                'support.create',
+                            label={t(
+                                'sidebar.centralDeAjuda',
                             )}
+                            href={route('faqs.index')}
+                            active={
+                                route().current(
+                                    'faqs.index',
+                                ) ||
+                                route().current(
+                                    'support.create',
+                                )
+                            }
                             onNavigate={onClose}
                         />
 
@@ -251,7 +306,9 @@ export default function Sidebar({
                             <nav className="space-y-2">
                                 <SidebarItem
                                     icon={Users}
-                                    label={t('sidebar.utilizadores')}
+                                    label={t(
+                                        'sidebar.utilizadores',
+                                    )}
                                     href={route(
                                         'admin.users.index',
                                     )}
@@ -263,7 +320,9 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={Building2}
-                                    label={t('sidebar.edificios')}
+                                    label={t(
+                                        'sidebar.edificios',
+                                    )}
                                     href={route(
                                         'admin.edificios.index',
                                     )}
@@ -275,7 +334,9 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={Layers}
-                                    label={t('sidebar.pisos')}
+                                    label={t(
+                                        'sidebar.pisos',
+                                    )}
                                     href={route(
                                         'admin.pisos.index',
                                     )}
@@ -287,7 +348,9 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={MapPinned}
-                                    label={t('sidebar.setores')}
+                                    label={t(
+                                        'sidebar.setores',
+                                    )}
                                     href={route(
                                         'admin.setores.index',
                                     )}
@@ -299,7 +362,9 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={Armchair}
-                                    label={t('sidebar.secretarias')}
+                                    label={t(
+                                        'sidebar.secretarias',
+                                    )}
                                     href={route(
                                         'admin.secretarias.index',
                                     )}
@@ -311,7 +376,9 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={CalendarDays}
-                                    label={t('sidebar.reservas')}
+                                    label={t(
+                                        'sidebar.reservas',
+                                    )}
                                     href={route(
                                         'admin.reservas.index',
                                     )}
@@ -323,7 +390,9 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={QrCode}
-                                    label={t('sidebar.qrCodes')}
+                                    label={t(
+                                        'sidebar.qrCodes',
+                                    )}
                                     href={route(
                                         'secretarias.qrcodes',
                                     )}
@@ -335,7 +404,9 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={MapPinned}
-                                    label={t('sidebar.editorDoMapa')}
+                                    label={t(
+                                        'sidebar.editorDoMapa',
+                                    )}
                                     href={route(
                                         'setores.mapa.edit',
                                     )}
@@ -348,7 +419,9 @@ export default function Sidebar({
                                 {isAdministrador && (
                                     <SidebarItem
                                         icon={History}
-                                        label={t('sidebar.registoDeAtividade')}
+                                        label={t(
+                                            'sidebar.registoDeAtividade',
+                                        )}
                                         href={route(
                                             'admin.atividade.index',
                                         )}
@@ -361,7 +434,9 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={BarChart3}
-                                    label={t('sidebar.estatisticas')}
+                                    label={t(
+                                        'sidebar.estatisticas',
+                                    )}
                                     href={route(
                                         'admin.statistics.index',
                                     )}
@@ -373,7 +448,9 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={FileText}
-                                    label={t('sidebar.relatorios')}
+                                    label={t(
+                                        'sidebar.relatorios',
+                                    )}
                                     href={route(
                                         'admin.reports.index',
                                     )}
@@ -385,7 +462,9 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={Star}
-                                    label={t('sidebar.avaliacoes')}
+                                    label={t(
+                                        'sidebar.avaliacoes',
+                                    )}
                                     href={route(
                                         'admin.avaliacoes.index',
                                     )}
@@ -397,15 +476,20 @@ export default function Sidebar({
 
                                 <SidebarItem
                                     icon={LifeBuoy}
-                                    label={t('sidebar.pedidosDeSuporte')}
+                                    label={t(
+                                        'sidebar.pedidosDeSuporte',
+                                    )}
                                     href={route(
                                         'support.index',
                                     )}
-                                    active={route().current(
-                                        'support.index',
-                                    ) || route().current(
-                                        'support.show',
-                                    )}
+                                    active={
+                                        route().current(
+                                            'support.index',
+                                        ) ||
+                                        route().current(
+                                            'support.show',
+                                        )
+                                    }
                                     onNavigate={onClose}
                                 />
                             </nav>
@@ -430,7 +514,10 @@ export default function Sidebar({
 
                     <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">
-                            {user?.name ?? t('sidebar.utilizadorFallback')}
+                            {user?.name ??
+                                t(
+                                    'sidebar.utilizadorFallback',
+                                )}
                         </p>
 
                         <p className="truncate text-xs text-slate-400">
