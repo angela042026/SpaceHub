@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Edificio;
 use App\Models\Piso;
+use Illuminate\Database\Seeder;
 
 class PisoSeeder extends Seeder
 {

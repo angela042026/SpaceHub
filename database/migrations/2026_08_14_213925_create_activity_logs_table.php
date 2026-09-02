@@ -12,9 +12,9 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('actor_id')
-                  ->nullable()
-                  ->constrained('users')
-                  ->nullOnDelete();
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
             // Preserva o nome/email mesmo que o utilizador seja
             // eliminado (o "actor_id" fica null via nullOnDelete()) e

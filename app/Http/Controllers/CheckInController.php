@@ -29,10 +29,10 @@ class CheckInController extends Controller
     public function camera(): Response
     {
         $reservas = Reserva::with([
-                'secretaria.setor.piso.edificio',
-                'periodo',
-                'estadoReserva',
-            ])
+            'secretaria.setor.piso.edificio',
+            'periodo',
+            'estadoReserva',
+        ])
             ->where('user_id', auth()->id())
             ->noIntervalo(Carbon::today())
             ->whereIn('estado_reserva_id', EstadoReserva::idsAtivos())
@@ -164,7 +164,7 @@ class CheckInController extends Controller
             ['via' => $viaQr ? 'qr' : 'manual']
         );
 
-        broadcast(new MapaAtualizado());
+        broadcast(new MapaAtualizado);
         DashboardMetricsService::limparCacheDoDia();
 
         return back()->with('success', __('Check-in confirmado com sucesso.'));

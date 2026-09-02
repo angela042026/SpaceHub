@@ -61,7 +61,6 @@ class StoreSecretariaRequest extends FormRequest
                 'boolean',
             ],
 
-
             'dock_usb' => [
                 'sometimes',
                 'boolean',

@@ -5,6 +5,7 @@ namespace Tests\Feature\Reservas;
 use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\ReservaDia;
+use App\Models\Secretaria;
 use App\Services\ReservaCriacaoService;
 use App\Services\ReservaDisponibilidadeService;
 use Carbon\Carbon;
@@ -24,8 +25,8 @@ use Tests\TestCase;
  */
 class ReservaIntervaloMultiDiaTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     /**
      * criarSecretaria() da trait só define preco_meio_dia/preco_dia_inteiro
@@ -33,7 +34,7 @@ class ReservaIntervaloMultiDiaTest extends TestCase
      * (PagamentoService::calcularValor()) exigem também o respetivo
      * preco_*, senão a criação falha ao gerar o pagamento associado.
      */
-    private function criarSecretariaComPrecos(): \App\Models\Secretaria
+    private function criarSecretariaComPrecos(): Secretaria
     {
         $secretaria = $this->criarSecretaria();
         $secretaria->setor->update([

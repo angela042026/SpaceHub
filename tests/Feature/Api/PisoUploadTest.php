@@ -36,7 +36,7 @@ class PisoUploadTest extends TestCase
 
         $this->edificio = Edificio::create([
             'nome' => 'Edifício Teste Upload',
-            'codigo' => 'EU' . Str::upper(Str::random(6)),
+            'codigo' => 'EU'.Str::upper(Str::random(6)),
             'morada' => 'Rua Teste, 1',
             'cidade' => 'Lisboa',
             'pais' => 'Portugal',
@@ -46,7 +46,7 @@ class PisoUploadTest extends TestCase
 
     public function test_administrator_can_create_floor_with_valid_plan(): void
     {
-        $codigo = 'PV' . Str::upper(Str::random(6));
+        $codigo = 'PV'.Str::upper(Str::random(6));
 
         $planta = UploadedFile::fake()->image(
             'planta.png',
@@ -87,7 +87,7 @@ class PisoUploadTest extends TestCase
 
     public function test_invalid_floor_plan_returns_422(): void
     {
-        $codigo = 'PI' . Str::upper(Str::random(6));
+        $codigo = 'PI'.Str::upper(Str::random(6));
 
         $ficheiro = UploadedFile::fake()->create(
             'planta.pdf',
@@ -122,7 +122,7 @@ class PisoUploadTest extends TestCase
 
     public function test_oversized_floor_plan_returns_422(): void
     {
-        $codigo = 'PG' . Str::upper(Str::random(6));
+        $codigo = 'PG'.Str::upper(Str::random(6));
 
         $planta = UploadedFile::fake()
             ->image('planta-grande.png')
@@ -155,7 +155,7 @@ class PisoUploadTest extends TestCase
 
     public function test_php_file_disguised_as_image_is_rejected(): void
     {
-        $codigo = 'PS' . Str::upper(Str::random(6));
+        $codigo = 'PS'.Str::upper(Str::random(6));
 
         // UploadedFile::fake() deriva sempre o MIME reportado a partir
         // da extensão do nome do ficheiro, nunca do conteúdo real —
@@ -204,7 +204,7 @@ class PisoUploadTest extends TestCase
         $piso = Piso::create([
             'edificio_id' => $this->edificio->id,
             'nome' => 'Piso para atualizar',
-            'codigo' => 'PA' . Str::upper(Str::random(6)),
+            'codigo' => 'PA'.Str::upper(Str::random(6)),
             'numero' => 104,
             'planta' => $plantaAntiga,
             'ativo' => true,

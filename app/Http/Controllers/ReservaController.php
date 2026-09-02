@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Avaliacao;
 use App\Models\Edificio;
 use App\Models\EstadoReserva;
 use App\Models\Periodo;
@@ -35,8 +34,7 @@ class ReservaController extends Controller
 {
     public function __construct(
         private ReservaDisponibilidadeService $disponibilidade
-    ) {
-    }
+    ) {}
 
     /**
      * Listar as reservas do utilizador autenticado.
@@ -363,8 +361,7 @@ class ReservaController extends Controller
         )) {
             return back()
                 ->withErrors([
-                    'secretaria_id' =>
-                    __('Esta secretária já se encontra reservada para a data e período selecionados.'),
+                    'secretaria_id' => __('Esta secretária já se encontra reservada para a data e período selecionados.'),
                 ])
                 ->withInput();
         }
@@ -379,8 +376,7 @@ class ReservaController extends Controller
         )) {
             return back()
                 ->withErrors([
-                    'data' =>
-                    __('Já possui outra reserva incompatível com este período na data selecionada.'),
+                    'data' => __('Já possui outra reserva incompatível com este período na data selecionada.'),
                 ])
                 ->withInput();
         }
@@ -409,8 +405,7 @@ class ReservaController extends Controller
                     'data_fim' => $novaDataFim,
                     'periodo_id' => $dadosValidados['periodo_id'],
                     'secretaria_id' => $dadosValidados['secretaria_id'],
-                    'observacoes' =>
-                    $dadosValidados['observacoes'] ?? null,
+                    'observacoes' => $dadosValidados['observacoes'] ?? null,
                 ]);
 
                 // data_fim já foi recalculada acima (RES-03) para manter a

@@ -9,8 +9,8 @@ use Tests\TestCase;
 
 class MapaTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     public function test_utilizador_nao_autenticado_e_redirecionado(): void
     {

@@ -27,6 +27,7 @@ class DisponibilidadeIntervaloTest extends TestCase
     use RefreshDatabase;
 
     private Secretaria $secretaria;
+
     private string $segunda;
 
     protected function setUp(): void
@@ -67,7 +68,7 @@ class DisponibilidadeIntervaloTest extends TestCase
 
         Sanctum::actingAs($this->criarUtilizador());
 
-        $resposta = $this->getJson('/api/reservas/disponibilidade?' . http_build_query([
+        $resposta = $this->getJson('/api/reservas/disponibilidade?'.http_build_query([
             'data' => $quarta,
             'periodo_id' => $this->periodoManha()->id,
         ]));

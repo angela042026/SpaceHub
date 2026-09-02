@@ -15,8 +15,8 @@ use Tests\TestCase;
 
 class CancelarReservasPagamentoPendenteTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     protected function tearDown(): void
     {
@@ -45,7 +45,7 @@ class CancelarReservasPagamentoPendenteTest extends TestCase
             'reserva_id' => $reserva->id,
             'valor' => 8.00,
             'estado' => $estadoPagamento,
-            'referencia' => 'REF-' . Str::upper(Str::random(8)),
+            'referencia' => 'REF-'.Str::upper(Str::random(8)),
         ]);
 
         return [$user, $reserva, $pagamento];

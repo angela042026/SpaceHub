@@ -128,7 +128,7 @@ class CancelarReservasPagamentoPendente extends Command
         }
 
         if ($canceladas > 0) {
-            broadcast(new MapaAtualizado());
+            broadcast(new MapaAtualizado);
             DashboardMetricsService::limparCacheDoDia();
         }
 

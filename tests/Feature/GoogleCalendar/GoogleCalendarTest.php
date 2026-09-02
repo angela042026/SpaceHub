@@ -3,7 +3,6 @@
 namespace Tests\Feature\GoogleCalendar;
 
 use App\Models\Reserva;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CriaEstruturaEspacial;
@@ -18,8 +17,8 @@ use Tests\TestCase;
  */
 class GoogleCalendarTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     public function test_utilizador_sem_tokens_nao_esta_conectado(): void
     {

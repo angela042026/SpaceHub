@@ -106,8 +106,7 @@ class PagamentoController extends Controller
             'pagamento_id' => $pagamentoConfirmado->id,
             'reserva_id' => $pagamentoConfirmado->reserva_id,
             'valor' => $pagamentoConfirmado->valor,
-            'metodo_pagamento' =>
-                $pagamentoConfirmado->metodo_pagamento,
+            'metodo_pagamento' => $pagamentoConfirmado->metodo_pagamento,
         ]);
 
         return new PagamentoResource(

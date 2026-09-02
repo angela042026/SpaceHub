@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Edificio;
 use App\Models\Piso;
 use App\Models\Reserva;
 use App\Models\Secretaria;
@@ -26,8 +25,8 @@ use Tests\TestCase;
  */
 class HierarquiaFisicaCascadeTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     public function test_apagar_secretaria_com_reserva_e_bloqueado(): void
     {

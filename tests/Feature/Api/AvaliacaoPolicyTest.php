@@ -22,8 +22,11 @@ class AvaliacaoPolicyTest extends TestCase
     use RefreshDatabase;
 
     private Role $administradorRole;
+
     private Role $gestorRole;
+
     private Role $colaboradorRole;
+
     private Role $utilizadorRole;
 
     protected function setUp(): void
@@ -41,7 +44,7 @@ class AvaliacaoPolicyTest extends TestCase
     public function test_administrator_can_moderate_without_being_gestor(): void
     {
         $admin = $this->createUser($this->administradorRole);
-        $avaliacao = new Avaliacao();
+        $avaliacao = new Avaliacao;
 
         $this->assertTrue(Gate::forUser($admin)->allows('viewAny', Avaliacao::class));
         $this->assertTrue(Gate::forUser($admin)->allows('moderar', $avaliacao));
@@ -50,7 +53,7 @@ class AvaliacaoPolicyTest extends TestCase
     public function test_gestor_can_view_any_and_moderate(): void
     {
         $gestor = $this->createUser($this->gestorRole);
-        $avaliacao = new Avaliacao();
+        $avaliacao = new Avaliacao;
 
         $this->assertTrue(Gate::forUser($gestor)->allows('viewAny', Avaliacao::class));
         $this->assertTrue(Gate::forUser($gestor)->allows('moderar', $avaliacao));
@@ -60,7 +63,7 @@ class AvaliacaoPolicyTest extends TestCase
     {
         foreach ([$this->colaboradorRole, $this->utilizadorRole] as $role) {
             $user = $this->createUser($role);
-            $avaliacao = new Avaliacao();
+            $avaliacao = new Avaliacao;
 
             $this->assertFalse(Gate::forUser($user)->allows('viewAny', Avaliacao::class));
             $this->assertFalse(Gate::forUser($user)->allows('moderar', $avaliacao));
@@ -70,7 +73,7 @@ class AvaliacaoPolicyTest extends TestCase
     public function test_inactive_gestor_has_no_avaliacao_permissions(): void
     {
         $gestor = $this->createUser($this->gestorRole, ativo: false);
-        $avaliacao = new Avaliacao();
+        $avaliacao = new Avaliacao;
 
         $this->assertFalse(Gate::forUser($gestor)->allows('viewAny', Avaliacao::class));
         $this->assertFalse(Gate::forUser($gestor)->allows('moderar', $avaliacao));

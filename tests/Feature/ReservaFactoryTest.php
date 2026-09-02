@@ -42,5 +42,6 @@ class ReservaFactoryTest extends TestCase
         $segunda = Reserva::factory()->create();
 
         $this->assertSame($primeira->secretaria_id, $segunda->secretaria_id);
+        $this->assertNotSame($primeira->data->toDateString(), $segunda->data->toDateString());
     }
 }

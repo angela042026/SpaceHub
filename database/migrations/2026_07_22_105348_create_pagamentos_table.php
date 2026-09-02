@@ -21,11 +21,11 @@ return new class extends Migration
 
             $table->decimal('valor', 10, 2);
 
-           $table->enum('metodo_pagamento', [
-    'cartao',
-    'mbway',
-    'transferencia',
-])->nullable();
+            $table->enum('metodo_pagamento', [
+                'cartao',
+                'mbway',
+                'transferencia',
+            ])->nullable();
             $table->enum('estado', [
                 'pendente',
                 'pago',

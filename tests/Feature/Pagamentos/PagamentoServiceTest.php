@@ -16,8 +16,8 @@ use Tests\TestCase;
 
 class PagamentoServiceTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     private PagamentoService $pagamentoService;
 
@@ -30,6 +30,7 @@ class PagamentoServiceTest extends TestCase
 
         $this->pagamentoService = app(PagamentoService::class);
     }
+
     /**
      * Cria uma reserva válida para os testes de pagamentos.
      */

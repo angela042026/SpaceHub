@@ -8,8 +8,8 @@ use Tests\TestCase;
 
 class SecretariaQrCodeTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     public function test_administrador_acede_a_listagem_de_qrcodes(): void
     {
@@ -52,6 +52,7 @@ class SecretariaQrCodeTest extends TestCase
         $cacheControl = (string) $response->headers->get('Cache-Control');
         $this->assertStringContainsString('no-store', $cacheControl);
         $this->assertStringContainsString('must-revalidate', $cacheControl);
-        $this->assertStringStartsWith('<?xml', $response->getContent());
+        $this->assertStringStartsWith('<svg', $response->getContent());
+        $this->assertStringNotContainsString('<?xml', $response->getContent());
     }
 }

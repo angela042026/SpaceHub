@@ -13,6 +13,7 @@ use App\Models\Secretaria;
 use App\Models\Setor;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
@@ -56,10 +57,10 @@ class ReportController extends Controller
             $query->where('estado_reserva_id', $request->integer('estado_reserva_id'));
         }
 
-        $reservas = $query
-            ->orderByDesc('data')
-            ->paginate(self::POR_PAGINA)
-            ->withQueryString();
+        $reservas = $this->paginarQuery(
+            $query->orderByDesc('data'),
+            $request
+        );
 
         return Inertia::render('Admin/Reports/Reservas', [
             'reservas' => $reservas,
@@ -87,10 +88,10 @@ class ReportController extends Controller
             $query->where('ativo', $request->boolean('ativo'));
         }
 
-        $utilizadores = $query
-            ->orderBy('name')
-            ->paginate(self::POR_PAGINA)
-            ->withQueryString();
+        $utilizadores = $this->paginarQuery(
+            $query->orderBy('name'),
+            $request
+        );
 
         return Inertia::render('Admin/Reports/Utilizadores', [
             'utilizadores' => $utilizadores,
@@ -110,10 +111,10 @@ class ReportController extends Controller
             $query->where('estado', $request->input('estado'));
         }
 
-        $pedidos = $query
-            ->orderByDesc('created_at')
-            ->paginate(self::POR_PAGINA)
-            ->withQueryString();
+        $pedidos = $this->paginarQuery(
+            $query->orderByDesc('created_at'),
+            $request
+        );
 
         return Inertia::render('Admin/Reports/Suporte', [
             'pedidos' => $pedidos,
@@ -194,14 +195,7 @@ class ReportController extends Controller
         // paginação é construída manualmente com o mesmo LengthAwarePaginator
         // que o Eloquent usa por trás de ->paginate(), preservando o
         // querystring (filtros de data/piso) nos links Anterior/Seguinte.
-        $paginaAtual = LengthAwarePaginator::resolveCurrentPage();
-        $linhasPaginadas = new LengthAwarePaginator(
-            array_slice($linhas, ($paginaAtual - 1) * self::POR_PAGINA, self::POR_PAGINA),
-            count($linhas),
-            self::POR_PAGINA,
-            $paginaAtual,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        $linhasPaginadas = $this->paginarLinhas($linhas, $request);
 
         return Inertia::render('Admin/Reports/Ocupacao', [
             'linhas' => $linhasPaginadas,
@@ -291,14 +285,7 @@ class ReportController extends Controller
         // $linhas vem de uma Collection agregada em PHP, não de uma query
         // paginável diretamente — mesmo padrão de paginação manual já
         // usado em ocupacao().
-        $paginaAtual = LengthAwarePaginator::resolveCurrentPage();
-        $linhasPaginadas = new LengthAwarePaginator(
-            array_slice($linhas, ($paginaAtual - 1) * self::POR_PAGINA, self::POR_PAGINA),
-            count($linhas),
-            self::POR_PAGINA,
-            $paginaAtual,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
+        $linhasPaginadas = $this->paginarLinhas($linhas, $request);
 
         return Inertia::render('Admin/Reports/Espacos', [
             'linhas' => $linhasPaginadas,
@@ -357,10 +344,10 @@ class ReportController extends Controller
             $query->whereHas('secretaria.setor', fn ($setorQuery) => $setorQuery->where('id', $setorId));
         }
 
-        $reservas = $query
-            ->orderByDesc('data')
-            ->paginate(self::POR_PAGINA)
-            ->withQueryString();
+        $reservas = $this->paginarQuery(
+            $query->orderByDesc('data'),
+            $request
+        );
 
         return Inertia::render('Admin/Reports/CancelamentosAusencias', [
             'reservas' => $reservas,
@@ -395,6 +382,46 @@ class ReportController extends Controller
                 'data_fim' => 'A data final não pode ser anterior à data inicial.',
             ]);
         }
+    }
+
+    /**
+     * Mantém os relatórios paginados no ecrã, mas entrega todos os registos
+     * filtrados à versão de impressão para que o browser possa gerar todas
+     * as páginas do documento.
+     */
+    private function paginarQuery(Builder $query, Request $request): LengthAwarePaginator
+    {
+        if (! $request->boolean('imprimir')) {
+            return $query->paginate(self::POR_PAGINA)->withQueryString();
+        }
+
+        $itens = $query->get();
+
+        return new LengthAwarePaginator(
+            $itens,
+            $itens->count(),
+            max($itens->count(), 1),
+            1,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+    }
+
+    private function paginarLinhas(array $linhas, Request $request): LengthAwarePaginator
+    {
+        $paginaAtual = $request->boolean('imprimir')
+            ? 1
+            : LengthAwarePaginator::resolveCurrentPage();
+        $porPagina = $request->boolean('imprimir')
+            ? max(count($linhas), 1)
+            : self::POR_PAGINA;
+
+        return new LengthAwarePaginator(
+            array_slice($linhas, ($paginaAtual - 1) * $porPagina, $porPagina),
+            count($linhas),
+            $porPagina,
+            $paginaAtual,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
     }
 
     /**

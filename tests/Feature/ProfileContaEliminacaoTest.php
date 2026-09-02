@@ -21,8 +21,8 @@ use Tests\TestCase;
  */
 class ProfileContaEliminacaoTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     public function test_eliminar_conta_preserva_reservas_e_pagamentos_do_utilizador(): void
     {
@@ -45,7 +45,7 @@ class ProfileContaEliminacaoTest extends TestCase
             'reserva_id' => $reserva->id,
             'valor' => 8.00,
             'estado' => 'pago',
-            'referencia' => 'REF-' . Str::upper(Str::random(8)),
+            'referencia' => 'REF-'.Str::upper(Str::random(8)),
         ]);
 
         $response = $this->actingAs($user)->delete('/profile', [

@@ -41,19 +41,19 @@ class ReservaSeeder extends Seeder
             ->take(5)
             ->get();
 
-        if (!$utilizador || !$admin) {
+        if (! $utilizador || ! $admin) {
             throw new RuntimeException(
                 'ReservaSeeder: os utilizadores obrigatórios não foram encontrados.'
             );
         }
 
-        if (!$manha || !$tarde) {
+        if (! $manha || ! $tarde) {
             throw new RuntimeException(
                 'ReservaSeeder: os períodos obrigatórios não foram encontrados.'
             );
         }
 
-        if (!$confirmada || !$pendente || !$cancelada || !$expirada) {
+        if (! $confirmada || ! $pendente || ! $cancelada || ! $expirada) {
             throw new RuntimeException(
                 'ReservaSeeder: os estados de reserva obrigatórios não foram encontrados.'
             );

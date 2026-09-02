@@ -20,8 +20,8 @@ use Tests\TestCase;
  */
 class LiberarReservasSemCheckInTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     private function criarReservaDiaRows(
         Reserva $reserva,

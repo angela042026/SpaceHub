@@ -91,7 +91,7 @@ class ProfileController extends Controller
         // mantém-se, pois continua a ser mostrado no histórico de
         // reservas de outros utilizadores/admin.
         $user->update([
-            'email' => "deleted_{$user->id}_" . now()->timestamp . '@deleted.local',
+            'email' => "deleted_{$user->id}_".now()->timestamp.'@deleted.local',
             'google_id' => null,
         ]);
 

@@ -17,8 +17,8 @@ use Tests\TestCase;
  */
 class DisponibilidadePerformanceTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     public function test_consulta_de_disponibilidade_nao_escala_queries_de_periodo_com_o_numero_de_secretarias(): void
     {
@@ -34,7 +34,7 @@ class DisponibilidadePerformanceTest extends TestCase
         $secretaria = $this->criarSecretaria();
         for ($i = 0; $i < 5; $i++) {
             $secretaria->setor->secretarias()->create([
-                'codigo' => 'SEC-' . uniqid(),
+                'codigo' => 'SEC-'.uniqid(),
                 'reservavel' => true,
                 'ativo' => true,
             ]);

@@ -22,10 +22,11 @@ use Tests\TestCase;
  */
 class PagamentoPolicyTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     private Role $administradorRole;
+
     private Role $utilizadorRole;
 
     protected function setUp(): void
@@ -57,7 +58,7 @@ class PagamentoPolicyTest extends TestCase
             'reserva_id' => $reserva->id,
             'valor' => 8.00,
             'estado' => $estado,
-            'referencia' => 'REF-' . Str::upper(Str::random(8)),
+            'referencia' => 'REF-'.Str::upper(Str::random(8)),
         ]);
     }
 

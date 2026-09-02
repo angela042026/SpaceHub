@@ -12,20 +12,20 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('user_id')
-                  ->constrained('users')
-                  ->cascadeOnDelete();
+                ->constrained('users')
+                ->cascadeOnDelete();
 
             $table->foreignId('secretaria_id')
-                  ->constrained('secretarias')
-                  ->cascadeOnDelete();
+                ->constrained('secretarias')
+                ->cascadeOnDelete();
 
             $table->foreignId('periodo_id')
-                  ->constrained('periodos')
-                  ->cascadeOnDelete();
+                ->constrained('periodos')
+                ->cascadeOnDelete();
 
             $table->foreignId('estado_reserva_id')
-                  ->constrained('estado_reservas')
-                  ->restrictOnDelete();
+                ->constrained('estado_reservas')
+                ->restrictOnDelete();
 
             $table->date('data');
 

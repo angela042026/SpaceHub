@@ -27,8 +27,8 @@ use Tests\TestCase;
  */
 class ReservaConcorrenciaTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     public function test_constraint_da_bd_impede_dupla_reserva_da_mesma_secretaria_sob_concorrencia(): void
     {

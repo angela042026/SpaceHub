@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('edificio_id')
-                  ->constrained('edificios')
-                  ->cascadeOnDelete();
+                ->constrained('edificios')
+                ->cascadeOnDelete();
 
             $table->string('nome', 100);
             $table->string('codigo', 10);

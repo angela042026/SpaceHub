@@ -7,7 +7,7 @@ use App\Models\User;
 
 class SetorPolicy
 {
-    public function before(User $user, string $ability): bool|null
+    public function before(User $user, string $ability): ?bool
     {
         if (! $user->ativo) {
             return false;

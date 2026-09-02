@@ -20,8 +20,11 @@ use Illuminate\Database\Eloquent\Model;
 class ActivityLogger
 {
     public const RESULTADO_SUCESSO = 'success';
+
     public const RESULTADO_CANCELADA = 'cancelled';
+
     public const RESULTADO_AUTOMATICO = 'automatic';
+
     public const RESULTADO_ERRO = 'error';
 
     /**

@@ -34,7 +34,7 @@ class DashboardController extends Controller
 
         $stats =
             $this->dashboardMetricsService
-            ->obterStats($hoje);
+                ->obterStats($hoje);
 
         // "Destaques do período" tem o seu próprio toggle (30
         // dias/90 dias/Ano), independente do filtro "periodo" acima
@@ -42,17 +42,17 @@ class DashboardController extends Controller
         // valor inicial deve bater certo com o botão ativo por omissão.
         $estatisticas =
             $this->estatisticasService
-            ->obterEstatisticas(
-                $this->estatisticasService->obterDataInicio('30dias')
-            );
+                ->obterEstatisticas(
+                    $this->estatisticasService->obterDataInicio('30dias')
+                );
 
         $atividadeRecente =
             $this->dashboardMetricsService
-            ->obterAtividadeRecente();
+                ->obterAtividadeRecente();
 
         $tendenciaOcupacao =
             $this->dashboardMetricsService
-            ->obterTendenciaOcupacaoComparativa($hoje);
+                ->obterTendenciaOcupacaoComparativa($hoje);
 
         [
             'pisos' => $pisos,
@@ -61,7 +61,7 @@ class DashboardController extends Controller
 
         $idsEstadosAtivos =
             $this->dashboardMetricsService
-            ->idsEstadosAtivos();
+                ->idsEstadosAtivos();
 
         /*
         |--------------------------------------------------------------------------
@@ -77,7 +77,7 @@ class DashboardController extends Controller
 
         $reservasPorPiso =
             $this->dashboardMetricsService
-            ->obterReservasPorPisoComparativo($hoje);
+                ->obterReservasPorPisoComparativo($hoje);
 
         /*
         |--------------------------------------------------------------------------
@@ -133,11 +133,9 @@ class DashboardController extends Controller
             'pisos' => $pisos,
             'edificios' => $edificios,
 
-            'reservaHojeUtilizador' =>
-            $reservaHojeUtilizador,
+            'reservaHojeUtilizador' => $reservaHojeUtilizador,
 
-            'proximasReservas' =>
-            $proximasReservas,
+            'proximasReservas' => $proximasReservas,
 
             'toleranciaCheckinMinutos' => (int) config(
                 'reservas.tolerancia_checkin_minutos',
@@ -148,14 +146,11 @@ class DashboardController extends Controller
             'stats' => $stats,
             'estatisticas' => $estatisticas,
 
-            'atividadeRecente' =>
-            $atividadeRecente,
+            'atividadeRecente' => $atividadeRecente,
 
-            'reservasPorPiso' =>
-            $reservasPorPiso,
+            'reservasPorPiso' => $reservasPorPiso,
 
-            'tendenciaOcupacao' =>
-            $tendenciaOcupacao,
+            'tendenciaOcupacao' => $tendenciaOcupacao,
         ];
 
         $user = $request->user();

@@ -10,8 +10,8 @@ use App\Http\Controllers\Admin\SecretariaController as AdminSecretariaController
 use App\Http\Controllers\Admin\SetorController as AdminSetorController;
 use App\Http\Controllers\Admin\StatisticsController as AdminStatisticsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\AvaliacaoController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;
@@ -19,6 +19,7 @@ use App\Http\Controllers\GoogleCalendarAuthController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MapaController;
 use App\Http\Controllers\NotificacaoController;
+use App\Http\Controllers\PagamentoController;
 use App\Http\Controllers\PedidoSuporteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservaController;
@@ -30,7 +31,6 @@ use App\Http\Controllers\SetorMapaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\PagamentoController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -131,16 +131,15 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/pagamentos/{pagamento}/pagar', [PagamentoController::class, 'pagar'])
         ->name('pagamentos.pagar');
 
-  Route::patch(
-    '/pagamentos/{pagamento}/confirmar',
-    [PagamentoController::class, 'confirmar']
-)->name('pagamentos.confirmar');
+    Route::patch(
+        '/pagamentos/{pagamento}/confirmar',
+        [PagamentoController::class, 'confirmar']
+    )->name('pagamentos.confirmar');
 
     Route::get(
         '/pagamentos/{pagamento}/comprovativo',
         [PagamentoController::class, 'comprovativo']
     )->name('pagamentos.comprovativo');
-
 
     // ==========================
     // Check-in
@@ -407,4 +406,4 @@ Route::middleware(['auth', 'active', 'role:Administrador,Gestor'])
             ->name('reports.cancelamentos');
     });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

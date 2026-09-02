@@ -16,8 +16,8 @@ use Tests\TestCase;
 
 class ReservaTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     /**
      * Criar uma reserva diretamente na base de dados
@@ -82,8 +82,8 @@ class ReservaTest extends TestCase
             'user_id' => $user->id,
             'secretaria_id' => $secretaria->id,
             'periodo_id' => $periodo->id,
-            'data' => $dataReserva . ' 00:00:00',
-            'data_fim' => $dataReserva . ' 00:00:00',
+            'data' => $dataReserva.' 00:00:00',
+            'data_fim' => $dataReserva.' 00:00:00',
             'tipo_duracao' => 'diaria',
         ]);
     }
@@ -413,7 +413,7 @@ class ReservaTest extends TestCase
         $response->assertOk();
 
         $response->assertInertia(
-            fn(Assert $page) => $page
+            fn (Assert $page) => $page
                 ->component('Reservas/History')
                 ->has('reservas.data', 10)
                 ->where('reservas.total', 12)

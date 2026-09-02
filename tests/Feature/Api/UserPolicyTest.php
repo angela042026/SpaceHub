@@ -14,8 +14,11 @@ class UserPolicyTest extends TestCase
     use RefreshDatabase;
 
     private Role $administradorRole;
+
     private Role $gestorRole;
+
     private Role $colaboradorRole;
+
     private Role $utilizadorRole;
 
     protected function setUp(): void
@@ -39,7 +42,7 @@ class UserPolicyTest extends TestCase
 
     public function test_administrator_has_user_management_permissions(): void
     {
-        $policy = new UserPolicy();
+        $policy = new UserPolicy;
 
         $admin = $this->createUser($this->administradorRole);
         $target = $this->createUser($this->utilizadorRole);
@@ -53,7 +56,7 @@ class UserPolicyTest extends TestCase
 
     public function test_non_administrator_roles_have_no_user_management_permissions(): void
     {
-        $policy = new UserPolicy();
+        $policy = new UserPolicy;
         $target = $this->createUser($this->utilizadorRole);
 
         foreach ($this->nonAdministratorRoles() as $role) {
@@ -74,13 +77,13 @@ class UserPolicyTest extends TestCase
         $admin = $this->createUser($this->administradorRole);
 
         $this->assertFalse(
-            (new UserPolicy())->toggleAtivo($admin, $admin)
+            (new UserPolicy)->toggleAtivo($admin, $admin)
         );
     }
 
     public function test_users_can_never_be_deleted(): void
     {
-        $policy = new UserPolicy();
+        $policy = new UserPolicy;
         $target = $this->createUser($this->utilizadorRole);
 
         foreach ([

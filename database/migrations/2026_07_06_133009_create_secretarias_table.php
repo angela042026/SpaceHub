@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('setor_id')
-                  ->constrained('setores')
-                  ->cascadeOnDelete();
+                ->constrained('setores')
+                ->cascadeOnDelete();
 
             $table->string('codigo', 20);
 

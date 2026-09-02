@@ -15,9 +15,8 @@ class Role extends Model
     /**
      * Um Role pode estar associado a vários utilizadores.
      */
-   public function users(): HasMany
-{
-    return $this->hasMany(User::class);
-}
-
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class);
+    }
 }

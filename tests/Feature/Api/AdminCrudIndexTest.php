@@ -35,7 +35,7 @@ class AdminCrudIndexTest extends TestCase
 
     public function test_users_support_search_filters_sorting_and_pagination(): void
     {
-        $token = 'Pesquisa-' . Str::lower(Str::random(8));
+        $token = 'Pesquisa-'.Str::lower(Str::random(8));
 
         $role = Role::query()
             ->where('nome', 'Utilizador')
@@ -43,7 +43,7 @@ class AdminCrudIndexTest extends TestCase
 
         User::create([
             'name' => "{$token} Alfa",
-            'email' => Str::lower(Str::random(8)) . '@spacehub.test',
+            'email' => Str::lower(Str::random(8)).'@spacehub.test',
             'password' => Hash::make('password123'),
             'role_id' => $role->id,
             'ativo' => false,
@@ -51,7 +51,7 @@ class AdminCrudIndexTest extends TestCase
 
         User::create([
             'name' => "{$token} Beta",
-            'email' => Str::lower(Str::random(8)) . '@spacehub.test',
+            'email' => Str::lower(Str::random(8)).'@spacehub.test',
             'password' => Hash::make('password123'),
             'role_id' => $role->id,
             'ativo' => false,
@@ -59,13 +59,13 @@ class AdminCrudIndexTest extends TestCase
 
         User::create([
             'name' => "{$token} Gama",
-            'email' => Str::lower(Str::random(8)) . '@spacehub.test',
+            'email' => Str::lower(Str::random(8)).'@spacehub.test',
             'password' => Hash::make('password123'),
             'role_id' => $role->id,
             'ativo' => true,
         ]);
 
-        $response = $this->getJson('/api/users?' . http_build_query([
+        $response = $this->getJson('/api/users?'.http_build_query([
             'search' => $token,
             'role_id' => $role->id,
             'ativo' => false,
@@ -86,7 +86,7 @@ class AdminCrudIndexTest extends TestCase
 
     public function test_edificios_support_search_filters_sorting_and_pagination(): void
     {
-        $token = 'Edificio-' . Str::lower(Str::random(8));
+        $token = 'Edificio-'.Str::lower(Str::random(8));
 
         $this->createEdificio([
             'nome' => "{$token} Alfa",
@@ -112,7 +112,7 @@ class AdminCrudIndexTest extends TestCase
             'ativo' => true,
         ]);
 
-        $response = $this->getJson('/api/edificios?' . http_build_query([
+        $response = $this->getJson('/api/edificios?'.http_build_query([
             'search' => $token,
             'cidade' => 'Lisboa',
             'pais' => 'Portugal',
@@ -133,7 +133,7 @@ class AdminCrudIndexTest extends TestCase
 
     public function test_pisos_support_search_filters_sorting_and_pagination(): void
     {
-        $token = 'Piso-' . Str::lower(Str::random(8));
+        $token = 'Piso-'.Str::lower(Str::random(8));
 
         $edificio = $this->createEdificio([
             'nome' => "Edifício {$token}",
@@ -161,7 +161,7 @@ class AdminCrudIndexTest extends TestCase
             'ativo' => false,
         ]);
 
-        $response = $this->getJson('/api/pisos?' . http_build_query([
+        $response = $this->getJson('/api/pisos?'.http_build_query([
             'search' => $token,
             'edificio_id' => $edificio->id,
             'ativo' => true,
@@ -181,7 +181,7 @@ class AdminCrudIndexTest extends TestCase
 
     public function test_setores_support_search_filters_sorting_and_pagination(): void
     {
-        $token = 'Setor-' . Str::lower(Str::random(8));
+        $token = 'Setor-'.Str::lower(Str::random(8));
 
         $edificio = $this->createEdificio([
             'nome' => "Edifício {$token}",
@@ -221,7 +221,7 @@ class AdminCrudIndexTest extends TestCase
             'ativo' => false,
         ]);
 
-        $response = $this->getJson('/api/setores?' . http_build_query([
+        $response = $this->getJson('/api/setores?'.http_build_query([
             'search' => $token,
             'piso_id' => $piso->id,
             'tipo' => 'coworking',
@@ -243,7 +243,7 @@ class AdminCrudIndexTest extends TestCase
 
     public function test_secretarias_support_search_filters_sorting_and_pagination(): void
     {
-        $token = 'SEC-' . Str::upper(Str::random(6));
+        $token = 'SEC-'.Str::upper(Str::random(6));
 
         $edificio = $this->createEdificio([
             'nome' => "Edifício {$token}",
@@ -297,7 +297,7 @@ class AdminCrudIndexTest extends TestCase
             'descricao' => "Secretária {$token} número três",
         ]);
 
-        $response = $this->getJson('/api/secretarias?' . http_build_query([
+        $response = $this->getJson('/api/secretarias?'.http_build_query([
             'search' => $token,
             'setor_id' => $setor->id,
             'monitor' => true,
@@ -329,7 +329,7 @@ class AdminCrudIndexTest extends TestCase
             'cidade' => 'Lisboa',
             'pais' => 'Portugal',
             'telefone' => '210000000',
-            'email' => Str::lower(Str::random(8)) . '@edificio.test',
+            'email' => Str::lower(Str::random(8)).'@edificio.test',
             'hora_abertura' => '08:00',
             'hora_fecho' => '20:00',
             'ativo' => true,

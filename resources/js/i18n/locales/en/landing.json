@@ -64,6 +64,12 @@
             "mensagemBot": "Hi! How can we help?",
             "mensagemUtilizador": "I'd like to change my booking.",
             "online": "We're online"
+        },
+        "googleCalendar": {
+            "titulo": "Google Calendar",
+            "descricao": "Automatically sync your bookings with Google Calendar.",
+            "exemploEspaco": "Coworking space",
+            "sincronizado": "Synced with Google Calendar"
         }
     },
     "howItWorks": {

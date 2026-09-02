@@ -28,8 +28,8 @@ return new class extends Migration
 
         Schema::table('pisos', function (Blueprint $table) {
             $table->foreign('edificio_id')
-                  ->references('id')->on('edificios')
-                  ->restrictOnDelete();
+                ->references('id')->on('edificios')
+                ->restrictOnDelete();
         });
 
         Schema::table('setores', function (Blueprint $table) {
@@ -38,8 +38,8 @@ return new class extends Migration
 
         Schema::table('setores', function (Blueprint $table) {
             $table->foreign('piso_id')
-                  ->references('id')->on('pisos')
-                  ->restrictOnDelete();
+                ->references('id')->on('pisos')
+                ->restrictOnDelete();
         });
 
         Schema::table('secretarias', function (Blueprint $table) {
@@ -48,8 +48,8 @@ return new class extends Migration
 
         Schema::table('secretarias', function (Blueprint $table) {
             $table->foreign('setor_id')
-                  ->references('id')->on('setores')
-                  ->restrictOnDelete();
+                ->references('id')->on('setores')
+                ->restrictOnDelete();
         });
 
         Schema::table('reservas', function (Blueprint $table) {
@@ -58,8 +58,8 @@ return new class extends Migration
 
         Schema::table('reservas', function (Blueprint $table) {
             $table->foreign('secretaria_id')
-                  ->references('id')->on('secretarias')
-                  ->restrictOnDelete();
+                ->references('id')->on('secretarias')
+                ->restrictOnDelete();
         });
     }
 
@@ -71,8 +71,8 @@ return new class extends Migration
 
         Schema::table('reservas', function (Blueprint $table) {
             $table->foreign('secretaria_id')
-                  ->references('id')->on('secretarias')
-                  ->cascadeOnDelete();
+                ->references('id')->on('secretarias')
+                ->cascadeOnDelete();
         });
 
         Schema::table('secretarias', function (Blueprint $table) {
@@ -81,8 +81,8 @@ return new class extends Migration
 
         Schema::table('secretarias', function (Blueprint $table) {
             $table->foreign('setor_id')
-                  ->references('id')->on('setores')
-                  ->cascadeOnDelete();
+                ->references('id')->on('setores')
+                ->cascadeOnDelete();
         });
 
         Schema::table('setores', function (Blueprint $table) {
@@ -91,8 +91,8 @@ return new class extends Migration
 
         Schema::table('setores', function (Blueprint $table) {
             $table->foreign('piso_id')
-                  ->references('id')->on('pisos')
-                  ->cascadeOnDelete();
+                ->references('id')->on('pisos')
+                ->cascadeOnDelete();
         });
 
         Schema::table('pisos', function (Blueprint $table) {
@@ -101,8 +101,8 @@ return new class extends Migration
 
         Schema::table('pisos', function (Blueprint $table) {
             $table->foreign('edificio_id')
-                  ->references('id')->on('edificios')
-                  ->cascadeOnDelete();
+                ->references('id')->on('edificios')
+                ->cascadeOnDelete();
         });
     }
 };

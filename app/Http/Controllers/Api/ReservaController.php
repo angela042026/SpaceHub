@@ -14,11 +14,11 @@ use App\Models\Periodo;
 use App\Models\Reserva;
 use App\Models\ReservaDia;
 use App\Models\Secretaria;
+use App\Notifications\ReservaCanceladaNotification;
 use App\Services\DashboardMetricsService;
 use App\Services\PagamentoService;
 use App\Services\ReservaCriacaoService;
 use App\Services\ReservaDisponibilidadeService;
-use App\Notifications\ReservaCanceladaNotification;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
@@ -31,8 +31,7 @@ class ReservaController extends Controller
 {
     public function __construct(
         private ReservaDisponibilidadeService $disponibilidade
-    ) {
-    }
+    ) {}
 
     /**
      * Lista reservas.
@@ -121,7 +120,7 @@ class ReservaController extends Controller
 
         $this->carregarRelacoes($reserva);
 
-        broadcast(new MapaAtualizado());
+        broadcast(new MapaAtualizado);
         DashboardMetricsService::limparCacheDoDia();
 
         return new ReservaResource($reserva);
@@ -298,7 +297,7 @@ class ReservaController extends Controller
 
         $this->carregarRelacoes($reserva);
 
-        broadcast(new MapaAtualizado());
+        broadcast(new MapaAtualizado);
         DashboardMetricsService::limparCacheDoDia();
 
         return new ReservaResource($reserva);
@@ -398,7 +397,7 @@ class ReservaController extends Controller
 
         $reserva->user?->notify(new ReservaCanceladaNotification($reserva));
 
-        broadcast(new MapaAtualizado());
+        broadcast(new MapaAtualizado);
         DashboardMetricsService::limparCacheDoDia();
 
         return new ReservaResource($reserva);
@@ -434,9 +433,6 @@ class ReservaController extends Controller
             'estadoReserva',
         ]);
     }
-
-
-
 
     /**
      * Obtém um estado de reserva pelo código.

@@ -15,8 +15,8 @@ use Tests\TestCase;
 
 class AvaliacaoTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     private function criarReserva(User $user, ?string $checkInAt = null): Reserva
     {
@@ -325,7 +325,7 @@ class AvaliacaoTest extends TestCase
         $response->assertInertia(function ($page) {
             $page->component('Reservas/Create')
                 ->where('setores.0.avaliacao_total', 2)
-                ->where('setores.0.avaliacao_media',fn ($valor) => (float) $valor === 4.0)
+                ->where('setores.0.avaliacao_media', fn ($valor) => (float) $valor === 4.0)
                 ->etc();
         });
     }

@@ -16,7 +16,7 @@ class LocaleController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $dados = $request->validate([
-            'locale' => ['required', 'string', 'in:' . implode(',', SetLocale::LOCALES_SUPORTADOS)],
+            'locale' => ['required', 'string', 'in:'.implode(',', SetLocale::LOCALES_SUPORTADOS)],
         ]);
 
         $request->session()->put('locale', $dados['locale']);

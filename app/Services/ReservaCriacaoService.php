@@ -39,13 +39,12 @@ class ReservaCriacaoService
         private ReservaDisponibilidadeService $disponibilidade,
         private PagamentoService $pagamentos,
         private GoogleCalendarService $googleCalendar,
-    ) {
-    }
+    ) {}
 
     /**
      * Cria uma reserva de meio dia (Manhã ou Tarde).
      *
-     * @param array{data:string,periodo_id:mixed,secretaria_id:mixed,observacoes?:?string} $dados
+     * @param  array{data:string,periodo_id:mixed,secretaria_id:mixed,observacoes?:?string}  $dados
      */
     public function criarMeioDia(array $dados, int $userId): Reserva
     {
@@ -53,8 +52,7 @@ class ReservaCriacaoService
 
         if ($periodo->nome === 'Dia inteiro') {
             throw ValidationException::withMessages([
-                'periodo_id' =>
-                    'As reservas de dia inteiro devem ser efetuadas através da opção Dia inteiro.',
+                'periodo_id' => 'As reservas de dia inteiro devem ser efetuadas através da opção Dia inteiro.',
             ]);
         }
 
@@ -91,7 +89,7 @@ class ReservaCriacaoService
      * mensal (1 mês corrido) e anual (1 ano corrido) — todas incluem
      * sábados, domingos e feriados.
      *
-     * @param array{data:string,secretaria_id:mixed,tipo_duracao:string,observacoes?:?string} $dados
+     * @param  array{data:string,secretaria_id:mixed,tipo_duracao:string,observacoes?:?string}  $dados
      */
     public function criarDiaInteiro(array $dados, int $userId): Reserva
     {
@@ -231,8 +229,7 @@ class ReservaCriacaoService
             }
 
             throw ValidationException::withMessages([
-                'secretaria_id' =>
-                    'Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.',
+                'secretaria_id' => 'Este lugar acabou de ser reservado por outra pessoa. Escolhe outro período ou lugar.',
             ]);
         }
 
@@ -257,15 +254,13 @@ class ReservaCriacaoService
 
         if ($periodo === null) {
             throw ValidationException::withMessages([
-                'tipo_duracao' =>
-                    'O período Dia inteiro não está configurado no sistema.',
+                'tipo_duracao' => 'O período Dia inteiro não está configurado no sistema.',
             ]);
         }
 
         if (! $periodo->ativo) {
             throw ValidationException::withMessages([
-                'tipo_duracao' =>
-                    'O período Dia inteiro encontra-se inativo.',
+                'tipo_duracao' => 'O período Dia inteiro encontra-se inativo.',
             ]);
         }
 
@@ -282,8 +277,7 @@ class ReservaCriacaoService
 
         if ($estadoId === null) {
             throw ValidationException::withMessages([
-                'reserva' =>
-                    'O estado pendente não está configurado no sistema.',
+                'reserva' => 'O estado pendente não está configurado no sistema.',
             ]);
         }
 

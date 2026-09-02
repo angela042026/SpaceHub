@@ -14,8 +14,8 @@ use Tests\TestCase;
 
 class ReportControllerTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -224,5 +224,69 @@ class ReportControllerTest extends TestCase
             ->has('linhas.data', 1)
             ->where('linhas.data.0.id', $secretaria->id)
             ->where('linhas.data.0.diasOcupados', 5));
+    }
+
+    public function test_impressao_do_relatorio_de_espacos_inclui_todas_as_linhas(): void
+    {
+        $admin = $this->userWithRole('Administrador');
+        $primeira = $this->criarSecretaria();
+
+        foreach (range(2, 25) as $numero) {
+            $primeira->setor->secretarias()->create([
+                'codigo' => sprintf('SEC-PRINT-%02d', $numero),
+                'reservavel' => true,
+                'ativo' => true,
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.espacos'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('linhas.data', 20)
+                ->where('linhas.total', 25));
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.espacos', ['imprimir' => 1]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('linhas.data', 25)
+                ->where('linhas.total', 25)
+                ->where('linhas.last_page', 1));
+    }
+
+    public function test_impressao_de_cancelamentos_inclui_todos_os_registos(): void
+    {
+        $admin = $this->userWithRole('Administrador');
+        $secretaria = $this->criarSecretaria();
+        $periodo = $this->criarPeriodo();
+        $estado = $this->criarEstadoReserva('cancelada');
+        $dono = $this->criarUsuarioComRole('Utilizador');
+
+        foreach (range(0, 24) as $indice) {
+            $data = now()->addDays($indice + 1)->toDateString();
+
+            Reserva::create([
+                'user_id' => $dono->id,
+                'secretaria_id' => $secretaria->id,
+                'periodo_id' => $periodo->id,
+                'estado_reserva_id' => $estado->id,
+                'data' => $data,
+                'data_fim' => $data,
+                'tipo_duracao' => 'diaria',
+                'cancelada_at' => now(),
+            ]);
+        }
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.cancelamentos'))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('reservas.data', 20)
+                ->where('reservas.total', 25));
+
+        $this->actingAs($admin)
+            ->get(route('admin.reports.cancelamentos', ['imprimir' => 1]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('reservas.data', 25)
+                ->where('reservas.total', 25)
+                ->where('reservas.last_page', 1));
     }
 }

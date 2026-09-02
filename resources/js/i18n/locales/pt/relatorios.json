@@ -1,4 +1,10 @@
 {
+    "impressao": {
+        "imprimir": "Imprimir",
+        "geradoEm": "Gerado em {{data}}",
+        "por": "Por {{nome}}",
+        "rodape": "SpaceHub — Documento gerado automaticamente em {{data}} por {{nome}}"
+    },
     "index": {
         "titulo": "Relatórios",
         "descricao": "Consulte, filtre e exporte os principais dados de gestão do SpaceHub.",
