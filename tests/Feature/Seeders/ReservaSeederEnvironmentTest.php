@@ -23,7 +23,7 @@ class ReservaSeederEnvironmentTest extends TestCase
         $this->app['env'] = 'production';
 
         try {
-            (new ReservaSeeder())->run(app(PagamentoService::class));
+            (new ReservaSeeder)->run(app(PagamentoService::class));
         } finally {
             $this->app['env'] = 'testing';
         }

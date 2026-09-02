@@ -27,8 +27,8 @@ use Tests\TestCase;
  */
 class ReservaUpdateDiaInteiroTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     private function criarPeriodoDiaInteiro(): Periodo
     {

@@ -13,8 +13,8 @@ use Tests\TestCase;
 
 class CancelarReservasExpiradasTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     protected function tearDown(): void
     {

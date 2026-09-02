@@ -8,8 +8,8 @@ use Tests\TestCase;
 
 class SetorMapaTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     public function test_administrador_acede_ao_editor_de_mapa(): void
     {

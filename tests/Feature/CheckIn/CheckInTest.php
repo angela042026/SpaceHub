@@ -12,8 +12,8 @@ use Tests\TestCase;
 
 class CheckInTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     /**
      * Confirmada por omissão: a maioria dos testes deste ficheiro

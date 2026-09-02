@@ -20,8 +20,11 @@ class ReservaAuthorizationTest extends TestCase
     use RefreshDatabase;
 
     private Role $administradorRole;
+
     private Role $gestorRole;
+
     private Role $colaboradorRole;
+
     private Role $utilizadorRole;
 
     protected function setUp(): void

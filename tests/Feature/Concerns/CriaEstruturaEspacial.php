@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Concerns;
 
+use App\Models\Edificio;
 use App\Models\EstadoReserva;
 use App\Models\Periodo;
 use App\Models\Role;
@@ -27,9 +28,9 @@ trait CriaEstruturaEspacial
 
     protected function criarSecretaria(): Secretaria
     {
-        $edificio = \App\Models\Edificio::create([
+        $edificio = Edificio::create([
             'nome' => 'Edifício Central',
-            'codigo' => 'ED-' . uniqid(),
+            'codigo' => 'ED-'.uniqid(),
             'morada' => 'Rua Principal, 1',
             'cidade' => 'Lisboa',
         ]);
@@ -50,7 +51,7 @@ trait CriaEstruturaEspacial
         ]);
 
         return $setor->secretarias()->create([
-            'codigo' => 'SEC-' . uniqid(),
+            'codigo' => 'SEC-'.uniqid(),
             'reservavel' => true,
             'ativo' => true,
         ]);

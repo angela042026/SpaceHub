@@ -15,8 +15,11 @@ class ReservaPolicyTest extends TestCase
     use RefreshDatabase;
 
     private Role $administradorRole;
+
     private Role $gestorRole;
+
     private Role $colaboradorRole;
+
     private Role $utilizadorRole;
 
     protected function setUp(): void
@@ -40,7 +43,7 @@ class ReservaPolicyTest extends TestCase
 
     public function test_all_roles_can_list_and_create_reservas(): void
     {
-        $policy = new ReservaPolicy();
+        $policy = new ReservaPolicy;
 
         foreach ($this->roles() as $role) {
             $user = $this->createUser($role);
@@ -52,7 +55,7 @@ class ReservaPolicyTest extends TestCase
 
     public function test_administrator_can_manage_any_reserva(): void
     {
-        $policy = new ReservaPolicy();
+        $policy = new ReservaPolicy;
 
         $admin = $this->createUser($this->administradorRole);
         $owner = $this->createUser($this->utilizadorRole);
@@ -68,7 +71,7 @@ class ReservaPolicyTest extends TestCase
 
     public function test_user_can_manage_own_reserva(): void
     {
-        $policy = new ReservaPolicy();
+        $policy = new ReservaPolicy;
 
         foreach ([
             $this->gestorRole,
@@ -89,7 +92,7 @@ class ReservaPolicyTest extends TestCase
 
     public function test_user_cannot_manage_another_users_reserva(): void
     {
-        $policy = new ReservaPolicy();
+        $policy = new ReservaPolicy;
 
         $owner = $this->createUser($this->utilizadorRole);
 
@@ -112,7 +115,7 @@ class ReservaPolicyTest extends TestCase
 
     public function test_reservas_cannot_be_deleted_directly(): void
     {
-        $policy = new ReservaPolicy();
+        $policy = new ReservaPolicy;
 
         $admin = $this->createUser($this->administradorRole);
         $owner = $this->createUser($this->utilizadorRole);

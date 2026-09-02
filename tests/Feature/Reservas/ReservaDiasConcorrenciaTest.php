@@ -29,8 +29,8 @@ use Tests\TestCase;
  */
 class ReservaDiasConcorrenciaTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     private function criarSecretariaComPrecoSemanal(): Secretaria
     {
