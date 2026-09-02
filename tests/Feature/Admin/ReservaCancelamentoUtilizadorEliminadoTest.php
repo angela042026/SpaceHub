@@ -23,8 +23,8 @@ use Tests\TestCase;
  */
 class ReservaCancelamentoUtilizadorEliminadoTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     public function test_admin_cancela_reserva_de_utilizador_ja_eliminado_sem_rebentar(): void
     {

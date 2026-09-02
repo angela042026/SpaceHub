@@ -9,6 +9,7 @@ use App\Models\Piso;
 use App\Models\Reserva;
 use App\Models\Secretaria;
 use App\Models\Setor;
+use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -270,7 +271,7 @@ class ReservaDisponibilidadeService
             })
             ->when(
                 $excluirReservaId !== null,
-                fn($query) => $query->where('id', '!=', $excluirReservaId)
+                fn ($query) => $query->where('id', '!=', $excluirReservaId)
             )
             ->exists();
     }
@@ -291,7 +292,7 @@ class ReservaDisponibilidadeService
             ->whereIn('periodo_id', $periodosConflito)
             ->when(
                 $excluirReservaId !== null,
-                fn($query) => $query->where('id', '!=', $excluirReservaId)
+                fn ($query) => $query->where('id', '!=', $excluirReservaId)
             )
             ->exists();
     }
@@ -362,8 +363,8 @@ class ReservaDisponibilidadeService
         $slots = $this->slotsDoPeriodo($nomePeriodo);
 
         $linhas = [];
-        $dia = \Carbon\Carbon::parse($dataInicio);
-        $fim = \Carbon\Carbon::parse($dataFim);
+        $dia = Carbon::parse($dataInicio);
+        $fim = Carbon::parse($dataFim);
 
         while ($dia->lte($fim)) {
             foreach ($slots as $slot) {
@@ -443,7 +444,7 @@ class ReservaDisponibilidadeService
 
         return Periodo::whereIn('nome', $nomesPeriodos)
             ->pluck('id')
-            ->map(fn($id) => (int) $id)
+            ->map(fn ($id) => (int) $id)
             ->all();
     }
 
@@ -469,27 +470,27 @@ class ReservaDisponibilidadeService
             ->with('setor.piso.edificio')
             ->when(
                 $setorId !== null,
-                fn($q) => $q->where('setor_id', $setorId)
+                fn ($q) => $q->where('setor_id', $setorId)
             )
             ->when(
                 $pisoId !== null,
-                fn($q) => $q->whereHas(
+                fn ($q) => $q->whereHas(
                     'setor',
-                    fn($setorQuery) => $setorQuery->where('piso_id', $pisoId)
+                    fn ($setorQuery) => $setorQuery->where('piso_id', $pisoId)
                 )
             )
             ->when(
                 $edificioId !== null,
-                fn($q) => $q->whereHas(
+                fn ($q) => $q->whereHas(
                     'setor.piso',
-                    fn($pisoQuery) => $pisoQuery->where('edificio_id', $edificioId)
+                    fn ($pisoQuery) => $pisoQuery->where('edificio_id', $edificioId)
                 )
             );
 
         foreach (self::CARACTERISTICAS_FILTRAVEIS as $caracteristica) {
             $query->when(
                 $preferencias[$caracteristica] ?? false,
-                fn($q) => $q->where($caracteristica, true)
+                fn ($q) => $q->where($caracteristica, true)
             );
         }
 
@@ -509,11 +510,11 @@ class ReservaDisponibilidadeService
             ->whereIn('secretaria_id', $secretariaIds)
             ->when(
                 $excluirReservaId !== null,
-                fn($query) => $query->where('id', '!=', $excluirReservaId)
+                fn ($query) => $query->where('id', '!=', $excluirReservaId)
             )
             ->get()
             ->groupBy('secretaria_id')
-            ->map(fn($reservas) => $reservas->pluck('periodo_id'));
+            ->map(fn ($reservas) => $reservas->pluck('periodo_id'));
     }
 
     /**

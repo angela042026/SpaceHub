@@ -41,12 +41,12 @@ class DashboardMetricsService
      */
     public static function limparCacheDoDia(): void
     {
-        Cache::forget('dashboard:stats:' . Carbon::today()->toDateString());
+        Cache::forget('dashboard:stats:'.Carbon::today()->toDateString());
     }
 
     private function chaveCacheStats(Carbon $hoje): string
     {
-        return 'dashboard:stats:' . $hoje->toDateString();
+        return 'dashboard:stats:'.$hoje->toDateString();
     }
 
     /**

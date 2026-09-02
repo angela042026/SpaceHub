@@ -67,8 +67,7 @@ class PagamentoSeeder extends Seeder
                     ? now()
                     : null,
 
-                'observacoes' =>
-                    'Pagamento simulado criado pelo seeder.',
+                'observacoes' => 'Pagamento simulado criado pelo seeder.',
             ]);
         }
     }

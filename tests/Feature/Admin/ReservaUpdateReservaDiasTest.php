@@ -8,6 +8,7 @@ use App\Models\ReservaDia;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\ReservaCriacaoService;
+use App\Services\ReservaDisponibilidadeService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Concerns\CriaEstruturaEspacial;
@@ -24,8 +25,8 @@ use Tests\TestCase;
  */
 class ReservaUpdateReservaDiasTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     private function admin(): User
     {
@@ -138,7 +139,7 @@ class ReservaUpdateReservaDiasTest extends TestCase
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            app(\App\Services\ReservaDisponibilidadeService::class)->gerarDiasOcupados(
+            app(ReservaDisponibilidadeService::class)->gerarDiasOcupados(
                 $quarta->toDateString(),
                 $sexta->toDateString(),
                 'Dia inteiro'

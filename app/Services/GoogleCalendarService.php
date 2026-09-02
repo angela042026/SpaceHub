@@ -23,7 +23,9 @@ use Throwable;
 class GoogleCalendarService
 {
     private const AUTORIZAR_URL = 'https://oauth2.googleapis.com/token';
+
     private const EVENTOS_URL = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
+
     private const FUSO_HORARIO = 'Europe/Lisbon';
 
     /**
@@ -125,7 +127,7 @@ class GoogleCalendarService
 
         try {
             Http::withToken($accessToken)
-                ->delete(self::EVENTOS_URL . '/' . $reserva->google_event_id);
+                ->delete(self::EVENTOS_URL.'/'.$reserva->google_event_id);
         } catch (Throwable $e) {
             Log::warning('Erro ao remover evento do Google Calendar.', [
                 'reserva_id' => $reserva->id,

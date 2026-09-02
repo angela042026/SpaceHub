@@ -546,7 +546,7 @@ class SpaceHubEstruturaSeeder extends Seeder
                 'preco_mensal' => $precoMensal,
                 'preco_anual' => $precoAnual,
 
-                'descricao' => $nome . ' - ' . $piso->nome,
+                'descricao' => $nome.' - '.$piso->nome,
                 'ativo' => true,
             ]
         );
@@ -591,12 +591,12 @@ class SpaceHubEstruturaSeeder extends Seeder
                 [
                     'setor_id' => $setor->id,
                     'codigo' => $prefixo
-                        . str_pad($i, 2, '0', STR_PAD_LEFT),
+                        .str_pad($i, 2, '0', STR_PAD_LEFT),
                 ],
                 [
                     'descricao' => $setor->nome
-                        . ' '
-                        . str_pad($i, 2, '0', STR_PAD_LEFT),
+                        .' '
+                        .str_pad($i, 2, '0', STR_PAD_LEFT),
 
                     'planta_x' => (int) min(
                         $xInicio + ($coluna * $xPasso),
@@ -617,8 +617,7 @@ class SpaceHubEstruturaSeeder extends Seeder
                     'junto_janela' => $juntoJanelaTodos
                         || in_array($i, $lugaresJuntoJanela, true),
 
-                    'ergonomica' =>
-                    $setor->tipo !== 'phone_booth',
+                    'ergonomica' => $setor->tipo !== 'phone_booth',
 
                     'luz_natural' => $luzNatural,
                     'zona_silenciosa' => $zonaSilenciosa,

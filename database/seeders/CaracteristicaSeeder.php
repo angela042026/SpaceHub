@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Caracteristica;
+use Illuminate\Database\Seeder;
 
 class CaracteristicaSeeder extends Seeder
 {

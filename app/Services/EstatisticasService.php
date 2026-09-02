@@ -8,8 +8,8 @@ use App\Models\Reserva;
 use App\Models\Secretaria;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class EstatisticasService
 {
@@ -30,8 +30,7 @@ class EstatisticasService
 
     public function __construct(
         private readonly DashboardMetricsService $dashboardMetricsService,
-    ) {
-    }
+    ) {}
 
     /**
      * Resolve o nome a apresentar (PT/EN) a partir de colunas cruas de
@@ -63,7 +62,7 @@ class EstatisticasService
      */
     public function obterEstatisticas(?Carbon $dataInicio): array
     {
-        $chave = 'dashboard:estatisticas:' . ($dataInicio?->toDateString() ?? 'geral');
+        $chave = 'dashboard:estatisticas:'.($dataInicio?->toDateString() ?? 'geral');
 
         return Cache::remember(
             $chave,

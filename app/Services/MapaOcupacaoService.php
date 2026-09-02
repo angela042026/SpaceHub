@@ -122,16 +122,15 @@ class MapaOcupacaoService
 
                     $ocupadas = $secretarias
                         ->filter(
-                            fn (array $secretaria) =>
-                                in_array(
-                                    $secretaria['status'],
-                                    [
-                                        'ocupada',
-                                        'reservada',
-                                        'expira',
-                                    ],
-                                    true
-                                )
+                            fn (array $secretaria) => in_array(
+                                $secretaria['status'],
+                                [
+                                    'ocupada',
+                                    'reservada',
+                                    'expira',
+                                ],
+                                true
+                            )
                         )
                         ->count();
 
@@ -167,8 +166,7 @@ class MapaOcupacaoService
             'planta' => $piso->planta,
             'edificio_id' => $piso->edificio_id,
             'edificio_nome' => $piso->edificio?->nome,
-            'totalSecretarias' =>
-                $setores->sum('totalSecretarias'),
+            'totalSecretarias' => $setores->sum('totalSecretarias'),
             'setores' => $setores,
         ];
     }

@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Secretaria;
 use App\Models\Setor;
+use Illuminate\Database\Seeder;
 
 class SecretariaSeeder extends Seeder
 {
@@ -23,7 +23,7 @@ class SecretariaSeeder extends Seeder
                 Secretaria::updateOrCreate(
                     [
                         'setor_id' => $setor->id,
-                        'codigo' => $setor->codigo . str_pad($i, 2, '0', STR_PAD_LEFT),
+                        'codigo' => $setor->codigo.str_pad($i, 2, '0', STR_PAD_LEFT),
                     ],
                     [
                         'descricao' => $setor->nome,
@@ -32,13 +32,13 @@ class SecretariaSeeder extends Seeder
                         'monitor' => in_array($setor->tipo, [
                             'open_space',
                             'escritorio',
-                            'escritorio_executivo'
+                            'escritorio_executivo',
                         ]),
 
                         'dock_usb' => in_array($setor->tipo, [
                             'open_space',
                             'escritorio',
-                            'escritorio_executivo'
+                            'escritorio_executivo',
                         ]),
 
                         'junto_janela' => false,

@@ -14,8 +14,8 @@ use Tests\TestCase;
 
 class AtividadeControllerTest extends TestCase
 {
-    use RefreshDatabase;
     use CriaEstruturaEspacial;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {

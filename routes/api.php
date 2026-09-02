@@ -10,7 +10,6 @@ use App\Http\Controllers\Api\SetorController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
-
 /*
 |--------------------------------------------------------------------------
 | Rotas públicas
