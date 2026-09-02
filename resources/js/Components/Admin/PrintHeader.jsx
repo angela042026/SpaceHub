@@ -1,7 +1,9 @@
 import { usePage } from '@inertiajs/react';
+import { useTranslation } from 'react-i18next';
 
 export default function PrintHeader({ title, subtitle, geradoEm }) {
     const { auth } = usePage().props;
+    const { t } = useTranslation('relatorios');
 
     return (
         <div className="hidden print-header print:mb-5 print:flex print:h-auto print:min-h-0 print:break-after-avoid print:items-start print:justify-between print:gap-6 print:overflow-visible print:border-b print:border-slate-300 print:pb-3">
@@ -22,8 +24,8 @@ export default function PrintHeader({ title, subtitle, geradoEm }) {
             </div>
 
             <div className="shrink-0 text-right text-[10px] leading-snug text-slate-500">
-                <p>Gerado em {geradoEm}</p>
-                <p>Por {auth.user?.name ?? '-'}</p>
+                <p>{t('impressao.geradoEm', { data: geradoEm })}</p>
+                <p>{t('impressao.por', { nome: auth.user?.name ?? '-' })}</p>
             </div>
         </div>
     );

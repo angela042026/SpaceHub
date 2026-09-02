@@ -663,6 +663,38 @@ php artisan schedule:work
 
 O Scheduler é utilizado para tarefas automáticas, incluindo atualização de reservas expiradas e outros processos agendados.
 
+### Preparação para produção
+
+Use `.env.production.example` como referência e copie os valores necessários para o `.env` do servidor. Nunca versione o `.env` real nem reutilize credenciais de desenvolvimento.
+
+Antes de disponibilizar uma nova versão:
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+php artisan migrate --force
+php artisan storage:link
+php artisan optimize
+```
+
+Confirme que `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL` usa HTTPS e `SESSION_SECURE_COOKIE=true`. Gere uma chave exclusiva com `php artisan key:generate` caso o ambiente ainda não tenha `APP_KEY`.
+
+O servidor também precisa de processos supervisionados para:
+
+```bash
+php artisan queue:work --tries=3
+php artisan reverb:start
+```
+
+Configure ainda o cron para executar o scheduler a cada minuto:
+
+```cron
+* * * * * cd /caminho/do/spacehub && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Depois do deploy, confirme `php artisan about`, `php artisan migrate:status`, os logs da aplicação e os fluxos críticos de login, reserva, pagamento e check-in.
+
 ▶️ Execução em desenvolvimento
 
 Durante o desenvolvimento podem permanecer ativos quatro terminais.

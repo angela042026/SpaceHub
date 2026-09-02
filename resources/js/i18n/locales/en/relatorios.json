@@ -1,4 +1,10 @@
 {
+    "impressao": {
+        "imprimir": "Print",
+        "geradoEm": "Generated at {{data}}",
+        "por": "By {{nome}}",
+        "rodape": "SpaceHub — Document automatically generated at {{data}} by {{nome}}"
+    },
     "index": {
         "titulo": "Reports",
         "descricao": "View, filter and export SpaceHub's key management data.",
