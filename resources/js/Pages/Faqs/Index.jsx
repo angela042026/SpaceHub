@@ -165,7 +165,7 @@ export default function Index({ faqs }) {
                 </div>
 
                 {/* Navegação rápida por categoria */}
-                <div className="-mx-1 mb-8 flex flex-nowrap gap-2 overflow-x-auto px-1 pb-1">
+                <div className="mb-8 flex flex-wrap gap-2 sm:-mx-1 sm:flex-nowrap sm:overflow-x-auto sm:px-1 sm:pb-1">
                     {CATEGORIAS.map((categoria) => {
                         const disponivel = categoriasFiltradas.some(
                             (c) => c.chave === categoria.chave,

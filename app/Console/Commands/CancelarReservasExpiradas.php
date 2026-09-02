@@ -2,13 +2,13 @@
 
 namespace App\Console\Commands;
 
-use App\Events\MapaAtualizado;
 use App\Models\EstadoReserva;
 use App\Models\Reserva;
 use App\Models\ReservaDia;
 use App\Notifications\ReservaExpiradaNotification;
 use App\Services\ActivityLogger;
 use App\Services\DashboardMetricsService;
+use App\Services\MapaAtualizadoBroadcaster;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -138,7 +138,7 @@ class CancelarReservasExpiradas extends Command
 
         if ($expiradas > 0) {
             // Atualiza o mapa em tempo real para todos os utilizadores
-            broadcast(new MapaAtualizado);
+            MapaAtualizadoBroadcaster::broadcast();
             DashboardMetricsService::limparCacheDoDia();
         }
 

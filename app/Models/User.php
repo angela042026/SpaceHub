@@ -152,6 +152,11 @@ class User extends Authenticatable implements HasLocalePreference
         return $this->hasRole(RoleName::Gestor);
     }
 
+    public function isColaborador(): bool
+    {
+        return $this->hasRole(RoleName::Colaborador);
+    }
+
     /**
      * Usado automaticamente pelo Laravel ao enviar Notifications (e-mail
      * e base de dados), incluindo as despoletadas por comandos agendados

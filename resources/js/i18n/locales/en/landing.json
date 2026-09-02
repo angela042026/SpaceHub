@@ -16,7 +16,10 @@
         "tituloLinha1": "Book the perfect space",
         "tituloLinha2": "to work",
         "tituloDestaque": "better.",
+        "tituloMobileLinha1": "Book the perfect space",
+        "tituloMobileLinha2": "to work",
         "descricao": "Book desks, meeting rooms and coworking spaces in seconds. Check in with a QR Code and track occupancy in real time, all in one platform.",
+        "descricaoMobile": "Book a workspace in seconds, check in with a QR Code and track occupancy in real time.",
         "ctaReservar": "Book a space",
         "ctaEntrarReservar": "Log in to book",
         "ctaConhecerEspacos": "Explore our spaces"

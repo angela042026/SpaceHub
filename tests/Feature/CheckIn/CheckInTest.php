@@ -404,4 +404,74 @@ class CheckInTest extends TestCase
 
         $this->assertSame('qr', $registo->metadata['via'] ?? null);
     }
+
+    public function test_colaborador_pode_abrir_checkin_da_recepcao(): void
+    {
+        $colaborador = $this->criarUsuarioComRole('Colaborador');
+        $dono = $this->criarUsuarioComRole('Utilizador');
+        $reserva = $this->criarReservaHoje($dono);
+
+        $this->travelTo(Carbon::today()->setTime(8, 15));
+
+        $this->actingAs($colaborador)
+            ->get(route('checkin.recepcao.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('CheckIn/Rececao')
+                ->where('reservas.data.0.id', $reserva->id)
+                ->where('reservas.data.0.status', 'pronta'));
+    }
+
+    public function test_colaborador_pode_confirmar_checkin_na_recepcao(): void
+    {
+        $colaborador = $this->criarUsuarioComRole('Colaborador');
+        $dono = $this->criarUsuarioComRole('Utilizador');
+        $reserva = $this->criarReservaHoje($dono);
+
+        $this->travelTo(Carbon::today()->setTime(8, 15));
+
+        $this->actingAs($colaborador)
+            ->post(route('checkin.recepcao.confirmar', $reserva))
+            ->assertSessionHas('success');
+
+        $this->assertNotNull($reserva->fresh()->check_in_at);
+
+        $registo = ActivityLog::where('action', 'checkin_efetuado')
+            ->where('actor_id', $colaborador->id)
+            ->firstOrFail();
+
+        $this->assertSame('rececao', $registo->metadata['via'] ?? null);
+        $this->assertSame($dono->id, $registo->metadata['utilizador_id'] ?? null);
+    }
+
+    public function test_utilizador_comum_nao_acede_ao_checkin_da_recepcao(): void
+    {
+        $utilizador = $this->criarUsuarioComRole('Utilizador');
+        $reserva = $this->criarReservaHoje($utilizador);
+
+        $this->actingAs($utilizador)
+            ->get(route('checkin.recepcao.index'))
+            ->assertForbidden();
+
+        $this->actingAs($utilizador)
+            ->post(route('checkin.recepcao.confirmar', $reserva))
+            ->assertForbidden();
+
+        $this->assertNull($reserva->fresh()->check_in_at);
+    }
+
+    public function test_recepcao_respeita_a_janela_horaria(): void
+    {
+        $administrador = $this->criarUsuarioComRole('Administrador');
+        $dono = $this->criarUsuarioComRole('Utilizador');
+        $reserva = $this->criarReservaHoje($dono);
+
+        $this->travelTo(Carbon::today()->setTime(15, 0));
+
+        $this->actingAs($administrador)
+            ->post(route('checkin.recepcao.confirmar', $reserva))
+            ->assertSessionHasErrors('reserva');
+
+        $this->assertNull($reserva->fresh()->check_in_at);
+    }
 }

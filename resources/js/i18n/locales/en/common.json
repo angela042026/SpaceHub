@@ -126,6 +126,7 @@
         "minhasReservas": "My Bookings",
         "disponibilidade": "Availability",
         "checkin": "Check-in",
+        "checkinRececao": "Reception check-in",
         "mapaDoEscritorio": "Office Map",
         "historico": "History",
         "pagamentos": "Payments",
@@ -149,5 +150,28 @@
         "fecharMenu": "Close sidebar menu",
         "terminarSessao": "Log out",
         "utilizadorFallback": "User"
+    },
+    "checkinRececao": {
+        "titulo": "Reception check-in",
+        "subtitulo": "Confirm in person the arrival of users with a booking for today.",
+        "pesquisar": "Search by name, email or desk code...",
+        "semReservas": "There are no pending bookings matching these criteria.",
+        "utilizador": "User",
+        "espaco": "Space",
+        "horario": "Time",
+        "estado": "Status",
+        "acao": "Action",
+        "confirmar": "Confirm check-in",
+        "confirmarTitulo": "Confirm in-person check-in",
+        "confirmacao": "Confirm the in-person check-in for {{nome}}?",
+        "cancelar": "Cancel",
+        "aConfirmar": "Confirming...",
+        "pronta": "Ready",
+        "pendente_pagamento": "Payment pending",
+        "fora_da_janela": "Outside check-in window",
+        "ja_check_in": "Checked in",
+        "pagina": "Page {{atual}} of {{total}}",
+        "anterior": "Previous",
+        "seguinte": "Next"
     }
 }

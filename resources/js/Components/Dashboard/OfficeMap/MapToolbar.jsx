@@ -59,7 +59,7 @@ export default function MapToolbar({
     }, []);
 
     const abasDePiso = (
-        <div className="flex min-w-0 items-center gap-1 overflow-x-auto rounded-xl p-0.5">
+        <div className="flex min-w-0 items-center gap-1 overflow-x-auto rounded-xl p-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {pisos.map((piso) => {
                 const ativo = String(piso.codigo) === String(selectedFloor);
 
@@ -68,7 +68,7 @@ export default function MapToolbar({
                         key={piso.id}
                         type="button"
                         onClick={() => setSelectedFloor?.(piso.codigo)}
-                        className={`relative h-10 min-w-[74px] rounded-lg px-4 text-sm font-bold transition ${
+                        className={`relative h-9 min-w-16 rounded-lg px-2 text-xs font-bold transition sm:h-10 sm:min-w-[74px] sm:px-4 sm:text-sm ${
                             ativo
                                 ? 'bg-teal-600 text-white shadow-[inset_0_1px_2px_rgba(0,0,0,0.12)]'
                                 : 'text-slate-600 hover:bg-white/70 dark:text-[#b5c5d5] dark:hover:bg-[#183f5d]'
@@ -120,7 +120,7 @@ export default function MapToolbar({
         <div className="flex flex-col gap-3 rounded-2xl border border-[#e6edf5] bg-[#f8fafc] p-2 xl:flex-row xl:items-center xl:justify-between dark:border-[#2a5069] dark:bg-[#101f34]">
             {abasDePiso}
 
-            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center justify-start gap-1.5 sm:justify-end sm:gap-2">
                 {edificios.length > 1 && (
                     <select
                         value={selectedEdificio}
@@ -143,7 +143,7 @@ export default function MapToolbar({
                     </select>
                 )}
 
-                <div className="relative min-w-[160px] flex-1 sm:min-w-[260px] xl:max-w-[300px]">
+                <div className="relative w-full flex-none sm:min-w-[260px] sm:flex-1 xl:max-w-[300px]">
                     <Search
                         size={17}
                         className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-[#8fa7bd]"
@@ -222,14 +222,14 @@ export default function MapToolbar({
                     }
                 />
 
-                <div className="flex h-10 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-[#2a5069] dark:bg-[#101f34]">
+                <div className="flex h-9 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:h-10 dark:border-[#2a5069] dark:bg-[#101f34]">
                     <IconButton
                         icon={ZoomOut}
                         label={t('officeMap.diminuirZoom')}
                         disabled={zoom <= MIN_ZOOM}
                         onClick={() => onZoom(-ZOOM_STEP)}
                     />
-                    <span className="flex min-w-12 items-center justify-center border-x border-slate-200 px-2 text-[11px] font-bold text-slate-500 dark:border-[#2a5069] dark:text-[#8fa7bd]">
+                    <span className="flex min-w-10 items-center justify-center border-x border-slate-200 px-1 text-[11px] font-bold text-slate-500 sm:min-w-12 sm:px-2 dark:border-[#2a5069] dark:text-[#8fa7bd]">
                         {Math.round(zoom * 100)}%
                     </span>
                     <IconButton
@@ -267,7 +267,7 @@ function ToolbarButton({
             type="button"
             onClick={onClick}
             title={label}
-            className={`flex h-10 items-center gap-2 rounded-xl border px-3 text-xs font-bold transition ${
+            className={`flex h-9 items-center gap-2 rounded-xl border px-2 text-xs font-bold transition sm:h-10 sm:px-3 ${
                 active
                     ? 'border-teal-500 bg-teal-500/10 text-teal-600'
                     : 'border-transparent bg-white text-slate-600 shadow-sm hover:border-teal-500 hover:text-teal-600 dark:bg-[#101f34] dark:text-slate-300'
@@ -294,7 +294,7 @@ function IconButton({
             disabled={disabled}
             aria-label={label}
             title={label}
-            className="flex w-9 items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-teal-600 disabled:opacity-30 dark:text-[#b5c5d5] dark:hover:bg-[#183f5d]"
+            className="flex w-8 items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-teal-600 disabled:opacity-30 sm:w-9 dark:text-[#b5c5d5] dark:hover:bg-[#183f5d]"
         >
             <Icon size={15} />
         </button>
@@ -308,7 +308,7 @@ function IconButtonBox({ icon: Icon, label, onClick }) {
             onClick={onClick}
             aria-label={label}
             title={label}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-teal-500 hover:text-teal-600 dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#b5c5d5]"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-teal-500 hover:text-teal-600 sm:h-10 sm:w-10 dark:border-[#2a5069] dark:bg-[#101f34] dark:text-[#b5c5d5]"
         >
             <Icon size={17} />
         </button>
