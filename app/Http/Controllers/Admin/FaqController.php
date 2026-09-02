@@ -38,9 +38,9 @@ class FaqController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'categoria'   => 'required|string|max:30',
-            'pergunta'    => 'required|string|max:255',
-            'resposta'    => 'required|string',
+            'categoria' => 'required|string|max:30',
+            'pergunta' => 'required|string|max:255',
+            'resposta' => 'required|string',
             'keywords_pt' => 'nullable|string',
             'keywords_en' => 'nullable|string',
         ]);
@@ -65,7 +65,7 @@ class FaqController extends Controller
         $categorias = Faq::distinct()->pluck('categoria')->filter()->values();
 
         return Inertia::render('Admin/Faqs/Edit', [
-            'faq'        => $faq,
+            'faq' => $faq,
             'categorias' => $categorias,
         ]);
     }
@@ -73,9 +73,9 @@ class FaqController extends Controller
     public function update(Request $request, Faq $faq)
     {
         $validated = $request->validate([
-            'categoria'   => 'required|string|max:30',
-            'pergunta'    => 'required|string|max:255',
-            'resposta'    => 'required|string',
+            'categoria' => 'required|string|max:30',
+            'pergunta' => 'required|string|max:255',
+            'resposta' => 'required|string',
             'keywords_pt' => 'nullable|string',
             'keywords_en' => 'nullable|string',
         ]);

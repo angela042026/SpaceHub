@@ -12,7 +12,7 @@ class FaqKeywordService
         'em', 'no', 'na', 'nos', 'nas', 'por', 'pelo', 'pela', 'pelos', 'pelas', 'para',
         'com', 'como', 'onde', 'quando', 'porque', 'porquê', 'que', 'qual', 'quais', 'se',
         'e', 'ou', 'mas', 'também', 'ser', 'estar', 'ter', 'haver', 'fazer', 'pode', 'posso',
-        'está', 'são', 'foram', 'meu', 'minha', 'seu', 'sua', 'este', 'esta', 'isto'
+        'está', 'são', 'foram', 'meu', 'minha', 'seu', 'sua', 'este', 'esta', 'isto',
     ];
 
     /**
@@ -22,7 +22,7 @@ class FaqKeywordService
         'i', 'me', 'my', 'mine', 'the', 'a', 'an', 'and', 'or', 'but', 'is', 'are', 'was',
         'were', 'to', 'of', 'in', 'on', 'for', 'with', 'from', 'how', 'what', 'where',
         'when', 'why', 'who', 'can', 'could', 'do', 'does', 'did', 'you', 'your', 'we',
-        'our', 'they', 'their', 'it', 'this', 'that', 'have', 'has', 'had', 'be', 'been'
+        'our', 'they', 'their', 'it', 'this', 'that', 'have', 'has', 'had', 'be', 'been',
     ];
 
     /**
@@ -41,10 +41,9 @@ class FaqKeywordService
         string $resposta,
         ?string $perguntaEn = null,
         ?string $respostaEn = null
-    ): array
-    {
-        $textoPt = $pergunta . ' ' . $resposta;
-        $textoEn = trim(($perguntaEn ?? '') . ' ' . ($respostaEn ?? ''));
+    ): array {
+        $textoPt = $pergunta.' '.$resposta;
+        $textoEn = trim(($perguntaEn ?? '').' '.($respostaEn ?? ''));
 
         $termosPt = $this->extrairTermosBase($textoPt, $this->stopwordsPt);
         $termosEn = $textoEn === ''
@@ -73,7 +72,7 @@ class FaqKeywordService
             // Aceita apenas palavras com mais de 3 letras que não sejam stopwords
             if (
                 (mb_strlen($palavra) > 3 || in_array($palavraSemAcento, $curtasPermitidas, true))
-                && !in_array($palavraSemAcento, $stopwords, true)
+                && ! in_array($palavraSemAcento, $stopwords, true)
             ) {
                 $relevantes[] = $palavra;
             }

@@ -11,9 +11,9 @@ use App\Http\Controllers\Admin\SecretariaController as AdminSecretariaController
 use App\Http\Controllers\Admin\SetorController as AdminSetorController;
 use App\Http\Controllers\Admin\StatisticsController as AdminStatisticsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\ChatController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\AvaliacaoController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckInController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FaqController;

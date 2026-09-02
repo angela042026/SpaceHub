@@ -27,8 +27,8 @@ class ChatController extends Controller
         foreach ($faqs as $faq) {
             $pontuacao = 0;
 
-            $perguntaLower   = mb_strtolower($faq->pergunta);
-            $respostaLower   = mb_strtolower($faq->resposta);
+            $perguntaLower = mb_strtolower($faq->pergunta);
+            $respostaLower = mb_strtolower($faq->resposta);
             $keywordsPtLower = mb_strtolower($faq->keywords_pt ?? '');
             $keywordsEnLower = mb_strtolower($faq->keywords_en ?? '');
 
@@ -65,15 +65,15 @@ class ChatController extends Controller
         // Limiar de relevância mínima
         if ($melhorFaq && $maiorPontuacao >= 2) {
             return response()->json([
-                'sucesso'   => true,
-                'resposta'  => $melhorFaq->resposta,
-                'faq_id'    => $melhorFaq->id,
+                'sucesso' => true,
+                'resposta' => $melhorFaq->resposta,
+                'faq_id' => $melhorFaq->id,
                 'categoria' => $melhorFaq->categoria,
             ]);
         }
 
         return response()->json([
-            'sucesso'  => false,
+            'sucesso' => false,
             'resposta' => 'Desculpe, não encontrei uma resposta exata para a sua questão. Pode contactar a nossa equipa de suporte no separador "Apoio".',
         ]);
     }
