@@ -33,56 +33,46 @@ class PagamentoResource extends JsonResource
                         'data' => $this->reserva->data
                             ?->format('Y-m-d'),
 
-                        'cancelada_at' =>
-                            $this->reserva->cancelada_at
-                                ?->toISOString(),
+                        'cancelada_at' => $this->reserva->cancelada_at
+                            ?->toISOString(),
 
                         'periodo' => $this->reserva->periodo
                             ? [
-                                'id' =>
-                                    $this->reserva->periodo->id,
+                                'id' => $this->reserva->periodo->id,
 
-                                'nome' =>
-                                    $this->reserva->periodo->nome,
+                                'nome' => $this->reserva->periodo->nome,
 
-                                'hora_inicio' =>
-                                    $this->reserva
-                                        ->periodo
-                                        ->hora_inicio,
+                                'hora_inicio' => $this->reserva
+                                    ->periodo
+                                    ->hora_inicio,
 
-                                'hora_fim' =>
-                                    $this->reserva
-                                        ->periodo
-                                        ->hora_fim,
+                                'hora_fim' => $this->reserva
+                                    ->periodo
+                                    ->hora_fim,
                             ]
                             : null,
 
                         'secretaria' => $this->reserva->secretaria
                             ? [
-                                'id' =>
-                                    $this->reserva->secretaria->id,
+                                'id' => $this->reserva->secretaria->id,
 
-                                'codigo' =>
-                                    $this->reserva
-                                        ->secretaria
-                                        ->codigo,
+                                'codigo' => $this->reserva
+                                    ->secretaria
+                                    ->codigo,
 
-                                'setor' =>
-                                    $this->reserva
-                                        ->secretaria
-                                        ->setor
+                                'setor' => $this->reserva
+                                    ->secretaria
+                                    ->setor
                                         ? [
-                                            'id' =>
-                                                $this->reserva
-                                                    ->secretaria
-                                                    ->setor
-                                                    ->id,
+                                            'id' => $this->reserva
+                                                ->secretaria
+                                                ->setor
+                                                ->id,
 
-                                            'nome' =>
-                                                $this->reserva
-                                                    ->secretaria
-                                                    ->setor
-                                                    ->nome,
+                                            'nome' => $this->reserva
+                                                ->secretaria
+                                                ->setor
+                                                ->nome,
                                         ]
                                         : null,
                             ]

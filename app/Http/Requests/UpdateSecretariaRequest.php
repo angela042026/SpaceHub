@@ -71,7 +71,6 @@ class UpdateSecretariaRequest extends FormRequest
                 'boolean',
             ],
 
-
             'dock_usb' => [
                 'sometimes',
                 'boolean',

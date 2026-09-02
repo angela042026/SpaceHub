@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Models\ActivityLog;
 use App\Models\User;
 
 class ActivityLogPolicy

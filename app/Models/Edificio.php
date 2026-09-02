@@ -48,7 +48,7 @@ class Edificio extends Model
     protected function imagemUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->imagem ? asset('storage/' . $this->imagem) : null,
+            get: fn () => $this->imagem ? asset('storage/'.$this->imagem) : null,
         );
     }
 }

@@ -94,7 +94,7 @@ class User extends Authenticatable implements HasLocalePreference
                 blank($this->fotografia) => null,
                 str_starts_with($this->fotografia, 'http://'),
                 str_starts_with($this->fotografia, 'https://') => $this->fotografia,
-                default => asset('storage/' . $this->fotografia),
+                default => asset('storage/'.$this->fotografia),
             },
         );
     }

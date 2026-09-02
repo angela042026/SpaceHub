@@ -10,7 +10,7 @@ class ReservaPolicy
     /**
      * Bloqueia qualquer operação de utilizadores inativos.
      */
-    public function before(User $user, string $ability): bool|null
+    public function before(User $user, string $ability): ?bool
     {
         if (! $user->ativo) {
             return false;

@@ -29,7 +29,7 @@ class PisoResource extends JsonResource
             'planta_url' => $this->planta
                 ? (str_starts_with($this->planta, '/')
                     ? asset($this->planta)
-                    : asset('storage/' . $this->planta))
+                    : asset('storage/'.$this->planta))
                 : null,
 
             'descricao' => $this->descricao,
