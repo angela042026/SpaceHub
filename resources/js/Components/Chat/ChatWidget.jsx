@@ -55,12 +55,12 @@ export default function ChatWidget() {
 
     return (
         <div
-            className={`fixed right-3 z-[120] font-sans transition-all duration-300 sm:right-6 print:hidden ${
+            className={`fixed right-2 z-[120] font-sans transition-all duration-300 sm:right-4 print:hidden ${
                 cookieBannerVisible
-                    ? "bottom-48 lg:bottom-28"
+                    ? "bottom-44 lg:bottom-24"
                     : alteracaoBarVisible
-                      ? "bottom-56 lg:bottom-28"
-                      : "bottom-6"
+                      ? "bottom-52 lg:bottom-24"
+                      : "bottom-3"
             }`}
         >
             {/* Painel do chat */}
@@ -181,7 +181,10 @@ export default function ChatWidget() {
                         </>
                     ) : (
                         /* CHATBOT INTEGRADO INTEGRALMENTE */
-                        <ChatBot aoVoltar={() => setModoAtivo("menu")} />
+                        <ChatBot
+                            aoVoltar={() => setModoAtivo("menu")}
+                            aoFechar={fechar}
+                        />
                     )}
                 </div>
             )}

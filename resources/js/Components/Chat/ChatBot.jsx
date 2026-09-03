@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, ArrowLeft } from 'lucide-react';
+import { Send, Bot, User, ArrowLeft, X } from 'lucide-react';
 import { usePage } from '@inertiajs/react';
+import axios from 'axios';
 
-export default function ChatBot({ aoVoltar }) {
+export default function ChatBot({ aoVoltar, aoFechar }) {
     const { auth } = usePage().props;
     const nomeDoUtilizador = auth?.user ? auth.user.name : 'Utilizador';
 
@@ -10,126 +11,40 @@ export default function ChatBot({ aoVoltar }) {
     const [mensagens, setMensagens] = useState([
         { id: 1, emissor: 'bot', texto: `Olá, ${nomeDoUtilizador}! 👋\nBem-vindo ao suporte do SpaceHub. Como posso ajudar hoje?`, opcoes: [] }
     ]);
-    const [mostrarBotoes, setMostrarBotoes] = useState(false);
-    const [triggerPendente, setTriggerPendente] = useState(null);
+    const [aEnviar, setAEnviar] = useState(false);
 
     const fimMensagensRef = useRef(null);
 
     // Auto-scroll para a última mensagem
     useEffect(() => {
         fimMensagensRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [mensagens, mostrarBotoes]);
+    }, [mensagens, aEnviar]);
 
-    const lidarComEnvio = (e) => {
+    const lidarComEnvio = async (e) => {
         e.preventDefault();
-        if (!input.trim()) return;
+        if (!input.trim() || aEnviar) return;
 
         const pergunta = input;
 
         const novaMensagemUser = { id: Date.now(), emissor: 'user', texto: pergunta };
         setMensagens(prev => [...prev, novaMensagemUser]);
         setInput('');
-        setMostrarBotoes(false);
+        setAEnviar(true);
 
-        setTimeout(() => {
-            let frase = pergunta.toLowerCase().trim();
-            const procurar = ['á', 'à', 'ã', 'â', 'é', 'ê', 'í', 'ó', 'ô', 'õ', 'ú', 'ç'];
-            const substituir = ['a', 'a', 'a', 'a', 'e', 'e', 'i', 'o', 'o', 'o', 'u', 'c'];
-            procurar.forEach((letra, i) => {
-                frase = frase.replaceAll(letra, substituir[i]);
+        try {
+            const { data } = await axios.post(route('chat.mensagem'), {
+                mensagem: pergunta,
             });
 
-            const temas = [
-                {
-                    id: 'saudacao',
-                    triggers: ['ola', 'oi', 'ajuda', 'bom dia', 'boa tarde', 'boa noite'],
-                    resposta: "Olá! 👋\nComo posso ajudar?"
-                },
-                {
-                    id: 'precos',
-                    triggers: ['preco', 'precos', 'valores', 'plano', 'planos', 'pagar', 'valor', 'custo', 'custos'],
-                    resposta: "Temos passes a partir de 8€ (meio-dia) e planos mensais a partir de 149€. Pode ver todos os detalhes na secção de Preços da página inicial! 💼"
-                },
-                {
-                    id: 'espaco',
-                    triggers: ['espaco', 'local', 'morada', 'onde', 'instalacoes', 'comunidade', 'cafe', 'internet', 'wifi'],
-                    resposta: "Temos salas de reunião modernas, internet ultra-rápida e café grátis à descrição, disponível no lobby! ☕"
-                },
-                {
-                    id: 'reservas',
-                    triggers: ['reserva', 'reservar', 'reservas', 'sala', 'salas', 'secretaria', 'secretarias'],
-                    resposta: "Para reservar uma sala de reunião ou secretária, basta aceder ao módulo correspondente no teu menu! 🗓️"
-                }
-            ];
-
-            let temasEncontrados = [];
-
-            temas.forEach(tema => {
-                const triggerUsada = tema.triggers.find(t => {
-                    const regex = new RegExp(`\\b${t}\\b`, 'i');
-                    return regex.test(frase);
-                });
-
-                if (triggerUsada) {
-                    const posicao = frase.indexOf(triggerUsada);
-                    temasEncontrados.push({ ...tema, triggerExata: triggerUsada, posicaoNaFrase: posicao });
-                }
-            });
-
-            if (temasEncontrados.length === 0) {
-                setMensagens((prev) => [...prev, {
-                    id: Date.now(),
-                    emissor: 'bot',
-                    texto: "Desculpe, ainda sou um robô em treino no SpaceHub. Por enquanto, posso ajudar com assuntos como 'preços', 'espaços' ou 'reservas'!"
-                }]);
-                return;
-            }
-
-            temasEncontrados.sort((a, b) => a.posicaoNaFrase - b.posicaoNaFrase);
-
-            const primeiroTema = temasEncontrados[0];
-            let respostaFinal = primeiroTema.resposta;
-
-            if (temasEncontrados.length > 1) {
-                const segundoTema = temasEncontrados[1];
-                respostaFinal += `\n\n💡 Notei que também mencionou "${segundoTema.triggerExata}". Deseja obter mais informação sobre este assunto?`;
-
-                setTriggerPendente(segundoTema);
-                setMostrarBotoes(true);
-            } else {
-                setTriggerPendente(null);
-            }
-
-            setMensagens((prev) => [...prev, { id: Date.now(), emissor: 'bot', texto: respostaFinal }]);
-        }, 800);
-    };
-
-    const lidarComEscolha = (querSaberMais) => {
-        const proximoTema = triggerPendente;
-
-        setMostrarBotoes(false);
-        setTriggerPendente(null);
-
-        if (querSaberMais && proximoTema) {
-            setMensagens((prev) => [...prev, { id: Date.now(), emissor: 'user', texto: "Sim, quero saber mais." }]);
-
-            setTimeout(() => {
-                setMensagens((prev) => [...prev, {
-                    id: Date.now() + 1,
-                    emissor: 'bot',
-                    texto: `${proximoTema.resposta}`
-                }]);
-            }, 800);
-        } else {
-            setMensagens((prev) => [...prev, { id: Date.now(), emissor: 'user', texto: "Já tenho a informação que procurava." }]);
-
-            setTimeout(() => {
-                setMensagens((prev) => [...prev, {
-                    id: Date.now() + 1,
-                    emissor: 'bot',
-                    texto: "Excelente! Se precisar de mais ajuda, eu continuo deste lado. Bom trabalho no SpaceHub! 🚀"
-                }]);
-            }, 800);
+            setMensagens((prev) => [...prev, { id: Date.now() + 1, emissor: 'bot', texto: data.resposta }]);
+        } catch {
+            setMensagens((prev) => [...prev, {
+                id: Date.now() + 1,
+                emissor: 'bot',
+                texto: "Desculpe, ocorreu um erro ao processar a sua questão. Tente novamente mais tarde.",
+            }]);
+        } finally {
+            setAEnviar(false);
         }
     };
 
@@ -159,12 +74,22 @@ export default function ChatBot({ aoVoltar }) {
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20">
                     <Bot size={20} />
                 </div>
-                <div>
+                <div className="flex-1">
                     <h4 className="text-sm font-bold leading-tight">Assistente Virtual</h4>
                     <span className="text-[11px] text-teal-100 flex items-center gap-1">
                         <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse" /> Disponível
                     </span>
                 </div>
+                {aoFechar && (
+                    <button
+                        onClick={aoFechar}
+                        aria-label="Fechar chat"
+                        className="rounded-lg p-1 hover:bg-white/10 transition-colors"
+                        title="Fechar"
+                    >
+                        <X size={18} />
+                    </button>
+                )}
             </div>
 
             {/* Balões de Conversa */}
@@ -204,21 +129,10 @@ export default function ChatBot({ aoVoltar }) {
                     </div>
                 ))}
 
-                {/* Opções de Botões Alternativos */}
-                {mostrarBotoes && (
-                    <div className="flex flex-col sm:flex-row gap-2 mt-2 pl-9 justify-start relative z-20">
-                        <button
-                            onClick={() => lidarComEscolha(false)}
-                            className="bg-slate-500 hover:bg-slate-600 text-white border-none px-3 py-1.5 rounded-full text-xs cursor-pointer shadow-sm active:scale-95 transition-all"
-                        >
-                            Já tenho a informação que procurava
-                        </button>
-                        <button
-                            onClick={() => lidarComEscolha(true)}
-                            className="bg-teal-500 hover:bg-teal-600 text-white border-none px-3 py-1.5 rounded-full text-xs cursor-pointer shadow-sm active:scale-95 transition-all"
-                        >
-                            Sim, quero saber mais
-                        </button>
+                {/* Indicador de escrita enquanto aguarda resposta */}
+                {aEnviar && (
+                    <div className="flex items-center gap-2 pl-9 text-xs text-slate-400">
+                        <Bot size={14} /> A escrever...
                     </div>
                 )}
 
@@ -239,7 +153,7 @@ export default function ChatBot({ aoVoltar }) {
                 />
                 <button
                     type="submit"
-                    disabled={!input.trim()}
+                    disabled={!input.trim() || aEnviar}
                     aria-label="Enviar mensagem"
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-500 text-white shadow-md shadow-teal-500/10 transition-all hover:bg-teal-600 disabled:opacity-40 disabled:hover:bg-teal-500 active:scale-95"
                 >

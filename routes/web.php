@@ -68,6 +68,12 @@ Route::get('/politica-cookies', function () {
 Route::get('/ajuda', [FaqController::class, 'index'])
     ->name('faqs.index');
 
+// ==========================
+// Chat (público — o widget é exibido a visitantes e utilizadores autenticados)
+// ==========================
+Route::post('/chat/mensagem', [ChatController::class, 'enviarMensagem'])
+    ->name('chat.mensagem');
+
 /*
 |--------------------------------------------------------------------------
 | Autenticação com Google
@@ -181,12 +187,6 @@ Route::middleware(['auth', 'active'])->group(function () {
     // ==========================
     Route::get('/mapa', [MapaController::class, 'index'])
         ->name('mapa.index');
-
-    // ==========================
-    // Chat
-    // ==========================
-    Route::post('/chat/mensagem', [ChatController::class, 'enviarMensagem'])
-        ->name('chat.mensagem');
 
     // ==========================
     // Mapa dos Setores
