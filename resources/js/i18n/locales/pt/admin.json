@@ -52,6 +52,15 @@
             "titulo": "Editar edifício",
             "imagemAlt": "Imagem do {{nome}}"
         },
+        "categorias": {
+            "sobre": "Sobre o SpaceHub",
+            "espacos": "Espaços e disponibilidade",
+            "reservas": "Reservas",
+            "pagamentos": "Pagamentos",
+            "checkin": "Check-in",
+            "conta": "Conta",
+            "geral": "Geral"
+        },
         "index": {
             "titulo": "Edifícios",
             "colunaEdificio": "Edifício",
@@ -337,6 +346,48 @@
             "jaModerada": "Já moderada",
             "confirmarAprovar": "Aprovar esta avaliação de {{nome}}?",
             "confirmarRejeitar": "Rejeitar esta avaliação de {{nome}}?"
+        }
+    },
+    "faqsAdmin": {
+        "comum": {
+            "voltar": "Voltar",
+            "categoria": "Categoria",
+            "selecionarExistente": "Selecionar existente",
+            "novaCategoria": "Nova categoria",
+            "categoriaPlaceholder": "Escreva o nome da nova categoria...",
+            "caracteres": "Caracteres: {{atual}}/{{maximo}}",
+            "geral": "Geral",
+            "pergunta": "Pergunta",
+            "resposta": "Resposta",
+            "perguntaEn": "Pergunta em inglês",
+            "respostaEn": "Resposta em inglês",
+            "keywordsPt": "Palavras-chave (Português)",
+            "keywordsEn": "Palavras-chave (Inglês)",
+            "keywordsPtPlaceholder": "ex.: reserva, horários, cancelar",
+            "keywordsEnPlaceholder": "ex.: booking, schedule, cancel",
+            "keywordsAjuda": "Se deixar os campos de palavras-chave em branco, o sistema gera os termos automaticamente ao guardar.",
+            "aGuardar": "A guardar..."
+        },
+        "index": {
+            "titulo": "FAQs",
+            "subtitulo": "Consulte e edite as perguntas frequentes.",
+            "novaFaq": "Nova FAQ",
+            "semCategoria": "Sem categoria",
+            "editar": "Editar",
+            "editarAria": "Editar FAQ: {{pergunta}}"
+        },
+        "create": {
+            "titulo": "Nova FAQ",
+            "subtitulo": "Adicione uma nova pergunta, resposta, categoria e palavras-chave.",
+            "criar": "Criar FAQ"
+        },
+        "edit": {
+            "titulo": "Editar FAQ",
+            "tituloComId": "Editar FAQ #{{id}}",
+            "subtitulo": "Altere os dados da pergunta, resposta, categoria ou palavras-chave associadas.",
+            "confirmarEliminar": "Tem a certeza de que pretende eliminar esta FAQ?",
+            "eliminar": "Eliminar FAQ",
+            "guardar": "Guardar alterações"
         }
     },
     "atividade": {
