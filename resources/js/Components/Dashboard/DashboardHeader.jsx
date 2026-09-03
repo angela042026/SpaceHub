@@ -457,7 +457,7 @@ export default function DashboardHeader({ onOpenNav = () => {} }) {
                     </div>
                 </div>
 
-                <LanguageSwitcher variant="light" />
+                <LanguageSwitcher variant="light" alignLeftOnMobile />
 
                 <button
                     type="button"

@@ -30,7 +30,12 @@ function trocarIdioma(i18n, locale) {
  * dropdown (usado no menu mobile da landing, onde o dropdown não
  * cabe).
  */
-export default function LanguageSwitcher({ variant = 'light', compact = false, className = '' }) {
+export default function LanguageSwitcher({
+    variant = 'light',
+    compact = false,
+    className = '',
+    alignLeftOnMobile = false,
+}) {
     const { t, i18n } = useTranslation('common');
     const [aberto, setAberto] = useState(false);
 
@@ -80,7 +85,13 @@ export default function LanguageSwitcher({ variant = 'light', compact = false, c
             </button>
 
             {aberto && (
-                <div className="absolute right-0 top-12 z-20 w-40 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 shadow-2xl dark:border-slate-700 dark:bg-slate-800">
+                <div
+                    className={`absolute top-12 z-20 w-40 overflow-hidden rounded-xl border border-slate-200 bg-white py-2 shadow-2xl dark:border-slate-700 dark:bg-slate-800 ${
+                        alignLeftOnMobile
+                            ? 'left-0 sm:left-auto sm:right-0'
+                            : 'right-0'
+                    }`}
+                >
                     {LOCALES_SUPORTADOS.map((locale) => (
                         <button
                             key={locale}
