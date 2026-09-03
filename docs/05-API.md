@@ -10,9 +10,9 @@ Esta documentação abrange apenas as rotas existentes sob o prefixo:
 
 /api
 
-As funcionalidades exclusivamente web, como determinadas páginas do dashboard, mapa interativo, leitura do QR Code, Help Center, chat e navegação Inertia, devem ser documentadas no capítulo da interface ou das rotas web.
+As funcionalidades exclusivamente web, como determinadas páginas do dashboard, mapa interativo, leitura do QR Code, Help Center, assistente virtual e navegação Inertia, devem ser documentadas no capítulo da interface ou das rotas web.
 
-Antes da entrega final, a lista de endpoints deve ser confirmada com php artisan route:list --path=api.
+Na versão final validada existem 41 rotas sob o prefixo API. A lista pode ser confirmada com php artisan route:list --path=api.
 
 5.2 URL base
 
@@ -1496,6 +1496,8 @@ editor gráfico;
 
 leitura e confirmação de check-in por QR Code;
 
+check-in presencial assistido na receção;
+
 comprovativo de pagamento;
 
 Help Center;
@@ -1508,7 +1510,7 @@ avaliações;
 
 notificações;
 
-chat;
+assistente virtual baseado nas FAQs;
 
 comunicação em tempo real.
 

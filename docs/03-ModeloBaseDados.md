@@ -104,11 +104,9 @@ notifications
 
 Mantém notificações persistentes associadas aos utilizadores
 
-Entidades do chat
+activity_logs
 
-Armazenam mensagens e dados necessários às conversas em tempo real
-
-A designação exata das tabelas do módulo de chat deve corresponder às migrations existentes no projeto.
+Regista ações administrativas, automáticas e operações sensíveis, incluindo o check-in presencial
 
 3.3 Organização hierárquica dos espaços
 
@@ -233,7 +231,7 @@ pode criar pedidos de suporte;
 
 pode receber notificações;
 
-pode participar no chat.
+pode utilizar o assistente virtual, sem que a pergunta seja persistida.
 
 O email deve ser único.
 
@@ -605,6 +603,10 @@ pergunta;
 
 resposta;
 
+pergunta e resposta em inglês;
+
+palavras-chave em português e inglês utilizadas pelo assistente virtual;
+
 estado ativo;
 
 ordem de apresentação;
@@ -613,7 +615,7 @@ datas de criação e atualização.
 
 As FAQs podem ser desativadas sem eliminação física.
 
-3.13 Notificações e chat
+3.13 Notificações e assistente virtual
 
 Notificações
 
@@ -641,21 +643,11 @@ data de leitura;
 
 datas de criação e atualização.
 
-Chat
+Assistente virtual
 
-O módulo de chat utiliza Laravel Reverb para comunicação em tempo real.
+O assistente virtual recebe uma pergunta, normaliza os termos introduzidos e procura a FAQ mais relevante através das perguntas, respostas e palavras-chave bilingues. A resposta é devolvida imediatamente ao utilizador.
 
-A base de dados mantém os dados necessários para preservar o histórico das mensagens, enquanto o Reverb assegura a transmissão imediata dos eventos aos participantes autorizados.
-
-A persistência das mensagens deve manter separadas:
-
-identidade do remetente;
-
-conversa ou destinatário;
-
-conteúdo;
-
-datas de criação e atualização.
+Não existem tabelas de conversas, participantes ou mensagens na versão atual. O módulo reutiliza a tabela faqs e não preserva histórico de conversação.
 
 3.14 Integridade referencial
 
@@ -810,7 +802,7 @@ Cada reserva pode receber, no máximo, uma avaliação.
 
 Apenas reservas elegíveis podem ser avaliadas.
 
-O check-in apenas pode ser efetuado pelo proprietário da reserva.
+O check-in por QR Code apenas pode ser efetuado pelo proprietário da reserva. Administradores, Gestores e Colaboradores podem efetuar um check-in presencial assistido, ficando o funcionário identificado em activity_logs.
 
 O QR Code deve pertencer à secretária reservada.
 

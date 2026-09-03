@@ -296,9 +296,9 @@ alterações a reservas canceladas ou expiradas;
 
 operações não autorizadas pelo perfil do utilizador.
 
-RF13 — Check-in por QR Code
+RF13 — Check-in por QR Code e na receção
 
-O sistema deve permitir realizar o check-in através da leitura do QR Code da secretária.
+O sistema deve permitir realizar o check-in através da leitura do QR Code da secretária. Deve também permitir o check-in presencial assistido por um Administrador, Gestor ou Colaborador através da área de receção.
 
 Durante o processo devem ser validados:
 
@@ -313,6 +313,8 @@ secretária reservada;
 QR Code apresentado;
 
 estado atual da reserva.
+
+No check-in presencial devem ainda ser validados o perfil do funcionário e a janela horária. A operação deve identificar no registo de atividade o funcionário que confirmou a chegada do utilizador.
 
 RF14 — Pagamentos
 
@@ -388,9 +390,9 @@ notificações persistentes;
 
 atualização de informação relevante;
 
-comunicação em tempo real através de Laravel Reverb;
+atualização do mapa em tempo real através de Laravel Reverb;
 
-chat integrado.
+assistente virtual integrado, baseado nas FAQs administráveis.
 
 RF18 — Avaliações
 
@@ -624,7 +626,7 @@ Reservas com pagamento pendente podem ser canceladas automaticamente quando ultr
 
 RN08 — Check-in
 
-O check-in apenas pode ser realizado pelo utilizador proprietário da reserva e para a secretária efetivamente reservada.
+O check-in por QR Code apenas pode ser realizado pelo utilizador proprietário da reserva e para a secretária efetivamente reservada. Como exceção controlada, Administradores, Gestores e Colaboradores podem confirmar presencialmente, na receção, o check-in de uma reserva elegível de outro utilizador. Esta operação deve ficar auditada.
 
 RN09 — Validação do QR Code
 
@@ -664,7 +666,9 @@ Uma avaliação apenas pode ser registada quando o utilizador e a reserva cumpre
 
 A versão atual do SpaceHub integra os seguintes módulos:
 
-Autenticação e perfis — registo, login, logout, recuperação de palavra-passe, perfil e controlo de utilizadores ativos ou inativos.
+Autenticação e perfis — registo, login, logout, recuperação de palavra-passe, perfil, Single Sign-On e controlo de utilizadores ativos ou inativos.
+
+Google Calendar — ligação opcional da conta e sincronização dos eventos associados às reservas.
 
 Gestão de utilizadores e permissões — papéis, Policies e acessos diferenciados.
 
@@ -672,17 +676,19 @@ Gestão de espaços — edifícios, pisos, plantas, setores, secretárias, carac
 
 Reservas — disponibilidade, criação, edição, cancelamento, histórico, estados e reservas de longa duração.
 
-Check-in — validação de reservas através de QR Code.
+Check-in — validação de reservas através de QR Code ou confirmação presencial assistida na receção.
 
 Pagamentos simulados — cálculo automático, métodos de pagamento, confirmação, histórico e detalhe.
 
 Dashboard e estatísticas — indicadores de ocupação e utilização dos espaços.
 
+Relatórios — consulta e impressão de reservas, ocupação, espaços, cancelamentos e ausências, utilizadores e suporte.
+
 Notificações e tempo real — notificações persistentes, eventos e comunicação através de Laravel Reverb.
 
 Avaliações — registo, consulta, moderação e médias por setor.
 
-Ajuda e comunicação — Help Center, pedidos de suporte e chat.
+Ajuda e comunicação — Help Center, gestão de FAQs, pedidos de suporte e assistente virtual baseado nas FAQs.
 
 Ferramentas administrativas — pesquisa, filtros, ordenação, paginação e ativação ou desativação de entidades.
 

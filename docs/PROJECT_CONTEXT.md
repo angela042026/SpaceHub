@@ -1,6 +1,20 @@
 Documento Mestre do Projeto — SpaceHub
 
-Versão: 3.0Estado: Consolidação, testes finais e preparação da entregaBackend: Laravel 12Frontend: React + Inertia.js + Tailwind CSSBase de dados: MySQLAutenticação: Laravel Sanctum + autenticação web + Single Sign-OnTempo real: Laravel Reverb + Laravel EchoTestes: última contagem documentada de 154 testes aprovados; confirmar na versão final
+Versão: 4.0
+
+Estado: versão final integrada e validada
+
+Backend: Laravel 12
+
+Frontend: React 18.2 + Inertia.js + Tailwind CSS
+
+Base de dados: MySQL
+
+Autenticação: Laravel Sanctum + autenticação web + Single Sign-On
+
+Tempo real: Laravel Reverb + Laravel Echo para atualizações do mapa
+
+Testes: 349 testes PHP com 1916 asserções e 20 testes frontend
 
 1. Finalidade do documento
 
@@ -42,7 +56,7 @@ criar reservas de diferentes durações;
 
 editar ou cancelar reservas elegíveis;
 
-efetuar check-in através de QR Code;
+efetuar check-in através de QR Code ou presencialmente na receção;
 
 gerir pagamentos simulados;
 
@@ -50,7 +64,7 @@ consultar dashboards e estatísticas;
 
 receber notificações;
 
-comunicar através de chat em tempo real;
+obter apoio através de um assistente virtual baseado nas FAQs;
 
 avaliar reservas e espaços;
 
@@ -236,7 +250,7 @@ Laravel Echo
     ↓
 Componente React
 
-Esta comunicação é utilizada no mapa, notificações, chat e outros componentes que necessitam de atualização dinâmica.
+Esta comunicação é utilizada principalmente no mapa e noutros componentes que necessitam de atualização dinâmica.
 
 5. Estrutura principal do projeto
 
@@ -724,7 +738,7 @@ Existem também estruturas associadas a:
 
 notificações;
 
-chat;
+registo de atividade;
 
 tokens;
 
@@ -734,7 +748,7 @@ cache;
 
 filas.
 
-Os nomes e campos exatos das tabelas de avaliações, notificações e chat devem ser confirmados através das migrations.
+As tabelas de avaliações, notificações e atividade correspondem às migrations avaliacoes, notifications e activity_logs. O assistente virtual reutiliza faqs e não possui tabelas de mensagens.
 
 10. Gestão de utilizadores
 
@@ -1056,7 +1070,7 @@ gateways externos.
 
 Uma integração real permanece como evolução futura.
 
-14. QR Code e check-in
+14. QR Code e check-in presencial
 
 Cada secretária possui um qr_token único.
 
@@ -1089,6 +1103,8 @@ a reserva passa a confirmada;
 o mapa é atualizado;
 
 podem ser emitidos eventos e notificações.
+
+Administradores, Gestores e Colaboradores dispõem ainda de uma área de receção para pesquisar reservas do dia e confirmar presencialmente a chegada do utilizador. Este fluxo respeita a janela horária, o pagamento e o estado da reserva, registando em activity_logs o funcionário responsável.
 
 15. Dashboard, estatísticas e mapa
 
@@ -1176,39 +1192,11 @@ pedido de suporte.
 
 As notificações podem possuir estado de leitura.
 
-18. Chat e comunicação em tempo real
+18. Assistente virtual e comunicação em tempo real
 
-O chat utiliza:
+O assistente virtual utiliza o ChatController e a tabela faqs. A pergunta é normalizada e comparada com perguntas, respostas e palavras-chave bilingues, sendo devolvida a FAQ mais relevante. Não existem conversas nem mensagens persistidas.
 
-Laravel Reverb;
-
-Laravel Echo;
-
-Broadcasting;
-
-Events;
-
-canais autenticados;
-
-persistência de mensagens, de acordo com as tabelas existentes.
-
-Fluxo:
-
-Utilizador envia mensagem
-    ↓
-Controller
-    ↓
-Validação e autorização
-    ↓
-Persistência
-    ↓
-Evento
-    ↓
-Reverb
-    ↓
-Echo
-    ↓
-Participantes autorizados
+Laravel Reverb, Laravel Echo, Broadcasting e Events são utilizados nas atualizações em tempo real do mapa. Uma indisponibilidade do broadcasting é registada nos logs sem invalidar a operação principal já concluída.
 
 19. Help Center
 
@@ -1422,13 +1410,16 @@ Services;
 
 regras de negócio.
 
-A última contagem registada na documentação foi:
+Na validação final foram registados:
 
-154 testes aprovados
+349 testes PHP aprovados, com 1916 asserções;
 
-Como foram posteriormente integrados novos commits, a contagem final deve ser confirmada com:
+20 testes frontend aprovados em 3 ficheiros.
+
+As contagens podem ser confirmadas com:
 
 php artisan test
+npm run test:frontend
 
 24. Processo de validação
 
@@ -1566,7 +1557,7 @@ avaliações;
 
 notificações;
 
-chat;
+assistente virtual;
 
 Help Center;
 
@@ -1626,13 +1617,11 @@ público-alvo;
 
 confirmação de leitura.
 
-27.2 Exportação e relatórios
+27.2 Exportação de relatórios
 
 comprovativos em PDF;
 
-relatórios de reservas;
-
-relatórios de pagamentos;
+exportação de relatórios financeiros e de pagamentos;
 
 exportação Excel;
 
@@ -1650,9 +1639,7 @@ comparação mensal.
 
 27.4 Integração com calendários
 
-Google Calendar;
-
-Microsoft Outlook.
+O Google Calendar já se encontra integrado. Mantêm-se como evoluções possíveis o Microsoft Outlook e melhorias adicionais de sincronização.
 
 27.5 Aplicação móvel
 
@@ -1668,7 +1655,7 @@ check-in;
 
 pagamentos;
 
-chat.
+assistente virtual.
 
 27.6 Previsão de ocupação
 
@@ -1850,7 +1837,7 @@ Tempo real:
 Laravel Reverb
 Broadcasting
 MapaAtualizado
-Chat
+Assistente virtual de FAQs
 Notificações
 
 Base de dados:
@@ -1870,12 +1857,12 @@ Dashboard
 Mapa
 Avaliações
 Notificações
-Chat
+Assistente virtual
 Help Center
 
 Testes:
-Última contagem documentada de 154 testes aprovados
-Contagem final a confirmar com php artisan test
+349 testes PHP aprovados, com 1916 asserções
+20 testes frontend aprovados em 3 ficheiros
 
 Estado:
 Projeto integrado e em fase de correções, validação e preparação da entrega
@@ -1906,7 +1893,7 @@ avaliações;
 
 notificações;
 
-chat;
+assistente virtual;
 
 suporte ao utilizador;
 
@@ -1914,4 +1901,4 @@ comunicação em tempo real.
 
 A arquitetura mantém a lógica e a segurança no backend, utiliza React e Inertia.js na interface e garante persistência através de MySQL e Eloquent.
 
-O projeto encontra-se na fase final, devendo as próximas alterações concentrar-se em correções, testes, documentação e preparação da apresentação e entrega.
+O projeto encontra-se integrado e validado para entrega. As tarefas restantes devem limitar-se à confirmação do ambiente, preparação das credenciais fictícias e materiais da apresentação.

@@ -10,7 +10,7 @@ Interface web com Inertia.jsAs rotas Laravel entregam páginas React e respetiva
 
 API RESTDisponibiliza endpoints JSON protegidos por Laravel Sanctum, utilizados em operações autenticadas, testes de integração e possíveis integrações externas.
 
-Comunicação em tempo realOs eventos são transmitidos através de Laravel Reverb, broadcasting e Laravel Echo, permitindo atualizar o mapa, notificações, chat e outros elementos sem recarregar toda a página.
+Comunicação em tempo real — Os eventos são transmitidos através de Laravel Reverb, broadcasting e Laravel Echo, permitindo atualizar o mapa sem recarregar toda a página.
 
 A arquitetura foi organizada para garantir:
 
@@ -440,7 +440,7 @@ avaliações;
 
 notificações;
 
-chat;
+assistente virtual;
 
 Help Center;
 
@@ -717,7 +717,7 @@ perfil;
 
 notificações;
 
-chat;
+assistente virtual;
 
 Help Center.
 
@@ -936,7 +936,7 @@ public/storage
 
 O logging técnico regista erros e informação operacional através dos mecanismos do Laravel.
 
-Uma auditoria administrativa completa, com histórico detalhado de todas as alterações realizadas por cada utilizador, mantém-se como evolução futura e não deve ser confundida com os logs técnicos.
+A tabela activity_logs mantém o registo das principais ações administrativas, automáticas e operações sensíveis, incluindo ator, categoria, ação, entidade afetada, metadados, resultado e endereço IP. Este registo funcional complementa os logs técnicos; uma cobertura absolutamente exaustiva de todas as alterações pode continuar a evoluir.
 
 4.11 Persistência e acesso aos dados
 
@@ -1122,7 +1122,7 @@ estados;
 
 disponibilidade.
 
-O check-in utiliza um qr_token único associado à secretária.
+O check-in por QR Code utiliza um qr_token único associado à secretária. Existe também um fluxo presencial na receção, restrito a Administrador, Gestor e Colaborador, que valida a reserva e regista o funcionário responsável em activity_logs.
 
 QR Code
 → Secretaria
@@ -1185,18 +1185,18 @@ avaliações;
 
 suporte.
 
-4.12.9 Chat
+4.12.9 Assistente virtual
 
-O chat combina persistência e comunicação em tempo real:
+O assistente virtual é baseado nas FAQs administráveis:
 
-Mensagem
-→ Controller
-→ Validação e autorização
-→ Base de dados
-→ Evento
-→ Reverb
-→ Echo
-→ Participantes autorizados
+Pergunta do utilizador
+→ ChatController
+→ Normalização das palavras
+→ Comparação com pergunta, resposta e keywords bilingues
+→ Seleção da FAQ mais relevante
+→ Resposta JSON
+
+Não existe persistência de conversas nem troca de mensagens entre utilizadores na versão atual.
 
 4.12.10 Help Center
 
@@ -1449,9 +1449,10 @@ filtros e paginação;
 
 regras de negócio.
 
-Na versão de referência da documentação, encontravam-se registados 154 testes aprovados. Antes da entrega final, a contagem deve ser confirmada com:
+Na validação final foram executados 349 testes PHP, com 1916 asserções, e 20 testes frontend distribuídos por 3 ficheiros:
 
 php artisan test
+npm run test:frontend
 
 Processo de validação
 
@@ -1522,7 +1523,7 @@ utilizar Eloquent e MySQL para persistência;
 
 utilizar Reverb e Echo para tempo real;
 
-utilizar QR Code para check-in;
+utilizar QR Code e confirmação assistida na receção para check-in;
 
 associar pagamentos às reservas;
 
@@ -1542,11 +1543,11 @@ dependência do Scheduler para tarefas automáticas;
 
 dependência do Reverb para comunicação em tempo real;
 
-ausência de integração final com Google Calendar e Outlook;
+ausência de integração com Microsoft Outlook; a integração com Google Calendar já está implementada;
 
 ausência de uma aplicação móvel;
 
-auditoria administrativa completa ainda não implementada;
+cobertura de auditoria passível de expansão para operações ainda não registadas;
 
 necessidade de configuração adequada do ambiente para filas, Scheduler e WebSockets.
 
@@ -1560,6 +1561,6 @@ A separação entre Controllers, Form Requests, Policies, Services, Models e Res
 
 O Eloquent e o MySQL asseguram a persistência dos dados, enquanto o Reverb e o Echo permitem refletir alterações em tempo real.
 
-A organização por módulos possibilitou integrar reservas, pagamentos, avaliações, notificações, chat, Help Center, dashboard, mapas e check-in sem substituir a arquitetura inicial.
+A organização por módulos possibilitou integrar reservas, pagamentos, avaliações, notificações, assistente virtual, Help Center, dashboard, mapas e check-in sem substituir a arquitetura inicial.
 
 Desta forma, o SpaceHub apresenta uma arquitetura modular, segura, testável e adequada aos objetivos do projeto académico.

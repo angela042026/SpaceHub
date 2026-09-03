@@ -290,7 +290,7 @@ pode criar PedidoSuportes;
 
 pode receber notificações;
 
-pode participar no chat.
+pode utilizar o assistente virtual, sem persistência da pergunta.
 
 Regras
 
@@ -1790,11 +1790,51 @@ Não
 
 Resposta
 
+pergunta_en
+
+varchar(255)
+
+Sim
+
+—
+
+Pergunta em inglês, com fallback para português
+
+resposta_en
+
+text
+
+Sim
+
+—
+
+Resposta em inglês, com fallback para português
+
+keywords_pt
+
+text
+
+Sim
+
+—
+
+Palavras-chave portuguesas utilizadas pelo assistente virtual
+
+keywords_en
+
+text
+
+Sim
+
+—
+
+Palavras-chave inglesas utilizadas pelo assistente virtual
+
 categoria
 
 varchar(100)
 
-Sim
+Não
 
 INDEX
 
@@ -1804,7 +1844,7 @@ ordem
 
 integer
 
-Sim
+Não
 
 INDEX
 
@@ -1846,11 +1886,9 @@ não possui obrigatoriamente relações com outras tabelas.
 
 7.8 Módulos adicionais
 
-A versão atual do projeto inclui avaliações, notificações persistentes e chat em tempo real.
+A versão atual do projeto inclui avaliações, notificações persistentes, registo de atividade e um assistente virtual baseado nas FAQs.
 
-O ficheiro de origem não apresenta as migrations ou a estrutura exata dessas tabelas. Por esse motivo, os campos não devem ser inventados neste dicionário.
-
-Antes da entrega final, devem ser acrescentadas secções completas para as tabelas efetivamente existentes, com base nas migrations.
+As estruturas descritas nesta secção foram verificadas nas migrations da versão final. Não existem tabelas de mensagens ou conversas.
 
 7.8.1 Avaliações
 
@@ -1886,17 +1924,41 @@ Comando:
 
 SHOW CREATE TABLE notifications;
 
-7.8.3 Chat
+7.8.3 Assistente virtual
 
-O chat utiliza Laravel Reverb para comunicação em tempo real, mas a persistência depende das tabelas definidas no projeto.
+O assistente virtual não possui tabela própria nem persiste conversas. O ChatController consulta a tabela faqs e utiliza os campos pergunta, resposta, keywords_pt e keywords_en para selecionar uma resposta relevante.
 
-Devem ser documentadas apenas as tabelas que existirem efetivamente nas migrations, como mensagens, conversas ou participantes.
+Não existem, na versão atual, tabelas de mensagens, conversas ou participantes.
 
-Comandos:
+7.8.4 Tabela activity_logs
 
-SHOW TABLES;
+Finalidade
 
-php artisan migrate:status
+Regista ações administrativas, tarefas automáticas e operações sensíveis para auditoria funcional.
+
+Campos principais
+
+id — identificador do registo;
+
+actor_id — utilizador responsável, quando aplicável;
+
+actor_name e actor_email — identificação preservada do ator;
+
+category e action — classificação da operação;
+
+description — descrição legível;
+
+subject_type e subject_id — entidade afetada;
+
+metadata — contexto adicional em JSON, incluindo os intervenientes no check-in presencial;
+
+result e ip_address — resultado e origem da operação;
+
+created_at e updated_at — datas do registo.
+
+7.8.5 Campos de integração com Google Calendar
+
+A tabela users possui google_calendar_access_token, google_calendar_refresh_token e google_calendar_token_expira_em. A tabela reservas possui google_event_id para associar a reserva ao evento sincronizado. Os tokens são dados sensíveis e não devem ser expostos em respostas, logs ou documentação de credenciais.
 
 7.9 Tabelas de autenticação e infraestrutura Laravel
 
@@ -2541,7 +2603,7 @@ estado_reservas
 
 faqs
 
-As relações relativas às notificações, avaliações e chat devem ser ajustadas ao nome e à estrutura reais das tabelas.
+As notificações e avaliações utilizam as tabelas notifications e avaliacoes. O assistente virtual reutiliza faqs e não introduz relações de conversação.
 
 7.11 Índices e restrições recomendados
 
@@ -2619,7 +2681,7 @@ Os tokens e palavras-passe são guardados de forma segura.
 
 Uma avaliação apenas pode ser associada a uma reserva elegível.
 
-As notificações e mensagens apenas podem ser consultadas pelos utilizadores autorizados.
+As notificações apenas podem ser consultadas pelos utilizadores autorizados; o assistente virtual não persiste mensagens.
 
 As regras que dependem de intervalos de datas ou estados são validadas na aplicação através de Form Requests, Policies, Services e Controllers, além das restrições existentes na base de dados.
 
@@ -2673,4 +2735,4 @@ A entidade reservas liga utilizadores, secretárias, períodos, estados, duraç�
 
 A entidade pagamentos mantém os dados financeiros separados da reserva, enquanto o Help Center utiliza FAQs e pedidos de suporte.
 
-As tabelas de avaliações, notificações e chat devem ser documentadas diretamente a partir das migrations da versão final, evitando assumir nomes ou campos que não correspondam à implementação real.
+As tabelas de avaliações, notificações e atividade devem corresponder às migrations da versão final. O assistente virtual utiliza faqs e não possui tabelas de mensagens.

@@ -195,7 +195,7 @@ atualização de indicadores;
 
 notificações;
 
-chat.
+atualizações do mapa.
 
 6.2.6 Pagamentos e reservas de longa duração
 
@@ -269,7 +269,7 @@ moderação de avaliações;
 
 cálculo da média por setor;
 
-chat em tempo real;
+assistente virtual baseado nas FAQs e em palavras-chave bilingues;
 
 Single Sign-On;
 
@@ -485,7 +485,7 @@ estados;
 
 validação de conflitos;
 
-check-in por QR Code;
+check-in por QR Code e check-in presencial assistido na receção;
 
 expiração automática;
 
@@ -543,11 +543,9 @@ notificações persistentes;
 
 notificações por email, quando aplicável;
 
-chat em tempo real;
+assistente virtual baseado nas FAQs;
 
-Laravel Reverb;
-
-Laravel Echo;
+atualizações do mapa através de Laravel Reverb e Laravel Echo;
 
 Help Center;
 
@@ -589,9 +587,10 @@ documentação técnica;
 
 controlo de versões com Git.
 
-À data da última validação registada na documentação, a suíte apresentava 154 testes aprovados. Como foram posteriormente integrados novos commits, a contagem final deve ser confirmada antes da entrega através de:
+Na validação final, a suíte PHP apresenta 349 testes aprovados e 1916 asserções. O frontend apresenta 20 testes aprovados em 3 ficheiros. As contagens podem ser novamente confirmadas através de:
 
 php artisan test
+npm run test:frontend
 
 6.5 Tarefas finais imediatas
 
@@ -659,13 +658,11 @@ opção de não voltar a mostrar no mesmo dia.
 
 6.6.2 Exportação de documentos e relatórios
 
-Criação de mecanismos de exportação para:
+Os relatórios administrativos de reservas, ocupação, espaços, cancelamentos e ausências, utilizadores e suporte já estão implementados para consulta e impressão. Como evolução futura, podem ser acrescentados mecanismos de exportação para:
 
 comprovativos em PDF;
 
-relatórios de reservas;
-
-relatórios de pagamentos;
+relatórios financeiros e de pagamentos;
 
 estatísticas;
 
@@ -691,13 +688,7 @@ exportação de resultados.
 
 6.6.4 Integração com calendários
 
-Integração das reservas com:
-
-Google Calendar;
-
-Microsoft Outlook.
-
-Esta funcionalidade poderá permitir criar, atualizar ou remover eventos no calendário do utilizador.
+A integração com Google Calendar já permite ao utilizador ligar a conta e sincronizar eventos associados às reservas. Como evolução futura mantém-se a integração com Microsoft Outlook e o aprofundamento da sincronização entre calendários.
 
 6.6.5 Aplicação móvel
 
@@ -715,7 +706,7 @@ efetuar check-in;
 
 consultar pagamentos;
 
-utilizar o chat.
+utilizar o assistente virtual.
 
 6.6.6 Previsão de ocupação
 
@@ -897,7 +888,7 @@ reservas de diferentes durações;
 
 pagamentos simulados;
 
-check-in por QR Code;
+check-in por QR Code e na receção;
 
 mapa interativo;
 
@@ -907,7 +898,7 @@ avaliações;
 
 notificações;
 
-chat;
+assistente virtual;
 
 Help Center;
 

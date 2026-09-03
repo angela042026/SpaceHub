@@ -814,6 +814,58 @@ O check-in fica registado.
 
 A reserva passa ao estado Confirmada.
 
+UC13A — Confirmar check-in presencial na receção
+
+Objetivo
+
+Permitir que um funcionário confirme presencialmente a chegada de um utilizador com uma reserva elegível para o dia atual.
+
+Atores
+
+Administrador
+
+Gestor
+
+Colaborador
+
+Pré-condições
+
+O funcionário encontra-se autenticado e possui um dos papéis autorizados.
+
+Existe uma reserva ativa para o dia atual, ainda sem check-in.
+
+A reserva encontra-se dentro da janela horária permitida e não possui pagamento pendente.
+
+Fluxo principal
+
+O funcionário acede à área Check-in na receção.
+
+Pesquisa a reserva pelo nome, e-mail ou código da secretária.
+
+O sistema apresenta o utilizador, o espaço, o horário e o estado de elegibilidade.
+
+O funcionário seleciona Confirmar check-in e confirma a operação no modal.
+
+O sistema regista a data e hora do check-in, identifica o funcionário responsável no registo de atividade e atualiza o mapa.
+
+Fluxos alternativos
+
+A1 — Reserva fora da janela horária
+
+O sistema bloqueia a confirmação e apresenta o respetivo estado.
+
+A2 — Pagamento pendente, reserva inativa ou check-in já efetuado
+
+O sistema rejeita a operação sem alterar a reserva.
+
+A3 — Perfil sem autorização
+
+O sistema devolve acesso negado.
+
+Pós-condições
+
+O check-in fica registado e a operação permanece auditável, incluindo o funcionário e o utilizador associado à reserva.
+
 UC14 — Gerir pagamentos
 
 Objetivo
@@ -1056,11 +1108,11 @@ Pós-condições
 
 O estado de leitura das notificações fica atualizado.
 
-UC18 — Utilizar o chat em tempo real
+UC18 — Utilizar o assistente virtual
 
 Objetivo
 
-Permitir a comunicação entre utilizadores através do chat da aplicação.
+Permitir obter respostas rápidas a partir das FAQs configuradas na aplicação.
 
 Atores
 
@@ -1076,31 +1128,23 @@ Pré-condições
 
 O ator encontra-se autenticado.
 
-O serviço de comunicação em tempo real encontra-se disponível.
+Existem FAQs ativas e configuradas com perguntas, respostas e palavras-chave.
 
 Fluxo principal
 
-O ator acede ao chat.
+O ator abre o assistente virtual e introduz uma pergunta.
 
-Seleciona uma conversa ou canal disponível.
+O sistema normaliza os termos e compara-os com as perguntas, respostas e palavras-chave das FAQs.
 
-Introduz uma mensagem.
-
-O sistema valida e guarda a mensagem.
-
-A mensagem é distribuída em tempo real aos participantes autorizados.
-
-A conversa é atualizada sem recarregar a página.
+O sistema devolve a resposta da FAQ com maior relevância.
 
 Fluxos alternativos
 
-A1 — Falha na ligação em tempo real
+A1 — Pergunta sem correspondência relevante
 
-O sistema apresenta uma mensagem de erro.
+O sistema informa que não encontrou uma resposta exata e encaminha o utilizador para o apoio.
 
-A aplicação tenta restabelecer a ligação.
-
-A2 — Mensagem inválida
+A2 — Pergunta inválida
 
 O sistema rejeita o envio.
 
@@ -1108,7 +1152,7 @@ O utilizador pode corrigir o conteúdo.
 
 Pós-condições
 
-A mensagem fica guardada e visível para os participantes autorizados.
+A resposta é apresentada sem persistir uma conversa ou mensagem.
 
 UC19 — Utilizar o Help Center
 

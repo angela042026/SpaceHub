@@ -21,7 +21,7 @@ Edifício
     └── Setor
         └── Secretária
 
-A plataforma permite consultar a disponibilidade, reservar secretárias, efetuar check-in por QR Code, gerir pagamentos simulados e acompanhar a utilização dos espaços através de dashboards, mapas e estatísticas.
+A plataforma permite consultar a disponibilidade, reservar secretárias, efetuar check-in por QR Code ou presencialmente na receção, gerir pagamentos simulados e acompanhar a utilização dos espaços através de dashboards, mapas, relatórios e estatísticas.
 
 O projeto foi desenvolvido em contexto académico por uma equipa de quatro elementos, com integração através de branches, Pull Requests e merge commits.
 
@@ -48,6 +48,8 @@ papéis e permissões;
 autenticação da API com Laravel Sanctum;
 
 Single Sign-On.
+
+ligação opcional ao Google Calendar para sincronização das reservas.
 
 Papéis existentes:
 
@@ -110,6 +112,8 @@ validação de conflitos;
 estados da reserva;
 
 check-in por QR Code;
+
+check-in presencial assistido por Administrador, Gestor ou Colaborador;
 
 expiração automática;
 
@@ -201,6 +205,10 @@ validação da data, período e secretária;
 
 confirmação do check-in;
 
+confirmação presencial na receção para reservas elegíveis;
+
+registo do funcionário responsável no histórico de atividade;
+
 atualização do estado para confirmada;
 
 atualização do mapa.
@@ -253,7 +261,7 @@ notificações relacionadas com reservas, pagamentos, check-in, avaliações e s
 
 comunicação em tempo real quando aplicável.
 
-💬 Chat e tempo real
+💬 Assistente virtual e tempo real
 
 Laravel Reverb;
 
@@ -265,16 +273,13 @@ WebSockets;
 
 eventos Laravel;
 
-chat;
+assistente virtual baseado nas FAQs;
 
 atualização do mapa;
 
-notificações em tempo real.
+proteção das operações de negócio quando o serviço de broadcasting está indisponível.
 
-Eventos utilizados incluem:
-
-MapaAtualizado
-EnviarMensagem
+O principal evento transmitido é `MapaAtualizado`.
 
 🆘 Help Center
 
@@ -394,7 +399,7 @@ PHP 8.2
 
 Linguagem de backend
 
-React 19
+React 18.2
 
 Frontend
 
@@ -441,6 +446,14 @@ Leitura de QR Codes
 PHPUnit
 
 Testes automatizados
+
+Pest 3
+
+Testes PHP de funcionalidade e regras de negócio
+
+Vitest 4
+
+Testes unitários do frontend
 
 Vite
 
@@ -653,7 +666,9 @@ Noutro terminal:
 
 php artisan reverb:start
 
-O Reverb é necessário para as funcionalidades WebSocket, chat e atualizações em tempo real.
+O Reverb é necessário para as funcionalidades WebSocket e atualizações do mapa em tempo real. O assistente virtual de FAQs funciona através de pedidos HTTP e não depende do Reverb.
+
+Por predefinição, o Reverb utiliza a porta `8080`. Se essa porta estiver ocupada pelo Apache ou por outro serviço, configure uma porta diferente em `REVERB_SERVER_PORT`, `REVERB_PORT` e nas variáveis `VITE_REVERB_*`, reinicie o Reverb e volte a compilar o frontend. A indisponibilidade temporária do broadcasting é registada nos logs, mas não deve invalidar operações de negócio já concluídas.
 
 13. Executar o Scheduler
 
@@ -743,7 +758,11 @@ Executar a suíte de testes:
 
 php artisan test
 
-A documentação anterior registava 154 testes aprovados. Como foram integradas alterações posteriores, o número final deve ser confirmado através do comando anterior.
+Na versão final validada, a suíte PHP apresenta **349 testes aprovados e 1916 asserções**. O frontend apresenta **20 testes aprovados em 3 ficheiros** através de:
+
+npm run test:frontend
+
+O GitHub Actions executa ainda o Pint, os testes PHP, os testes frontend e o build de produção.
 
 Antes de uma integração ou entrega:
 
@@ -793,7 +812,7 @@ Evolução do projeto e trabalho futuro
 
 Estrutura das tabelas
 
-08-PROJECT_CONTEXT.md
+PROJECT_CONTEXT.md
 
 Contexto consolidado do projeto
 
@@ -866,9 +885,7 @@ chaves e segredos.
 
 Base de dados
 
-A estrutura e os dados de demonstração são entregues em:
-
-spacehub_bd.sql
+A estrutura da base de dados é reproduzida pelas migrations e os dados de demonstração pelos seeders. Quando a entrega exigir também uma exportação SQL, esta deve ser gerada a partir da versão final e entregue fora do repositório, sem dados pessoais reais.
 
 Credenciais
 
@@ -886,7 +903,7 @@ palavra-passe do administrador;
 
 utilizadores de demonstração necessários.
 
-As credenciais não devem ser incluídas no repositório Git.
+As contas fictícias necessárias à demonstração são criadas pelo UserSeeder e podem ser repetidas no ficheiro de entrega para facilitar a avaliação. Credenciais reais, pessoais ou de produção nunca devem ser incluídas no repositório.
 
 🌱 Dados iniciais
 
@@ -934,7 +951,7 @@ Pessoa 1 — Joana: reservas e fluxo de utilização;
 
 Pessoa 2 — Ângela: administração, espaços, segurança, integração e documentação;
 
-Pessoa 3 — Eduardo: comunicação em tempo real, Reverb e chat;
+Pessoa 3 — Eduardo: comunicação em tempo real, Reverb e assistente virtual;
 
 Pessoa 4 — Hanna: dashboard, estatísticas, mapa, QR Code e check-in.
 
@@ -970,7 +987,7 @@ redução do risco nas integrações.
 
 📌 Estado do projeto
 
-O projeto encontra-se em fase de consolidação e preparação da entrega.
+O projeto encontra-se integrado, testado e preparado para entrega, ficando sujeito apenas à validação final do ambiente e dos materiais de apresentação.
 
 Principais módulos concluídos:
 
@@ -1002,7 +1019,7 @@ avaliações;
 
 notificações;
 
-chat;
+assistente virtual de FAQs;
 
 Help Center;
 
@@ -1045,8 +1062,6 @@ exportação PDF dos comprovativos;
 relatórios Excel;
 
 dashboard financeiro avançado;
-
-integração com Google Calendar;
 
 integração com Microsoft Outlook;
 
