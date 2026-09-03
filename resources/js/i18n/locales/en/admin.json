@@ -339,6 +339,57 @@
             "confirmarRejeitar": "Reject this review from {{nome}}?"
         }
     },
+    "faqsAdmin": {
+        "comum": {
+            "voltar": "Back",
+            "categoria": "Category",
+            "selecionarExistente": "Select existing",
+            "novaCategoria": "New category",
+            "categoriaPlaceholder": "Enter the new category name...",
+            "caracteres": "Characters: {{atual}}/{{maximo}}",
+            "geral": "General",
+            "pergunta": "Question",
+            "resposta": "Answer",
+            "perguntaEn": "Question in English",
+            "respostaEn": "Answer in English",
+            "keywordsPt": "Keywords (Portuguese)",
+            "keywordsEn": "Keywords (English)",
+            "keywordsPtPlaceholder": "e.g. reserva, horários, cancelar",
+            "keywordsEnPlaceholder": "e.g. booking, schedule, cancel",
+            "keywordsAjuda": "If you leave the keyword fields empty, the system will generate the terms automatically when saving.",
+            "aGuardar": "Saving..."
+        },
+        "categorias": {
+            "sobre": "About SpaceHub",
+            "espacos": "Spaces and availability",
+            "reservas": "Bookings",
+            "pagamentos": "Payments",
+            "checkin": "Check-in",
+            "conta": "Account",
+            "geral": "General"
+        },
+        "index": {
+            "titulo": "FAQs",
+            "subtitulo": "View and edit frequently asked questions.",
+            "novaFaq": "New FAQ",
+            "semCategoria": "Uncategorised",
+            "editar": "Edit",
+            "editarAria": "Edit FAQ: {{pergunta}}"
+        },
+        "create": {
+            "titulo": "New FAQ",
+            "subtitulo": "Add a new question, answer, category and keywords.",
+            "criar": "Create FAQ"
+        },
+        "edit": {
+            "titulo": "Edit FAQ",
+            "tituloComId": "Edit FAQ #{{id}}",
+            "subtitulo": "Change the question, answer, category or associated keywords.",
+            "confirmarEliminar": "Are you sure you want to delete this FAQ?",
+            "eliminar": "Delete FAQ",
+            "guardar": "Save changes"
+        }
+    },
     "atividade": {
         "titulo": "Activity Log",
         "subtitulo": "View recent actions performed in the system.",

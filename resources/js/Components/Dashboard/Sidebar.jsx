@@ -87,12 +87,14 @@ import {
         }
 
         return (
-            <a
+            <Link
                 href={href}
+                onClick={onNavigate}
+                preserveScroll
                 className={active ? 'sidebar-link-active' : 'sidebar-link'}
             >
                 {content}
-            </a>
+            </Link>
         );
     }
 

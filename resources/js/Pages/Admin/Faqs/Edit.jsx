@@ -2,13 +2,31 @@ import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { HelpCircle, ArrowLeft, Plus, Folder, Sparkles, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+const categoriaKeys = {
+    'Sobre o SpaceHub': 'sobre',
+    'Espaços e disponibilidade': 'espacos',
+    Reservas: 'reservas',
+    Pagamentos: 'pagamentos',
+    'Check-in': 'checkin',
+    Conta: 'conta',
+    Geral: 'geral',
+};
 
 export default function Edit({ faq, categorias = [] }) {
+    const { t } = useTranslation('admin');
+    const traduzirCategoria = (categoria) =>
+        categoriaKeys[categoria]
+            ? t(`faqsAdmin.categorias.${categoriaKeys[categoria]}`)
+            : categoria;
     const [criarNovaCategoria, setCriarNovaCategoria] = useState(false);
 
     const { data, setData, put, delete: destroy, processing, errors } = useForm({
         pergunta: faq?.pergunta || '',
         resposta: faq?.resposta || '',
+        pergunta_en: faq?.pergunta_en || '',
+        resposta_en: faq?.resposta_en || '',
         categoria: faq?.categoria || 'Geral',
         keywords_pt: faq?.keywords_pt || '',
         keywords_en: faq?.keywords_en || '',
@@ -30,14 +48,14 @@ export default function Edit({ faq, categorias = [] }) {
     };
 
     const handleDelete = () => {
-        if (window.confirm('Tem a certeza de que pretende eliminar esta FAQ?')) {
+        if (window.confirm(t('faqsAdmin.edit.confirmarEliminar'))) {
             destroy(route('admin.faqs.destroy', faq.id));
         }
     };
 
     return (
         <DashboardLayout>
-            <Head title={`Editar FAQ #${faq?.id || ''}`} />
+            <Head title={t('faqsAdmin.edit.tituloComId', { id: faq?.id || '' })} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -47,10 +65,10 @@ export default function Edit({ faq, categorias = [] }) {
                         </div>
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 dark:text-white">
-                                Editar FAQ
+                                {t('faqsAdmin.edit.titulo')}
                             </h1>
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Altere os dados da pergunta, resposta, categoria ou keywords associadas.
+                                {t('faqsAdmin.edit.subtitulo')}
                             </p>
                         </div>
                     </div>
@@ -61,7 +79,7 @@ export default function Edit({ faq, categorias = [] }) {
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                         >
                             <ArrowLeft size={16} />
-                            Voltar
+                            {t('faqsAdmin.comum.voltar')}
                         </Link>
                     </div>
                 </div>
@@ -71,7 +89,7 @@ export default function Edit({ faq, categorias = [] }) {
                     <div>
                         <div className="flex items-center justify-between mb-2">
                             <label htmlFor="categoria" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                Categoria
+                                {t('faqsAdmin.comum.categoria')}
                             </label>
                             <button
                                 type="button"
@@ -83,11 +101,11 @@ export default function Edit({ faq, categorias = [] }) {
                             >
                                 {criarNovaCategoria ? (
                                     <>
-                                        <Folder size={14} /> Selecionar existente
+                                        <Folder size={14} /> {t('faqsAdmin.comum.selecionarExistente')}
                                     </>
                                 ) : (
                                     <>
-                                        <Plus size={14} /> Nova Categoria
+                                        <Plus size={14} /> {t('faqsAdmin.comum.novaCategoria')}
                                     </>
                                 )}
                             </button>
@@ -99,14 +117,14 @@ export default function Edit({ faq, categorias = [] }) {
                                     id="categoria"
                                     type="text"
                                     maxLength={30}
-                                    placeholder="Escreva o nome da nova categoria..."
+                                    placeholder={t('faqsAdmin.comum.categoriaPlaceholder')}
                                     value={data.categoria}
                                     onChange={handleNovaCategoriaChange}
                                     className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                                     required
                                 />
                                 <span className="mt-1 block text-right text-xs text-slate-400">
-                                    Caracteres: {data.categoria.length}/30
+                                    {t('faqsAdmin.comum.caracteres', { atual: data.categoria.length, maximo: 30 })}
                                 </span>
                             </div>
                         ) : (
@@ -119,7 +137,7 @@ export default function Edit({ faq, categorias = [] }) {
                             >
                                 {(categorias || []).map((cat) => (
                                     <option key={cat} value={cat}>
-                                        {cat}
+                                        {traduzirCategoria(cat)}
                                     </option>
                                 ))}
                             </select>
@@ -132,7 +150,7 @@ export default function Edit({ faq, categorias = [] }) {
                     {/* Pergunta */}
                     <div>
                         <label htmlFor="pergunta" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            Pergunta
+                            {t('faqsAdmin.comum.pergunta')}
                         </label>
                         <input
                             id="pergunta"
@@ -150,7 +168,7 @@ export default function Edit({ faq, categorias = [] }) {
                     {/* Resposta */}
                     <div>
                         <label htmlFor="resposta" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                            Resposta
+                            {t('faqsAdmin.comum.resposta')}
                         </label>
                         <textarea
                             id="resposta"
@@ -166,15 +184,47 @@ export default function Edit({ faq, categorias = [] }) {
                     </div>
 
                     {/* Keywords PT & EN */}
+                    <div>
+                        <label htmlFor="pergunta_en" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            {t('faqsAdmin.comum.perguntaEn')}
+                        </label>
+                        <input
+                            id="pergunta_en"
+                            type="text"
+                            value={data.pergunta_en}
+                            onChange={(e) => setData('pergunta_en', e.target.value)}
+                            className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        />
+                        {errors.pergunta_en && (
+                            <p className="mt-1 text-xs text-rose-500">{errors.pergunta_en}</p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label htmlFor="resposta_en" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            {t('faqsAdmin.comum.respostaEn')}
+                        </label>
+                        <textarea
+                            id="resposta_en"
+                            rows={5}
+                            value={data.resposta_en}
+                            onChange={(e) => setData('resposta_en', e.target.value)}
+                            className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                        />
+                        {errors.resposta_en && (
+                            <p className="mt-1 text-xs text-rose-500">{errors.resposta_en}</p>
+                        )}
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label htmlFor="keywords_pt" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                Keywords (Português)
+                                {t('faqsAdmin.comum.keywordsPt')}
                             </label>
                             <input
                                 id="keywords_pt"
                                 type="text"
-                                placeholder="ex: reserva, horários, cancelar"
+                                placeholder={t('faqsAdmin.comum.keywordsPtPlaceholder')}
                                 value={data.keywords_pt}
                                 onChange={(e) => setData('keywords_pt', e.target.value)}
                                 className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -186,12 +236,12 @@ export default function Edit({ faq, categorias = [] }) {
 
                         <div>
                             <label htmlFor="keywords_en" className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                Keywords (Inglês)
+                                {t('faqsAdmin.comum.keywordsEn')}
                             </label>
                             <input
                                 id="keywords_en"
                                 type="text"
-                                placeholder="ex: booking, schedule, cancel"
+                                placeholder={t('faqsAdmin.comum.keywordsEnPlaceholder')}
                                 value={data.keywords_en}
                                 onChange={(e) => setData('keywords_en', e.target.value)}
                                 className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
@@ -205,7 +255,7 @@ export default function Edit({ faq, categorias = [] }) {
                     <div className="rounded-xl bg-slate-50 p-3 text-xs text-slate-500 dark:bg-slate-800/50 dark:text-slate-400 flex items-center gap-2">
                         <Sparkles size={16} className="text-teal-500 shrink-0" />
                         <span>
-                            Se deixar os campos de keywords em branco, o sistema gera os termos automaticamente ao guardar.
+                            {t('faqsAdmin.comum.keywordsAjuda')}
                         </span>
                     </div>
 
@@ -218,14 +268,14 @@ export default function Edit({ faq, categorias = [] }) {
                             className="inline-flex w-48 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-6 py-3 text-sm font-semibold text-red-600 shadow-sm transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-900/50 dark:bg-white dark:text-red-600 dark:hover:bg-red-50"
                         >
                             <Trash2 size={16} />
-                            Eliminar FAQ
+                            {t('faqsAdmin.edit.eliminar')}
                         </button>
                         <button
                             type="submit"
                             disabled={processing}
                             className="inline-flex w-48 items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-500 disabled:opacity-50"
                         >
-                            {processing ? 'A guardar...' : 'Guardar Alterações'}
+                            {processing ? t('faqsAdmin.comum.aGuardar') : t('faqsAdmin.edit.guardar')}
                         </button>
                     </div>
                 </form>

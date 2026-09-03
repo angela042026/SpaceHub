@@ -41,6 +41,8 @@ class FaqController extends Controller
             'categoria' => 'required|string|max:30',
             'pergunta' => 'required|string|max:255',
             'resposta' => 'required|string',
+            'pergunta_en' => 'nullable|string|max:255',
+            'resposta_en' => 'nullable|string',
             'keywords_pt' => 'nullable|string',
             'keywords_en' => 'nullable|string',
         ]);
@@ -49,6 +51,8 @@ class FaqController extends Controller
             $autoKeywords = $this->keywordService->extrair(
                 $validated['pergunta'],
                 $validated['resposta'],
+                $validated['pergunta_en'] ?? null,
+                $validated['resposta_en'] ?? null,
             );
 
             $validated['keywords_pt'] = $validated['keywords_pt'] ?: $autoKeywords['keywords_pt'];
@@ -57,7 +61,7 @@ class FaqController extends Controller
 
         Faq::create($validated);
 
-        return redirect()->route('admin.faqs.index')->with('message', 'FAQ criada com sucesso!');
+        return redirect()->route('admin.faqs.index')->with('message', __('FAQ criada com sucesso!'));
     }
 
     public function edit(Faq $faq)
@@ -76,6 +80,8 @@ class FaqController extends Controller
             'categoria' => 'required|string|max:30',
             'pergunta' => 'required|string|max:255',
             'resposta' => 'required|string',
+            'pergunta_en' => 'nullable|string|max:255',
+            'resposta_en' => 'nullable|string',
             'keywords_pt' => 'nullable|string',
             'keywords_en' => 'nullable|string',
         ]);
@@ -84,8 +90,8 @@ class FaqController extends Controller
             $autoKeywords = $this->keywordService->extrair(
                 $validated['pergunta'],
                 $validated['resposta'],
-                $faq->pergunta_en,
-                $faq->resposta_en
+                $validated['pergunta_en'] ?? null,
+                $validated['resposta_en'] ?? null
             );
 
             $validated['keywords_pt'] = $validated['keywords_pt'] ?: $autoKeywords['keywords_pt'];
@@ -94,13 +100,13 @@ class FaqController extends Controller
 
         $faq->update($validated);
 
-        return redirect()->route('admin.faqs.index')->with('message', 'FAQ atualizada com sucesso!');
+        return redirect()->route('admin.faqs.index')->with('message', __('FAQ atualizada com sucesso!'));
     }
 
     public function destroy(Faq $faq)
     {
         $faq->delete();
 
-        return redirect()->route('admin.faqs.index')->with('message', 'FAQ eliminada com sucesso!');
+        return redirect()->route('admin.faqs.index')->with('message', __('FAQ eliminada com sucesso!'));
     }
 }

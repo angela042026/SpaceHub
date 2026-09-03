@@ -1,13 +1,29 @@
 import DashboardLayout from '@/Layouts/DashboardLayout';
 import { Head, Link } from '@inertiajs/react';
 import { Edit, HelpCircle, Plus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+const categoriaKeys = {
+    'Sobre o SpaceHub': 'sobre',
+    'Espaços e disponibilidade': 'espacos',
+    Reservas: 'reservas',
+    Pagamentos: 'pagamentos',
+    'Check-in': 'checkin',
+    Conta: 'conta',
+    Geral: 'geral',
+};
 
 export default function Index({ faqs = {} }) {
+    const { t, i18n } = useTranslation('admin');
     const faqGroups = Object.entries(faqs || {});
+    const traduzirCategoria = (categoria) =>
+        categoriaKeys[categoria]
+            ? t(`faqsAdmin.categorias.${categoriaKeys[categoria]}`)
+            : categoria;
 
     return (
         <DashboardLayout>
-            <Head title="FAQs" />
+            <Head title={t('faqsAdmin.index.titulo')} />
 
             <section className="dashboard-card overflow-hidden">
                 <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
@@ -16,9 +32,9 @@ export default function Index({ faqs = {} }) {
                             <HelpCircle size={22} strokeWidth={1.9} />
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">FAQs</h1>
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">{t('faqsAdmin.index.titulo')}</h1>
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Consulte e edite as perguntas frequentes.
+                                {t('faqsAdmin.index.subtitulo')}
                             </p>
                         </div>
                     </div>
@@ -27,7 +43,7 @@ export default function Index({ faqs = {} }) {
                         className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-teal-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-teal-500"
                     >
                         <Plus size={16} />
-                        Nova FAQ
+                        {t('faqsAdmin.index.novaFaq')}
                     </Link>
                 </div>
 
@@ -35,7 +51,7 @@ export default function Index({ faqs = {} }) {
                     {faqGroups.map(([categoria, items]) => (
                         <div key={categoria || 'sem-categoria'}>
                             <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-teal-600 dark:text-teal-400">
-                                {categoria || 'Sem categoria'}
+                                {categoria ? traduzirCategoria(categoria) : t('faqsAdmin.index.semCategoria')}
                             </h2>
                             <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 dark:divide-slate-800 dark:border-slate-700">
                                 {items.map((faq) => (
@@ -45,19 +61,27 @@ export default function Index({ faqs = {} }) {
                                     >
                                         <div className="min-w-0">
                                             <p className="font-medium text-slate-800 dark:text-slate-100">
-                                                {faq.pergunta}
+                                                {i18n.language.startsWith('en')
+                                                    ? faq.pergunta_en || faq.pergunta
+                                                    : faq.pergunta}
                                             </p>
                                             <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
-                                                {faq.resposta}
+                                                {i18n.language.startsWith('en')
+                                                    ? faq.resposta_en || faq.resposta
+                                                    : faq.resposta}
                                             </p>
                                         </div>
                                         <Link
                                             href={route('admin.faqs.edit', faq.id)}
-                                            aria-label={`Editar FAQ: ${faq.pergunta}`}
+                                            aria-label={t('faqsAdmin.index.editarAria', {
+                                                pergunta: i18n.language.startsWith('en')
+                                                    ? faq.pergunta_en || faq.pergunta
+                                                    : faq.pergunta,
+                                            })}
                                             className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                                         >
                                             <Edit size={15} />
-                                            Editar
+                                            {t('faqsAdmin.index.editar')}
                                         </Link>
                                     </div>
                                 ))}

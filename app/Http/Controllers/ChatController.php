@@ -74,7 +74,7 @@ class ChatController extends Controller
 
         return response()->json([
             'sucesso' => false,
-            'resposta' => 'Desculpe, não encontrei uma resposta exata para a sua questão. Pode contactar a nossa equipa de suporte no separador "Apoio".',
+            'resposta' => __('Desculpe, não encontrei uma resposta exata para a sua questão. Pode contactar a nossa equipa de suporte no separador "Apoio".'),
         ]);
     }
 }
