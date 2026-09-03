@@ -18,6 +18,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // O Render termina o HTTPS no proxy e encaminha o pedido ao container.
+        // Confiar nesses cabeçalhos permite ao Laravel gerar URLs HTTPS corretas.
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             SetLocale::class,
             HandleInertiaRequests::class,

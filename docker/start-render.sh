@@ -30,4 +30,8 @@ if [ "${RUN_SEEDERS:-false}" = "true" ]; then
     php artisan db:seed --force
 fi
 
+if [ "${RUN_SCHEDULER:-false}" = "true" ]; then
+    php artisan schedule:work &
+fi
+
 exec "$@"
