@@ -20,6 +20,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $driver = DB::connection()->getDriverName();
+
         /*
          * Cria primeiro um índice normal para suportar
          * a foreign key de secretaria_id.
@@ -30,6 +32,17 @@ return new class extends Migration
                 'reservas_secretaria_id_index'
             );
         });
+
+        /*
+         * O PostgreSQL resolve esta regra de forma nativa com índices
+         * únicos parciais, sem precisar das colunas virtuais do MySQL.
+         */
+        if ($driver === 'pgsql') {
+            DB::statement('CREATE UNIQUE INDEX unique_reserva_secretaria_periodo_ativa ON reservas (secretaria_id, data, periodo_id) WHERE cancelada_at IS NULL');
+            DB::statement('CREATE UNIQUE INDEX unique_reserva_utilizador_periodo_ativo ON reservas (user_id, data, periodo_id) WHERE cancelada_at IS NULL');
+
+            return;
+        }
 
         /*
          * Agora o índice único antigo pode ser removido.
@@ -44,8 +57,6 @@ return new class extends Migration
          * O MySQL aceita a função IF().
          * O SQLite, utilizado nos testes, utiliza CASE WHEN.
          */
-        $driver = DB::connection()->getDriverName();
-
         $expressaoSecretaria = $driver === 'sqlite'
             ? 'CASE WHEN cancelada_at IS NULL THEN secretaria_id ELSE NULL END'
             : 'IF(cancelada_at IS NULL, secretaria_id, NULL)';
@@ -96,6 +107,24 @@ return new class extends Migration
 
     public function down(): void
     {
+        $driver = DB::connection()->getDriverName();
+
+        if ($driver === 'pgsql') {
+            DB::statement('DROP INDEX IF EXISTS unique_reserva_secretaria_periodo_ativa');
+            DB::statement('DROP INDEX IF EXISTS unique_reserva_utilizador_periodo_ativo');
+
+            Schema::table('reservas', function (Blueprint $table) {
+                $table->unique(
+                    ['secretaria_id', 'data', 'periodo_id'],
+                    'unique_reserva_secretaria_periodo'
+                );
+
+                $table->dropIndex('reservas_secretaria_id_index');
+            });
+
+            return;
+        }
+
         /*
          * Remove os novos índices únicos.
          */
