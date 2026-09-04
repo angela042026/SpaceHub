@@ -527,6 +527,80 @@ Git, para clonar o repositório.
 
 🚀 Instalação
 
+### Instalação e execução local — passo a passo
+
+Este é o percurso recomendado para executar o SpaceHub pela primeira vez. Antes de começar, confirme que o PHP, Composer, Node.js, npm e MySQL/MariaDB estão instalados e que o servidor da base de dados está em execução.
+
+1. Clone o repositório e entre na pasta do projeto:
+
+```bash
+git clone https://github.com/angela042026/SpaceHub.git
+cd SpaceHub
+```
+
+2. Crie o ficheiro de configuração local e gere a chave da aplicação:
+
+```bash
+copy .env.example .env
+php artisan key:generate
+```
+
+Em Linux ou macOS, substitua o primeiro comando por `cp .env.example .env`.
+
+3. Crie uma base de dados MySQL/MariaDB chamada `spacehub` e confirme no ficheiro `.env` os valores de ligação:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=spacehub
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+4. Instale as dependências do backend e frontend:
+
+```bash
+composer install
+npm.cmd install
+```
+
+Em Linux ou macOS, utilize `npm install`. No PowerShell do Windows, `npm.cmd` evita problemas com a política de execução de scripts.
+
+5. Escolha **uma** das opções para preparar a base de dados:
+
+   - Desenvolvimento ou instalação sem ficheiro SQL: `php artisan migrate --seed`
+   - Demonstração com a base de dados entregue: importe primeiro `spacehub_bd.sql` para a base `spacehub`. Não execute migrations sobre essa cópia já importada, salvo se souber que estão em falta.
+
+6. Crie o atalho público para uploads e limpe as caches locais:
+
+```bash
+php artisan storage:link
+php artisan optimize:clear
+```
+
+7. Abra quatro terminais na pasta do projeto e execute:
+
+```bash
+# Terminal 1 — aplicação Laravel
+php artisan serve
+
+# Terminal 2 — Vite / frontend
+npm.cmd run dev
+
+# Terminal 3 — atualizações em tempo real
+php artisan reverb:start
+
+# Terminal 4 — tarefas automáticas
+php artisan schedule:work
+```
+
+Abra [http://127.0.0.1:8000](http://127.0.0.1:8000) no navegador. O Reverb é necessário para o chat, notificações e atualizações em tempo real; o Scheduler processa expirações, não comparências e outras tarefas agendadas.
+
+Para uma verificação final, execute `php artisan test` noutro terminal.
+
+### Detalhe dos passos
+
 1. Clonar o projeto
 
 git clone https://github.com/angela042026/SpaceHub.git
@@ -812,98 +886,9 @@ Evolução do projeto e trabalho futuro
 
 Estrutura das tabelas
 
-PROJECT_CONTEXT.md
-
-Contexto consolidado do projeto
-
-📦 Entrega do projeto
-
-A entrega deve incluir:
-
-SpaceHub_Entrega/
-├── SpaceHub_Projeto.zip
-├── spacehub_bd.sql
-└── SpaceHub_Credenciais.txt
-
-Repositório Git
-
-O repositório deve conter:
-
-todo o código Laravel;
-
-app;
-
-bootstrap;
-
-config;
-
-database;
-
-public;
-
-resources;
-
-routes;
-
-storage, quando necessário;
-
-tests;
-
-docs;
-
-imagens utilizadas;
-
-composer.json;
-
-composer.lock;
-
-package.json;
-
-package-lock.json;
-
-.env.example;
-
 README.md.
 
-Elementos que não devem ficar no Git
 
-.env;
-
-vendor/;
-
-node_modules/;
-
-credenciais reais;
-
-ficheiros SQL com dados;
-
-logs;
-
-ficheiros temporários;
-
-chaves e segredos.
-
-Base de dados
-
-A estrutura da base de dados é reproduzida pelas migrations e os dados de demonstração pelos seeders. Quando a entrega exigir também uma exportação SQL, esta deve ser gerada a partir da versão final e entregue fora do repositório, sem dados pessoais reais.
-
-Credenciais
-
-As credenciais devem ser entregues separadamente em:
-
-SpaceHub_Credenciais.txt
-
-O ficheiro deve incluir:
-
-URL da aplicação;
-
-utilizador administrador;
-
-palavra-passe do administrador;
-
-utilizadores de demonstração necessários.
-
-As contas fictícias necessárias à demonstração são criadas pelo UserSeeder e podem ser repetidas no ficheiro de entrega para facilitar a avaliação. Credenciais reais, pessoais ou de produção nunca devem ser incluídas no repositório.
 
 🌱 Dados iniciais
 
