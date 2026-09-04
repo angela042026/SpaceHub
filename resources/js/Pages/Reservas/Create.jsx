@@ -821,6 +821,7 @@ export default function Create({
                                             secretaria={secretaria}
                                             periodosReserva={periodosReserva}
                                             reservaLonga={reservaLonga}
+                                            tipoDuracao={tipoDuracao}
                                             periodoEscolhido={
                                                 reservaLonga
                                                     ? 'dia_inteiro'

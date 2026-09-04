@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { formatarDataPortugues } from './reservaHelpers';
 import { etiquetaPeriodo } from '@/utils/estados';
 import { resolverImagemSecretaria } from '@/utils/imagemSetor';
+import { formatarValorEuro } from '@/utils/formatacaoPagamento';
 import LocalizacaoEspaco from './LocalizacaoEspaco';
 
 /**
@@ -19,6 +20,7 @@ export default function LugarCard({
     secretaria,
     periodosReserva,
     reservaLonga,
+    tipoDuracao,
     periodoEscolhido,
     onEscolherPeriodo,
     ehAlvo,
@@ -46,6 +48,20 @@ export default function LugarCard({
     const titulo = categoriaNome
         ? `${categoriaNome} ${numeroLugar ?? ''}`.trim()
         : secretaria.codigo;
+    const precoMeioDia = secretaria.setor?.preco_meio_dia;
+    const campoPrecoLonga = {
+        semanal: 'preco_semanal',
+        mensal: 'preco_mensal',
+        anual: 'preco_anual',
+    }[tipoDuracao];
+    const precoDiaInteiro = reservaLonga
+        ? secretaria.setor?.[campoPrecoLonga]
+        : secretaria.setor?.preco_dia_inteiro;
+
+    const precoFormatado = (valor) =>
+        valor === null || valor === undefined
+            ? null
+            : formatarValorEuro(valor, i18n.language);
 
     const grupoPeriodosRef = useRef(null);
     const [mostrarErroPeriodo, setMostrarErroPeriodo] = useState(false);
@@ -139,7 +155,7 @@ export default function LugarCard({
                                             periodo.id,
                                         )
                                     }
-                                    className={`flex-1 rounded-xl border px-2 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed dark:focus-visible:ring-offset-slate-900 ${
+                                    className={`flex min-h-12 flex-1 flex-col items-center justify-center rounded-xl border px-2 py-1.5 text-sm font-semibold leading-tight transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed dark:focus-visible:ring-offset-slate-900 ${
                                         selecionado
                                             ? 'border-teal-500 bg-teal-500 text-white shadow-sm'
                                             : disponivel
@@ -147,7 +163,12 @@ export default function LugarCard({
                                                 : 'border-slate-100 bg-slate-50 text-slate-300 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-600'
                                     }`}
                                 >
-                                    {etiquetaPeriodo(periodo.nome, i18n.t)}
+                                    <span>{etiquetaPeriodo(periodo.nome, i18n.t)}</span>
+                                    {precoFormatado(precoMeioDia) && (
+                                        <span className="mt-0.5 text-[11px] font-bold opacity-75">
+                                            {precoFormatado(precoMeioDia)}
+                                        </span>
+                                    )}
                                 </button>
                             );
                         })}
@@ -164,7 +185,7 @@ export default function LugarCard({
                         onClick={() =>
                             onEscolherPeriodo(secretaria.id, 'dia_inteiro')
                         }
-                        className={`flex-1 rounded-xl border px-2 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed dark:focus-visible:ring-offset-slate-900 ${
+                        className={`flex min-h-12 flex-1 flex-col items-center justify-center rounded-xl border px-2 py-1.5 text-sm font-semibold leading-tight transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/60 focus-visible:ring-offset-2 disabled:cursor-not-allowed dark:focus-visible:ring-offset-slate-900 ${
                             periodoEscolhido === 'dia_inteiro'
                                 ? 'border-teal-500 bg-teal-500 text-white shadow-sm'
                                 : diaInteiroDisponivel
@@ -172,7 +193,12 @@ export default function LugarCard({
                                     : 'border-slate-100 bg-slate-50 text-slate-300 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-600'
                         }`}
                     >
-                        {t('lugarCard.diaInteiro')}
+                        <span>{t('lugarCard.diaInteiro')}</span>
+                        {precoFormatado(precoDiaInteiro) && (
+                            <span className="mt-0.5 text-[11px] font-bold opacity-75">
+                                {precoFormatado(precoDiaInteiro)}
+                            </span>
+                        )}
                     </button>
                 </div>
 

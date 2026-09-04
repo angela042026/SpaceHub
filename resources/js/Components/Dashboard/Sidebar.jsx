@@ -116,12 +116,6 @@ export default function Sidebar({
     // também inclui Gestor. Gestor não vê o item, para não apontar para
     // uma página que lhe devolveria 403.
     const isAdministrador = roleName === 'Administrador';
-    const isStaffRececao = [
-        'Administrador',
-        'Gestor',
-        'Colaborador',
-    ].includes(roleName);
-
     return (
         <>
             {open && (
@@ -234,22 +228,6 @@ export default function Sidebar({
                             }
                             onNavigate={onClose}
                         />
-
-                        {isStaffRececao && (
-                            <SidebarItem
-                                icon={ClipboardCheck}
-                                label={t(
-                                    'sidebar.checkinRececao',
-                                )}
-                                href={route(
-                                    'checkin.recepcao.index',
-                                )}
-                                active={route().current(
-                                    'checkin.recepcao.*',
-                                )}
-                                onNavigate={onClose}
-                            />
-                        )}
 
                         <SidebarItem
                             icon={Map}
@@ -431,6 +409,20 @@ export default function Sidebar({
                                     )}
                                     active={route().current(
                                         'secretarias.qrcodes',
+                                    )}
+                                    onNavigate={onClose}
+                                />
+
+                                <SidebarItem
+                                    icon={ClipboardCheck}
+                                    label={t(
+                                        'sidebar.checkinRececao',
+                                    )}
+                                    href={route(
+                                        'checkin.recepcao.index',
+                                    )}
+                                    active={route().current(
+                                        'checkin.recepcao.*',
                                     )}
                                     onNavigate={onClose}
                                 />

@@ -368,6 +368,15 @@
             "keywordsAjuda": "Se deixar os campos de palavras-chave em branco, o sistema gera os termos automaticamente ao guardar.",
             "aGuardar": "A guardar..."
         },
+        "categorias": {
+            "sobre": "Sobre o SpaceHub",
+            "espacos": "Espaços e disponibilidade",
+            "reservas": "Reservas",
+            "pagamentos": "Pagamentos",
+            "checkin": "Check-in",
+            "conta": "Conta",
+            "geral": "Geral"
+        },
         "index": {
             "titulo": "FAQs",
             "subtitulo": "Consulte e edite as perguntas frequentes.",
