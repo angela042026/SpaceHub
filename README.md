@@ -1,308 +1,204 @@
 <div align="center">
-
-🏢 SpaceHub
-
-Sistema de Gestão e Reserva de Espaços Colaborativos
-
-Aplicação web desenvolvida em Laravel 12, React, Inertia.js e MySQL para gestão de espaços, reservas de secretárias, pagamentos simulados, check-in, suporte e monitorização da ocupação.
-
-👉 [Aceder ao SpaceHub] - https://spacehub-d5ld.onrender.com/
-
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/images/logo/logoprincipalbranco.png">
+    <img src="public/images/logo/spacehub-logo.png" alt="SpaceHub — O seu espaço. Quando precisar." width="280">
+  </picture>
+  <h3>Sistema de Gestão e Reserva de Espaços Colaborativos</h3>
+  <p>
+    Plataforma web para gerir edifícios, pisos, setores e secretárias, com reservas,<br>
+    check-in por QR Code, pagamentos simulados e monitorização da ocupação em tempo real.
+  </p>
+  <p>
+    <img src="https://img.shields.io/badge/Laravel-12-FF2D20?style=flat-square&logo=laravel&logoColor=white" alt="Laravel 12">
+    <img src="https://img.shields.io/badge/PHP-8.2-777BB4?style=flat-square&logo=php&logoColor=white" alt="PHP 8.2">
+    <img src="https://img.shields.io/badge/React-18.2-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React 18.2">
+    <img src="https://img.shields.io/badge/Inertia.js-9553E9?style=flat-square&logo=inertia&logoColor=white" alt="Inertia.js">
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
+    <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white" alt="MySQL">
+    <img src="https://img.shields.io/badge/testes-369_aprovados-success?style=flat-square" alt="369 testes aprovados">
+  </p>
+  <p><a href="https://spacehub-d5ld.onrender.com/"><strong>▶️ Ver aplicação online</strong></a></p>
 </div>
 
-📖 Sobre o projeto
+---
 
-O SpaceHub é uma aplicação web destinada à gestão de espaços de trabalho colaborativos e à reserva de postos de trabalho.
+## 📑 Índice
 
-O sistema organiza os espaços através da seguinte hierarquia:
+- [Sobre o projeto](#-sobre-o-projeto)
+- [Demonstração](#-demonstração)
+- [Funcionalidades](#-funcionalidades)
+- [Stack tecnológica](#️-stack-tecnológica)
+- [Arquitetura](#️-arquitetura)
+- [Segurança](#-segurança)
+- [Instalação](#-instalação)
+- [Testes e qualidade](#-testes-e-qualidade)
+- [Documentação](#-documentação)
+- [Equipa e contributos](#-equipa-e-contributos)
+- [Trabalho futuro](#-trabalho-futuro)
+- [Licença](#-licença)
 
+---
+
+## 📖 Sobre o projeto
+
+O **SpaceHub** resolve um problema concreto dos espaços de trabalho partilhados: saber
+o que está livre, reservar um posto e confirmar a presença sem fricção.
+
+A aplicação organiza o espaço físico numa hierarquia de quatro níveis e mapeia-a numa
+planta interativa, sobre a qual assentam as reservas, os pagamentos e as estatísticas:
+
+```text
 Edifício
 └── Piso
     └── Setor
         └── Secretária
+```
 
-A plataforma permite consultar a disponibilidade, reservar secretárias, efetuar check-in por QR Code ou presencialmente na receção, gerir pagamentos simulados e acompanhar a utilização dos espaços através de dashboards, mapas, relatórios e estatísticas.
+Um utilizador consulta a disponibilidade, reserva uma secretária por período ou por
+duração longa, paga (em ambiente simulado) e faz check-in lendo o QR Code do posto —
+ou na receção, com validação assistida. Cada check-in atualiza o mapa em tempo real
+via WebSockets, e os gestores acompanham a ocupação através de dashboards e relatórios.
 
-O projeto foi desenvolvido em contexto académico por uma equipa de quatro elementos, com integração através de branches, Pull Requests e merge commits.
+Projeto académico desenvolvido por uma equipa de quatro elementos, com fluxo de trabalho
+profissional em Git: branches de funcionalidade, Pull Requests, revisão e merge commits.
 
-✨ Funcionalidades principais
+---
 
-👤 Autenticação e utilizadores
+## 🎬 Demonstração
 
-registo;
+A aplicação está publicada em **[spacehub-d5ld.onrender.com](https://spacehub-d5ld.onrender.com/)**.
 
-login e logout;
+**Credenciais de demonstração**
 
-recuperação e redefinição da palavra-passe;
+| Papel | Email | Palavra-passe |
+| --- | --- | --- |
+| Administrador | `admin@spacehub.test` | `password` |
+| Gestor | `gestor@spacehub.test` | `password` |
+| Utilizador | `user@spacehub.test` | `password` |
 
-gestão do perfil;
+> Confirmar/atualizar estas credenciais de acordo com os seeders ou com o ficheiro SQL entregue.
 
-fotografia de perfil;
+---
 
-contas ativas e inativas;
+## ✨ Funcionalidades
 
-gestão administrativa de utilizadores;
+| Módulo | O que faz |
+| --- | --- |
+| 👤 **Autenticação** | Registo, login, recuperação de palavra-passe, perfil com fotografia, contas ativas/inativas, Single Sign-On e API com Laravel Sanctum. |
+| 🏢 **Gestão de espaços** | CRUD de edifícios, pisos, setores e secretárias com pesquisa, filtros, ordenação, paginação, plantas dos pisos e posicionamento gráfico no mapa. |
+| 📅 **Reservas** | Consulta de disponibilidade, validação de conflitos, durações diária a anual, períodos de manhã/tarde/dia inteiro, expiração automática e histórico. |
+| 💳 **Pagamentos simulados** | Criação automática por reserva, cálculo do valor, referência única, comprovativo e quatro métodos (Cartão, MB Way, Transferência, PayPal). |
+| 📱 **QR Code e check-in** | QR Code único por secretária, leitura pela câmara, validação de utilizador/reserva/data/período e confirmação presencial assistida na receção. |
+| 📊 **Dashboard e mapa** | Taxa de ocupação, reservas por estado/período/edifício, próximas reservas, gráficos Recharts e mapa interativo atualizado em tempo real. |
+| ⭐ **Avaliações** | Classificação e comentários em reservas elegíveis, média por setor, moderação e regras de autorização. |
+| 🔔 **Notificações** | Notificações persistentes com estado de leitura para reservas, pagamentos, check-in, avaliações e suporte. |
+| 💬 **Tempo real** | Laravel Reverb + Echo sobre WebSockets, com o evento `MapaAtualizado` a propagar alterações de ocupação. |
+| 🆘 **Help Center** | FAQs por categoria, assistente virtual baseado nas FAQs, pedidos de suporte, reporte de avarias e resposta administrativa. |
 
-papéis e permissões;
+<details>
+<summary><strong>Ver detalhe completo de cada módulo</strong></summary>
 
-autenticação da API com Laravel Sanctum;
+### 👤 Autenticação e utilizadores
 
-Single Sign-On.
+Registo, login e logout, recuperação e redefinição da palavra-passe, gestão do perfil,
+fotografia de perfil, contas ativas e inativas, gestão administrativa de utilizadores,
+papéis e permissões, autenticação da API com Laravel Sanctum, Single Sign-On e ligação
+opcional ao Google Calendar para sincronização das reservas.
 
-ligação opcional ao Google Calendar para sincronização das reservas.
+Papéis existentes: **Administrador**, **Gestor**, **Colaborador** e **Utilizador**.
+Os papéis são fixos e criados através de seeders — não existe CRUD de papéis.
 
-Papéis existentes:
+### 🏢 Gestão de espaços
 
-Administrador;
+Gestão de edifícios, pisos, setores e secretárias, com pesquisa, filtros, ordenação,
+paginação e ativação/desativação lógica. Inclui upload e substituição das plantas dos
+pisos, características das secretárias, posicionamento no mapa através de editor gráfico
+e QR Code único por secretária.
 
-Gestor;
+### 📅 Reservas
 
-Colaborador;
-
-Utilizador.
-
-Os papéis são fixos e criados através de seeders. Não existe CRUD de papéis.
-
-🏢 Gestão de espaços
-
-gestão de edifícios;
-
-gestão de pisos;
-
-gestão de setores;
-
-gestão de secretárias;
-
-pesquisa;
-
-filtros;
-
-ordenação;
-
-paginação;
-
-ativação e desativação lógica;
-
-upload e substituição das plantas dos pisos;
-
-características das secretárias;
-
-posicionamento no mapa;
-
-editor gráfico;
-
-QR Code único por secretária.
-
-📅 Reservas
-
-criação;
-
-consulta;
-
-edição;
-
-cancelamento;
-
-histórico;
-
-consulta de disponibilidade;
-
-validação de conflitos;
-
-estados da reserva;
-
-check-in por QR Code;
-
-check-in presencial assistido por Administrador, Gestor ou Colaborador;
-
-expiração automática;
-
-atualização do mapa em tempo real;
-
+Criação, consulta, edição, cancelamento e histórico; consulta de disponibilidade e
+validação de conflitos; check-in por QR Code ou presencial assistido por Administrador,
+Gestor ou Colaborador; expiração automática; atualização do mapa em tempo real; e
 associação automática a um pagamento.
 
-Durações suportadas:
+- **Durações:** diária, semanal, mensal e anual.
+- **Períodos:** Manhã, Tarde e Dia inteiro.
+- **Estados:** pendente, confirmada, cancelada e expirada.
 
-diária;
+As reservas longas utilizam o período *Dia inteiro*, têm data final calculada e
+correspondem a um único registo de reserva e a um único pagamento.
 
-semanal;
+### 💳 Pagamentos simulados
 
-mensal;
+Criação automática, cálculo do valor, referência única, consulta, confirmação,
+cancelamento, histórico, comprovativo e controlo de acesso.
 
-anual.
+- **Métodos:** Cartão, MB Way, Transferência Bancária e PayPal.
+- **Estados:** pendente, pago e cancelado.
 
-Períodos suportados:
+> Os pagamentos são simulados para fins académicos. Não existe movimentação financeira real.
 
-Manhã;
+### 📱 QR Code e check-in
 
-Tarde;
+Geração do QR Code, leitura através da câmara, validação do utilizador, da reserva e da
+data/período/secretária, confirmação do check-in, confirmação presencial na receção para
+reservas elegíveis, registo do funcionário responsável no histórico de atividade,
+atualização do estado para *confirmada* e atualização do mapa.
 
-Dia inteiro.
+### 📊 Dashboard, estatísticas e mapa
 
-As reservas longas utilizam o período Dia inteiro, possuem data final calculada e correspondem a um único registo de reserva e a um único pagamento.
+Indicadores de utilização, taxa de ocupação, reservas por estado, por período e por
+edifício, próximas reservas, mapa interativo com editor gráfico, atualização em tempo
+real e gráficos com Recharts.
 
-Estados principais:
+### ⭐ Avaliações
 
-pendente;
+Avaliação de reservas elegíveis, classificação, comentários, moderação, média por setor
+e regras de autorização.
 
-confirmada;
+### 🔔 Notificações
 
-cancelada;
+Notificações persistentes com estado de leitura, relacionadas com reservas, pagamentos,
+check-in, avaliações e suporte, com comunicação em tempo real quando aplicável.
 
-expirada.
+### 💬 Assistente virtual e tempo real
 
-💳 Pagamentos simulados
+Laravel Reverb, Laravel Echo, broadcasting, WebSockets e eventos Laravel. O assistente
+virtual é baseado nas FAQs e funciona por pedidos HTTP, não dependendo do Reverb. O
+principal evento transmitido é `MapaAtualizado`. As operações de negócio permanecem
+protegidas quando o serviço de broadcasting está indisponível.
 
-criação automática;
+### 🆘 Help Center
 
-cálculo do valor;
+FAQs, categorias, conteúdos ativos, pedidos de suporte, reporte de problemas e avarias,
+acompanhamento do estado, resposta administrativa e associação ao utilizador autenticado.
 
-referência única;
+</details>
 
-consulta;
+---
 
-confirmação;
+## 🛠️ Stack tecnológica
 
-cancelamento;
+| Camada | Tecnologias |
+| --- | --- |
+| **Backend** | Laravel 12 · PHP 8.2 · Eloquent ORM · MySQL |
+| **Frontend** | React 18.2 · Inertia.js · Tailwind CSS · Vite · Recharts |
+| **Tempo real** | Laravel Reverb (servidor WebSocket) · Laravel Echo · Broadcasting |
+| **Autenticação** | Laravel Sanctum · Policies · Gates · Middleware |
+| **QR Code** | Simple QR Code (geração) · html5-qrcode (leitura pela câmara) |
+| **Testes** | Pest 3 · PHPUnit · Vitest 4 |
+| **Qualidade e CI** | Laravel Pint · GitHub Actions · Git e GitHub |
 
-histórico;
+---
 
-comprovativo;
+## 🏗️ Arquitetura
 
-controlo de acesso.
+Arquitetura em camadas assente no padrão **MVC**, com a camada de apresentação em React
+servida por Inertia.js — sem API pública para o frontend web, mas com uma API REST
+autenticada por Sanctum para consumidores externos.
 
-Métodos suportados:
-
-Cartão;
-
-MB Way;
-
-Transferência Bancária;
-
-PayPal.
-
-Estados:
-
-pendente;
-
-pago;
-
-cancelado.
-
-Os pagamentos são simulados para fins académicos. Não existe movimentação financeira real.
-
-📱 QR Code e check-in
-
-geração de QR Code;
-
-leitura através da câmara;
-
-validação do utilizador;
-
-validação da reserva;
-
-validação da data, período e secretária;
-
-confirmação do check-in;
-
-confirmação presencial na receção para reservas elegíveis;
-
-registo do funcionário responsável no histórico de atividade;
-
-atualização do estado para confirmada;
-
-atualização do mapa.
-
-📊 Dashboard, estatísticas e mapa
-
-dashboard;
-
-indicadores de utilização;
-
-taxa de ocupação;
-
-reservas por estado;
-
-reservas por período;
-
-reservas por edifício;
-
-próximas reservas;
-
-mapa interativo;
-
-editor gráfico;
-
-atualização em tempo real;
-
-gráficos com Recharts.
-
-⭐ Avaliações
-
-avaliação de reservas elegíveis;
-
-classificação;
-
-comentários;
-
-moderação;
-
-média por setor;
-
-regras de autorização.
-
-🔔 Notificações
-
-notificações persistentes;
-
-estado de leitura;
-
-notificações relacionadas com reservas, pagamentos, check-in, avaliações e suporte;
-
-comunicação em tempo real quando aplicável.
-
-💬 Assistente virtual e tempo real
-
-Laravel Reverb;
-
-Laravel Echo;
-
-Broadcasting;
-
-WebSockets;
-
-eventos Laravel;
-
-assistente virtual baseado nas FAQs;
-
-atualização do mapa;
-
-proteção das operações de negócio quando o serviço de broadcasting está indisponível.
-
-O principal evento transmitido é `MapaAtualizado`.
-
-🆘 Help Center
-
-FAQs;
-
-categorias;
-
-conteúdos ativos;
-
-pedidos de suporte;
-
-reporte de problemas e avarias;
-
-acompanhamento do estado;
-
-resposta administrativa;
-
-associação ao utilizador autenticado.
-
-🏗️ Arquitetura
-
-O SpaceHub utiliza uma arquitetura em camadas baseada no padrão Model-View-Controller.
-
+```text
 Utilizador
     ↓
 React + Inertia.js
@@ -313,158 +209,22 @@ Middleware
     ↓
 Controllers
     ↓
-Form Requests / Policies / Services
+Form Requests · Policies · Services
     ↓
 Models Eloquent
     ↓
 MySQL
+```
 
-A API utiliza:
-
-Laravel Sanctum;
-
-API Resources;
-
-Form Requests;
-
-Policies;
-
-Gates;
-
-Middleware;
-
-Route Model Binding;
-
-Eloquent ORM;
-
-respostas JSON.
-
-A interface web utiliza:
-
-React;
-
-Inertia.js;
-
-Tailwind CSS;
-
-componentes reutilizáveis;
-
+A **API REST** utiliza Laravel Sanctum, API Resources, Form Requests, Policies, Gates,
+Middleware, Route Model Binding, Eloquent ORM e respostas JSON.
+A **interface web** utiliza React, Inertia.js, Tailwind CSS, componentes reutilizáveis e
 Controllers Laravel.
 
-🔐 Segurança
+<details>
+<summary><strong>Estrutura de pastas</strong></summary>
 
-A aplicação inclui:
-
-hashing das palavras-passe;
-
-Laravel Sanctum;
-
-autenticação por sessão;
-
-middleware de autenticação;
-
-middleware de conta ativa;
-
-middleware de papel;
-
-Policies;
-
-Gates;
-
-Form Requests;
-
-controlo de propriedade dos recursos;
-
-validação de uploads;
-
-proteção contra mass assignment;
-
-revogação de tokens;
-
-listas seguras de campos de ordenação;
-
-desativação lógica das entidades.
-
-🛠️ Tecnologias
-
-Tecnologia
-
-Utilização
-
-Laravel 12
-
-Backend
-
-PHP 8.2
-
-Linguagem de backend
-
-React 18.2
-
-Frontend
-
-Inertia.js
-
-Integração Laravel/React
-
-Tailwind CSS
-
-Interface
-
-MySQL
-
-Base de dados
-
-Laravel Sanctum
-
-Autenticação da API
-
-Laravel Reverb
-
-Servidor WebSocket
-
-Laravel Echo
-
-Comunicação em tempo real
-
-Broadcasting
-
-Emissão de eventos
-
-Recharts
-
-Gráficos
-
-Simple QR Code
-
-Geração de QR Codes
-
-html5-qrcode
-
-Leitura de QR Codes
-
-PHPUnit
-
-Testes automatizados
-
-Pest 3
-
-Testes PHP de funcionalidade e regras de negócio
-
-Vitest 4
-
-Testes unitários do frontend
-
-Vite
-
-Desenvolvimento e compilação
-
-Git e GitHub
-
-Controlo de versões e integração
-
-📂 Estrutura do projeto
-
+```text
 app/
 ├── Events/
 ├── Http/
@@ -485,7 +245,6 @@ database/
 └── seeders/
 
 docs/
-
 public/
 
 resources/
@@ -506,48 +265,54 @@ storage/
 tests/
 ├── Feature/
 └── Unit/
+```
 
-✅ Requisitos
+</details>
 
-Para executar o projeto são necessários:
+---
 
-PHP 8.2 ou versão compatível;
+## 🔐 Segurança
 
-Composer;
+Hashing das palavras-passe, autenticação por sessão e Laravel Sanctum para a API.
+O acesso é controlado em várias camadas: middleware de autenticação, de conta ativa e de
+papel; Policies e Gates; e verificação de propriedade dos recursos.
 
-Node.js;
+A validação de entrada é feita por Form Requests, com proteção contra mass assignment,
+validação de uploads, listas seguras (allow-list) de campos de ordenação, revogação de
+tokens e desativação lógica das entidades em vez de eliminação destrutiva.
 
-npm;
+---
 
-MySQL ou MariaDB compatível;
+## 🚀 Instalação
 
-extensões PHP exigidas pelo Laravel;
+### Requisitos
 
-Git, para clonar o repositório.
+PHP 8.2+ · Composer · Node.js e npm · MySQL ou MariaDB · Git · extensões PHP exigidas pelo Laravel.
 
-🚀 Instalação
-
-### Instalação e execução local — passo a passo
-
-Este é o percurso recomendado para executar o SpaceHub pela primeira vez. Antes de começar, confirme que o PHP, Composer, Node.js, npm e MySQL/MariaDB estão instalados e que o servidor da base de dados está em execução.
-
-1. Clone o repositório e entre na pasta do projeto:
+### Instalação rápida
 
 ```bash
+# 1. Clonar e entrar na pasta
 git clone https://github.com/angela042026/SpaceHub.git
 cd SpaceHub
-```
 
-2. Crie o ficheiro de configuração local e gere a chave da aplicação:
-
-```bash
-copy .env.example .env
+# 2. Configurar o ambiente (Windows: copy .env.example .env)
+cp .env.example .env
 php artisan key:generate
+
+# 3. Instalar dependências
+composer install
+npm install
+
+# 4. Preparar a base de dados (criar antes a base `spacehub`)
+php artisan migrate --seed
+
+# 5. Storage e caches
+php artisan storage:link
+php artisan optimize:clear
 ```
 
-Em Linux ou macOS, substitua o primeiro comando por `cp .env.example .env`.
-
-3. Crie uma base de dados MySQL/MariaDB chamada `spacehub` e confirme no ficheiro `.env` os valores de ligação:
+Configuração de ligação esperada no `.env`:
 
 ```env
 DB_CONNECTION=mysql
@@ -558,203 +323,98 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-4. Instale as dependências do backend e frontend:
+### Execução
+
+A aplicação usa quatro processos em paralelo — abrir quatro terminais na pasta do projeto:
 
 ```bash
-composer install
-npm.cmd install
+php artisan serve          # Terminal 1 — aplicação Laravel  → http://127.0.0.1:8000
+npm run dev                # Terminal 2 — Vite / frontend
+php artisan reverb:start   # Terminal 3 — WebSockets (tempo real)
+php artisan schedule:work  # Terminal 4 — tarefas agendadas
 ```
 
-Em Linux ou macOS, utilize `npm install`. No PowerShell do Windows, `npm.cmd` evita problemas com a política de execução de scripts.
+O **Reverb** é necessário para o chat, notificações e atualização do mapa em tempo real.
+O **Scheduler** processa expirações de reservas, não comparências e outras tarefas automáticas.
 
-5. Escolha **uma** das opções para preparar a base de dados:
+> **Windows / PowerShell:** usar `npm.cmd` em vez de `npm` evita problemas com a política
+> de execução de scripts.
 
-   - Desenvolvimento ou instalação sem ficheiro SQL: `php artisan migrate --seed`
-   - Demonstração com a base de dados entregue: importe primeiro `spacehub_bd.sql` para a base `spacehub`. Não execute migrations sobre essa cópia já importada, salvo se souber que estão em falta.
+<details>
+<summary><strong>Notas de instalação detalhadas</strong></summary>
 
-6. Crie o atalho público para uploads e limpe as caches locais:
+### Importar a base de dados entregue
+
+Para avaliação, a estrutura e os dados são entregues separadamente no ficheiro
+`spacehub_bd.sql`, que **não deve ser colocado no repositório Git**.
+
+Via phpMyAdmin: criar ou selecionar a base `spacehub` → *Importar* → selecionar
+`spacehub_bd.sql` → iniciar a importação → confirmar que as tabelas e os dados foram criados.
+
+Via linha de comandos:
 
 ```bash
-php artisan storage:link
-php artisan optimize:clear
-```
-
-7. Abra quatro terminais na pasta do projeto e execute:
-
-```bash
-# Terminal 1 — aplicação Laravel
-php artisan serve
-
-# Terminal 2 — Vite / frontend
-npm.cmd run dev
-
-# Terminal 3 — atualizações em tempo real
-php artisan reverb:start
-
-# Terminal 4 — tarefas automáticas
-php artisan schedule:work
-```
-
-Abra [http://127.0.0.1:8000](http://127.0.0.1:8000) no navegador. O Reverb é necessário para o chat, notificações e atualizações em tempo real; o Scheduler processa expirações, não comparências e outras tarefas agendadas.
-
-Para uma verificação final, execute `php artisan test` noutro terminal.
-
-### Detalhe dos passos
-
-1. Clonar o projeto
-
-git clone https://github.com/angela042026/SpaceHub.git
-cd SpaceHub
-
-2. Instalar as dependências PHP
-
-composer install
-
-3. Instalar as dependências JavaScript
-
-npm install
-
-No Windows:
-
-npm.cmd install
-
-4. Configurar o ambiente
-
-Copiar o ficheiro .env.example para .env.
-
-Windows:
-
-copy .env.example .env
-
-Linux ou macOS:
-
-cp .env.example .env
-
-Gerar a chave da aplicação:
-
-php artisan key:generate
-
-O ficheiro .env não deve ser enviado para o repositório.
-
-5. Configurar a base de dados
-
-A base de dados esperada chama-se:
-
-spacehub
-
-Configuração local exemplificativa:
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=spacehub
-DB_USERNAME=root
-DB_PASSWORD=
-
-Os dados reais de acesso devem ser configurados apenas no ficheiro .env.
-
-6. Importar a base de dados entregue
-
-Para avaliação, a estrutura e os dados são entregues separadamente num ficheiro SQL:
-
-spacehub_bd.sql
-
-O ficheiro SQL não deve ser colocado no repositório Git.
-
-Importação através do phpMyAdmin:
-
-criar ou selecionar a base de dados spacehub;
-
-abrir a opção Importar;
-
-selecionar spacehub_bd.sql;
-
-iniciar a importação;
-
-confirmar que as tabelas e os dados foram criados.
-
-Também pode ser utilizado o MySQL:
-
 mysql -u root -p spacehub < spacehub_bd.sql
+```
 
-As migrations e os seeders permanecem no projeto, mas a instalação para avaliação deve utilizar o ficheiro SQL entregue separadamente.
+Não executar migrations sobre uma cópia já importada, salvo se souber que estão em falta.
+As migrations e os seeders permanecem no projeto, mas a instalação para avaliação deve
+utilizar o ficheiro SQL entregue.
 
-7. Migrations e seeders em desenvolvimento
+### Migrations e seeders em desenvolvimento
 
-Num ambiente de desenvolvimento vazio pode ser utilizado:
+```bash
+php artisan migrate --seed          # base de dados vazia
+php artisan migrate:fresh --seed    # recriar do zero — apaga todos os dados
+```
 
-php artisan migrate --seed
+⚠️ `migrate:fresh` elimina todos os dados. Não usar numa base com informação a preservar.
 
-Para recriar completamente a base de dados durante o desenvolvimento:
+Os seeders cobrem papéis, utilizadores, períodos, estados das reservas, edifícios, pisos,
+setores, secretárias, reservas, FAQs e os restantes módulos da versão atual.
 
-php artisan migrate:fresh --seed
+### Storage e uploads
 
-migrate:fresh elimina todos os dados. Não deve ser utilizado numa base de dados que contenha informação a preservar.
-
-8. Criar o link do Storage
-
+```bash
 php artisan storage:link
+```
 
-Este comando disponibiliza publicamente:
+Este comando publica em `public/storage` os ficheiros do disco público, incluindo:
 
-fotografias dos utilizadores;
+```text
+storage/app/public/utilizadores/fotografias
+storage/app/public/pisos/plantas
+```
 
-plantas dos pisos;
+Os recursos estáticos da aplicação encontram-se em `public/` e `resources/`.
 
-outros ficheiros guardados no disco público.
+### Porta do Reverb
 
-9. Compilar o frontend
+Por predefinição o Reverb utiliza a porta `8080`. Se estiver ocupada pelo Apache ou por
+outro serviço, configurar uma porta diferente em `REVERB_SERVER_PORT`, `REVERB_PORT` e nas
+variáveis `VITE_REVERB_*`, reiniciar o Reverb e recompilar o frontend. A indisponibilidade
+temporária do broadcasting é registada nos logs, mas não invalida operações de negócio já
+concluídas.
 
-Produção:
+### Compilar o frontend
 
-npm run build
+```bash
+npm run dev      # desenvolvimento
+npm run build    # produção
+```
 
-Windows:
+### Ficheiro `.env`
 
-npm.cmd run build
+O ficheiro `.env` nunca deve ser enviado para o repositório. Os dados reais de acesso
+devem ser configurados apenas nesse ficheiro.
 
-Desenvolvimento:
+</details>
 
-npm run dev
+<details>
+<summary><strong>Preparação para produção</strong></summary>
 
-Windows:
-
-npm.cmd run dev
-
-10. Limpar e preparar a aplicação
-
-php artisan optimize:clear
-composer dump-autoload
-
-11. Executar o servidor Laravel
-
-php artisan serve
-
-Endereço local:
-
-http://127.0.0.1:8000
-
-12. Executar o Laravel Reverb
-
-Noutro terminal:
-
-php artisan reverb:start
-
-O Reverb é necessário para as funcionalidades WebSocket e atualizações do mapa em tempo real. O assistente virtual de FAQs funciona através de pedidos HTTP e não depende do Reverb.
-
-Por predefinição, o Reverb utiliza a porta `8080`. Se essa porta estiver ocupada pelo Apache ou por outro serviço, configure uma porta diferente em `REVERB_SERVER_PORT`, `REVERB_PORT` e nas variáveis `VITE_REVERB_*`, reinicie o Reverb e volte a compilar o frontend. A indisponibilidade temporária do broadcasting é registada nos logs, mas não deve invalidar operações de negócio já concluídas.
-
-13. Executar o Scheduler
-
-Noutro terminal:
-
-php artisan schedule:work
-
-O Scheduler é utilizado para tarefas automáticas, incluindo atualização de reservas expiradas e outros processos agendados.
-
-### Preparação para produção
-
-Use `.env.production.example` como referência e copie os valores necessários para o `.env` do servidor. Nunca versione o `.env` real nem reutilize credenciais de desenvolvimento.
+Usar `.env.production.example` como referência e copiar os valores necessários para o
+`.env` do servidor. Nunca versionar o `.env` real nem reutilizar credenciais de desenvolvimento.
 
 Antes de disponibilizar uma nova versão:
 
@@ -767,319 +427,109 @@ php artisan storage:link
 php artisan optimize
 ```
 
-Confirme que `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL` usa HTTPS e `SESSION_SECURE_COOKIE=true`. Gere uma chave exclusiva com `php artisan key:generate` caso o ambiente ainda não tenha `APP_KEY`.
+Confirmar que `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL` usa HTTPS e
+`SESSION_SECURE_COOKIE=true`. Gerar uma chave exclusiva com `php artisan key:generate`
+caso o ambiente ainda não tenha `APP_KEY`.
 
-O servidor também precisa de processos supervisionados para:
+Processos supervisionados necessários:
 
 ```bash
 php artisan queue:work --tries=3
 php artisan reverb:start
 ```
 
-Configure ainda o cron para executar o scheduler a cada minuto:
+Cron para o scheduler, a cada minuto:
 
 ```cron
 * * * * * cd /caminho/do/spacehub && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-Depois do deploy, confirme `php artisan about`, `php artisan migrate:status`, os logs da aplicação e os fluxos críticos de login, reserva, pagamento e check-in.
+Após o deploy, confirmar `php artisan about`, `php artisan migrate:status`, os logs da
+aplicação e os fluxos críticos de login, reserva, pagamento e check-in.
 
-▶️ Execução em desenvolvimento
+</details>
 
-Durante o desenvolvimento podem permanecer ativos quatro terminais.
+---
 
-Terminal 1 — Laravel
+## 🧪 Testes e qualidade
 
-php artisan serve
+| Suíte | Comando | Resultado |
+| --- | --- | --- |
+| Backend (Pest 3 / PHPUnit) | `php artisan test` | 349 testes aprovados · 1916 asserções |
+| Frontend (Vitest 4) | `npm run test:frontend` | 20 testes aprovados · 3 ficheiros |
 
-Terminal 2 — Frontend
+O **GitHub Actions** executa em cada integração o Laravel Pint, os testes PHP, os testes
+de frontend e o build de produção.
 
-npm.cmd run dev
+<details>
+<summary><strong>Checklist antes de uma integração ou entrega</strong></summary>
 
-Terminal 3 — Reverb
-
-php artisan reverb:start
-
-Terminal 4 — Scheduler
-
-php artisan schedule:work
-
-🖼️ Imagens e uploads
-
-Os recursos estáticos da aplicação encontram-se principalmente em:
-
-public/
-resources/
-
-Os uploads efetuados através da aplicação utilizam o Storage público do Laravel, incluindo:
-
-storage/app/public/utilizadores/fotografias
-storage/app/public/pisos/plantas
-
-O acesso público é efetuado através do link:
-
-public/storage
-
-Por esse motivo, deve ser executado:
-
-php artisan storage:link
-
-As imagens necessárias ao funcionamento e à demonstração devem estar incluídas no repositório ou na pasta compactada entregue, conforme a sua natureza.
-
-🧪 Testes e validação
-
-Executar a suíte de testes:
-
-php artisan test
-
-Na versão final validada, a suíte PHP apresenta **349 testes aprovados e 1916 asserções**. O frontend apresenta **20 testes aprovados em 3 ficheiros** através de:
-
-npm run test:frontend
-
-O GitHub Actions executa ainda o Pint, os testes PHP, os testes frontend e o build de produção.
-
-Antes de uma integração ou entrega:
-
+```bash
 php artisan optimize:clear
 composer dump-autoload
-npm.cmd run build
+npm run build
 php artisan test
 php artisan route:list
+php artisan route:list --path=api   # confirmar rotas da API
+```
 
-Para confirmar as rotas da API:
+</details>
 
-php artisan route:list --path=api
+---
 
-📚 Documentação
+## 📚 Documentação
 
-A documentação técnica encontra-se em docs/.
+A documentação técnica encontra-se na pasta [`docs/`](docs/).
 
-Documento
+| Documento | Descrição |
+| --- | --- |
+| [`01-Requisitos.md`](docs/01-Requisitos.md) | Requisitos e regras de negócio |
+| [`02-CasosDeUso.md`](docs/02-CasosDeUso.md) | Atores e casos de uso |
+| [`03-ModeloBaseDados.md`](docs/03-ModeloBaseDados.md) | Entidades e relações |
+| [`04-Arquitetura.md`](docs/04-Arquitetura.md) | Arquitetura técnica |
+| [`05-API.md`](docs/05-API.md) | Endpoints, autenticação e respostas |
+| [`06-Roadmap.md`](docs/06-Roadmap.md) | Evolução do projeto e trabalho futuro |
+| [`07-DicionarioDados.md`](docs/07-DicionarioDados.md) | Estrutura das tabelas |
 
-Descrição
+---
 
-01-Requisitos.md
+## 👥 Equipa e contributos
 
-Requisitos e regras de negócio
+| Elemento | Responsabilidade principal |
+| --- | --- |
+| **Ângela Costa** | Administração, espaços, segurança, integração e documentação |
+| **Eduardo** | Comunicação em tempo real, Reverb e assistente virtual |
+| **Hanna Sampaio** | Dashboard, estatísticas, mapa interativo, QR Code e check-in |
+| **Joana Oliveira** | Reservas e fluxo de utilização |
 
-02-CasosDeUso.md
+O desenvolvimento foi integrado através de branches de funcionalidade, Pull Requests,
+revisão e merge commits, preservando a autoria de cada commit:
 
-Atores e casos de uso
+```text
+Branch de funcionalidade → Commit → Push → Pull Request → Revisão e testes → Merge commit → main
+```
 
-03-ModeloBaseDados.md
+Este processo permitiu desenvolvimento paralelo, revisão das alterações, preservação da
+autoria, histórico completo e menor risco nas integrações.
 
-Entidades e relações
+---
 
-04-Arquitetura.md
+## 🔮 Trabalho futuro
 
-Arquitetura técnica
+Comunicados e mensagem do dia · exportação PDF dos comprovativos · relatórios Excel ·
+dashboard financeiro avançado · integração com Microsoft Outlook · aplicação móvel ·
+previsão estatística da ocupação com evolução para IA · auditoria administrativa ·
+integração com gateways reais de pagamento · melhorias no Help Center · gestão avançada
+de equipamentos.
 
-05-API.md
+---
 
-Endpoints, autenticação e respostas
+## 📄 Licença
 
-06-Roadmap.md
-
-Evolução do projeto e trabalho futuro
-
-07-DicionarioDados.md
-
-Estrutura das tabelas
-
-README.md.
-
-
-
-🌱 Dados iniciais
-
-O projeto inclui migrations e seeders para:
-
-papéis;
-
-utilizadores;
-
-períodos;
-
-estados das reservas;
-
-edifícios;
-
-pisos;
-
-setores;
-
-secretárias;
-
-reservas;
-
-FAQs;
-
-outros módulos definidos na versão atual.
-
-Os dados de avaliação são fornecidos principalmente através do ficheiro SQL entregue.
-
-👥 Equipa
-
-Projeto desenvolvido por:
-
-Ângela Costa;
-
-Eduardo;
-
-Joana Oliveira;
-
-Hanna Sampaio.
-
-Divisão principal:
-
-Pessoa 1 — Joana: reservas e fluxo de utilização;
-
-Pessoa 2 — Ângela: administração, espaços, segurança, integração e documentação;
-
-Pessoa 3 — Eduardo: comunicação em tempo real, Reverb e assistente virtual;
-
-Pessoa 4 — Hanna: dashboard, estatísticas, mapa, QR Code e check-in.
-
-O desenvolvimento foi integrado através de branches, Pull Requests e merge commits, preservando a autoria dos commits.
-
-🔀 Git e integração
-
-Branch de funcionalidade
-    ↓
-Commit
-    ↓
-Push
-    ↓
-Pull Request
-    ↓
-Revisão e testes
-    ↓
-Create a merge commit
-    ↓
-main
-
-Este processo permite:
-
-desenvolvimento paralelo;
-
-revisão das alterações;
-
-preservação da autoria;
-
-histórico completo;
-
-redução do risco nas integrações.
-
-📌 Estado do projeto
-
-O projeto encontra-se integrado, testado e preparado para entrega, ficando sujeito apenas à validação final do ambiente e dos materiais de apresentação.
-
-Principais módulos concluídos:
-
-autenticação;
-
-Single Sign-On;
-
-utilizadores;
-
-gestão de espaços;
-
-reservas;
-
-reservas longas;
-
-pagamentos simulados;
-
-QR Code;
-
-check-in;
-
-dashboard;
-
-estatísticas;
-
-mapa;
-
-avaliações;
-
-notificações;
-
-assistente virtual de FAQs;
-
-Help Center;
-
-testes;
-
-documentação.
-
-Tarefas finais:
-
-correções pontuais;
-
-testes manuais;
-
-confirmação da suíte de testes;
-
-revisão visual;
-
-revisão das permissões;
-
-remoção de código técnico temporário;
-
-atualização do README;
-
-exportação SQL;
-
-preparação do ZIP;
-
-preparação das credenciais;
-
-apresentação final.
-
-🔮 Trabalho futuro
-
-Possíveis evoluções:
-
-comunicados e mensagem do dia;
-
-exportação PDF dos comprovativos;
-
-relatórios Excel;
-
-dashboard financeiro avançado;
-
-integração com Microsoft Outlook;
-
-aplicação móvel;
-
-previsão estatística da ocupação;
-
-evolução da previsão para Inteligência Artificial;
-
-auditoria administrativa;
-
-integração com gateways reais de pagamento;
-
-melhorias no Help Center;
-
-gestão avançada de equipamentos.
-
-O Single Sign-On, as avaliações e as notificações já estão implementados e não devem ser apresentados como funcionalidades pendentes.
-
-📄 Licença
-
-Este projeto foi desenvolvido em contexto académico e destina-se a fins educativos.
+Projeto desenvolvido em contexto académico, para fins educativos.
 
 <div align="center">
 
-SpaceHub
-
-Sistema de Gestão e Reserva de Espaços Colaborativos
-
-Laravel • React • Inertia.js • Tailwind CSS • MySQL
-
-Sanctum • Reverb • Echo • PHPUnit
-
-Projeto em consolidação e preparação da entrega final
+**SpaceHub** — Laravel · React · Inertia.js · Tailwind CSS · MySQL · Sanctum · Reverb · Echo
 
 </div>
