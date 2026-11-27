@@ -41,7 +41,7 @@ class DemoOcupacaoSeeder extends Seeder
         ReservaCriacaoService $criacao,
         PagamentoService $pagamentos
     ): void {
-        if (! app()->environment(['local', 'testing'])) {
+        if (! app()->environment(['local', 'testing']) && ! config('app.demo_data')) {
             return;
         }
 

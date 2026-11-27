@@ -21,7 +21,7 @@ class ReservaSeeder extends Seeder
         // lá) — sem isto, `migrate --seed` num ambiente com APP_ENV
         // diferente falhava a meio com RuntimeException, depois de já
         // ter criado roles/períodos/estados/estrutura física.
-        if (! app()->environment(['local', 'testing'])) {
+        if (! app()->environment(['local', 'testing']) && ! config('app.demo_data')) {
             return;
         }
 
