@@ -1,0 +1,63 @@
+services:
+  - type: web
+    name: spacehub
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /up
+    initialDeployHook: php artisan db:seed --force
+    envVars:
+      - key: APP_NAME
+        value: SpaceHub
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false
+      - key: APP_URL
+        fromService:
+          type: web
+          name: spacehub
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: APP_LOCALE
+        value: pt
+      - key: APP_FALLBACK_LOCALE
+        value: pt
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_URL
+        fromDatabase:
+          name: spacehub-db
+          property: connectionString
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: BROADCAST_CONNECTION
+        value: log
+      - key: FILESYSTEM_DISK
+        value: public
+      - key: MAIL_MAILER
+        value: log
+      - key: RUN_MIGRATIONS
+        value: "true"
+      - key: RUN_SEEDERS
+        value: "false"
+      - key: RUN_SCHEDULER
+        value: "true"
+
+databases:
+  - name: spacehub-db
+    plan: free
+    region: frankfurt
+    databaseName: spacehub
+    user: spacehub

@@ -10,6 +10,8 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $driver = DB::getDriverName();
+
         /*
          * Nos testes é utilizada uma base de dados SQLite em memória.
          * O SQLite não suporta ALTER TABLE ... MODIFY COLUMN.
@@ -17,7 +19,14 @@ return new class extends Migration
          * No SQLite, o enum é tratado como texto, pelo que não é
          * necessário alterar a coluna para aceitar PayPal.
          */
-        if (DB::getDriverName() === 'sqlite') {
+        if ($driver === 'sqlite') {
+            return;
+        }
+
+        if ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE pagamentos DROP CONSTRAINT IF EXISTS pagamentos_metodo_pagamento_check');
+            DB::statement("ALTER TABLE pagamentos ADD CONSTRAINT pagamentos_metodo_pagamento_check CHECK (metodo_pagamento IN ('cartao', 'mbway', 'transferencia', 'paypal'))");
+
             return;
         }
 
@@ -52,7 +61,16 @@ return new class extends Migration
         /*
          * O SQLite não suporta MODIFY COLUMN.
          */
-        if (DB::getDriverName() === 'sqlite') {
+        $driver = DB::getDriverName();
+
+        if ($driver === 'sqlite') {
+            return;
+        }
+
+        if ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE pagamentos DROP CONSTRAINT IF EXISTS pagamentos_metodo_pagamento_check');
+            DB::statement("ALTER TABLE pagamentos ADD CONSTRAINT pagamentos_metodo_pagamento_check CHECK (metodo_pagamento IN ('cartao', 'mbway', 'transferencia'))");
+
             return;
         }
 
