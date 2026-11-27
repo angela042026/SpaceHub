@@ -15,9 +15,10 @@
     <img src="https://img.shields.io/badge/Inertia.js-9553E9?style=flat-square&logo=inertia&logoColor=white" alt="Inertia.js">
     <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
     <img src="https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white" alt="MySQL">
-    <img src="https://img.shields.io/badge/testes-369_aprovados-success?style=flat-square" alt="369 testes aprovados">
+    <img src="https://img.shields.io/badge/testes-371_aprovados-success?style=flat-square" alt="371 testes aprovados">
   </p>
-  <p><a href="https://spacehub-d5ld.onrender.com/"><strong>▶️ Ver aplicação online</strong></a></p>
+  <p><a href="https://spacehub-j6gd.onrender.com/"><strong>▶️ Ver aplicação online</strong></a></p>
+  <p><sub>⏳ Alojado em plano gratuito: a primeira abertura pode demorar cerca de 1 minuto.</sub></p>
 </div>
 
 ---
@@ -34,7 +35,6 @@
 - [Testes e qualidade](#-testes-e-qualidade)
 - [Documentação](#-documentação)
 - [Equipa e contributos](#-equipa-e-contributos)
-- [Trabalho futuro](#-trabalho-futuro)
 - [Licença](#-licença)
 
 ---
@@ -66,17 +66,29 @@ profissional em Git: branches de funcionalidade, Pull Requests, revisão e merge
 
 ## 🎬 Demonstração
 
-A aplicação está publicada em **[spacehub-d5ld.onrender.com](https://spacehub-d5ld.onrender.com/)**.
+A aplicação está publicada em **[spacehub-j6gd.onrender.com](https://spacehub-j6gd.onrender.com/)**.
 
-**Credenciais de demonstração**
+> ⏳ Alojada em plano gratuito: depois de algum tempo sem visitas, a primeira abertura pode demorar cerca de 1 minuto.
+
+<table>
+<tr>
+<td width="50%" align="center"><b>Página inicial</b><br><img src="docs/screenshots/landing.jpg" alt="Página inicial"></td>
+<td width="50%" align="center"><b>Dashboard</b><br><img src="docs/screenshots/dashboard.jpg" alt="Dashboard"></td>
+</tr>
+<tr>
+<td width="50%" align="center"><b>Mapa do escritório</b><br><img src="docs/screenshots/mapa.jpg" alt="Mapa do escritório"></td>
+<td width="50%" align="center"><b>Nova reserva</b><br><img src="docs/screenshots/nova-reserva.jpg" alt="Nova reserva"></td>
+</tr>
+</table>
+
+**Contas de demonstração**
 
 | Papel | Email | Palavra-passe |
 | --- | --- | --- |
-| Administrador | `admin@spacehub.test` | `password` |
-| Gestor | `gestor@spacehub.test` | `password` |
-| Utilizador | `user@spacehub.test` | `password` |
-
-> Confirmar/atualizar estas credenciais de acordo com os seeders ou com o ficheiro SQL entregue.
+| Administrador | `admin@spacehub.pt` | `password123` |
+| Gestor | `gestor@spacehub.pt` | `password123` |
+| Colaborador | `colaborador@spacehub.pt` | `password123` |
+| Utilizador | `utilizador@spacehub.pt` | `password123` |
 
 ---
 
@@ -455,7 +467,7 @@ aplicação e os fluxos críticos de login, reserva, pagamento e check-in.
 
 | Suíte | Comando | Resultado |
 | --- | --- | --- |
-| Backend (Pest 3 / PHPUnit) | `php artisan test` | 349 testes aprovados · 1916 asserções |
+| Backend (Pest 3 / PHPUnit) | `php artisan test` | 351 testes aprovados · 1919 asserções |
 | Frontend (Vitest 4) | `npm run test:frontend` | 20 testes aprovados · 3 ficheiros |
 
 O **GitHub Actions** executa em cada integração o Laravel Pint, os testes PHP, os testes
@@ -499,7 +511,7 @@ A documentação técnica encontra-se na pasta [`docs/`](docs/).
 | --- | --- |
 | **Ângela Costa** | Administração, espaços, segurança, integração e documentação |
 | **Eduardo** | Comunicação em tempo real, Reverb e assistente virtual |
-| **Hanna Sampaio** | Dashboard, estatísticas, mapa interativo, QR Code e check-in |
+| **Hanna Sampaio** | Dashboard, estatísticas, mapa interativo, QR Code e check-in; deploy em produção (Docker, Render e PostgreSQL), integração contínua (GitHub Actions) e dados de demonstração |
 | **Joana Oliveira** | Reservas e fluxo de utilização |
 
 O desenvolvimento foi integrado através de branches de funcionalidade, Pull Requests,
@@ -511,16 +523,6 @@ Branch de funcionalidade → Commit → Push → Pull Request → Revisão e tes
 
 Este processo permitiu desenvolvimento paralelo, revisão das alterações, preservação da
 autoria, histórico completo e menor risco nas integrações.
-
----
-
-## 🔮 Trabalho futuro
-
-Comunicados e mensagem do dia · exportação PDF dos comprovativos · relatórios Excel ·
-dashboard financeiro avançado · integração com Microsoft Outlook · aplicação móvel ·
-previsão estatística da ocupação com evolução para IA · auditoria administrativa ·
-integração com gateways reais de pagamento · melhorias no Help Center · gestão avançada
-de equipamentos.
 
 ---
 
