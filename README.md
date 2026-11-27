@@ -18,7 +18,6 @@
     <img src="https://img.shields.io/badge/testes-371_aprovados-success?style=flat-square" alt="371 testes aprovados">
   </p>
   <p><a href="https://spacehub-j6gd.onrender.com/"><strong>▶️ Ver aplicação online</strong></a></p>
-  <p><sub>⏳ Alojado em plano gratuito: a primeira abertura pode demorar cerca de 1 minuto.</sub></p>
 </div>
 
 ---
