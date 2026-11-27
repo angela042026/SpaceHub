@@ -38,6 +38,15 @@ sucedido, o `initialDeployHook` carrega os dados de demonstração uma única ve
 - `RUN_MIGRATIONS=true`
 - `RUN_SEEDERS=false`
 - `RUN_SCHEDULER=true`
+- `DEMO_DATA=true` (apenas no ambiente de demonstração)
+
+## Dados de demonstração
+
+Por segurança, as contas de demonstração (com palavra-passe pública) e as
+reservas de exemplo só são criadas em `local`/`testing`. No deploy de
+demonstração, ativar `DEMO_DATA=true` e, no primeiro arranque,
+`RUN_SEEDERS=true`. Depois de os dados serem criados, voltar a colocar
+`RUN_SEEDERS=false`. Nunca ativar `DEMO_DATA` num ambiente com dados reais.
 
 Nunca guardar `APP_KEY`, palavras-passe da base de dados ou credenciais Google
 no repositório.
