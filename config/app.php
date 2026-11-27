@@ -43,6 +43,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Dados de demonstração
+    |--------------------------------------------------------------------------
+    |
+    | As contas e reservas de demonstração só são criadas em local/testing.
+    | Num ambiente de demonstração público (por exemplo, o deploy no Render)
+    | podem ser ativadas explicitamente com DEMO_DATA=true. Nunca ativar
+    | num ambiente com dados reais: as palavras-passe são públicas.
+    |
+    */
+
+    'demo_data' => (bool) env('DEMO_DATA', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
     |

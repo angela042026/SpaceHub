@@ -11,10 +11,10 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Contas de demonstração com password conhecida — nunca correr
-        // fora de local/testing, para não criar um admin com password
-        // pública num ambiente real.
-        if (! app()->environment(['local', 'testing'])) {
+        // Contas de demonstração com password conhecida — só em local/testing
+        // ou quando DEMO_DATA=true (ambiente de demonstração público), para
+        // não criar um admin com password pública num ambiente real.
+        if (! app()->environment(['local', 'testing']) && ! config('app.demo_data')) {
             return;
         }
 
